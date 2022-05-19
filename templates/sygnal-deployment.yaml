@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matrix-synapse-sygnal
+  labels:
+    app: matrix-synapse-sygnal
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: matrix-synapse-sygnal
+  template:
+    metadata:
+      labels:
+        app: matrix-synapse-sygnal
+    spec:
+      containers:
+       - name: matrix-synapse-sygnal
+         image:  "{{ $.Values.sygnal.image.repository }}:{{ include "matrix-synapse.sygnal.imageTag" $ }}"
+         imagePullPolicy: {{ $.Values.sygnal.image.pullPolicy }}
+         env:
+           - name: KEYID
+             valueFrom: { secretKeyRef: { name: sygnal-secret, key: keyid}}
+           - name: TEAMID
+             valueFrom: { secretKeyRef: { name: sygnal-secret, key: teamid}}
+           - name: APIKEY
+             valueFrom: { secretKeyRef: { name: sygnal-secret, key: apikey}}
+         volumeMounts:
+           - name: config
+             mountPath: /sygnal.yaml
+             subPath: sygnal.yaml
+           - name: ioskey
+             mountPath: /etc/matrix/sygnal/de.bwi.bwmessenger.ios.dev.p8
+             subPath: de.bwi.bwmessenger.ios.dev.p8
+           - mountPath: /tmp
+             name: sygnal-tmp
+           - mountPath: /log
+             name: sygnal-log
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: config
+          secret:
+            secretName: matrix-synapse-sygnal
+        - name: ioskey
+          secret: 
+            secretName: ioskey
+        - name: sygnal-tmp
+          emptyDir: {}
+        - name: sygnal-log
+          emptyDir: {}

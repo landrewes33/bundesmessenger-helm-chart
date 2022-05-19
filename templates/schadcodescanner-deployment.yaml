@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: matrix-schadcodescanner
+  labels:
+    app: matrix-schadcodescanner
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: matrix-schadcodescanner
+  template:
+    metadata:
+      labels:
+        app: matrix-schadcodescanner
+    spec:
+#      initContainers:
+#       - name: update-config
+#         command:
+#           - sh
+#           - -c
+#           - |
+#             apt-get update && \
+#             apt-get -y upgrade && \
+#             apt-get install -y c-icap libicapapi-dev clamav curl less vim libc-icap-mod-virus-scan && \
+#             usermod -a -G c-icap c-icap && \
+#             mkdir -p /var/run/c-icap && \
+#             touch /var/run/c-icap/c-icap.id && \
+#             chown -R c-icap:c-icap /var/run/c-icap && \
+#             /usr/bin/freshclam && \
+#             chown -R c-icap:c-icap /etc/c-icap/ && \
+#             echo "acl all src 0.0.0.0/0.0.0.0" >> /etc/c-icap/c-icap.conf && \
+#             echo "icap_access allow all" >> /etc/c-icap/c-icap.conf && \
+#             echo "Include /etc/c-icap/virus_scan.conf" >> /etc/c-icap/c-icap.conf && \
+#             sed -i "s/^StartServers.*/StartServers 1/" /etc/c-icap/c-icap.conf && \
+#             sed -i "s/^MaxServers.*/StartServers 1/" /etc/c-icap/c-icap.conf && \
+#             sed -i "s/^Service echo srv/#Service echo srv/" /etc/c-icap/c-icap.conf && \
+#             sed -i "s/^Group c-icap/Group nogroup/" /etc/c-icap/c-icap.conf && \
+#             echo "Include clamav_mod.conf" >> /etc/c-icap/virus_scan.conf
+#         image:   "{{  $.Values.schadcodescanner.image.registry }}/{{ $.Values.schadcodescanner.image.repository }}:{{ $.Values.schadcodescanner.image.tag }}"
+      containers:
+       - name: matrix-schadcodescanner
+         image:  "{{ $.Values.schadcodescanner.image.repository }}:{{ $.Values.schadcodescanner.image.tag }}"
+         imagePullPolicy: {{ $.Values.schadcodescanner.image.pullPolicy }}
+#         command: ["/usr/bin/c-icap"]
+#         args: ["-f /etc/c-icap/c-icap.conf -D -N"]
+#         command:
+#           - bash
+#           - -c
+#           - |
+#             apt-get update && \
+#             apt-get -y upgrade && \
+#             apt-get install -y c-icap libicapapi-dev clamav clamav-daemon curl less vim libc-icap-mod-virus-scan && \
+#             usermod -a -G c-icap c-icap && \
+#             mkdir -p /var/run/c-icap && \
+#             touch /var/run/c-icap/c-icap.id && \
+#             chown -R c-icap:c-icap /var/run/c-icap && \
+#             /usr/bin/freshclam && \
+#             chown -R c-icap:c-icap /etc/c-icap/ && \
+#             echo "acl all src 0.0.0.0/0.0.0.0" >> /etc/c-icap/c-icap.conf && \
+#             echo "icap_access allow all" >> /etc/c-icap/c-icap.conf && \
+#             echo "Include /etc/c-icap/virus_scan.conf" >> /etc/c-icap/c-icap.conf && \
+#             sed -i "s/^StartServers.*/StartServers 1/" /etc/c-icap/c-icap.conf && \
+#             sed -i "s/^MaxServers.*/StartServers 1/" /etc/c-icap/c-icap.conf && \
+#             sed -i "s/^Service echo srv/#Service echo srv/" /etc/c-icap/c-icap.conf && \
+#             sed -i "s/^Group c-icap/Group nogroup/" /etc/c-icap/c-icap.conf && \
+#             echo "Include clamav_mod.conf" >> /etc/c-icap/virus_scan.conf && \
+#             /usr/bin/c-icap -f /etc/c-icap/c-icap.conf -D -N
+         volumeMounts:
+           - mountPath: /tmp
+             name: schadcodescanner-tmp
+           - mountPath: /log
+             name: schadcodescanner-log
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: schadcodescanner-tmp
+          emptyDir: {}
+        - name: schadcodescanner-log
+          emptyDir: {}
