@@ -1066,8 +1066,9 @@ coturn:
 ######################################################################################
 ##          Setting up Synapse Admin
 ######################################################################################
-synapse-admin:
-  enabled: true
+synapse_admin:
+  enabled: false
+#  adminUri:  
   image:
     repository: awesometechnologies/synapse-admin
     tag: latest

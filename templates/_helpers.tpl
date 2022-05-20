@@ -150,6 +150,30 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
+Dependencies check
+*/}}
+{{- define "require" -}}
+    {{- $scope := index . 0 -}}
+    {{- $name := index . 1 -}}
+    {{required (print "Missing required value: " $name) (index $scope "Values" $name)}}
+{{- end}}
+{{/*
+Index a nested component
+*/}}
+{{- define "indexNested" -}}
+    {{- $message := index . 0 -}}
+    {{- $object := index . 1 -}}
+    {{- $path := (mustRegexSplit "\\." (index . 2) -1) -}}
+    {{- range $path -}}
+        {{- if not $object -}}
+            {{ fail $message }}
+        {{- end -}}
+        {{- $object = index $object . -}}
+    {{- end -}}
+    {{ required $message $object }}
+{{- end}}
+
+{{/*
 Set postgres host
 */}}
 {{- define "matrix-synapse.postgresql.host" -}}
