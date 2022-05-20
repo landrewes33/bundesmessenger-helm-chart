@@ -3,10 +3,10 @@ apiVersion: v2
 name: bundesmessenger
 description: BWI Matrix BundesMessenger 
 icon: https://matrix.org/images/matrix-logo.svg
-appVersion: 1.58.0
+appVersion: 1.59.1
 
 type: application
-version: 2.3.2
+version: 2.3.3
 maintainers:
   - name: Christian Steinke
     email: christian.steinke@bwi.de

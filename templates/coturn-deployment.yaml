@@ -1,10 +1,21 @@
-{{- $config := .Values.coturn }}
-{{- if $config.enabled }}
+{{- $config := $.Values.coturn }}
+{{- if and $config.enabled (not $config.existingcoturn.enabled) }}
 
+{{- if ne $config.ingress_udp_ns .Release.Namespace  }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    kubernetes.io/metadata.name: {{ $config.ingress_udp_ns }}
+  name: {{ $config.ingress_udp_ns }}
+{{ end }}
+
+---
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  namespace:  {{ .Release.Namespace }}
+  namespace:  {{ $.Values.coturn.namespace }}
   name: coturn
   labels:
     name: coturn
@@ -56,869 +67,6 @@ spec:
             name: coturn
 
 
-#---
-#apiVersion: v1
-#kind: Namespace
-#metadata:
-#  labels:
-#    kubernetes.io/metadata.name: nginx-coturn-udp
-#  name: nginx-coturn-udp
-#
-#---
-#apiVersion: v1
-#kind: Namespace
-#metadata:
-#  labels:
-#    kubernetes.io/metadata.name: nginx-coturn-tcp
-#  name: nginx-coturn-tcp
-#
-#---
-#apiVersion: v1
-#automountServiceAccountToken: true
-#kind: ServiceAccount
-#metadata:
-#  annotations:
-#    meta.helm.sh/release-name: nginx-ingress
-#    meta.helm.sh/release-namespace:  {{ .Release.Namespace }}
-#  labels:
-#    app.kubernetes.io/component: controller
-#    app.kubernetes.io/instance: nginx-ingress
-#    app.kubernetes.io/managed-by: Helm
-#    app.kubernetes.io/name: ingress-nginx
-#    app.kubernetes.io/part-of: ingress-nginx
-#  name: nginx-ingress-ingress-nginx-udp
-#  namespace: {{ .Release.Namespace }}
-#secrets:
-#- name: nginx-ingress-ingress-nginx-token
-#
-#---
-#apiVersion: v1
-#kind: Service
-#metadata:
-#  annotations:
-#    meta.helm.sh/release-name: nginx-ingress
-#    meta.helm.sh/release-namespace:  {{ .Release.Namespace }}
-#  labels:
-#    app.kubernetes.io/component: controller
-#    app.kubernetes.io/instance: nginx-ingress
-#    app.kubernetes.io/managed-by: Helm
-#    app.kubernetes.io/name: ingress-nginx
-#    app.kubernetes.io/part-of: ingress-nginx
-#  name: ingress-nginx-udp-controller-admission
-#  namespace: {{ .Release.Namespace }}
-#spec:
-#  internalTrafficPolicy: Cluster
-#  ipFamilies:
-#  - IPv4
-#  ipFamilyPolicy: SingleStack
-#  ports:
-#  - appProtocol: https
-#    name: https-webhook
-#    port: 443
-#    protocol: TCP
-#    targetPort: webhook
-#  selector:
-#    app.kubernetes.io/component: controller
-#    app.kubernetes.io/instance: nginx-ingress
-#    app.kubernetes.io/name: ingress-nginx
-#  sessionAffinity: None
-#  type: ClusterIP
-#
-#
-#
-#---
-#apiVersion: v1
-#automountServiceAccountToken: true
-#kind: ServiceAccount
-#metadata:
-#  annotations:
-#    meta.helm.sh/release-name: nginx-ingress
-#    meta.helm.sh/release-namespace: nginx-coturn-tcp
-#  labels:
-#    app.kubernetes.io/component: controller
-#    app.kubernetes.io/instance: nginx-ingress
-#    app.kubernetes.io/managed-by: Helm
-#    app.kubernetes.io/name: ingress-nginx
-#    app.kubernetes.io/part-of: ingress-nginx
-#  name: nginx-ingress-ingress-nginx-tcp
-#  namespace: nginx-coturn-tcp
-#secrets:
-#- name: nginx-ingress-ingress-nginx-token
-#
-#---
-#apiVersion: apps/v1
-#kind: Deployment
-#metadata:
-#  annotations:
-#    meta.helm.sh/release-name: ingress-nginx-tcp
-#    meta.helm.sh/release-namespace: nginx-tcp
-#  labels:
-#    app.kubernetes.io/component: controller
-#    app.kubernetes.io/instance: ingress-nginx-tcp
-#    app.kubernetes.io/managed-by: Helm
-#    app.kubernetes.io/name: ingress-nginx
-#    app.kubernetes.io/part-of: ingress-nginx
-#    app.kubernetes.io/version: 1.2.0
-#    helm.sh/chart: ingress-nginx-4.1.0
-#  name: ingress-nginx-tcp-controller
-#  namespace: nginx-coturn-tcp
-#spec:
-#  progressDeadlineSeconds: 600
-#  replicas: 1
-#  revisionHistoryLimit: 10
-#  selector:
-#    matchLabels:
-#      app.kubernetes.io/component: controller
-#      app.kubernetes.io/instance: ingress-nginx-tcp
-#      app.kubernetes.io/name: ingress-nginx
-#  strategy:
-#    rollingUpdate:
-#      maxSurge: 25%
-#      maxUnavailable: 25%
-#    type: RollingUpdate
-#  template:
-#    metadata:
-#      labels:
-#        app.kubernetes.io/component: controller
-#        app.kubernetes.io/instance: ingress-nginx-tcp
-#        app.kubernetes.io/name: ingress-nginx
-#    spec:
-#      containers:
-#      - args:
-#        - /nginx-ingress-controller
-#        - --publish-service=$(POD_NAMESPACE)/ingress-nginx-tcp-controller
-#        - --election-id=ingress-controller-leader
-#        - --controller-class=k8s.io/nginx-tcp
-#        - --ingress-class=nginx
-#        - --configmap=$(POD_NAMESPACE)/ingress-nginx-tcp-controller
-#        - --validating-webhook=:8443
-#        - --validating-webhook-certificate=/usr/local/certificates/cert
-#        - --validating-webhook-key=/usr/local/certificates/key
-#        - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
-#        env:
-#        - name: POD_NAME
-#          valueFrom:
-#            fieldRef:
-#              apiVersion: v1
-#              fieldPath: metadata.name
-#        - name: POD_NAMESPACE
-#          valueFrom:
-#            fieldRef:
-#              apiVersion: v1
-#              fieldPath: metadata.namespace
-#        - name: LD_PRELOAD
-#          value: /usr/local/lib/libmimalloc.so
-#        image: k8s.gcr.io/ingress-nginx/controller:v1.2.0@sha256:d8196e3bc1e72547c5dec66d6556c0ff92a23f6d0919b206be170bc90d5f9185
-#        imagePullPolicy: IfNotPresent
-#        lifecycle:
-#          preStop:
-#            exec:
-#              command:
-#              - /wait-shutdown
-#        livenessProbe:
-#          failureThreshold: 5
-#          httpGet:
-#            path: /healthz
-#            port: 10254
-#            scheme: HTTP
-#          initialDelaySeconds: 10
-#          periodSeconds: 10
-#          successThreshold: 1
-#          timeoutSeconds: 1
-#        name: controller
-#        ports:
-#        - containerPort: 3478
-#          name: coturn-tcp
-#          protocol: TCP
-#        - containerPort: 8443
-#          name: webhook
-#          protocol: TCP
-#        readinessProbe:
-#          failureThreshold: 3
-#          httpGet:
-#            path: /healthz
-#            port: 10254
-#            scheme: HTTP
-#          initialDelaySeconds: 10
-#          periodSeconds: 10
-#          successThreshold: 1
-#          timeoutSeconds: 1
-#        resources:
-#          requests:
-#            cpu: 100m
-#            memory: 90Mi
-#        securityContext:
-#          allowPrivilegeEscalation: true
-#          capabilities:
-#            add:
-#            - NET_BIND_SERVICE
-#            drop:
-#            - ALL
-#          runAsUser: 101
-#        terminationMessagePath: /dev/termination-log
-#        terminationMessagePolicy: File
-#        volumeMounts:
-#        - mountPath: /usr/local/certificates/
-#          name: webhook-cert
-#          readOnly: true
-#      dnsPolicy: ClusterFirst
-#      nodeSelector:
-#        kubernetes.io/os: linux
-#      restartPolicy: Always
-#      schedulerName: default-scheduler
-#      securityContext: {}
-#      serviceAccount: nginx-ingress-ingress-nginx-tcp
-#      serviceAccountName: nginx-ingress-ingress-nginx-tcp
-#      terminationGracePeriodSeconds: 300
-#      volumes:
-#      - name: webhook-cert
-#        secret:
-#          defaultMode: 420
-#          secretName: ingress-nginx-tcp-admission
-#
----
-apiVersion: v1
-automountServiceAccountToken: true
-kind: ServiceAccount
-metadata:
-  labels:
-    app.kubernetes.io/component: controller
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-{{ .Release.Namespace }}
-  namespace: {{ .Release.Namespace }}
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  labels:
-    app.kubernetes.io/component: admission-webhook
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-admission-{{ .Release.Namespace }}
-  namespace: {{ .Release.Namespace }}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  labels:
-    app.kubernetes.io/component: controller
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-{{ .Release.Namespace }}
-  namespace: {{ .Release.Namespace }}
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - namespaces
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  - pods
-  - secrets
-  - endpoints
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - services
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses/status
-  verbs:
-  - update
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingressclasses
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resourceNames:
-  - ingress-controller-leader
-  resources:
-  - configmaps
-  verbs:
-  - get
-  - update
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  verbs:
-  - create
-- apiGroups:
-  - ""
-  resources:
-  - events
-  verbs:
-  - create
-  - patch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  labels:
-    app.kubernetes.io/component: admission-webhook
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-admission-{{ .Release.Namespace }}
-  namespace: {{ .Release.Namespace }}
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - secrets
-  verbs:
-  - get
-  - create
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-{{ .Release.Namespace }}
-rules:
-- apiGroups:
-  - ""
-  resources:
-  - configmaps
-  - endpoints
-  - nodes
-  - pods
-  - secrets
-  - namespaces
-  verbs:
-  - list
-  - watch
-  - get
-- apiGroups:
-  - ""
-  resources:
-  - nodes
-  - pods
-  verbs:
-  - get
-- apiGroups:
-  - ""
-  resources:
-  - services
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
-  - ""
-  resources:
-  - events
-  - configmaps
-  verbs:
-  - create
-  - patch
-  - update
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingresses/status
-  verbs:
-  - update
-- apiGroups:
-  - networking.k8s.io
-  resources:
-  - ingressclasses
-  verbs:
-  - get
-  - list
-  - watch
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  labels:
-    app.kubernetes.io/component: admission-webhook
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-admission-{{ .Release.Namespace }}
-rules:
-- apiGroups:
-  - admissionregistration.k8s.io
-  resources:
-  - validatingwebhookconfigurations
-  verbs:
-  - get
-  - update
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  labels:
-    app.kubernetes.io/component: controller
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-{{ .Release.Namespace }}
-  namespace: {{ .Release.Namespace }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: nginx-udp
-subjects:
-- kind: ServiceAccount
-  name: nginx-udp
-  namespace: {{ .Release.Namespace }}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  labels:
-    app.kubernetes.io/component: admission-webhook
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-admission-{{ .Release.Namespace }}
-  namespace: {{ .Release.Namespace }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: nginx-udp-admission-{{ .Release.Namespace }}
-subjects:
-- kind: ServiceAccount
-  name: nginx-udp-admission-{{ .Release.Namespace }}
-  namespace: {{ .Release.Namespace }}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  labels:
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-{{ .Release.Namespace }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: nginx-udp-{{ .Release.Namespace }}
-subjects:
-- kind: ServiceAccount
-  name: nginx-udp-{{ .Release.Namespace }}
-  namespace: {{ .Release.Namespace }}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  labels:
-    app.kubernetes.io/component: admission-webhook
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-admission-{{ .Release.Namespace }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: nginx-udp-admission-{{ .Release.Namespace }}
-subjects:
-- kind: ServiceAccount
-  name: nginx-udp-admission-{{ .Release.Namespace }}
-  namespace: {{ .Release.Namespace }}
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  labels:
-    app.kubernetes.io/component: admission-webhook
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-admission-create
-  namespace: {{ .Release.Namespace }}
-spec:
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/component: admission-webhook
-        app.kubernetes.io/instance: nginx-udp
-        app.kubernetes.io/name: nginx-udp
-        app.kubernetes.io/part-of: nginx-udp
-      name: nginx-udp-admission-create
-    spec:
-      containers:
-      - args:
-        - create
-        - --host=nginx-udp-controller-admission,nginx-udp-controller-admission.$(POD_NAMESPACE).svc
-        - --namespace=$(POD_NAMESPACE)
-        - --secret-name=nginx-udp-admission-$(POD_NAMESPACE)
-        env:
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        image: k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
-        imagePullPolicy: IfNotPresent
-        name: create
-        securityContext:
-          allowPrivilegeEscalation: false
-      nodeSelector:
-        kubernetes.io/os: linux
-      restartPolicy: OnFailure
-      securityContext:
-        fsGroup: 2000
-        runAsNonRoot: true
-        runAsUser: 2000
-      serviceAccountName: nginx-udp-admission-{{ .Release.Namespace }}
----
-apiVersion: batch/v1
-kind: Job
-metadata:
-  labels:
-    app.kubernetes.io/component: admission-webhook
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-admission-patch
-  namespace: {{ .Release.Namespace }}
-spec:
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/component: admission-webhook
-        app.kubernetes.io/instance: nginx-udp
-        app.kubernetes.io/name: nginx-udp
-        app.kubernetes.io/part-of: nginx-udp
-      name: nginx-udp-admission-patch
-    spec:
-      containers:
-      - args:
-        - patch
-        - --webhook-name=nginx-udp-admission-$(POD_NAMESPACE)
-        - --namespace=$(POD_NAMESPACE)
-        - --patch-mutating=false
-        - --secret-name=nginx-udp-admission-$(POD_NAMESPACE)
-        - --patch-failure-policy=Fail
-        env:
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.namespace
-        image: k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
-        imagePullPolicy: IfNotPresent
-        name: patch
-        securityContext:
-          allowPrivilegeEscalation: false
-      nodeSelector:
-        kubernetes.io/os: linux
-      restartPolicy: OnFailure
-      securityContext:
-        fsGroup: 2000
-        runAsNonRoot: true
-        runAsUser: 2000
-      serviceAccountName: nginx-udp-admission-{{ .Release.Namespace }}
----
-apiVersion: networking.k8s.io/v1
-kind: IngressClass
-metadata:
-  labels:
-    app.kubernetes.io/component: controller
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-{{ .Release.Namespace }}
-spec:
-  controller: k8s.io/ingress-nginx
----
-apiVersion: admissionregistration.k8s.io/v1
-kind: ValidatingWebhookConfiguration
-metadata:
-  labels:
-    app.kubernetes.io/component: admission-webhook
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-admission-{{ .Release.Namespace }}
-webhooks:
-- admissionReviewVersions:
-  - v1
-  clientConfig:
-    service:
-      name: nginx-udp-controller-admission
-      namespace: {{ .Release.Namespace }}
-      path: /networking/v1/ingresses
-  failurePolicy: Fail
-  matchPolicy: Equivalent
-  name: validate.nginx.ingress.kubernetes.io
-  rules:
-  - apiGroups:
-    - networking.k8s.io
-    apiVersions:
-    - v1
-    operations:
-    - CREATE
-    - UPDATE
-    resources:
-    - ingresses
-  sideEffects: None
-
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  labels:
-    app.kubernetes.io/component: controller
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/managed-by: Helm
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-  name: nginx-udp-controller
-  namespace:  {{ .Release.Namespace }}
-spec:
-  progressDeadlineSeconds: 600
-  replicas: 1
-  revisionHistoryLimit: 10
-  selector:
-    matchLabels:
-      app.kubernetes.io/component: controller
-      app.kubernetes.io/instance: nginx-udp
-      app.kubernetes.io/name: nginx-udp
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
-  template:
-    metadata:
-      labels:
-        app.kubernetes.io/component: controller
-        app.kubernetes.io/instance: nginx-udp
-        app.kubernetes.io/name: nginx-udp
-    spec:
-      containers:
-      - args:
-        - /nginx-ingress-controller
-        - --publish-service=$(POD_NAMESPACE)/nginx-udp-controller
-        - --election-id=ingress-controller-leader
-        - --controller-class=k8s.io/ingress-nginx
-        - --ingress-class=nginx-$(POD_NAMESPACE)
-        - --configmap=$(POD_NAMESPACE)/nginx-udp-controller
-        - --validating-webhook=:8443
-        - --validating-webhook-certificate=/usr/local/certificates/cert
-        - --validating-webhook-key=/usr/local/certificates/key
-        - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
-        env:
-        - name: POD_NAME
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.name
-        - name: POD_NAMESPACE
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: metadata.namespace
-        - name: LD_PRELOAD
-          value: /usr/local/lib/libmimalloc.so
-        image: k8s.gcr.io/ingress-nginx/controller:v1.2.0@sha256:d8196e3bc1e72547c5dec66d6556c0ff92a23f6d0919b206be170bc90d5f9185
-        imagePullPolicy: IfNotPresent
-        lifecycle:
-          preStop:
-            exec:
-              command:
-              - /wait-shutdown
-        livenessProbe:
-          failureThreshold: 5
-          httpGet:
-            path: /healthz
-            port: 10254
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        name: controller
-        ports:
-        - containerPort: 3478
-          name: coturn-udp
-          protocol: UDP
-        - containerPort: 8443
-          name: webhook
-          protocol: TCP
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /healthz
-            port: 10254
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 1
-        resources:
-          requests:
-            cpu: 100m
-            memory: 90Mi
-        securityContext:
-          allowPrivilegeEscalation: true
-          capabilities:
-            add:
-            - NET_BIND_SERVICE
-            drop:
-            - ALL
-          runAsUser: 101
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-        volumeMounts:
-        - mountPath: /usr/local/certificates/
-          name: webhook-cert
-          readOnly: true
-      dnsPolicy: ClusterFirst
-      nodeSelector:
-        kubernetes.io/os: linux
-      restartPolicy: Always
-      schedulerName: default-scheduler
-      securityContext: {}
-      serviceAccount: nginx-udp-{{ .Release.Namespace }}
-      serviceAccountName: nginx-udp-{{ .Release.Namespace }}
-      terminationGracePeriodSeconds: 300
-      volumes:
-      - name: webhook-cert
-        secret:
-          defaultMode: 420
-          secretName: nginx-udp-admission-{{ .Release.Namespace }}
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app.kubernetes.io/component: controller
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-    app.kubernetes.io/version: 1.2.0
-  name: nginx-udp-controller-admission
-  namespace: {{ .Release.Namespace }}
-spec:
-  ports:
-  - appProtocol: https
-    name: https-webhook
-    port: 443
-    targetPort: webhook
-  selector:
-    app.kubernetes.io/component: controller
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-  type: ClusterIP
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app.kubernetes.io/component: controller
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-    app.kubernetes.io/part-of: nginx-udp
-    app.kubernetes.io/version: 1.2.0
-  name: nginx-udp-controller
-  namespace: {{ .Release.Namespace }}
-spec:
-  externalTrafficPolicy: Local
-  ports:
-  - appProtocol: coturn-udp
-    name: coturn-udp
-    port: 3478
-    protocol: UDP
-    targetPort: coturn-udp
-  selector:
-    app.kubernetes.io/component: controller
-    app.kubernetes.io/instance: nginx-udp
-    app.kubernetes.io/name: nginx-udp
-  type: LoadBalancer
-#  namespace: nginx-coturn-udp
----
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: udp-services
-  namespace: {{ .Release.Namespace }}
-data:
-  3478: "{{ .Release.Namespace }}/coturn-udp:3478"
-
----
-
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: tcp-services
-  namespace: "{{ $.Values.coturn.ingress_ns_standard }}"
-data:
-  3478: "{{ .Release.Namespace }}/coturn-tcp:3478"
-
-#---
-#{{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
-#{{- if $v1Ingress -}}
-#apiVersion: networking.k8s.io/v1
-#{{- else -}}
-#apiVersion: networking.k8s.io/v1beta1
-#{{- end }}
-#kind: Ingress
-#metadata:
-#  name: coturn-tcp-{{ .Release.Namespace }}
-#  labels:
-#    app: coturn-tcp
-#spec:
-#  ingressClassName: nginx-tcp
-#  rules:
-#    - host: msgk8s.lab-mobility.de
-#      http:
-#        paths:
-#          - path: /
-#            pathType: Prefix
-#            backend:
-#              service:
-#                name: coturn-tcp
-#                port:
-#                  number: 3478
-#
-
 ---
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 {{- if $v1Ingress -}}
@@ -928,11 +76,11 @@ apiVersion: networking.k8s.io/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: coturn-udp-{{ .Release.Namespace }}
+  name: coturn-udp-{{ $.Values.coturn.ingress_udp_ns }}
   labels:
     app: coturn-udp
 spec:
-  ingressClassName: nginx-{{ .Release.Namespace }}
+  ingressClassName: nginx-{{ $.Values.coturn.ingress_udp_ns }}
   defaultBackend:
     service:
       name: coturn-udp
@@ -940,12 +88,11 @@ spec:
         name: turn-port-udp
 
 --- 
-
 apiVersion: v1
 kind: Service
 metadata:
   name: coturn-tcp
-  namespace:  {{ .Release.Namespace }}
+  namespace:  {{ $config.namespace }}
   labels:
        name: coturn
        instance: coturn
@@ -975,12 +122,11 @@ spec:
 
 
 --- 
-
 apiVersion: v1
 kind: Service
 metadata:
   name: coturn-udp
-  namespace:  {{ .Release.Namespace }}
+  namespace:  {{ $config.namespace }}
   labels:
        name: coturn
        instance: coturn
@@ -1009,12 +155,20 @@ spec:
        instance: coturn
 
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-services
+  namespace: "{{ $.Values.coturn.ingress_ns_standard }}"
+data:
+  3478: "{{ $config.namespace }}/coturn-tcp:3478"
 
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: coturn
-  namespace:  {{ .Release.Namespace }}
+  namespace:  {{ $config.namespace}}
 data:
   turnconfig.conf: "
 # Coturn TURN SERVER configuration file\n
@@ -1332,7 +486,7 @@ static-auth-secret=j8dOQy5TgYv0x7r9LL3so08jZReoZ9JgbpjdFO73toyqloQuCZywGihhbqYU7
 # and the userdb file). Must be used with long-term credentials \n
 # mechanism or with TURN REST API.\n
 #\n
-realm=msgk8s.lab-mobility.de\n
+realm={{ .Values.config.publicBaseurl | default (printf "%s" (.Values.publicServerName | default .Values.serverName)) }}
 \n
 # The flag that sets the origin consistency \n
 # check: across the session, all requests must have the same\n
@@ -1675,5 +829,858 @@ no-multicast-peers \n
 #no-tlsv1_2\n
 \n
 "
+
+#"
+#---
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  labels:
+#    kubernetes.io/metadata.name: nginx-coturn-udp
+#  name: nginx-coturn-udp
+#
+#---
+#apiVersion: v1
+#kind: Namespace
+#metadata:
+#  labels:
+#    kubernetes.io/metadata.name: nginx-coturn-tcp
+#  name: nginx-coturn-tcp
+#
+#---
+#apiVersion: v1
+#automountServiceAccountToken: true
+#kind: ServiceAccount
+#metadata:
+#  annotations:
+#    meta.helm.sh/release-name: nginx-ingress
+#    meta.helm.sh/release-namespace:  {{ .Release.Namespace }}
+#  labels:
+#    app.kubernetes.io/component: controller
+#    app.kubernetes.io/instance: nginx-ingress
+#    app.kubernetes.io/managed-by: Helm
+#    app.kubernetes.io/name: ingress-nginx
+#    app.kubernetes.io/part-of: ingress-nginx
+#  name: nginx-ingress-ingress-nginx-udp
+#  namespace: {{ .Release.Namespace }}
+#secrets:
+#- name: nginx-ingress-ingress-nginx-token
+#
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  annotations:
+#    meta.helm.sh/release-name: nginx-ingress
+#    meta.helm.sh/release-namespace:  {{ .Release.Namespace }}
+#  labels:
+#    app.kubernetes.io/component: controller
+#    app.kubernetes.io/instance: nginx-ingress
+#    app.kubernetes.io/managed-by: Helm
+#    app.kubernetes.io/name: ingress-nginx
+#    app.kubernetes.io/part-of: ingress-nginx
+#  name: ingress-nginx-udp-controller-admission
+#  namespace: {{ .Release.Namespace }}
+#spec:
+#  internalTrafficPolicy: Cluster
+#  ipFamilies:
+#  - IPv4
+#  ipFamilyPolicy: SingleStack
+#  ports:
+#  - appProtocol: https
+#    name: https-webhook
+#    port: 443
+#    protocol: TCP
+#    targetPort: webhook
+#  selector:
+#    app.kubernetes.io/component: controller
+#    app.kubernetes.io/instance: nginx-ingress
+#    app.kubernetes.io/name: ingress-nginx
+#  sessionAffinity: None
+#  type: ClusterIP
+#
+#
+#
+#---
+#apiVersion: v1
+#automountServiceAccountToken: true
+#kind: ServiceAccount
+#metadata:
+#  annotations:
+#    meta.helm.sh/release-name: nginx-ingress
+#    meta.helm.sh/release-namespace: nginx-coturn-tcp
+#  labels:
+#    app.kubernetes.io/component: controller
+#    app.kubernetes.io/instance: nginx-ingress
+#    app.kubernetes.io/managed-by: Helm
+#    app.kubernetes.io/name: ingress-nginx
+#    app.kubernetes.io/part-of: ingress-nginx
+#  name: nginx-ingress-ingress-nginx-tcp
+#  namespace: nginx-coturn-tcp
+#secrets:
+#- name: nginx-ingress-ingress-nginx-token
+#
+#---
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  annotations:
+#    meta.helm.sh/release-name: ingress-nginx-tcp
+#    meta.helm.sh/release-namespace: nginx-tcp
+#  labels:
+#    app.kubernetes.io/component: controller
+#    app.kubernetes.io/instance: ingress-nginx-tcp
+#    app.kubernetes.io/managed-by: Helm
+#    app.kubernetes.io/name: ingress-nginx
+#    app.kubernetes.io/part-of: ingress-nginx
+#    app.kubernetes.io/version: 1.2.0
+#    helm.sh/chart: ingress-nginx-4.1.0
+#  name: ingress-nginx-tcp-controller
+#  namespace: nginx-coturn-tcp
+#spec:
+#  progressDeadlineSeconds: 600
+#  replicas: 1
+#  revisionHistoryLimit: 10
+#  selector:
+#    matchLabels:
+#      app.kubernetes.io/component: controller
+#      app.kubernetes.io/instance: ingress-nginx-tcp
+#      app.kubernetes.io/name: ingress-nginx
+#  strategy:
+#    rollingUpdate:
+#      maxSurge: 25%
+#      maxUnavailable: 25%
+#    type: RollingUpdate
+#  template:
+#    metadata:
+#      labels:
+#        app.kubernetes.io/component: controller
+#        app.kubernetes.io/instance: ingress-nginx-tcp
+#        app.kubernetes.io/name: ingress-nginx
+#    spec:
+#      containers:
+#      - args:
+#        - /nginx-ingress-controller
+#        - --publish-service=$(POD_NAMESPACE)/ingress-nginx-tcp-controller
+#        - --election-id=ingress-controller-leader
+#        - --controller-class=k8s.io/nginx-tcp
+#        - --ingress-class=nginx
+#        - --configmap=$(POD_NAMESPACE)/ingress-nginx-tcp-controller
+#        - --validating-webhook=:8443
+#        - --validating-webhook-certificate=/usr/local/certificates/cert
+#        - --validating-webhook-key=/usr/local/certificates/key
+#        - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
+#        env:
+#        - name: POD_NAME
+#          valueFrom:
+#            fieldRef:
+#              apiVersion: v1
+#              fieldPath: metadata.name
+#        - name: POD_NAMESPACE
+#          valueFrom:
+#            fieldRef:
+#              apiVersion: v1
+#              fieldPath: metadata.namespace
+#        - name: LD_PRELOAD
+#          value: /usr/local/lib/libmimalloc.so
+#        image: k8s.gcr.io/ingress-nginx/controller:v1.2.0@sha256:d8196e3bc1e72547c5dec66d6556c0ff92a23f6d0919b206be170bc90d5f9185
+#        imagePullPolicy: IfNotPresent
+#        lifecycle:
+#          preStop:
+#            exec:
+#              command:
+#              - /wait-shutdown
+#        livenessProbe:
+#          failureThreshold: 5
+#          httpGet:
+#            path: /healthz
+#            port: 10254
+#            scheme: HTTP
+#          initialDelaySeconds: 10
+#          periodSeconds: 10
+#          successThreshold: 1
+#          timeoutSeconds: 1
+#        name: controller
+#        ports:
+#        - containerPort: 3478
+#          name: coturn-tcp
+#          protocol: TCP
+#        - containerPort: 8443
+#          name: webhook
+#          protocol: TCP
+#        readinessProbe:
+#          failureThreshold: 3
+#          httpGet:
+#            path: /healthz
+#            port: 10254
+#            scheme: HTTP
+#          initialDelaySeconds: 10
+#          periodSeconds: 10
+#          successThreshold: 1
+#          timeoutSeconds: 1
+#        resources:
+#          requests:
+#            cpu: 100m
+#            memory: 90Mi
+#        securityContext:
+#          allowPrivilegeEscalation: true
+#          capabilities:
+#            add:
+#            - NET_BIND_SERVICE
+#            drop:
+#            - ALL
+#          runAsUser: 101
+#        terminationMessagePath: /dev/termination-log
+#        terminationMessagePolicy: File
+#        volumeMounts:
+#        - mountPath: /usr/local/certificates/
+#          name: webhook-cert
+#          readOnly: true
+#      dnsPolicy: ClusterFirst
+#      nodeSelector:
+#        kubernetes.io/os: linux
+#      restartPolicy: Always
+#      schedulerName: default-scheduler
+#      securityContext: {}
+#      serviceAccount: nginx-ingress-ingress-nginx-tcp
+#      serviceAccountName: nginx-ingress-ingress-nginx-tcp
+#      terminationGracePeriodSeconds: 300
+#      volumes:
+#      - name: webhook-cert
+#        secret:
+#          defaultMode: 420
+#          secretName: ingress-nginx-tcp-admission
+#
+---
+apiVersion: v1
+automountServiceAccountToken: true
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-{{ $.Values.coturn.ingress_udp_ns }}
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-admission-{{ $.Values.coturn.ingress_udp_ns }}
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-{{ $.Values.coturn.ingress_udp_ns }}
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - pods
+  - secrets
+  - endpoints
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resourceNames:
+  - ingress-controller-leader
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-admission-{{ $.Values.coturn.ingress_udp_ns }}
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-{{ $.Values.coturn.ingress_udp_ns }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - endpoints
+  - nodes
+  - pods
+  - secrets
+  - namespaces
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  - configmaps
+  verbs:
+  - create
+  - patch
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingressclasses
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-admission-{{ $.Values.coturn.ingress_udp_ns }}
+rules:
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - validatingwebhookconfigurations
+  verbs:
+  - get
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-{{ $.Values.coturn.ingress_udp_ns }}
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: nginx-udp
+subjects:
+- kind: ServiceAccount
+  name: nginx-udp
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-admission-{{ $.Values.coturn.ingress_udp_ns }}
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: nginx-udp-admission-{{ $.Values.coturn.ingress_udp_ns }}
+subjects:
+- kind: ServiceAccount
+  name: nginx-udp-admission-{{ $.Values.coturn.ingress_udp_ns }}
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-{{ $.Values.coturn.ingress_udp_ns }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nginx-udp-{{ $.Values.coturn.ingress_udp_ns }}
+subjects:
+- kind: ServiceAccount
+  name: nginx-udp-{{ $.Values.coturn.ingress_udp_ns }}
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-admission-{{ $.Values.coturn.ingress_udp_ns }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nginx-udp-admission-{{ $.Values.coturn.ingress_udp_ns }}
+subjects:
+- kind: ServiceAccount
+  name: nginx-udp-admission-{{ $.Values.coturn.ingress_udp_ns }}
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-admission-create
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: admission-webhook
+        app.kubernetes.io/instance: nginx-udp
+        app.kubernetes.io/name: nginx-udp
+        app.kubernetes.io/part-of: nginx-udp
+      name: nginx-udp-admission-create
+    spec:
+      containers:
+      - args:
+        - create
+        - --host=nginx-udp-controller-admission,nginx-udp-controller-admission.$(POD_NAMESPACE).svc
+        - --namespace=$(POD_NAMESPACE)
+        - --secret-name=nginx-udp-admission-$(POD_NAMESPACE)
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
+        imagePullPolicy: IfNotPresent
+        name: create
+        securityContext:
+          allowPrivilegeEscalation: false
+      nodeSelector:
+        kubernetes.io/os: linux
+      restartPolicy: OnFailure
+      securityContext:
+        fsGroup: 2000
+        runAsNonRoot: true
+        runAsUser: 2000
+      serviceAccountName: nginx-udp-admission-{{ $.Values.coturn.ingress_udp_ns }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-admission-patch
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+spec:
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: admission-webhook
+        app.kubernetes.io/instance: nginx-udp
+        app.kubernetes.io/name: nginx-udp
+        app.kubernetes.io/part-of: nginx-udp
+      name: nginx-udp-admission-patch
+    spec:
+      containers:
+      - args:
+        - patch
+        - --webhook-name=nginx-udp-admission-$(POD_NAMESPACE)
+        - --namespace=$(POD_NAMESPACE)
+        - --patch-mutating=false
+        - --secret-name=nginx-udp-admission-$(POD_NAMESPACE)
+        - --patch-failure-policy=Fail
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        image: k8s.gcr.io/ingress-nginx/kube-webhook-certgen:v1.1.1@sha256:64d8c73dca984af206adf9d6d7e46aa550362b1d7a01f3a0a91b20cc67868660
+        imagePullPolicy: IfNotPresent
+        name: patch
+        securityContext:
+          allowPrivilegeEscalation: false
+      nodeSelector:
+        kubernetes.io/os: linux
+      restartPolicy: OnFailure
+      securityContext:
+        fsGroup: 2000
+        runAsNonRoot: true
+        runAsUser: 2000
+      serviceAccountName: nginx-udp-admission-{{ $.Values.coturn.ingress_udp_ns }}
+---
+apiVersion: networking.k8s.io/v1
+kind: IngressClass
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-{{ $.Values.coturn.ingress_udp_ns }}
+spec:
+  controller: k8s.io/ingress-nginx
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  labels:
+    app.kubernetes.io/component: admission-webhook
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-admission-{{ $.Values.coturn.ingress_udp_ns }}
+webhooks:
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: nginx-udp-controller-admission
+      namespace: {{ $.Values.coturn.ingress_udp_ns }}
+      path: /networking/v1/ingresses
+  failurePolicy: Fail
+  matchPolicy: Equivalent
+  name: validate.nginx.ingress.kubernetes.io
+  rules:
+  - apiGroups:
+    - networking.k8s.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - ingresses
+  sideEffects: None
+
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+  name: nginx-udp-controller
+  namespace:  {{ $.Values.coturn.ingress_udp_ns }}
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: controller
+      app.kubernetes.io/instance: nginx-udp
+      app.kubernetes.io/name: nginx-udp
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: controller
+        app.kubernetes.io/instance: nginx-udp
+        app.kubernetes.io/name: nginx-udp
+    spec:
+      containers:
+      - args:
+        - /nginx-ingress-controller
+        - --publish-service=$(POD_NAMESPACE)/nginx-udp-controller
+        - --election-id=ingress-controller-leader
+        - --controller-class=k8s.io/ingress-nginx
+        - --ingress-class=nginx-$(POD_NAMESPACE)
+        - --configmap=$(POD_NAMESPACE)/nginx-udp-controller
+        - --validating-webhook=:8443
+        - --validating-webhook-certificate=/usr/local/certificates/cert
+        - --validating-webhook-key=/usr/local/certificates/key
+        - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: LD_PRELOAD
+          value: /usr/local/lib/libmimalloc.so
+        image: k8s.gcr.io/ingress-nginx/controller:v1.2.0@sha256:d8196e3bc1e72547c5dec66d6556c0ff92a23f6d0919b206be170bc90d5f9185
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /wait-shutdown
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: controller
+        ports:
+        - containerPort: 3478
+          name: coturn-udp
+          protocol: UDP
+        - containerPort: 8443
+          name: webhook
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          requests:
+            cpu: 100m
+            memory: 90Mi
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            drop:
+            - ALL
+          runAsUser: 101
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /usr/local/certificates/
+          name: webhook-cert
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        kubernetes.io/os: linux
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: nginx-udp-{{ $.Values.coturn.ingress_udp_ns }}
+      serviceAccountName: nginx-udp-{{ $.Values.coturn.ingress_udp_ns }}
+      terminationGracePeriodSeconds: 300
+      volumes:
+      - name: webhook-cert
+        secret:
+          defaultMode: 420
+          secretName: nginx-udp-admission-{{ $.Values.coturn.ingress_udp_ns }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+    app.kubernetes.io/version: 1.2.0
+  name: nginx-udp-controller-admission
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+spec:
+  ports:
+  - appProtocol: https
+    name: https-webhook
+    port: 443
+    targetPort: webhook
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+    app.kubernetes.io/part-of: nginx-udp
+    app.kubernetes.io/version: 1.2.0
+  name: nginx-udp-controller
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+spec:
+  externalTrafficPolicy: Local
+  ports:
+  - appProtocol: coturn-udp
+    name: coturn-udp
+    port: 3478
+    protocol: UDP
+    targetPort: coturn-udp
+  selector:
+    app.kubernetes.io/component: controller
+    app.kubernetes.io/instance: nginx-udp
+    app.kubernetes.io/name: nginx-udp
+  type: LoadBalancer
+#  namespace: nginx-coturn-udp
+---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: udp-services
+  namespace: {{ $.Values.coturn.ingress_udp_ns }}
+data:
+  3478: "{{ $config.namespace }}/coturn-udp:3478"
+#---
+#{{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
+#{{- if $v1Ingress -}}
+#apiVersion: networking.k8s.io/v1
+#{{- else -}}
+#apiVersion: networking.k8s.io/v1beta1
+#{{- end }}
+#kind: Ingress
+#metadata:
+#  name: coturn-tcp-{{ .Release.Namespace }}
+#  labels:
+#    app: coturn-tcp
+#spec:
+#  ingressClassName: nginx-tcp
+#  rules:
+#    - host: msgk8s.lab-mobility.de
+#      http:
+#        paths:
+#          - path: /
+#            pathType: Prefix
+#            backend:
+#              service:
+#                name: coturn-tcp
+#                port:
+#                  number: 3478
+#
 {{- end }}
 

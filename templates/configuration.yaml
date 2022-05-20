@@ -86,14 +86,17 @@ data:
     recaptcha_public_key: {{ .Values.config.recaptcha.publicKey | quote }}
     enable_registration_captcha: true
     {{- end }}
-    {{- if .Values.config.turnUris }}
+    {{- if .Values.coturn.turnUris }}
 
     ## Turn ##
-
+    # The public URIs of the TURN server to give to clients
+    #
+    #turn_uris: []
     turn_uris:
-      {{ toYaml .Values.config.turnUris | nindent 6 }}
-    {{- end }}
-
+      {{- range $k, $v := .Values.coturn.turnUris }}
+      - turn:{{ $.Values.config.publicBaseurl | default (printf "%s" ( $.Values.publicServerName | default $.Values.serverName)) }}:{{$v}}?transport={{$k}}
+      {{end}}
+    {{end}}
     ## Registration ##
 
     enable_registration: {{ .Values.config.enableRegistration | default false }}
@@ -144,11 +147,6 @@ data:
     {{- if .Values.coturn.enabled }}
     ## TURN ##
     
-    # The public URIs of the TURN server to give to clients
-    #
-    #turn_uris: []
-    #turn_uris: ["turn:msgk8s.lab-mobility.de:3478?transport=udp"]
-    #turn_uris: ["turn:{{ .Values.coturn.realm  |  default (printf "%s" (.Values.publicServerName | default .Values.serverName)) }}:{{ .Values.coturn.port }}?transport={{ .Values.coturn.protocol }}"]
     # The shared secret used to compute passwords for the TURN server
     #
     #turn_shared_secret: "YOUR_SHARED_SECRET"

@@ -100,8 +100,9 @@ config:
   ## URIs and secret key for TURN servers to use to help establish 1:1 WebRTC
   ## calls.
   ##
+  turnUris: []
   #turnUris: ["turn:msgk8s.lab-mobility.de:3478?transport=udp","turn:msgk8s.lab-mobility.de:3478?transport=tcp"]
-  turnUris: ["turn:msgk8s.lab-mobility.de:3478?transport=tcp"]
+  #turnUris: ["turn:msgk8s.lab-mobility.de:3478?transport=udp"]
   # turnSecret: ''
 
   ## Registration configuration, note that registration with the
@@ -136,15 +137,57 @@ config:
 extraConfig: 
 #  old_signing_keys:
 #    "ed25519:id": { key: "base64string", expired_ts: 123456789123 } 
-  use_presence: true
+#    Best Practise:
+  require_auth_for_profile_requests: true
+  limit_profile_requests_to_users_who_share_rooms: false
+  include_profile_data_on_invite: true
+  allow_public_rooms_without_auth: false
+  allow_public_rooms_over_federation: false
+  block_non_admin_invites: false
+  ip_range_whitelist: []
+#    - ""
+  presence: 
+      enabled: false
   enable_search: true
+  user_directory:
+      enabled: true
+      search_all_users: true
+  require_membership_for_aliases: true
+  user_ips_max_age: 28d
+  retention:
+      enabled: false
+  url_preview_enabled: false
+  oembed:
+      disable_default_providers: true
+  enable_3pid_lookup: false
+  allow_guest_access: false
+  enable_metrics: true
+  report_stats: false
+  password_config:
+      enabled: true
+      localdb_enabled: true
+      policy:
+          enabled: true
+          minimum_length: 8
+          require_digit: true
+          require_symbol: true
+          require_lowercase: true
+          require_uppercase: true
+  ui_auth:
+      session_timeout: "15s"    
+  push:
+      include_content: false
+  encryption_enabled_by_default_for_room_type: all
+  stats:
+      enabled: true
+  enable_room_list_search: true 
+  opentracing:
+      enabled: false
 #  federation_domain_whitelist:
 #    - lon.example.com
 #    - nyc.example.com
 #    - syd.example.com
 #  dynamic_thumbnails: true
-  user_directory:
-      search_all_users: true
 
 ## Specify arbitrary - secret - Synapse configuration here;
 ## These values will be stored in secrets instead of configmaps
@@ -998,11 +1041,19 @@ schadcodescanner:
 ######################################################################################
 ##          Setting up CoTurn
 ######################################################################################
-
+#Standard: if enabled, coturn will be deployed under default namespace, to be used from more than one instance
+# if coturn is enabled and existingcoturn too, it will configure the service to be used
+# with a coturn deployed under the namespace coturn.namespace
+# ingress_ns_standard is important if you deployed the standard-controller under an other namespace
 coturn:
   enabled: true
-  existingcoturn: false
+  turnUris:
+    tcp: 3478
+    udp: 3478
+  existingcoturn: 
+    enabled: false
   namespace: default
+  ingress_udp_ns: ingress-udp
   image:
     repository: coturn/coturn
     tag: latest
