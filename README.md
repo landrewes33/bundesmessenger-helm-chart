@@ -13,6 +13,8 @@ BWI Bundesmessenger auf Basis von Matrix Synapse
 
 Übersicht zum [BundesMessenger](https://gitlab.opencode.de/bwi/bundesmessenger/info)
 
+**Das Helm Chart ist noch nicht Produktionsbereit. Nur für PoC oder Teststellung zu verwenden.** 
+
 [Synapse](https://github.com/matrix-org/synapse) ist die aktuelle Implementation des [Matrix Protokoll](https://matrix.org).
 Das Helm-Chart für den Bundesmessenger wurde aus dem Helm Chart von [Alexander Olofsson](https://gitlab.com/ananace/charts/-/tree/master/charts/matrix-synapse) entwickelt.
 Die größten Änderungen zu dem zugrunde liegenden Chart sind:
