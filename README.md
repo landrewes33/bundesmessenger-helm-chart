@@ -51,13 +51,13 @@ Sollte die storageClass nfs-client nicht existent sein, muss diese erstellt oder
 
 ## PoC
 
-So installieren Sie eine POC-Umgebung
+So installieren Sie eine PoC-Umgebung
 
-Unser Helm Chart kann die Installation von Matrix/Synapse Proof of Concept (POC) Umgebungen übernehmen. Unsere Standard-POC-Umgebung ist ein 4-Node-Cluster mit vanilla Kubernetes, auf dem wir unsere Testumgebung bereitstellen, was zu einem voll funktionsfähigen Synapse-Server mit Element Web führt, der zur Durchführung eines POC verwendet werden kann. Lokale Produktionsbereitstellungen verwenden dasselbe Installationsprogramm und denselben Operator, sind jedoch für die Bereitstellung in einer vollständigen Kubernetes-Umgebung vorgesehen und müssen erst noch getestet werden und das PoC erfolgreich verlassen.
+Unser Helm Chart kann die Installation von Matrix/Synapse Proof of Concept (PoC) Umgebungen übernehmen. Unsere Standard-PoC-Umgebung ist ein 4-Node-Cluster mit vanilla Kubernetes, auf dem wir unsere Testumgebung bereitstellen, was zu einem voll funktionsfähigen Synapse-Server mit Element Web führt, der zur Durchführung eines PoC verwendet werden kann. Lokale Produktionsbereitstellungen verwenden dasselbe Installationsprogramm und denselben Operator, sind jedoch für die Bereitstellung in einer vollständigen Kubernetes-Umgebung vorgesehen und müssen erst noch getestet werden und das PoC erfolgreich verlassen.
 
-POC-Anlagen sind nicht dazu bestimmt, zu Produktionszwecken betrieben zu werden. Sie sollten eine andere Installation für Ihre Produktionsumgebung planen. Die Einstellungen, die Sie mit dem Installationsprogramm verwenden, können für Ihre Produktionsinstallation übernommen, Ihre Räume und Bereiche jedoch nicht.
+PoC-Anlagen sind nicht dazu bestimmt, zu Produktionszwecken betrieben zu werden. Sie sollten eine andere Installation für Ihre Produktionsumgebung planen. Die Einstellungen, die Sie mit dem Installationsprogramm verwenden, können für Ihre Produktionsinstallation übernommen, Ihre Räume und Bereiche jedoch nicht.
 
-Um mit einer POC-Installation zu beginnen, müssen mehrere Dinge berücksichtigt werden, die in diesem Leitfaden behandelt werden:
+Um mit einer PoC-Installation zu beginnen, müssen mehrere Dinge berücksichtigt werden, die in diesem Leitfaden behandelt werden:
 
 Hostnamen/DNS
 Maschinengröße
@@ -68,7 +68,7 @@ Postgresql-Datenbank
 TURN-Server
 SSL-Zertifikate
 Zusätzliche Konfigurationselemente
-Sobald diese Bereiche abgedeckt sind, können Sie eine POC-Umgebung installieren!
+Sobald diese Bereiche abgedeckt sind, können Sie eine PoC-Umgebung installieren!
 
 ### Hostnamen/DNS
 Sie benötigen Hostnamen für die folgenden Infrastrukturkomponenten:
