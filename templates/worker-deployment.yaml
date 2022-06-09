@@ -36,6 +36,7 @@ spec:
         {{ . | toYaml | nindent 8 }}
       {{- end }}
     spec:
+      serviceAccountName: bundesmessenger
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       securityContext:
         {{- $config.podSecurityContext | default $default.podSecurityContext | toYaml | nindent 8 }}

@@ -16,6 +16,7 @@ spec:
       labels:
         app: matrix-synapse-sygnal
     spec:
+      serviceAccountName: bundesmessenger
       containers:
        - name: matrix-synapse-sygnal
          image:  "{{ $.Values.sygnal.image.repository }}:{{ include "matrix-synapse.sygnal.imageTag" $ }}"

@@ -16,6 +16,7 @@ spec:
       labels:
         app: synapse-admin
     spec:
+      serviceAccountName: bundesmessenger
       containers:
         - name: synapse-admin
           image: awesometechnologies/synapse-admin:latest

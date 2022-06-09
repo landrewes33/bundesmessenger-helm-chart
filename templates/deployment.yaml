@@ -5,6 +5,16 @@
 {{- if (and .Values.redis.enabled (and .Values.redis.usePassword (and (not .Values.redis.password) (not .Values.redis.existingSecret)))) -}}
 {{-  fail "You must specify a static redis password or existing secret if using the included redis chart" -}}
 {{- end -}}
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+  {{- include "matrix-synapse.labels" . | nindent 4 }}
+  name: bundesmessenger
+  namespace: {{ .Release.Namespace }}
+
 ---
 # Server: {{ required "A valid serverName is required" .Values.serverName }}
 apiVersion: apps/v1
@@ -35,6 +45,7 @@ spec:
         {{ . | toYaml | nindent 8 }}
         {{- end }}
     spec:
+      serviceAccountName: bundesmessenger
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.synapse.podSecurityContext | nindent 8 }}

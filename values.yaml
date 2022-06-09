@@ -256,21 +256,21 @@ synapse:
   ## NB; The synapse install is currently unable to run as anything but UID:GID
   ## 666:666.
   ##
-  podSecurityContext: {}
-  #  fsGroup: 666
-  #  runAsGroup: 666
-  #  runAsUser: 666
-
+  #podSecurityContext:
+  #  fsGroup: 2666
+  #  runAsGroup: 2666
+  #  runAsUser: 2666
+ #
   ## Configuration for the container security policy, refer to the above
   ## podSecurityContext for more relevant information.
   ##
   securityContext: 
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 2666
   #  capabilities:
   #    drop:
   #    - ALL
-    readOnlyRootFilesystem: true
-  #  runAsNonRoot: true
-  #  runAsUser: 666
 
   ## Resources to apply to the main Synapse pod.
   ##
@@ -372,20 +372,20 @@ workers:
 
     ## Security context information to set to the worker.
     ##
-    podSecurityContext: {}
-    #   fsGroup: 666
-    #   runAsGroup: 666
-    #   runAsUser: 666
+    #podSecurityContext: 
+    #   fsGroup: 2003
+    #   runAsGroup: 2003
+    #   runAsUser: 2003
 
     ## Container security context information to set to the worker.
     ##
-    securityContext: 
+    #securityContext: 
+    #   readOnlyRootFilesystem: true
+    #   runAsNonRoot: true
+    #   runAsUser: 2003
     #   capabilities:
     #     drop:
     #       - ALL
-       readOnlyRootFilesystem: true
-    #   runAsNonRoot: true
-    #   runAsUser: 666
 
     ## Resources to apply to the worker.
     ##
@@ -428,6 +428,10 @@ workers:
   ## Proper load balancing with the K8s Ingress resource may not be possible.
   ##
   generic_worker:
+    securityContext: 
+       readOnlyRootFilesystem: true
+       runAsNonRoot: true
+       runAsUser: 2003
     enabled: true
     generic: true
     listeners: [client, federation]
@@ -539,6 +543,10 @@ workers:
   ## NB; Running multiple instances will conflict with background jobs.
   ##
   media_repository:
+    securityContext: 
+       readOnlyRootFilesystem: true
+       runAsNonRoot: true
+       runAsUser: 2012
     enabled: true
     listeners: [media]
     csPaths:
@@ -591,20 +599,20 @@ sygnal:
 #
   ## Configuration for the pod security policy.
   ##
-  podSecurityContext: {}
-  #  fsGroup: 101
-  #  runAsGroup: 101
-  #  runAsUser: 100
+  podSecurityContext: {} 
+#    fsGroup: 2000
+#    runAsGroup: 2000
+#    runAsUser: 2000
 
   ## Configuration for the container security policy.
   ##
-  securityContext: 
+  securityContext: {}
   #  capabilities:
   #    drop:
   #    - ALL
-    readOnlyRootFilesystem: true
-  #  runAsNonRoot: true
-  #  runAsUser: 100
+#    readOnlyRootFilesystem: true
+#    runAsNonRoot: true
+#    runAsUser: 2000
 
   ## Resource configuration to apply to the sygnal server.
   ##
@@ -675,20 +683,20 @@ wellknown:
 
   ## Configuration for the pod security policy.
   ##
-  podSecurityContext: {}
-  #  fsGroup: 101
-  #  runAsGroup: 101
-  #  runAsUser: 100
+  #podSecurityContext: 
+  #  fsGroup: 2001
+  #  runAsGroup: 2001
+  #  runAsUser: 2001
 
   ## Configuration for the container security policy.
   ##
-  securityContext: 
+  securityContext: {} 
+#    readOnlyRootFilesystem: true
+#    runAsNonRoot: true
+#    runAsUser: 2001
   #  capabilities:
   #    drop:
   #    - ALL
-     readOnlyRootFilesystem: true
-  #  runAsNonRoot: true
-  #  runAsUser: 100
 
   ## Resource configuration to apply to the well-known server.
   ##
@@ -717,9 +725,9 @@ wellknown:
 ## enabled to false and configure the externalPostgresql block.
 ##
 postgresql:
-  enabled: true
-
-  # XXX Change me!
+  enabled: false
+  
+# XXX Change me!
   postgresqlPassword: synapse
 
   postgresqlUsername: synapse
@@ -745,7 +753,7 @@ postgresql:
 ## that the database needs to have both COLLATE and CTYPE set to "C".
 ##
 externalPostgresql:
-  host: postgres-headless-svc
+  host: postgres-4-matrix-postgresql.postgres.svc.cluster.local
   port: 5432
   username: synapse
   password: synapse
@@ -770,7 +778,6 @@ externalPostgresql:
 ##
 redis:
   enabled: true
-
   usePassword: true
   # XXX Change me!
 #  password: synapse
@@ -820,9 +827,9 @@ persistence:
 ##
 volumePermissions:
   enabled: false
-
-  uid: 666
-  gid: 666
+#policy 'require-uid-greater-2000'
+  uid: 2666
+  gid: 2666
 
   image:
     repository: alpine
@@ -960,9 +967,6 @@ ingress:
 schadcodescanner:
   enabled: true
   image:
-#    registry: docker.io
-#    repository: bitnami/minideb
-#    tag: stretch
     repository: clamav/clamav
     tag: stable
     pullPolicy: Always
@@ -1001,9 +1005,9 @@ schadcodescanner:
 #  ## Configuration for the pod security policy.
 #  ##
 #  podSecurityContext: {}
-#  #  fsGroup: 101
-#  #  runAsGroup: 101
-#  #  runAsUser: 100
+#    fsGroup: 666
+#    runAsGroup: 666
+#    runAsUser: 666
 #
 #  ## Configuration for the container security policy.
 #  ##
@@ -1011,9 +1015,9 @@ schadcodescanner:
 #  #  capabilities:
 #  #    drop:
 #  #    - ALL
-#  #  readOnlyRootFilesystem: true
-#  #  runAsNonRoot: true
-#  #  runAsUser: 100
+#    readOnlyRootFilesystem: true
+#    runAsNonRoot: true
+#    runAsUser: 666
 #
 #  ## Resource configuration to apply to the sygnal server.
 #  ##
@@ -1046,19 +1050,23 @@ schadcodescanner:
 # with a coturn deployed under the namespace coturn.namespace
 # ingress_ns_standard is important if you deployed the standard-controller under an other namespace
 coturn:
-  enabled: true
+  enabled: false
   turnUris:
     tcp: 3478
     udp: 3478
   existingcoturn: 
     enabled: false
-  namespace: default
-  ingress_udp_ns: ingress-udp
+  default_ns: default
   image:
     repository: coturn/coturn
     tag: latest
     pullPolicy: Always 
-  ingress_ns_standard: default
+  securityContext:
+    runAsUser: 2011
+    runAsGroup: 2011
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+
 # if shared secret:
 # LATER, weil wegen redis
 
@@ -1067,8 +1075,8 @@ coturn:
 ##          Setting up Synapse Admin
 ######################################################################################
 synapse_admin:
-  enabled: false
-#  adminUri:  
+  enabled: true
+  adminUri:  
   image:
     repository: awesometechnologies/synapse-admin
     tag: latest

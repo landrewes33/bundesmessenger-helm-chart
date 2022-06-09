@@ -40,6 +40,7 @@ spec:
 #             sed -i "s/^Group c-icap/Group nogroup/" /etc/c-icap/c-icap.conf && \
 #             echo "Include clamav_mod.conf" >> /etc/c-icap/virus_scan.conf
 #         image:   "{{  $.Values.schadcodescanner.image.registry }}/{{ $.Values.schadcodescanner.image.repository }}:{{ $.Values.schadcodescanner.image.tag }}"
+      serviceAccountName: bundesmessenger
       containers:
        - name: matrix-schadcodescanner
          image:  "{{ $.Values.schadcodescanner.image.repository }}:{{ $.Values.schadcodescanner.image.tag }}"

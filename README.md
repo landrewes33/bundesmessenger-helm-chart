@@ -20,7 +20,7 @@ Die größten Änderungen zu dem zugrunde liegenden Chart sind:
 - Änderung des Sets für die Worker auf Statefulsets
 - Hinzufügen und Konfiguration für Horizontal Pod Autoscaling (HPA) für die Generic-Worker
 - Änderung der Benamung/Transport der Pod-Names in die Dienste, für eineindeutiges Logging und Auswertung der internen Kommunikation
-- feste PersistentVolumeClaims für eigenen Postgresql-Server und Media-Worker
+- festes PersistentVolumeClaim für Media-Worker
 - Einfügen/Anpassen von Ingress-Routen 
 - Hinzufügen eines Virenscanners (ClamAV) **(TODO: Einbringung des Contentscanners zum aktivieren des Virenscanners)**
 - Hinzufügen des Synapse Admin von [Awesome-Technologies](https://github.com/Awesome-Technologies/synapse-admin) zur Administration der Instanz (aktuell auf nur intern erreichbarer Domain)
@@ -40,6 +40,9 @@ Für Fragen zur Anwendung des Helm-Charts, Konfiguration und Deployment steht Ih
 - vorgelagerte Loadbalancer und vorkonfigurierte Firewalls, um den Service in vollem Umfang zu nutzen
     - bei Nutzung von CoTurn wird ein NginX-ReverseProxy empfohlen, der die TCP/UDP-Streams weiterleitet
 - Storage muss PersistentVolumeClaims zulassen und konfiguriert haben (von Vorteil für DB und Media)
+- Zugriff auf vorhandenen PostgreSQL Server (DVS Konformität)
+    - Datenbank **synapse_db** (**Hinweis: Collation und cType müssen auf "C" gesetzt sein**)  und User **synapse**.
+    - Server kann im Kubernetes stehen oder extern.
 - ein "existingClaim" (persistent volume claim) mit dem Namen "matrix-synapse" (empfohlen 10GB) für den Media-Worker als Speicher. 
 Sollte die storageClass nfs-client nicht existent sein, muss diese erstellt oder mit dem folgenden Parameter gesetzt werden:
 ```console
