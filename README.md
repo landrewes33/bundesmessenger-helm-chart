@@ -42,7 +42,7 @@ Für Fragen zur Anwendung des Helm-Charts, Konfiguration und Deployment steht Ih
 - Ingress Controller (NginX) im Cluster installiert
     - Bei Nutzung von CoTurn des Helm Charts, muss der IngressController den Port 3478 TCP zugefügt werden(Patch) oder durch vorgeschalteten ReverseProxy an die Nodeports direkt durchgeleitet werden
 - vorgelagerte Loadbalancer und vorkonfigurierte Firewalls, um den Service in vollem Umfang zu nutzen
-    - bei Nutzung von CoTurn wird ein NginX-ReverseProxy empfohlen, der die TCP/UDP-Streams weiterleitet
+    - *Optional: bei Nutzung von CoTurn wird ein NginX-ReverseProxy empfohlen, der die TCP/UDP-Streams weiterleitet*
 - Storage muss PersistentVolumeClaims zulassen und konfiguriert haben (von Vorteil für DB und Media)
 - Zugriff auf vorhandenen PostgreSQL Server (DVS Konformität)
     - Datenbank **synapse_db** (**Hinweis: Collation und cType müssen auf "C" gesetzt sein**)  und User **synapse**.
