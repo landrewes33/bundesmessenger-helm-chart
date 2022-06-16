@@ -1,3 +1,4 @@
+{{- if .Values.schadcodescanner.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,12 +17,23 @@ spec:
       labels:
         app: matrix-schadcodescanner
     spec:
+      serviceAccountName: bundesmessenger
+      securityContext:
+        {{- toYaml .Values.schadcodescanner.podSecurityContext | nindent 8 }}
 #      initContainers:
 #       - name: update-config
+#         image:  "{{ $.Values.schadcodescanner.image.repository }}:{{ $.Values.schadcodescanner.image.tag }}"
 #         command:
 #           - sh
 #           - -c
 #           - |
+#             addgroup -g 2001 clamavgroup && \
+#             adduser -D -u 2002 -g clamavgroup -s /bin/false clamavuser && \
+#             chown -R clamavuser:clamavgroup /var/lib/clamav && \
+#             sed -i 's/DatabaseOwner clamav/DatabaseOwner clamavuser/g' /etc/clamav/freshclam.conf && \
+#             sed -i 's/^User clamav/User clamavuser/g' /etc/clamav/clamd.conf && \
+#             cat /etc/clamav/freshclam.conf && \
+#             echo "##################clamav#########################" && grep -v "^#" /etc/clamav/clamd.conf && echo "###################freshclam#################" && grep -v "^#" /etc/clamav/freshclam.conf && ls -lah /var/lib/clamav &&  echo "done! :)"
 #             apt-get update && \
 #             apt-get -y upgrade && \
 #             apt-get install -y c-icap libicapapi-dev clamav curl less vim libc-icap-mod-virus-scan && \
@@ -39,18 +51,28 @@ spec:
 #             sed -i "s/^Service echo srv/#Service echo srv/" /etc/c-icap/c-icap.conf && \
 #             sed -i "s/^Group c-icap/Group nogroup/" /etc/c-icap/c-icap.conf && \
 #             echo "Include clamav_mod.conf" >> /etc/c-icap/virus_scan.conf
-#         image:   "{{  $.Values.schadcodescanner.image.registry }}/{{ $.Values.schadcodescanner.image.repository }}:{{ $.Values.schadcodescanner.image.tag }}"
-      serviceAccountName: bundesmessenger
+#         securityContext:
+#           runAsNonRoot: false
+#           runAsUser: 0
+#         volumeMounts:
+#           - name: tmpdata
+#             mountPath: /var/lib/clamav
       containers:
        - name: matrix-schadcodescanner
          image:  "{{ $.Values.schadcodescanner.image.repository }}:{{ $.Values.schadcodescanner.image.tag }}"
-         imagePullPolicy: {{ $.Values.schadcodescanner.image.pullPolicy }}
-#         command: ["/usr/bin/c-icap"]
+         imagePullPolicy: {{ .Values.schadcodescanner.image.pullPolicy }}
+         resources:
+           {{- .Values.schadcodescanner.resources | toYaml | nindent 12 }}
+         securityContext:
+           {{- toYaml .Values.schadcodescanner.securityContext | nindent 12 }}
+#                    command: ["/usr/bin/c-icap"]
 #         args: ["-f /etc/c-icap/c-icap.conf -D -N"]
 #         command:
-#           - bash
+#           - sh
 #           - -c
 #           - |
+#             echo "##################clamav#########################" && grep -v "^#" /etc/clamav/clamd.conf && echo "###################freshclam#################" && grep -v "^#" /etc/clamav/freshclam.conf && cat /etc/group && cat /etc/passwd 
+#
 #             apt-get update && \
 #             apt-get -y upgrade && \
 #             apt-get install -y c-icap libicapapi-dev clamav clamav-daemon curl less vim libc-icap-mod-virus-scan && \
@@ -69,15 +91,31 @@ spec:
 #             sed -i "s/^Group c-icap/Group nogroup/" /etc/c-icap/c-icap.conf && \
 #             echo "Include clamav_mod.conf" >> /etc/c-icap/virus_scan.conf && \
 #             /usr/bin/c-icap -f /etc/c-icap/c-icap.conf -D -N
+#
+         {{- with .Values.schadcodescanner.livenessProbe }}
+         livenessProbe:
+           {{- . | toYaml | nindent 12 }}
+         {{- end }}
+         {{- with $.Values.schadcodescanner.readinessProbe }}
+         readinessProbe:
+           {{- . | toYaml | nindent 12 }}
+         {{- end }}
          volumeMounts:
            - mountPath: /tmp
-             name: schadcodescanner-tmp
+             name: schadcodescannertmp
            - mountPath: /log
-             name: schadcodescanner-log
+             name: schadcodescannerlog
+           - name: tmprun
+             mountPath: /run
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
-        - name: schadcodescanner-tmp
+        - name: schadcodescannertmp
           emptyDir: {}
-        - name: schadcodescanner-log
+        - name: schadcodescannerlog
           emptyDir: {}
+        - name: tmpdata
+          emptyDir: {}
+        - name: tmprun
+          emptyDir: {}
+{{- end }}

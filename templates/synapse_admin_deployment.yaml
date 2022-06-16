@@ -17,9 +17,32 @@ spec:
         app: synapse-admin
     spec:
       serviceAccountName: bundesmessenger
+      securityContext:
+        {{- $.Values.synapse_admin.podSecurityContext | toYaml | nindent 8 }}
       containers:
         - name: synapse-admin
-          image: awesometechnologies/synapse-admin:latest
+          image:  "{{ $.Values.synapse_admin.image.repository }}:{{ $.Values.synapse_admin.image.tag }}"
+          imagePullPolicy: {{ $.Values.synapse_admin.image.pullPolicy }}
+          securityContext:
+            {{- $.Values.synapse_admin.securityContext | toYaml | nindent 12 }}
           ports:
             - containerPort: 80
+          resources:
+            {{- toYaml .Values.synapse_admin.resources | nindent 12 }}
+          {{- with .Values.synapse_admin.livenessProbe }}
+          livenessProbe:
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.synapse_admin.readinessProbe }}
+          readinessProbe:
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+          {{- with $.Values.synapse_admin.extraVolumeMounts }}
+          {{- . | toYaml | nindent 12 }}
+          {{- end }}
       restartPolicy: Always
+      volumes:
+      {{- with $.Values.synapse_admin.extraVolumes }}
+      {{- . | toYaml | nindent 8 }}
+      {{- end }}

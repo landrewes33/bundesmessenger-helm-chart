@@ -48,6 +48,14 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- printf "%s-%s" .global.Release.Name .sygnal | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{/*
+Create a default synapse-admin name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+{{- define "matrix-synapse.synapse-adminname" -}}
+{{- printf "%s-%s" .global.Release.Name .synapse_admin | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+*/}}
+
 Create a default schadcodescanner name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}

@@ -4,6 +4,7 @@
 {{- end }}
 {{- $name := include "matrix-synapse.workername" (dict "global" . "worker" "signingkey-job") }}
 {{- $secretName := include "matrix-synapse.workername" (dict "global" . "worker" "signingkey") }}
+#{{- if not (lookup "v1" "secret" .Release.Namespace $secretName)}}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -74,7 +75,7 @@ spec:
               else
                 generate_signing_key -o /synapse/keys/signing.key
               fi
-          image: "{{ .Values.signingkey.job.generateImage.repository }}:{{ .Values.signingkey.job.generateImage.tag | default "latest" }}"
+          image: "{{ .Values.signingkey.job.generateImage.repository }}:{{ .Values.signingkey.job.generateImage.tag | default ( include "matrix-synapse.imageTag" .) }}"
           imagePullPolicy: {{ .Values.signingkey.job.generateImage.pullPolicy }}
           name: signing-key-generate
           resources:
@@ -82,6 +83,9 @@ spec:
           volumeMounts:
             - mountPath: /synapse/keys
               name: matrix-synapse-keys
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 2018
         - command:
             - sh
             - -c
@@ -95,6 +99,9 @@ spec:
           image: "{{ .Values.signingkey.job.publishImage.repository }}:{{ .Values.signingkey.job.publishImage.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.signingkey.job.publishImage.pullPolicy }}
           name: signing-key-upload
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 2019
           resources:
             {{- toYaml .Values.signingkey.resources | nindent 12 }}
           volumeMounts:
@@ -116,4 +123,5 @@ spec:
   parallelism: 1
   completions: 1
   backoffLimit: 1
+#{{- end }}
 {{- end }}

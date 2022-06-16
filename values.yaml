@@ -51,10 +51,10 @@ signingkey:
       repository: matrixdotorg/synapse
       #tag: latest
       pullPolicy: IfNotPresent
-
+#aktuelle Version am 13.06.2022
     publishImage:
       repository: bitnami/kubectl
-      # tag: latest
+      tag: 1.21.13-debian-11-r4
       pullPolicy: IfNotPresent
 
   ## Specify an existing signing key secret, will need to be created in advance.
@@ -256,7 +256,8 @@ synapse:
   ## NB; The synapse install is currently unable to run as anything but UID:GID
   ## 666:666.
   ##
-  #podSecurityContext:
+  podSecurityContext:
+    runAsNonRoot: true
   #  fsGroup: 2666
   #  runAsGroup: 2666
   #  runAsUser: 2666
@@ -546,7 +547,7 @@ workers:
     securityContext: 
        readOnlyRootFilesystem: true
        runAsNonRoot: true
-       runAsUser: 2012
+       runAsUser: 2005
     enabled: true
     listeners: [media]
     csPaths:
@@ -587,7 +588,7 @@ sygnal:
   image:
     repository: matrixdotorg/sygnal
     tag: v0.11.0 
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
 #    listeners: [client]
 #    csPaths: 
 #      - "/_matrix/push/v1/notify"
@@ -599,30 +600,49 @@ sygnal:
 #
   ## Configuration for the pod security policy.
   ##
-  podSecurityContext: {} 
-#    fsGroup: 2000
+#  podSecurityContext:  
+#    sysctls:
+#      - name: net.ipv4.ip_unprivileged_port_start
+#        value: "80"
+#    runAsNonRoot: true
+#    fsGroup: 27
 #    runAsGroup: 2000
 #    runAsUser: 2000
 
   ## Configuration for the container security policy.
   ##
-  securityContext: {}
+  securityContext: 
   #  capabilities:
   #    drop:
   #    - ALL
-#    readOnlyRootFilesystem: true
+    readOnlyRootFilesystem: true
 #    runAsNonRoot: true
-#    runAsUser: 2000
+#    runAsUser: 2111
 
   ## Resource configuration to apply to the sygnal server.
   ##
-  resources: {}
-  #  limits:
-  #    cpu: 5m
-  #    memory: 15Mi
-  #  requests:
-  #    cpu: 5m
-  #    memory: 15Mi
+  resources: 
+    limits:
+      cpu: 150m
+      memory: 45Mi
+    requests:
+      cpu: 150m
+      memory: 45Mi
+
+#  ## Liveness probe configuration to use
+#  ##
+#  livenessProbe:
+#    httpGet:
+#      path: /health
+#      port: http
+#
+#  ## Readiness probe configuration to use
+#  ##
+#  readinessProbe:
+#    httpGet:
+#      path: /health
+#      port: http
+
 
   ## Node selectors to set for the sygnal server.
   ##
@@ -650,8 +670,8 @@ wellknown:
 
   ## The host and port combo to serve on .well-known/matrix/server.
   ##
-  server: {}
-  #  m.server: matrix.example.com:443
+  server: 
+    m.server: msgk8s.lab-mobility.de:443
 
   ## Data to serve on .well-known/matrix/client.
   ##
@@ -670,9 +690,9 @@ wellknown:
   ## The lighttpd image to run.
   ##
   image:
-    repository: m4rcu5/lighttpd
-    tag: latest
-    pullPolicy: Always
+    repository: sebp/lighttpd
+    tag: 1.4.61-r1
+    pullPolicy: IfNotPresent
 
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -683,30 +703,31 @@ wellknown:
 
   ## Configuration for the pod security policy.
   ##
-  #podSecurityContext: 
+  podSecurityContext: 
+    runAsNonRoot: true
   #  fsGroup: 2001
   #  runAsGroup: 2001
   #  runAsUser: 2001
 
   ## Configuration for the container security policy.
   ##
-  securityContext: {} 
-#    readOnlyRootFilesystem: true
-#    runAsNonRoot: true
-#    runAsUser: 2001
+  securityContext: 
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 2022
   #  capabilities:
   #    drop:
   #    - ALL
 
   ## Resource configuration to apply to the well-known server.
   ##
-  resources: {}
-  #  limits:
-  #    cpu: 5m
-  #    memory: 15Mi
-  #  requests:
-  #    cpu: 5m
-  #    memory: 15Mi
+  resources: 
+    limits:
+      cpu: 5m
+      memory: 15Mi
+    requests:
+      cpu: 5m
+      memory: 15Mi
 
   ## Node selectors to set for the well-known server.
   ##
@@ -726,28 +747,27 @@ wellknown:
 ##
 postgresql:
   enabled: false
-  
 # XXX Change me!
-  postgresqlPassword: synapse
-
-  postgresqlUsername: synapse
-  postgresqlDatabase: synapse_db
-  ## Or use existing secret with "postgresql-password" key
-  ## instead of static password
-  ##
-  existingSecret: postgres-secrets
-  existingSecretPasswordKey: POSTGRES_PASSWORD
-
-  postgresqlInitdbArgs: "--lc-collate=C --lc-ctype=C"
-
-  persistence:
-    storageClass: nfs-client
-    size: 16Gi
-
-  ## Extra arguments for the database connection
-  ## ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config
-  ##
-  extraArgs: {}
+#  postgresqlPassword: synapse
+#
+#  postgresqlUsername: synapse
+#  postgresqlDatabase: synapse_db
+#  ## Or use existing secret with "postgresql-password" key
+#  ## instead of static password
+#  ##
+#  existingSecret: postgres-secrets
+#  existingSecretPasswordKey: POSTGRES_PASSWORD
+#
+#  postgresqlInitdbArgs: "--lc-collate=C --lc-ctype=C"
+#
+#  persistence:
+#    storageClass: nfs-client
+#    size: 16Gi
+#
+#  ## Extra arguments for the database connection
+#  ## ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config
+#  ##
+#  extraArgs: {}
 
 ## An externally configured Postgres server to use for Synapse's database, note
 ## that the database needs to have both COLLATE and CTYPE set to "C".
@@ -778,14 +798,15 @@ externalPostgresql:
 ##
 redis:
   enabled: true
-  usePassword: true
+  auth:
+    enabled: true
   # XXX Change me!
-#  password: synapse
+    password: synapse
 
   ## Or use existing secret with "redis-password" key
   ## instead of static password
-  ## der Platzhalter wird später hart überschrieben, muss aber gesetzt und nicht leer sein dafür. Nur für mehr als 1 Instanz je K8s interessant
-  existingSecret: redis-platzhalter
+  ## der Platzhalter wird später hart ignoriert, muss aber gesetzt und nicht leer sein dafür. Nur für mehr als 1 Instanz je K8s interessant
+  #existingSecret: synapse-redis
 
   architecture: standalone
   master:
@@ -794,6 +815,8 @@ redis:
       ## data will ever need to be persisted.
       ##
       enabled: false
+    service:
+      port: 6379
     statefulset:
       updateStrategy: RollingUpdate
 
@@ -965,12 +988,42 @@ ingress:
 ##          Setting up Content-Scanner
 ######################################################################################
 schadcodescanner:
-  enabled: true
+  enabled: false
   image:
     repository: clamav/clamav
     tag: stable
-    pullPolicy: Always
-#    listeners: [client] 
+    pullPolicy: IfNotPresent
+#  ## Resource configuration 
+#  ##
+  resources: 
+    limits:
+      cpu: 400m
+      memory: 3Gi
+    requests:
+      cpu: 150m
+      memory: 400Mi
+
+#  podSecurityContext: 
+#   runAsNonRoot: true
+  securityContext:
+    runAsNonRoot: true
+#    runAsUser: 2333
+    runAsGroup: 1000
+
+#  ## Liveness probe configuration to use
+#  ##
+#  livenessProbe:
+#    httpGet:
+#      path: /health
+#      port: http
+#
+#  ## Readiness probe configuration to use
+#  ##
+#  readinessProbe:
+#    httpGet:
+#      path: /health
+#      port: http
+#
 #    paths:  
 #    # K8s 1.19+
 #    - path: /_matrix/media
@@ -1018,29 +1071,7 @@ schadcodescanner:
 #    readOnlyRootFilesystem: true
 #    runAsNonRoot: true
 #    runAsUser: 666
-#
-#  ## Resource configuration to apply to the sygnal server.
-#  ##
-#  resources: {}
-#  #  limits:
-#  #    cpu: 5m
-#  #    memory: 15Mi
-#  #  requests:
-#  #    cpu: 5m
-#  #    memory: 15Mi
-#
-#  ## Node selectors to set for the sygnal server.
-#  ##
-#  nodeSelector: {}
-#
-#  ## Tolerations to set for the sygnal server.
-#  ##
-#  tolerations: []
-#
-#  ## Affinity to set for the main sygnal server.
-#  ##
-#  affinity: {}
-#
+
 
 ######################################################################################
 ##          Setting up CoTurn
@@ -1052,15 +1083,15 @@ schadcodescanner:
 coturn:
   enabled: false
   turnUris:
-    tcp: 3478
     udp: 3478
+    tcp: 3478
   existingcoturn: 
-    enabled: false
+    enabled: true
   default_ns: default
   image:
     repository: coturn/coturn
     tag: latest
-    pullPolicy: Always 
+    pullPolicy: IfNotPresent
   securityContext:
     runAsUser: 2011
     runAsGroup: 2011
@@ -1079,6 +1110,60 @@ synapse_admin:
   adminUri:  
   image:
     repository: awesometechnologies/synapse-admin
-    tag: latest
-    pullPolicy: Always
+    tag: 0.8.5
+    pullPolicy: IfNotPresent
+  ## Resource configuration to apply to the synapse-admin server.
+  ##
+  resources: 
+    limits:
+      cpu: 5m
+      memory: 15Mi
+    requests:
+      cpu: 5m
+      memory: 15Mi
 
+  podSecurityContext: 
+    runAsNonRoot: true
+  securityContext:
+    runAsNonRoot: true
+    readOnlyRootFilesystem: true
+    runAsUser: 2010
+  ## Configuration for mounting additional volumes into the application container.
+  ##
+  extraVolumes:
+    - name: confnginx
+      emptyDir: {}
+    - name: lognginx
+      emptyDir: {}
+    - name: runnginx
+      emptyDir: {}
+    - name: tmpnginx
+      emptyDir: {}
+  # - name: backgrounds
+  #   persistentVolumeClaim:
+  #     claimName: element-backgrounds
+  extraVolumeMounts:
+    - name: confnginx
+      mountPath: /etc/nginx/conf.d/
+    - name: lognginx
+      mountPath: /var/log/nginx/
+    - name: runnginx
+      mountPath: /var/run/
+    - name: tmpnginx
+      mountPath: /var/cache/nginx/
+
+
+#  ## Liveness probe configuration to use
+#  ##
+#  livenessProbe:
+#    httpGet:
+#      path: /health
+#      port: http
+#
+#  ## Readiness probe configuration to use
+#  ##
+#  readinessProbe:
+#    httpGet:
+#      path: /health
+#      port: http
+#

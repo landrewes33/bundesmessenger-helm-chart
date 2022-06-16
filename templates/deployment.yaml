@@ -107,13 +107,14 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.redis.enabled }} 
-#um das Passwort in einem festen Scret zu setzen, was Namespace gebunden ist und nicht values.yaml-gebunden, wird hier hart auf den Namen umgebogen
-#                  name: {{ .Values.redis.existingSecret | default (include "matrix-synapse.redis.fullname" .) }}
-                  name: {{ $.Release.Name }}-redis
+#um das Passwort in einem festen Secret zu setzen, was Namespace gebunden ist und nicht values.yaml-gebunden, wird hier hart auf den Namen umgebogen
+                  name: {{ .Values.redis.existingSecret | default (include "matrix-synapse.redis.fullname" .) }}
+#                  name: redis-secret
                   key: redis-password
-#                  {{- else }}
-#ALT:                  name: {{ .Values.externalRedis.existingSecret }}
-#                  key: {{ .Values.externalRedis.existingSecretPasswordKey }}
+                  {{- else }}
+#ALT:  
+                  name: {{ .Values.externalRedis.existingSecret }}
+                  key: {{ .Values.externalRedis.existingSecretPasswordKey }}
                   {{- end -}}
           {{- end }}
           {{- with .Values.synapse.extraEnv }}

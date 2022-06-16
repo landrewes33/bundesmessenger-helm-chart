@@ -17,10 +17,16 @@ spec:
         app: matrix-synapse-sygnal
     spec:
       serviceAccountName: bundesmessenger
+      securityContext:
+        {{- $.Values.sygnal.podSecurityContext | toYaml | nindent 8 }}
       containers:
        - name: matrix-synapse-sygnal
          image:  "{{ $.Values.sygnal.image.repository }}:{{ include "matrix-synapse.sygnal.imageTag" $ }}"
          imagePullPolicy: {{ $.Values.sygnal.image.pullPolicy }}
+         resources:
+           {{- $.Values.sygnal.resources | toYaml | nindent 12 }}
+         securityContext:
+           {{- $.Values.sygnal.securityContext | toYaml | nindent 12 }}
          env:
            - name: KEYID
              valueFrom: { secretKeyRef: { name: sygnal-secret, key: keyid}}
