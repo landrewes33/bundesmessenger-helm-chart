@@ -29,7 +29,8 @@ Die größten Änderungen zu dem zugrunde liegenden Chart sind:
 - Hinzufügen und Konfiguration des Sygnal-Push-Dienstes
 - Konfiguration des kompletten Dienstes für das ServiceMonitoring per Prometheus (wird automatisch an Clustereigenen Prometheus promoted)
 - Integration eines CoTurn-Servers zur Nutzung der VoIP-Dienste 
-    - Installation und Konfiguration eines dedizierten NginX Controllers für UDP Traffic
+    - *OPTIONAL: Installation und Konfiguration eines dedizierten NginX Controllers für UDP Traffic*
+    - **Empfehlung: Installation eines CoTurn außerhalb des Kubernetes und Konfiguration zur Erreichbarkeit dort vornehmen**
 
 Für Fragen zur Anwendung des Helm-Charts, Konfiguration und Deployment steht Ihnen Christian.Steinke@bwi.de gerne zur Verfügung.
 
