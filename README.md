@@ -45,7 +45,7 @@ Für Fragen zur Anwendung des Helm-Charts, Konfiguration und Deployment steht Ih
 - Storage muss PersistentVolumeClaims zulassen und konfiguriert haben (von Vorteil für DB und Media)
 - Zugriff auf vorhandenen PostgreSQL Server (DVS Konformität)
     - Datenbank **synapse_db** (**Hinweis: Collation und cType müssen auf "C" gesetzt sein**)  und User **synapse**.
-    - Server kann im Kubernetes stehen oder extern.
+    - Server muss erreichbar sein aus dem Namespace *Empfehlung: PostgreSQL Server liegt auch im Kubernetes*.
 - ein "existingClaim" (persistent volume claim) mit dem Namen "matrix-synapse" (empfohlen 10GB) für den Media-Worker als Speicher. 
 Sollte die storageClass nfs-client nicht existent sein, muss diese erstellt oder mit dem folgenden Parameter gesetzt werden:
 ```console
