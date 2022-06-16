@@ -37,6 +37,7 @@ Für Fragen zur Anwendung des Helm-Charts, Konfiguration und Deployment steht Ih
 
 - Kubernetes 1.19+
 - Helm 3.0+
+- Unix mit Kernel 4.11 oder neuer auf Worker-Nodes (für syscall Anweisung net.ipv4.ip_unprivileged_port_start)
 - Ingress Controller (NginX) im Cluster installiert
     - Bei Nutzung von CoTurn des Helm Charts, muss der IngressController den Port 3478 TCP zugefügt werden(Patch) oder durch vorgeschalteten ReverseProxy an die Nodeports direkt durchgeleitet werden
 - vorgelagerte Loadbalancer und vorkonfigurierte Firewalls, um den Service in vollem Umfang zu nutzen
