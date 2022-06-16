@@ -29,7 +29,7 @@ Die größten Änderungen zu dem zugrunde liegenden Chart sind:
 - Hinzufügen und Konfiguration des Sygnal-Push-Dienstes
 - Konfiguration des kompletten Dienstes für das ServiceMonitoring per Prometheus (wird automatisch an Clustereigenen Prometheus promoted)
 - Integration eines CoTurn-Servers zur Nutzung der VoIP-Dienste 
-    - *OPTIONAL: Installation und Konfiguration eines dedizierten NginX Controllers für UDP Traffic*
+    - *Optional: Installation und Konfiguration eines dedizierten NginX Controllers für UDP Traffic*
     - **Empfehlung: Installation eines CoTurn außerhalb des Kubernetes und Konfiguration zur Erreichbarkeit dort vornehmen**
 
 Für Fragen zur Anwendung des Helm-Charts, Konfiguration und Deployment steht Ihnen Christian.Steinke@bwi.de gerne zur Verfügung.
@@ -40,10 +40,10 @@ Für Fragen zur Anwendung des Helm-Charts, Konfiguration und Deployment steht Ih
 - Helm 3.0+
 - Unix mit Kernel 4.11 oder neuer auf Worker-Nodes (für syscall Anweisung net.ipv4.ip_unprivileged_port_start)
 - Ingress Controller (NginX) im Cluster installiert
-    - *Optional: Nicht Policiy-Konform: Bei Nutzung von CoTurn des Helm Charts, muss der IngressController den Port 3478 TCP zugefügt werden(Patch) oder durch vorgeschalteten ReverseProxy an die Nodeports direkt durchgeleitet werden *
+    - *Optional: Nicht Policiy-Konform: Bei Nutzung von CoTurn des Helm Charts, muss der IngressController den Port 3478 TCP zugefügt werden(Patch) oder durch vorgeschalteten ReverseProxy an die Nodeports direkt durchgeleitet werden*
 - vorgelagerte Loadbalancer und vorkonfigurierte Firewalls, um den Service in vollem Umfang zu nutzen
     - *Optional: bei Nutzung von CoTurn wird ein NginX-ReverseProxy empfohlen, der die TCP/UDP-Streams weiterleitet*
-- Storage muss PersistentVolumeClaims zulassen und konfiguriert haben (von Vorteil für DB und Media)
+- *Optional: Storage muss PersistentVolumeClaims zulassen und konfiguriert haben (von Vorteil für DB und Media)*
 - Zugriff auf vorhandenen PostgreSQL Server (DVS Konformität)
     - Datenbank **synapse_db** (**Hinweis: Collation und cType müssen auf "C" gesetzt sein**)  und User **synapse**.
     - Server muss erreichbar sein aus dem Namespace *Empfehlung: PostgreSQL Server liegt auch im Kubernetes*.
