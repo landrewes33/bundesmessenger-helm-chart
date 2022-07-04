@@ -26,7 +26,7 @@ Für beide Typen kann er akzeptiert werden:
 - den ```platform```-Parameter, der bestimmt, ob die APNS-Umgebung "production" oder "sandbox" verwendet wird. Gültige Werte sind 'production' oder 'sandbox'. Wenn er nicht angegeben wird, wird "production" verwendet.
 - den Parameter ```push_type```, der bestimmt, welcher Wert für den apns-push-type-Header an APNs gesendet wird. Wenn er nicht angegeben wird, wird der Header nicht gesendet.
 ## gcm
-Diese Funktion sendet Nachrichten über Google/Firebase Cloud Messaging (GCM/FCM) und kann daher verwendet werden, um Benachrichtigungen an Android-Anwendungen zu übermitteln. Der Parameter "```api_key```" muss den "Server-Schlüssel" enthalten, der von der Firebase-Konsole unter ```https://console.firebase.google.com/project/<PROJEKTNAME>/settings/cloudmessaging/``` abgerufen werden kann.
+Diese Funktion sendet Nachrichten über Google/Firebase Cloud Messaging (GCM/FCM) und kann daher verwendet werden, um Benachrichtigungen an Android-Anwendungen zu übermitteln. Der Parameter "```api_key```" muss den "```Server-Schlüssel```" enthalten, der von der Firebase-Konsole unter ```https://console.firebase.google.com/project/<PROJEKTNAME>/settings/cloudmessaging/``` abgerufen werden kann.
 
 # Verwendung eines HTTP-Proxys für ausgehenden Datenverkehr
 Sygnal erkennt standardmäßig beim Start automatisch eine ```HTTPS_PROXY```-Umgebungsvariable.
@@ -35,7 +35,7 @@ Wenn eine solche vorhanden ist, wird sie für den ausgehenden Datenverkehr zu AP
 
 Derzeit werden nur HTTP-Proxys mit der CONNECT-Methode unterstützt. (Sowohl APNs als auch FCM verwenden HTTPS-Verkehr, der in einem CONNECT-Tunnel getunnelt wird).
 
-Wenn Sie möchten, können Sie stattdessen einen HTTP-CONNECT-Proxy in sygnal.yaml konfigurieren.
+Wenn Sie möchten, können Sie stattdessen einen HTTP-CONNECT-Proxy in ```sygnal.yaml``` konfigurieren.
 
 # Konfiguration der Pusher-Daten
 Die folgenden Parameter können im Wörterbuch [data]{.title-ref} angegeben werden, das bei der Konfiguration des Pusher über ```POST /_matrix/client/r0/pushers/set``` angegeben wird:
