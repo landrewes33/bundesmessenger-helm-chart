@@ -9,17 +9,22 @@ Die erwartete Konfiguration hängt von der Art der Authentifizierung ab, die Sie
 
 Bei zertifikatsbasierter Authentifizierung wird erwartet:
 
-Der Parameter ``` certfile ``` muss ein Pfad relativ zum Arbeitsverzeichnis von sygnal einer PEM-Datei sein, die das APNS-Zertifikat und den unverschlüsselten privaten Schlüssel enthält.
+
+- Der Parameter ``` certfile ``` muss ein Pfad relativ zum Arbeitsverzeichnis von sygnal einer PEM-Datei sein, die das APNS-Zertifikat und den unverschlüsselten privaten Schlüssel enthält.
+
 Für die Token-basierte Authentifizierung erwartet er:
 
-den Parameter ```keyfile``` als Pfad relativ zum Arbeitsverzeichnis von Sygnal für eine p8-Datei
-den Parameter ```key_id```
-den ```team_id```-Parameter
-den ```topic```-Parameter, der in der Regel der "Bundle Identifier" für Ihre iOS-Anwendung ist
+
+- den Parameter ```keyfile``` als Pfad relativ zum Arbeitsverzeichnis von Sygnal für eine p8-Datei
+
+- den Parameter ```key_id```
+- den ```team_id```-Parameter
+- den ```topic```-Parameter, der in der Regel der "Bundle Identifier" für Ihre iOS-Anwendung ist
+
 Für beide Typen kann er akzeptiert werden:
 
-den ```platform```-Parameter, der bestimmt, ob die APNS-Umgebung "production" oder "sandbox" verwendet wird. Gültige Werte sind 'production' oder 'sandbox'. Wenn er nicht angegeben wird, wird "production" verwendet.
-den Parameter ```push_type```, der bestimmt, welcher Wert für den apns-push-type-Header an APNs gesendet wird. Wenn er nicht angegeben wird, wird der Header nicht gesendet.
+- den ```platform```-Parameter, der bestimmt, ob die APNS-Umgebung "production" oder "sandbox" verwendet wird. Gültige Werte sind 'production' oder 'sandbox'. Wenn er nicht angegeben wird, wird "production" verwendet.
+- den Parameter ```push_type```, der bestimmt, welcher Wert für den apns-push-type-Header an APNs gesendet wird. Wenn er nicht angegeben wird, wird der Header nicht gesendet.
 ## gcm
 Diese Funktion sendet Nachrichten über Google/Firebase Cloud Messaging (GCM/FCM) und kann daher verwendet werden, um Benachrichtigungen an Android-Anwendungen zu übermitteln. Der Parameter "```api_key```" muss den "Server-Schlüssel" enthalten, der von der Firebase-Konsole unter ```https://console.firebase.google.com/project/<PROJEKTNAME>/settings/cloudmessaging/``` abgerufen werden kann.
 
