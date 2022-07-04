@@ -547,7 +547,7 @@ workers:
     securityContext: 
        readOnlyRootFilesystem: true
        runAsNonRoot: true
-       runAsUser: 2005
+       runAsUser: 2666
     enabled: true
     listeners: [media]
     csPaths:
@@ -841,7 +841,7 @@ externalRedis:
 ##
 persistence:
   enabled: true
-  existingClaim: matrix-synapse
+  existingClaim: "matrix-synapse"
   storageClass: nfs-client
   accessMode: ReadWriteOnce
   size: 10Gi
@@ -849,15 +849,15 @@ persistence:
 ## Set up an init container to chown the mounted media if necessary.
 ##
 volumePermissions:
-  enabled: false
+  enabled: true
 #policy 'require-uid-greater-2000'
   uid: 2666
   gid: 2666
 
   image:
-    repository: alpine
-    tag: latest
-    pullPolicy: Always
+    repository: bitnami/bitnami-shell
+    tag: 11-debian-11-r0 
+    pullPolicy: IfNotPresent
 
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.

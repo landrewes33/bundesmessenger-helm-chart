@@ -121,6 +121,12 @@ app.kubernetes.io/name: {{ include "matrix-synapse.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
+{{/*
+VolumePermissions for media storage
+*/}}
+{{- define "needsVolumePermissions" -}}
+{{- .Values.volumePermissions.enabled | toString | title | quote -}}
+{{- end -}}
 
 
 {{/*
