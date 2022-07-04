@@ -1,4 +1,4 @@
-_Übersetzt von https://github.com/matrix-org/sygnal_
+_Original: https://github.com/matrix-org/sygnal_
 # App-Typen
 Es gibt zwei unterstützte App-Typen:
 
