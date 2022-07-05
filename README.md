@@ -2,7 +2,7 @@ BWI Bundesmessenger auf Basis von Matrix Synapse
 ================================================
 
 1. Übersicht
-2. PoC
+2. [PoC](##Voraussetzungen)
 3. Installationsbeispiele 
 
 Übersicht zum [BundesMessenger](https://gitlab.opencode.de/bwi/bundesmessenger/info)
