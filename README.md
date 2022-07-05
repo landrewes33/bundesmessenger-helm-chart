@@ -89,16 +89,18 @@ Monitoring (empfohlen)
 Diese Hostnamen müssen in die entsprechenden IP-Adressen aufgelöst werden. Wenn Sie über einen geeigneten DNS-Server mit Einträgen für diese Hostnamen verfügen, können Sie loslegen
 
 ### Maschinengröße
-Für die Durchführung eines Proof of Concept mit unserem Installationschart unterstützen wir nur die x86_64-Architektur und empfehlen die folgenden Mindestanforderungen:
+Für die Durchführung eines Proof of Concept mit unserem Installationschart unterstützen wir nur die x86_64-Architektur und empfehlen die folgenden Mindestanforderungen für ein eigenständig aufgebautes PoC-Umfeld:
 
-- Kein Verbund: 4 vCPUs/CPUs und 16 GB RAM
-- Föderation: 8 vCPUs/CPUs und 32 GB RAM
+- Keine Förderation: 4 vCPUs/CPUs und 16 GB RAM auf 2 Worker-Nodes und eine Master-Node mit 2vCPUs und 4GB RAM
+- Föderation: 8 vCPUs/CPUs und 32 GB RAM auf 3+ Worker-Nodes und mindestens eine Master-Node mit 2vCPUs und 4GB RAM
 
-(TODO: Gegenprüfung!!!)
- 
+*Es wird empfohlen auf mehr als eine Master-Node zu setzen. Weiterhin ist eine zusätzliche Node, welche persistenten Speicher präsentiert von Vorteil. **Diese Funktionalität muss später vom Plattformbetreiber zur Verfügung gestellt werden und sollte somit aus dem PoC frühzeitig gelöst werden.***
+
 ### Betriebssystem
 Im Rahmen der DVS und der Entwicklung des Bundesmessenger ist die Nutzung von OSADL-Images die wahrscheinlichste Variante.
 Aus der Sicht der Sicherheit ist zu Alpine oder Debian bzw. Ubuntu-Server (LTS) zu raten. Es gibt aber keine Einschränkungen zu RedHead oder SLES, jedoch müssen Abhängigkeiten zu nötigen Paketen selbst vorgenommen werden.
+
+*Empfehlung: Als OS für die PoC-Umgebung wird Debian empfohlen. Da dort iptables-legacy-mode ohne große Umstände mit der aktuellen Version von kubelet und containerd.io lauffähig ist.*
 
 ### Netzwerk
 Der Messengerservice muss Inhalte binden und bereitstellen über:
@@ -107,6 +109,11 @@ Der Messengerservice muss Inhalte binden und bereitstellen über:
 - Port 443 TCP
 
 Entsprechende Ports müssen auch entweder lokal auf der PoC-Umgebung freigegeben werden oder in der vorgeschalteten Sicherheitsinfrastruktur.
+
+Für zusätzliche Dienste wie CoTurn, müssen die entsprechenden Ports in der Sicherheitsinfrastruktur freigegeben werden:
+
+- Port 3478 UDP/TCP
+- Port 5349 TCP (bei TLS)
 
 ### Postgresql-Datenbank
 Die Installation erfordert, dass Sie eine postgresql-Datenbank mit einem LOCALE von C und UTF8-Codierung eingerichtet haben. 
@@ -122,14 +129,29 @@ Es ist von Vorteil, wie auch in der folgenden Installationsanweisung, valide Zer
 *Es ist auch möglich Lets-Encrypt-Zertifikate zu nutzen, allerdings führt dies zu Fehlverhalten bei Nutzung von Goggle-Chrome als Browser.*
 
 ### Zusätzliche Konfigurationselemente
-Hier ist Platz für weitere Ausführungen (dazu muss ich das auch in meinem Kopf sortiert haben)
-- SSO/SAML
-- Integration mehrerer Instanzen auf einen CoTurn
-- Jobs (Backup der Datenbank)
-- BestPractise Netzwerk Policies
+
+Die Anbindung an eine IAM-Sicherheitsinfrastruktur ist noch ein offener Punkt, der während des PoCs zur Klärung bereit ist.
+Einhergehend auch die Thematik SSO per SAML oder anderen Mechaniken.
+
+#### Backup:
+Für den Messenger ist die Datenbank der Hauptfokus, zusammen mit dem ```signing-key``` von Matrix. Dahingehend muss die Datenbank persistiert und regelmäßig gebackupt werden. Der Schlüssel liegt als Secret im laufenden Deployment und sollte gesichert werden. Für ein aktives Redeployment, bzw. Migration in eine andere Umgebung (PRD), wird dieser Schlüssel benötigt und kann bei der initialen Ausführung des Helm-Charts mit angegeben werden: 
+```
+extraConfig:
+#  old_signing_keys:
+#    "ed25519:id": { key: "base64string", expired_ts: 123456789123 }
+```
+
+#### BestPractise 
+
+    Netzwerk Policies 
+    Noch im TODO
 
 
-## Installation
+#### Kyverno
+Siehe Dokumentation der einzelnen Rulesets im Dokument [DVS Policies retentions](./DVS-Policies-restrictions.md)
+
+
+## Installationshinweis
 
 Um eine Förderationsversion vom Matrix zu Nutzen, benötigen Sie eine öffentlich zugängliche Subdomain, auf der Kubernetes ein Ingress laufen hat.
 Sie benötigen weiterhin auch einen Vermittler, entweder in Form des Well-Known `.well-known/matrix/server` Server oder einem SRV-Eintrag im DNS.
@@ -137,7 +159,7 @@ Sie benötigen weiterhin auch einen Vermittler, entweder in Form des Well-Known 
 Wenn Sie einen well-known Eintrag verwenden, benötigen Sie ein gültiges Zertifikat für die Subdomain, auf der Sie Synapse bereitstellen möchten.
 Wenn Sie einen SRV-Eintrag verwenden, benötigen Sie zusätzlich ein gültiges Zertifikat für die Hauptdomäne, die Sie für Ihre MXIDs (**M**atri**x** Nutzer **ID**s) verwenden.
 
-## Installations Beispiele
+## Installation
 
 Für mehr Informationen nutzen Sie die öffentlich erreichbaren Dokumentationen: [Synapse Dokumentation](https://github.com/matrix-org/synapse/blob/master/docs/federate.md)
 
@@ -154,7 +176,7 @@ Es ist auch möglich, Synapse auf einer Subdomain laufen zu lassen, wobei diese 
 ```console
     helm install matrix-synapse bundesmessenger/bundesmessenger --set serverName=matrix.beispiel.org --set wellknown.enabled=true
 ```
-### auf separater Subdomain
+### Auf separater Subdomain
 
 Für den Fall, Sie besitzen die Domain `beispiel.org` und Sie wollen die MXIDs in der Form `@nutzer:beispiel.org`, aber dennoch den Synapsedienst unter der Domain `matrix.beispiel.org` laufen lassen, bleiben Ihnen 2 Möglichkeiten: DNS oder well-known.
 
