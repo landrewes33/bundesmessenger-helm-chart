@@ -61,15 +61,15 @@ PoC-Anlagen sind nicht dazu bestimmt, zu Produktionszwecken betrieben zu werden.
 
 Um mit einer PoC-Installation zu beginnen, müssen mehrere Dinge berücksichtigt werden, die in diesem Leitfaden behandelt werden:
 
-- Hostnamen/DNS
-- Maschinengröße
-- Betriebssystem
-- Benutzer
-- Netzwerkbesonderheiten
-- Postgresql-Datenbank
-- *Optional: TURN-Server*
-- SSL-Zertifikate
-- Zusätzliche Konfigurationselemente
+- [Hostnamen/DNS](#hostnamendns)
+- [Maschinengröße](#maschinengröße)
+- [Betriebssystem](#betriebssystem)
+- [Benutzer](#benutzer)
+- [Netzwerkbesonderheiten](#netzwerkbesonderheiten)
+- [Postgresql-Datenbank](#postgresql-datenbank)
+- *Optional: [TURN-Server](/docs/turn.md)*
+- [SSL-Zertifikate](#ssl-zertifikate)
+- [Zusätzliche Konfigurationselemente](#zusätzliche-konfigurationselemente)
 
 Sobald diese Bereiche abgedeckt sind, können Sie eine PoC-Umgebung installieren!
 
@@ -98,7 +98,10 @@ Aus der Sicht der Sicherheit ist zu Alpine oder Debian bzw. Ubuntu-Server (LTS) 
 
 *Empfehlung: Als OS für die PoC-Umgebung wird Debian empfohlen. Da dort iptables-legacy-mode ohne große Umstände mit der aktuellen Version von kubelet und containerd.io lauffähig ist.*
 
-### Netzwerk
+### Benutzer
+Es wird empfohlen im Rahmen das PoC auf alle sicherheitsrelevanten Umgebungs- und Rahmenbedigungen zu achten. Dazu zählen nicht previligierte Benutzer auf den Maschinen um dort eventuelle Arbeiten umzusetzen. Damit ist eine lauffähige und stabile Infrastrukur gewährleistet.
+
+### Netzwerkbesonderheiten
 Der Messengerservice muss Inhalte binden und bereitstellen über:
 
 - Port 80 TCP
@@ -118,6 +121,8 @@ Siehe https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#set-up
 Wenn Sie diese bereits haben, notieren Sie sich bitte den Datenbanknamen, den Benutzer und das Passwort, da Sie diese benötigen, um mit der Installation zu beginnen. (per Parameter zu übergeben oder in der value.yaml anzupassen)
 
 Wenn Sie noch keine Datenbank haben, richtet das PoC-Installationsprogramm PostgreSQL in Ihrem Namen ein. Dies ist per Default so hinterlegt. Dafür benötigt das Chart jedoch ein festes VolumeClaim der StorageClass "nfs-client". Dies kann geändert werden (siehe oben)
+
+*Optional: Es kann das Helm-Chart mit dazu verwendet werden im gleichen Namespace einen PostgreSQL-Server mit entsprechender Konfiguration zu deployen. Das ist für den PoC auch soweit funkional, sollte aber in eine stabile DVS-konforme Version überführt werden. Dazu kann auch das Subchart für den PostSQL-Server entsprechend angepasst werden, dass ein eigener Namespace für einen "externen" Datenbankserver verwendet wird. Dabei ist zu beachten, das dieses Deployment losgelöst vom Bundesmessenger umgesetzt wird, da sonst die kyverno-Regeln hier einen Verstoß melden würden.*
 
 ### SSL-Zertifikate
 Es ist von Vorteil, wie auch in der folgenden Installationsanweisung, valide Zertifikate für die Hauptdomain und wenn notwendig auch die entsprechende Subdomain auf dem der Synapse-Host erreichbar ist. 
@@ -150,6 +155,6 @@ Erweitertes Inhaltsverzeichnis
 ==================
 Eine Installationsanweisung finden sie hier, so wie auch Hinweise zu den einzelnen zusätzlichen Diensten:
 
-- [Installation](./installation.md)
-- [TURN (Audio / Video)](./turn.md)
-- [Sygnal (Push-Service)](./Sygnal_push.md)
+- [Installation](/docs/installation.md)
+- [TURN (Audio / Video)](/docs/turn.md)
+- [Sygnal (Push-Service)](/docs/Sygnal_push.md)
