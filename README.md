@@ -1,9 +1,9 @@
 Inhaltsverzeichnis
 ==================
 
-- [Installation](docs/installation.md)
-- [TURN (Audio / Video)](docs/turn.md)
-- [Sygnal (Push-Service)](docs/Sygnal_push.md)
+- [Installation](./installation.md)
+- [TURN (Audio / Video)](./turn.md)
+- [Sygnal (Push-Service)](./Sygnal_push.md)
 
 BWI Bundesmessenger auf Basis von Matrix Synapse
 ================================================

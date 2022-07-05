@@ -1,4 +1,18 @@
 {{- if .Values.schadcodescanner.enabled }}
+
+{{- if .Values.schadcodescanner.freshclamConfig -}}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "matrix-synapse.schadcodescannername" . }}-freshclam
+  labels:
+    app: {{ template "matrix-synapse.schadcodescannername" . }}
+data:
+  freshclam.conf:
+    {{ toYaml .Values.schadcodescannername.freshclamConfig | indent 4 }}
+{{- end }}
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

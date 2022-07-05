@@ -86,12 +86,15 @@ data:
     recaptcha_public_key: {{ .Values.config.recaptcha.publicKey | quote }}
     enable_registration_captcha: true
     {{- end }}
-    {{- if .Values.coturn.turnUris }}
 
     ## Turn ##
     # The public URIs of the TURN server to give to clients
     #
     #turn_uris: []
+    {{- if .Values.config.turnUris }}
+    turn_uris:
+       {{ toYaml .Values.config.turnUris | nindent 6 }}
+    {{- else if .Values.coturn.turnUris }}
     turn_uris:
       {{- range $k, $v := .Values.coturn.turnUris }}
       - turn:{{ $.Values.config.publicBaseurl | default (printf "%s" ( $.Values.publicServerName | default $.Values.serverName)) }}:{{$v}}?transport={{$k}}

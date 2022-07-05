@@ -1,4 +1,4 @@
-{{- $needsVolumePermissions := and .Values.volumePermissions.enabled (or .Values.persistence.enabled .Values.persistence.existingClaim) }}
+{{- $needsVolumePermissions := and .Values.volumePermissions.enabled (or .Values.persistence.enabled .Values.persistence.existingClaim)  }}
 {{- $default := .Values.workers.default }}
 {{- range $worker, $config := .Values.workers }}
 {{- if $config.enabled }}
@@ -36,10 +36,6 @@ spec:
         {{ . | toYaml | nindent 8 }}
       {{- end }}
     spec:
-      serviceAccountName: bundesmessenger
-      {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
-      securityContext:
-        {{- $config.podSecurityContext | default $default.podSecurityContext | toYaml | nindent 8 }}
       initContainers:
     {{- if and $needsVolumePermissions (eq $name "media-repository") }}
         - name: volume-permissions
@@ -70,6 +66,10 @@ spec:
             name: temp-worker-config
           - mountPath: "/synapse/config/"
             name: worker-config
+      serviceAccountName: bundesmessenger
+      {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
+      securityContext:
+        {{- $config.podSecurityContext | default $default.podSecurityContext | toYaml | nindent 8 }}
       containers:
         - name: {{ $name }}
           command:
@@ -170,6 +170,8 @@ spec:
           {{- if eq $name "media-repository" }}
             - name: media
               mountPath: /synapse/data
+            - mountPath: /tmp/
+              name: tempdir
           {{- end }}
           {{- with $config.volumeMounts | default $default.volumeMounts }}
             {{ . | toYaml | nindent 12 }}
@@ -205,6 +207,8 @@ spec:
               - key: {{ $.Values.signingkey.existingSecretKey | default "signing.key" | quote }}
                 path: signing.key
         - name: tmpconf
+          emptyDir: {}
+        - name: tempdir
           emptyDir: {}
       {{- if regexMatch $name "media-repository" }}
         - name: media

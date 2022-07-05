@@ -100,9 +100,10 @@ config:
   ## URIs and secret key for TURN servers to use to help establish 1:1 WebRTC
   ## calls.
   ##
-  turnUris: []
+  #turnUris: []
   #turnUris: ["turn:msgk8s.lab-mobility.de:3478?transport=udp","turn:msgk8s.lab-mobility.de:3478?transport=tcp"]
-  #turnUris: ["turn:msgk8s.lab-mobility.de:3478?transport=udp"]
+
+  turnUris: ["turn:turn.lab-mobility.de:3478?transport=udp"]
   # turnSecret: ''
 
   ## Registration configuration, note that registration with the
@@ -137,7 +138,7 @@ config:
 extraConfig: 
 #  old_signing_keys:
 #    "ed25519:id": { key: "base64string", expired_ts: 123456789123 } 
-#    Best Practise:
+#    Best Practise BWI GmbH:
   require_auth_for_profile_requests: true
   limit_profile_requests_to_users_who_share_rooms: false
   include_profile_data_on_invite: true
@@ -145,7 +146,6 @@ extraConfig:
   allow_public_rooms_over_federation: false
   block_non_admin_invites: false
   ip_range_whitelist: []
-#    - ""
   presence: 
       enabled: false
   enable_search: true
@@ -564,7 +564,7 @@ workers:
   ## This worker deals with user directory searches.
   ##
   user_dir:
-    enabled: false
+    enabled: true
     listeners: [client]
     csPaths:
       - "/_matrix/client/(api/v1|r0|v3|unstable)/user_directory/search"
@@ -583,27 +583,20 @@ workers:
 ######################################################################################
 ##          Setting up Sygnal
 ######################################################################################
+#Reference: https://github.com/matrix-org/sygnal
 sygnal:
   enabled: true
   image:
     repository: matrixdotorg/sygnal
     tag: v0.11.0 
     pullPolicy: IfNotPresent
-#    listeners: [client]
-#    csPaths: 
-#      - "/_matrix/push/v1/notify"
-#      backend:
-#        service:
-#          name: matrix-sygnal       
-#          port:
-#            number: 5000 
-#
+
   ## Configuration for the pod security policy.
   ##
-#  podSecurityContext:  
-#    sysctls:
-#      - name: net.ipv4.ip_unprivileged_port_start
-#        value: "80"
+  podSecurityContext:  
+    sysctls:
+      - name: net.ipv4.ip_unprivileged_port_start
+        value: "80"
 #    runAsNonRoot: true
 #    fsGroup: 27
 #    runAsGroup: 2000
@@ -616,8 +609,8 @@ sygnal:
   #    drop:
   #    - ALL
     readOnlyRootFilesystem: true
-#    runAsNonRoot: true
-#    runAsUser: 2111
+    runAsNonRoot: true
+    runAsUser: 2111
 
   ## Resource configuration to apply to the sygnal server.
   ##
@@ -655,6 +648,34 @@ sygnal:
   ## Affinity to set for the main sygnal server.
   ##
   affinity: {}
+
+#wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden
+  ios_push_enabled: true
+
+#Beispiel:
+# apns:
+#    de.opencode.dvs.ios:
+#      type: apns
+#      keyfile: /etc/matrix/sygnal/
+  apns:
+    de.bundesmessenger.ios.dev:
+      type: apns
+      keyfile: /etc/matrix/sygnal/de.bwi.bwmessenger.ios.dev.p8
+      key_id: 6F5K9Q96VZ
+      team_id: Q283Q29YC2
+      topic:  de.bwi.bundesmessenger
+      platform: sandbox
+    de.bundesmessenger.android:
+      type: gcm
+      api_key: 'AAAAhQYs0IM:APA91bEW1Xh-Hj3DejTt0M-6Aj3H3Lx0Ooa5saZGg59IdlRc5Fc-WCJWWX3g_3Y0xEfqDtcEp_BiL1v8i88Si-PUf0RUCDQXRZnh6eG09nDisWpIH8e0GlqcETengqBHpzpVDYkWbKB1'
+  
+#bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden
+  ioskey:
+#Beispiel:
+#    name: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Datenamen aus dem APN-File übereinstimmen!!!!
+#    key: 'HIER KÖNNTE IHR KEY IN STEHEN (BASE64 endcoded)'
+    name: de.bwi.bwmessenger.ios.dev.p8
+    key: 'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR1RBZ0VBTUJNR0J5cUdTTTQ5QWdFR0NDcUdTTTQ5QXdFSEJIa3dkd0lCQVFRZ0lHUUFwU0hWcEpOVm9neTkKQXdIZWVpNC9pVXZ0QlR2TDU3N2R2OC9PTGN5Z0NnWUlLb1pJemowREFRZWhSQU5DQUFSTkJTMG5ra0RwR04zNQpIcjYrb3FyNDEwZTd6MG1Vc1ZOQUdmQjVmL0QwbVJna3RCV1dhN3lZM3c3ZlFHZVUybHl4aEtOSVhsQ2h6MElECnJ0blZLY2NI'
 
 
 ## This will set up a Lighttpd server to respond to any
@@ -841,7 +862,7 @@ externalRedis:
 ##
 persistence:
   enabled: true
-  existingClaim: "matrix-synapse"
+  existingClaim: matrix-synapse
   storageClass: nfs-client
   accessMode: ReadWriteOnce
   size: 10Gi
@@ -855,9 +876,9 @@ volumePermissions:
   gid: 2666
 
   image:
-    repository: bitnami/bitnami-shell
-    tag: 11-debian-11-r0 
-    pullPolicy: IfNotPresent
+    repository: alpine
+    tag: latest
+    pullPolicy: Always
 
     ## Optionally specify an array of imagePullSecrets.
     ## Secrets must be manually created in the namespace.
@@ -1078,19 +1099,21 @@ schadcodescanner:
 ######################################################################################
 #Standard: if enabled, coturn will be deployed under default namespace, to be used from more than one instance
 # if coturn is enabled and existingcoturn too, it will configure the service to be used
-# with a coturn deployed under the namespace coturn.namespace
-# ingress_ns_standard is important if you deployed the standard-controller under an other namespace
+# with a coturn deployed under the namespace coturn.default_ns
+# Empfohlen nicht zu nutzen, da coturn host-ports nutzen muss um stabil und performant zu arbeiten
+
 coturn:
   enabled: false
   turnUris:
     udp: 3478
     tcp: 3478
+    realm: "turn.lab-mobility.de"
   existingcoturn: 
     enabled: true
   default_ns: default
   image:
     repository: coturn/coturn
-    tag: latest
+    tag: docker/4.5.2-r12
     pullPolicy: IfNotPresent
   securityContext:
     runAsUser: 2011
@@ -1123,47 +1146,50 @@ synapse_admin:
       memory: 15Mi
 
   podSecurityContext: 
-    runAsNonRoot: true
-  securityContext:
-    runAsNonRoot: true
-    readOnlyRootFilesystem: true
-    runAsUser: 2010
+    #    runAsNonRoot: true
+    sysctls:
+      - name: net.ipv4.ip_unprivileged_port_start
+        value: "80"
+#   securityContext:
+    #    runAsNonRoot: true
+    #    readOnlyRootFilesystem: true
+      #    runAsUser: 2010
   ## Configuration for mounting additional volumes into the application container.
   ##
-  extraVolumes:
-    - name: confnginx
-      emptyDir: {}
-    - name: lognginx
-      emptyDir: {}
-    - name: runnginx
-      emptyDir: {}
-    - name: tmpnginx
-      emptyDir: {}
-  # - name: backgrounds
-  #   persistentVolumeClaim:
-  #     claimName: element-backgrounds
-  extraVolumeMounts:
-    - name: confnginx
-      mountPath: /etc/nginx/conf.d/
-    - name: lognginx
-      mountPath: /var/log/nginx/
-    - name: runnginx
-      mountPath: /var/run/
-    - name: tmpnginx
-      mountPath: /var/cache/nginx/
+  #  extraVolumes:
+  #    - name: confnginx
+  #      emptyDir: {}
+  #    - name: lognginx
+  #      emptyDir: {}
+  #    - name: runnginx
+  #      emptyDir: {}
+  #    - name: tmpnginx
+  #      emptyDir: {}
+  #  # - name: backgrounds
+  #  #   persistentVolumeClaim:
+  #  #     claimName: element-backgrounds
+  #  extraVolumeMounts:
+  #    - name: confnginx
+  #      mountPath: /etc/nginx/conf.d/
+  #    - name: lognginx
+  #      mountPath: /var/log/nginx/
+  #    - name: runnginx
+  #      mountPath: /var/run/
+  #    - name: tmpnginx
+  #      mountPath: /var/cache/nginx/
 
 
 #  ## Liveness probe configuration to use
 #  ##
-#  livenessProbe:
-#    httpGet:
-#      path: /health
-#      port: http
-#
-#  ## Readiness probe configuration to use
-#  ##
-#  readinessProbe:
-#    httpGet:
-#      path: /health
-#      port: http
-#
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 80
+
+  ## Readiness probe configuration to use
+  ##
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 80
+

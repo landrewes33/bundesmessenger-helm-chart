@@ -3,7 +3,7 @@
 Expand the name of the chart.
 */}}
 {{- define "matrix-synapse.name" -}}
-{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
+{{- .Values.nameOverride | default .Chart.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -15,7 +15,7 @@ If release name contains chart name it will be used as a full name.
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- $name := .Values.nameOverride | default .Chart.Name -}}
 {{- if contains $name .Release.Name -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -121,12 +121,6 @@ app.kubernetes.io/name: {{ include "matrix-synapse.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
-{{/*
-VolumePermissions for media storage
-*/}}
-{{- define "needsVolumePermissions" -}}
-{{- .Values.volumePermissions.enabled | toString | title | quote -}}
-{{- end -}}
 
 
 {{/*
@@ -153,14 +147,6 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 */}}
 {{- define "matrix-synapse.postgresql.fullname" -}}
 {{- printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "matrix-synapse.redis.fullname" -}}
-{{- printf "%s-%s" .Release.Name "redis" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -215,7 +201,7 @@ Set postgres port
 {{- define "matrix-synapse.postgresql.port" -}}
 {{- if .Values.postgresql.enabled -}}
 {{- if .Values.postgresql.service -}}
-{{- default 5432 .Values.postgresql.service.port }}
+{{- .Values.postgresql.service.port | default 5432 }}
 {{- else -}}
 5432
 {{- end -}}
@@ -229,7 +215,7 @@ Set postgresql username
 */}}
 {{- define "matrix-synapse.postgresql.username" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- default "postgres" .Values.postgresql.postgresqlUsername }}
+{{- .Values.postgresql.postgresqlUsername | default "postgres" }}
 {{- else -}}
 {{ required "A valid externalPostgresql.username is required" .Values.externalPostgresql.username }}
 {{- end -}}
@@ -240,7 +226,7 @@ Set postgresql password
 */}}
 {{- define "matrix-synapse.postgresql.password" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- default "" .Values.postgresql.postgresqlPassword }}
+{{- .Values.postgresql.postgresqlPassword | default "" }}
 {{- else if not (and .Values.externalPostgresql.existingSecret .Values.externalPostgresql.existingSecretPasswordKey) -}}
 {{ required "A valid externalPostgresql.password is required" .Values.externalPostgresql.password }}
 {{- end -}}
@@ -251,7 +237,7 @@ Set postgresql database
 */}}
 {{- define "matrix-synapse.postgresql.database" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- default "synapse" .Values.postgresql.postgresqlDatabase }}
+{{- .Values.postgresql.postgresqlDatabase | default "synapse" }}
 {{- else -}}
 {{ required "A valid externalPostgresql.database is required" .Values.externalPostgresql.database }}
 {{- end -}}
@@ -262,9 +248,9 @@ Set postgresql sslmode
 */}}
 {{- define "matrix-synapse.postgresql.sslmode" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- default "prefer" .Values.postgresql.sslmode }}
+{{- .Values.postgresql.sslmode | default "prefer" }}
 {{- else -}}
-{{- default "prefer" .Values.externalPostgresql.sslmode }}
+{{- .Values.externalPostgresql.sslmode | default "prefer" }}
 {{- end -}}
 {{- end -}}
 
@@ -288,11 +274,20 @@ for a list of options that can be passed.
 
 
 {{/*
+Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "matrix-synapse.redis.fullname" -}}
+{{- printf "%s-%s" .Release.Name "redis" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+
+{{/*
 Set redis host
 */}}
 {{- define "matrix-synapse.redis.host" -}}
 {{- if .Values.redis.enabled -}}
-{{- template "matrix-synapse.redis.fullname" . -}}-master
+{{- printf "%s-%s" (include "matrix-synapse.redis.fullname" .) "master" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
 {{ required "A valid externalRedis.host is required" .Values.externalRedis.host }}
 {{- end -}}
@@ -314,7 +309,7 @@ Set redis port
 */}}
 {{- define "matrix-synapse.redis.port" -}}
 {{- if .Values.redis.enabled -}}
-{{- default 6379 .Values.redis.redisPort }}
+{{- .Values.redis.master.service.port | default 6379 }}
 {{- else -}}
 {{ required "A valid externalRedis.port is required" .Values.externalRedis.port }}
 {{- end -}}

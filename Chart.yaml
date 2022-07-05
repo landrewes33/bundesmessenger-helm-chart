@@ -3,10 +3,10 @@ apiVersion: v2
 name: bundesmessenger
 description: BWI Matrix BundesMessenger 
 icon: https://matrix.org/images/matrix-logo.svg
-appVersion: 1.60.0
+appVersion: 1.61.1
 
 type: application
-version: 2.3.4
+version: 0.9.1
 maintainers:
   - name: Christian Steinke
     email: christian.steinke@bwi.de
@@ -15,6 +15,11 @@ maintainers:
 
 dependencies:
   - name: redis
-    version: ~16.1.0
+    version: ^16.1.0
     repository: https://charts.bitnami.com/bitnami
     condition: redis.enabled
+  - name: postgresql
+    version: ^10.9.4
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+
