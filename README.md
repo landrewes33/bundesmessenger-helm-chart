@@ -80,13 +80,13 @@ Sobald diese Bereiche abgedeckt sind, können Sie eine PoC-Umgebung installieren
 ### Hostnamen/DNS
 Sie benötigen Hostnamen für die folgenden Infrastrukturkomponenten:
 
-Elementserver (erforderlich)
-Synapse-Server (erforderlich)
-CoTurn-Server (optional)
-Synapse-Admin-Server (empfohlen für nur intern erreichbar, .local-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :) )
-Monitoring (empfohlen)
+- Elementserver (erforderlich)
+- Synapse-Server (erforderlich)
+- CoTurn-Server (optional)
+- Synapse-Admin-Server (empfohlen für nur intern erreichbar, .local-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :) )
+- Monitoring (empfohlen)
  
-Diese Hostnamen müssen in die entsprechenden IP-Adressen aufgelöst werden. Wenn Sie über einen geeigneten DNS-Server mit Einträgen für diese Hostnamen verfügen, können Sie loslegen
+Diese Hostnamen müssen in die entsprechenden IP-Adressen aufgelöst werden. Wenn Sie über einen geeigneten DNS-Server mit Einträgen (auch mit SRV-Einträgen für Matrix) für diese Hostnamen verfügen, können Sie loslegen.
 
 ### Maschinengröße
 Für die Durchführung eines Proof of Concept mit unserem Installationschart unterstützen wir nur die x86_64-Architektur und empfehlen die folgenden Mindestanforderungen für ein eigenständig aufgebautes PoC-Umfeld:
