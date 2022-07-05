@@ -61,15 +61,16 @@ PoC-Anlagen sind nicht dazu bestimmt, zu Produktionszwecken betrieben zu werden.
 
 Um mit einer PoC-Installation zu beginnen, müssen mehrere Dinge berücksichtigt werden, die in diesem Leitfaden behandelt werden:
 
-Hostnamen/DNS
-Maschinengröße
-Betriebssystem
-Benutzer
-Netzwerkbesonderheiten
-Postgresql-Datenbank
-*Optional: TURN-Server*
-SSL-Zertifikate
-Zusätzliche Konfigurationselemente
+- Hostnamen/DNS
+- Maschinengröße
+- Betriebssystem
+- Benutzer
+- Netzwerkbesonderheiten
+- Postgresql-Datenbank
+- *Optional: TURN-Server*
+- SSL-Zertifikate
+- Zusätzliche Konfigurationselemente
+
 Sobald diese Bereiche abgedeckt sind, können Sie eine PoC-Umgebung installieren!
 
 ### Hostnamen/DNS
