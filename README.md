@@ -72,7 +72,7 @@ Betriebssystem
 Benutzer
 Netzwerkbesonderheiten
 Postgresql-Datenbank
-TURN-Server
+*Optional: TURN-Server*
 SSL-Zertifikate
 Zusätzliche Konfigurationselemente
 Sobald diese Bereiche abgedeckt sind, können Sie eine PoC-Umgebung installieren!
@@ -94,7 +94,7 @@ Für die Durchführung eines Proof of Concept mit unserem Installationschart unt
 - Keine Förderation: 4 vCPUs/CPUs und 16 GB RAM auf 2 Worker-Nodes und eine Master-Node mit 2vCPUs und 4GB RAM
 - Föderation: 8 vCPUs/CPUs und 32 GB RAM auf 3+ Worker-Nodes und mindestens eine Master-Node mit 2vCPUs und 4GB RAM
 
-*Es wird empfohlen auf mehr als eine Master-Node zu setzen. Weiterhin ist eine zusätzliche Node, welche persistenten Speicher präsentiert von Vorteil. **Diese Funktionalität muss später vom Plattformbetreiber zur Verfügung gestellt werden und sollte somit aus dem PoC frühzeitig gelöst werden.***
+*Es wird empfohlen auf mehr als eine Master-Node zu setzen. Weiterhin ist eine zusätzliche Node, welche persistenten Speicher präsentiert von Vorteil. **Diese Funktionalität muss später vom Plattformbetreiber zur Verfügung gestellt werden und sollte somit aus dem PoC-Fokus frühzeitig gelöst sein.***
 
 ### Betriebssystem
 Im Rahmen der DVS und der Entwicklung des Bundesmessenger ist die Nutzung von OSADL-Images die wahrscheinlichste Variante.
