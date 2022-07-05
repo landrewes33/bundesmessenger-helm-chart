@@ -1,9 +1,3 @@
-Inhaltsverzeichnis
-==================
-
-- [Installation](./installation.md)
-- [TURN (Audio / Video)](./turn.md)
-- [Sygnal (Push-Service)](./Sygnal_push.md)
 
 BWI Bundesmessenger auf Basis von Matrix Synapse
 ================================================
@@ -151,4 +145,9 @@ extraConfig:
 #### Kyverno
 Siehe Dokumentation der einzelnen Rulesets im Dokument [DVS Policies retentions](./DVS-Policies-restrictions.md)
 
+Erweitertes Inhaltsverzeichnis
+==================
 
+- [Installation](./installation.md)
+- [TURN (Audio / Video)](./turn.md)
+- [Sygnal (Push-Service)](./Sygnal_push.md)
