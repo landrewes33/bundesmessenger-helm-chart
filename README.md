@@ -2,8 +2,9 @@ BWI Bundesmessenger auf Basis von Matrix Synapse
 ================================================
 
 1. Übersicht
-2. [PoC](##Voraussetzungen)
-3. Installationsbeispiele 
+2. [Voraussetzungen](#voraussetzungen)
+3. [PoC](#poc)
+4. [Installationsbeispiele](#erweitertes-inhaltsverzeichnis)
 
 Übersicht zum [BundesMessenger](https://gitlab.opencode.de/bwi/bundesmessenger/info)
 
@@ -146,6 +147,7 @@ Siehe Dokumentation der einzelnen Rulesets im Dokument [DVS Policies retentions]
 
 Erweitertes Inhaltsverzeichnis
 ==================
+Eine Installationsanweisung finden sie hier, so wie auch Hinweise zu den einzelnen zusätzlichen Diensten:
 
 - [Installation](./installation.md)
 - [TURN (Audio / Video)](./turn.md)
