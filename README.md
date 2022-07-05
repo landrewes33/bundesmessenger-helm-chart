@@ -1,4 +1,3 @@
-
 BWI Bundesmessenger auf Basis von Matrix Synapse
 ================================================
 
@@ -36,9 +35,9 @@ Für Fragen zur Anwendung des Helm-Charts, Konfiguration und Deployment steht Ih
 - Helm 3.0+
 - Unix mit Kernel 4.11 oder neuer auf Worker-Nodes (für syscall Anweisung net.ipv4.ip_unprivileged_port_start)
 - Ingress Controller (NginX) im Cluster installiert
-    - *Optional: Nicht Policiy-Konform: Bei Nutzung von CoTurn des Helm Charts, muss der IngressController den Port 3478 TCP zugefügt werden(Patch) oder durch vorgeschalteten ReverseProxy an die Nodeports direkt durchgeleitet werden*
+    - *Optional: Nicht Policy-Konform: Bei Nutzung von CoTurn des Helm Charts, muss der IngressController den Port 3478 TCP zugefügt werden(Patch) oder durch vorgeschalteten ReverseProxy an die Nodeports direkt durchgeleitet werden. Weiterhin müsste bei Kubernetesinternem CoTurn ein weiterer NginX-Controller deployed werden, welcher sich um den UDP-Traffic kümmert **(nicht empfohlen)***
 - vorgelagerte Loadbalancer und vorkonfigurierte Firewalls, um den Service in vollem Umfang zu nutzen
-    - *Optional: bei Nutzung von CoTurn wird ein NginX-ReverseProxy empfohlen, der die TCP/UDP-Streams weiterleitet*
+    - *Optional: bei Nutzung von CoTurn wird ein NginX-ReverseProxy empfohlen, der die TCP/UDP-Streams weiterleitet (nicht Policykonform, da Host-Ports angesprochen werden müssen.*
 - *Optional: Storage muss PersistentVolumeClaims zulassen und konfiguriert haben (von Vorteil für DB und Media)*
 - Zugriff auf vorhandenen PostgreSQL Server (DVS Konformität)
     - Datenbank **synapse_db** (**Hinweis: Collation und cType müssen auf "C" gesetzt sein**)  und User **synapse**.
