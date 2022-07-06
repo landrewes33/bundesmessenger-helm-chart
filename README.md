@@ -1,12 +1,12 @@
 BWI Bundesmessenger auf Basis von Matrix Synapse
 ================================================
 
-1. Übersicht
+1. [Übersicht](#übersicht-zum-bundesmessenger)
 2. [Voraussetzungen](#voraussetzungen)
 3. [PoC](#poc)
 4. [Installationsbeispiele](#erweitertes-inhaltsverzeichnis)
 
-Übersicht zum [BundesMessenger](https://gitlab.opencode.de/bwi/bundesmessenger/info)
+# Übersicht zum [BundesMessenger](https://gitlab.opencode.de/bwi/bundesmessenger/info)
 
 **Das Helm Chart ist noch nicht Produktionsbereit. Nur für PoC oder Teststellung zu verwenden.** 
 
