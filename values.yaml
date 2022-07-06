@@ -100,10 +100,10 @@ config:
   ## URIs and secret key for TURN servers to use to help establish 1:1 WebRTC
   ## calls.
   ##
-  #turnUris: []
-  #turnUris: ["turn:msgk8s.lab-mobility.de:3478?transport=udp","turn:msgk8s.lab-mobility.de:3478?transport=tcp"]
+  turnUris: []
+    #Beispiel:
+    #turnUris: ["turn:turn.beispiel.org:3478?transport=udp"]
 
-  turnUris: ["turn:turn.lab-mobility.de:3478?transport=udp"]
   # turnSecret: ''
 
   ## Registration configuration, note that registration with the
@@ -650,32 +650,20 @@ sygnal:
   affinity: {}
 
 #wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden
-  ios_push_enabled: true
+  ios_push_enabled: false
 
 #Beispiel:
 # apns:
 #    de.opencode.dvs.ios:
 #      type: apns
 #      keyfile: /etc/matrix/sygnal/
-  apns:
-    de.bundesmessenger.ios.dev:
-      type: apns
-      keyfile: /etc/matrix/sygnal/de.bwi.bwmessenger.ios.dev.p8
-      key_id: 6F5K9Q96VZ
-      team_id: Q283Q29YC2
-      topic:  de.bwi.bundesmessenger
-      platform: sandbox
-    de.bundesmessenger.android:
-      type: gcm
-      api_key: 'AAAAhQYs0IM:APA91bEW1Xh-Hj3DejTt0M-6Aj3H3Lx0Ooa5saZGg59IdlRc5Fc-WCJWWX3g_3Y0xEfqDtcEp_BiL1v8i88Si-PUf0RUCDQXRZnh6eG09nDisWpIH8e0GlqcETengqBHpzpVDYkWbKB1'
+  apns: {}
   
-#bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden
-  ioskey:
-#Beispiel:
+#bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden. Weitereres siehe README.md
+  ioskey: {}
+#Beispiel: 
 #    name: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Datenamen aus dem APN-File übereinstimmen!!!!
-#    key: 'HIER KÖNNTE IHR KEY IN STEHEN (BASE64 endcoded)'
-    name: de.bwi.bwmessenger.ios.dev.p8
-    key: 'LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR1RBZ0VBTUJNR0J5cUdTTTQ5QWdFR0NDcUdTTTQ5QXdFSEJIa3dkd0lCQVFRZ0lHUUFwU0hWcEpOVm9neTkKQXdIZWVpNC9pVXZ0QlR2TDU3N2R2OC9PTGN5Z0NnWUlLb1pJemowREFRZWhSQU5DQUFSTkJTMG5ra0RwR04zNQpIcjYrb3FyNDEwZTd6MG1Vc1ZOQUdmQjVmL0QwbVJna3RCV1dhN3lZM3c3ZlFHZVUybHl4aEtOSVhsQ2h6MElECnJ0blZLY2NI'
+#    key: 'HIER KÖNNTE IHR KEY IN STEHEN'
 
 
 ## This will set up a Lighttpd server to respond to any
@@ -683,7 +671,7 @@ sygnal:
 ## adding SRV-records to DNS.
 ##
 wellknown:
-  enabled: true
+  enabled: false
 
   # Lighttpd does not bind on IPv6 by default, although this is required in
   # Ipv6-only clusters.
@@ -692,7 +680,7 @@ wellknown:
   ## The host and port combo to serve on .well-known/matrix/server.
   ##
   server: 
-    m.server: msgk8s.lab-mobility.de:443
+    m.server: matrix.beispiel.org:443
 
   ## Data to serve on .well-known/matrix/client.
   ##
@@ -702,7 +690,7 @@ wellknown:
       secure_backup_setup_methods: ["passphrase"]
       outbound_keys_pre_sharing_mode: "on_room_opening" 
     m.homeserver:
-      base_url: https://msgk8s.lab-mobility.de
+      base_url: https://matrix.beispiel.org
 
   ## A custom htdocs path, useful when running another image.
   ##
@@ -793,6 +781,7 @@ postgresql:
 ## An externally configured Postgres server to use for Synapse's database, note
 ## that the database needs to have both COLLATE and CTYPE set to "C".
 ##
+#Beispiel für K8s internen Postgres im Namespace "postgres":
 externalPostgresql:
   host: postgres-4-matrix-postgresql.postgres.svc.cluster.local
   port: 5432
@@ -1107,7 +1096,7 @@ coturn:
   turnUris:
     udp: 3478
     tcp: 3478
-    realm: "turn.lab-mobility.de"
+    realm: "turn.beispiel.org"
   existingcoturn: 
     enabled: true
   default_ns: default
