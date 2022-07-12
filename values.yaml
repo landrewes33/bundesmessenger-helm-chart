@@ -1,5 +1,7 @@
 ---
-##
+######################################################################################
+##          Konfiguration für Synapse
+######################################################################################
 image:
   # -- (string) Repository/Image Konfiguration, für Synapse und Workernodes.
   repository: matrixdotorg/synapse
@@ -46,7 +48,7 @@ signingkey:
   ## Konfiguration, oder indem Sie den alten Schlüssel unter `extraConfig.old_signing_keys` einbinden.
   ##
   ## Wenn Sie Ihren Signierschlüssel verlieren, kann es sein, dass der Föderationsverkehr von Ihrer Instanz
-  ## möglicherweise nicht mehr vom weiteren Netzwerk als vertrauenswürdig eingestuft werden.
+  ## möglicherweise nicht mehr vom weiteren Netzwerk als vertrauenswürdig eingestuft wird.
 
   job:
     # -- (bool) es wird ein Job zu Beginn des Deployments gestartet, der einen Signierschlüssel erzeugt.
@@ -90,7 +92,7 @@ signingkey:
 ##
 config:
   # -- (string) Die öffentlich zugängliche URL für die Synapse-Instanz 
-  # lautet standardmäßig https://<publicServerName>
+  # lautet standardmäßig `https://<publicServerName>`
   # Beispiel: 
   # publicBaseurl: 'https://matrix.beispiel.org'
   publicBaseurl: ''
@@ -227,19 +229,21 @@ extraConfig:
   # Die einzelnen Server verfolgen Ereignisse und melden 
   # sie an einen zentralen Server - im Fall von Synapse: Jaeger.
       enabled: false
-  # -- (list) TODO
+  # -- (list) Whitelist (Domainbased) für Föderation
 #  federation_domain_whitelist:
 #    - poc1.dvs.beispiel.org
 #    - poc2.dvs.beispiel.org
 #    - poc3.dvs.beispiel.org
-#  dynamic_thumbnails: true
+  # -- (bool) dynamisches Vorschaubild, eingeschaltet
+  dynamic_thumbnails: true
 
-# -- (object) Geben Sie hier eine beliebige - geheime - Synapse-Konfiguration an;
+# -- (map) Geben Sie hier eine beliebige - geheime - Synapse-Konfiguration an;
 # Diese Werte werden in Secrets anstelle von Configmaps gespeichert
 # Ref: https://github.com/matrix-org/synapse/blob/develop/docs/sample_config.yaml
-extraSecrets: {}
+# Beispiel:
 #  password_config:
 #    pepper: ''
+extraSecrets: {}
 
 # -- (object) Konfiguration, die auf den Haupt-Synapse-Pod anzuwenden ist.
 # @default -- wird nachfolgend einzeln aufgeschlüsselt
@@ -751,8 +755,6 @@ persistence:
   # -- (string) Größe des zu nutzenden Volumes
   size: 10Gi
 
-## Set up an init container to chown the mounted media if necessary.
-##
 volumePermissions:
   # -- (bool) Aktivieren des Init-Containers zur Rechtekorrektur,
   # um die Rechte auf dem Volume für Media anzupassen
@@ -801,107 +803,115 @@ service:
 ######################################################################################
 #Reference: https://github.com/matrix-org/sygnal
 sygnal:
+  # -- (bool) Aktivieren des Sygnal-Pod
   enabled: true
+  # -- (map) Image/Repo-Konfiguration von Sygnal
   image:
     repository: matrixdotorg/sygnal
     tag: v0.11.0 
     pullPolicy: IfNotPresent
 
-  ## Configuration for the pod security policy.
-  ##
+  # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
+  # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
+  # weitere Beispiele:
+  #  runAsNonRoot: true
+  #  fsGroup: 27
+  #  runAsGroup: 2000
+  #  runAsUser: 2000
   podSecurityContext:  
     sysctls:
       - name: net.ipv4.ip_unprivileged_port_start
         value: "80"
-#    runAsNonRoot: true
-#    fsGroup: 27
-#    runAsGroup: 2000
-#    runAsUser: 2000
 
-  ## Configuration for the container security policy.
-  ##
-  securityContext: 
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
+  # weitere Beispiele:
   #  capabilities:
   #    drop:
   #    - ALL
+  securityContext: 
     readOnlyRootFilesystem: true
     runAsNonRoot: true
     runAsUser: 2111
 
-  ## Resource configuration to apply to the sygnal server.
+  ## Ressource konfiguration für Sygnal server.
   ##
   resources: 
     limits:
+      # -- (string) Rechenressourcengrenzen, die auf den Sygnal-Pod anzuwenden sind. 
       cpu: 150m
+      # -- (object) RAM Ressourcengrenzen, die auf den Sygnal-Pod anzuwenden sind.
       memory: 45Mi
     requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf den Sygnal-Pod anzuwenden sind. 
       cpu: 150m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den Sygnal-Pod anzuwenden sind. 
       memory: 45Mi
 
-#  ## Liveness probe configuration to use
-#  ##
-#  livenessProbe:
-#    httpGet:
-#      path: /health
-#      port: http
-#
-#  ## Readiness probe configuration to use
-#  ##
-#  readinessProbe:
-#    httpGet:
-#      path: /health
-#      port: http
+  #Healthcheck
+  livenessProbe:
+    httpGet:
+      # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks 
+      path: /health
+      # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks 
+      port: http
 
+  #Bereitschaftscheck
+  readinessProbe:
+    httpGet:
+      # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
+      path: /health
+      # -- (string) Konfiguration des Ports vom Bereitschaftscheck
+      port: http
 
-  ## Node selectors to set for the sygnal server.
-  ##
+  # -- (list) Node Selektor Konfiguration für Sygnal-Pod.
   nodeSelector: {}
 
-  ## Tolerations to set for the sygnal server.
-  ##
+  # -- (list) Tolerations/Tains Konfiguration für Sygnal-Pod.
   tolerations: []
 
-  ## Affinity to set for the main sygnal server.
-  ##
+  # -- (list) Affinitäts-Konfiguration für Sygnal-Pod.
   affinity: {}
 
-#wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden
+  # -- (bool) IOS-Push Schalter
+  # Wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden
   ios_push_enabled: false
 
-#Beispiel:
-# apns:
-#    de.opencode.dvs.ios:
-#      type: apns
-#      keyfile: /etc/matrix/sygnal/
+  # -- (map) APN-Konfigurationsteil
+  # Beispiel:
+  # apns:
+  #    de.opencode.dvs.ios:
+  #      type: apns
+  #      keyfile: /etc/matrix/sygnal/
   apns: {}
   
-#bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden. Weitereres siehe README.md
+  # -- (map) iOS-Key Konfiguration
+  # bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden. Weitereres siehe README.md
+  # Beispiel: 
+  #    name: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Datenamen aus dem APN-File übereinstimmen!!!!
+  #    key: 'HIER KÖNNTE IHR KEY IN STEHEN'
   ioskey: {}
-#Beispiel: 
-#    name: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Datenamen aus dem APN-File übereinstimmen!!!!
-#    key: 'HIER KÖNNTE IHR KEY IN STEHEN'
 
 
 ######################################################################################
 ##          Konfiguration für Well-Known-Server
 ######################################################################################
-## This will set up a Lighttpd server to respond to any
-## /.well-known/matrix/server requests, to make federation possible without
-## adding SRV-records to DNS.
+## Dies wird einen Lighttpd-Server einrichten, der auf alle
+## /.well-known/matrix/server Anfragen antwortet, um den Verbund zu ermöglichen, ohne
+## Hinzufügen von SRV-Einträgen zu DNS.
+
 wellknown:
+  # -- (bool) Aktivierung des Wellknown-Pods
   enabled: false
 
-  # Lighttpd does not bind on IPv6 by default, although this is required in
-  # Ipv6-only clusters.
+  # -- (bool) Lighttpd bindet standardmäßig nicht an IPv6, obwohl dies in
+  # IPv6-only-Clustern erforderlich ist.
   useIpv6: false
 
-  ## The host and port combo to serve on .well-known/matrix/server.
-  ##
   server: 
+    # -- (map) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
     m.server: matrix.beispiel.org:443
 
-  ## Data to serve on .well-known/matrix/client.
-  ##
+  # -- (map) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
   client:
     io.element.e2ee:
       secure_backup_required: true
@@ -910,217 +920,225 @@ wellknown:
     m.homeserver:
       base_url: https://matrix.beispiel.org
 
-  ## A custom htdocs path, useful when running another image.
-  ##
+  # -- (path) Ein benutzerdefinierter htdocs-Pfad, der nützlich ist, wenn ein anderes Image ausgeführt wird.
   htdocsPath: /var/www/localhost/htdocs
 
-  ## The lighttpd image to run.
-  ##
+  # -- (map) Das lighttpd image
+  # optional:
+  # pullSecrets:
+  #   - myRegistryKeySecretName
   image:
     repository: sebp/lighttpd
     tag: 1.4.61-r1
     pullPolicy: IfNotPresent
 
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ##
-    # pullSecrets:
-    #   - myRegistryKeySecretName
 
-  ## Configuration for the pod security policy.
-  ##
-  podSecurityContext: 
-    runAsNonRoot: true
+  # -- (map) Informationen zum Sicherheitskontext, die dem Arbeiter mitgeteilt werden sollen.
+  # weitere Möglichkeiten:
   #  fsGroup: 2001
   #  runAsGroup: 2001
   #  runAsUser: 2001
+  podSecurityContext: 
+    runAsNonRoot: true
 
-  ## Configuration for the container security policy.
-  ##
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  # weitere Möglichkeiten:
+  #  capabilities:
+  #    drop:
+  #    - ALL
   securityContext: 
     readOnlyRootFilesystem: true
     runAsNonRoot: true
     runAsUser: 2022
-  #  capabilities:
-  #    drop:
-  #    - ALL
 
-  ## Resource configuration to apply to the well-known server.
-  ##
+  ## Ressource Konfiguration für well-known server.
   resources: 
     limits:
+      # -- (string) Rechenressourcengrenzen, die auf den well-known server anzuwenden sind. 
       cpu: 5m
+      # -- (object) RAM Ressourcengrenzen, die auf den well-known server anzuwenden sind.
       memory: 15Mi
     requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf den well-known server anzuwenden sind. 
       cpu: 5m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den well-known server anzuwenden sind. 
       memory: 15Mi
 
-  ## Node selectors to set for the well-known server.
-  ##
+  # -- (list) Node Selektor Konfiguration für well-known server.
   nodeSelector: {}
 
-  ## Tolerations to set for the well-known server.
-  ##
+  # -- (list) Tolerations/Tains Konfiguration für well-known server.
   tolerations: []
 
-  ## Affinity to set for the main well-known server.
-  ##
+  # -- (list) Affinitäts-Konfiguration für well-known server.
   affinity: {}
 
 ######################################################################################
 ##          Konfiguration für Postgres Server
 ######################################################################################
-## This configuration is for setting up the internally provided Postgres server,
-## if you instead want to use an existing server, then you may want to set
-## enabled to false and configure the externalPostgresql block.
+## Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht,
+## Wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie
+## enabled auf false setzen und den externalPostgresql-Block konfigurieren.
 ##
 postgresql:
+  # -- (bool) Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht,
+  # Wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie
+  # enabled auf false setzen und den externalPostgresql-Block konfigurieren.
   enabled: false
-# XXX Change me!
-#  postgresqlPassword: synapse
-#
-#  postgresqlUsername: synapse
-#  postgresqlDatabase: synapse_db
-#  ## Or use existing secret with "postgresql-password" key
-#  ## instead of static password
-#  ##
-#  existingSecret: postgres-secrets
-#  existingSecretPasswordKey: POSTGRES_PASSWORD
-#
-#  postgresqlInitdbArgs: "--lc-collate=C --lc-ctype=C"
-#
-#  persistence:
-#    storageClass: nfs-client
-#    size: 16Gi
-#
-#  ## Extra arguments for the database connection
-#  ## ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config
-#  ##
-#  extraArgs: {}
 
-## An externally configured Postgres server to use for Synapse's database, note
-## that the database needs to have both COLLATE and CTYPE set to "C".
-##
-#Beispiel für K8s internen Postgres im Namespace "postgres":
+  # -- (string) Name für PostgreSQL-DB
+  postgresqlDatabase: synapse_db
+
+  # -- (string) Passwort für PostgreSQL Nutzer
+  # TODO: Muss in ein Vault!
+  # Oder verwenden Sie ein bestehendes Secret mit dem Schlüssel "postgresql-password"
+  # anstelle eines statischen Passworts
+  #  existingSecret: postgres-secrets
+  #  existingSecretPasswordKey: POSTGRES_PASSWORD
+  postgresqlPassword: synapse
+
+  # -- (string) Name für PostgreSQL Nutzer
+  postgresqlUsername: synapse
+
+  # -- (string) Extra Argumente zur Initialisierung der Datenbank 
+  postgresqlInitdbArgs: "--lc-collate=C --lc-ctype=C"
+  
+  # -- (map) Persistenzkonfiguration für Storage für PostgreSQL
+  persistence:
+    storageClass: nfs-client
+    size: 16Gi
+
+  # -- (list) Zusätzliche Argumente für die Datenbankverbindung
+  # ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config
+  extraArgs: {}
+
+# -- (map) Ein extern konfigurierter Postgres-Server, der für die Datenbank von Synapse verwendet wird, 
+# muss die Datenbank sowohl COLLATE als auch CTYPE auf "C" eingestellt haben.
+# Beispiel für K8s internen Postgres im Namespace "postgres":
 externalPostgresql:
   host: postgres-4-matrix-postgresql.postgres.svc.cluster.local
   port: 5432
   username: synapse
   password: synapse
 
-  ## The name of an existing secret with postgresql credentials
+  # -- (string) Der Name eines bestehenden Secrets mit Postgresql-Anmeldedaten
   existingSecret: postgres-secrets
 
-  ## Password key to be retrieved from existing secret
+  # -- (string) Passwortschlüssel, der aus dem bestehenden Secret abgerufen wird
   existingSecretPasswordKey: POSTGRES_PASSWORD
 
+  # -- (string) Name der Datenbank auf die sich verbunden wird
   database: synapse_db
-  # sslmode: prefer
+  
+    #sslmode: prefer
 
-  ## Extra arguments for the database connection
-  ## ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config
-  ##
+  # -- (list) Zusätzliche Argumente für die Datenbankverbindung
+  # ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config
   extraArgs: {}
 
 
 ######################################################################################
 ##          Konfiguration für Redis Server
 ######################################################################################
-## This configuration is for the internal Redis that's deployed for use with
-## workers/sharding, for an external Redis server you want to set enabled to
-## false and configure the externalRedis block.
+## Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
+## Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
+## false setzen und den externalRedis-Block konfigurieren.
 ##
 redis:
+  # -- (bool) Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
+  # Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
+  # false setzen und den externalRedis-Block konfigurieren.
   enabled: true
+  # -- (map) Konfiguration für Authentifikation gegen Redis
+  # Oder verwenden Sie ein bestehendes Geheimnis mit "redis-password"-Schlüssel
+  # anstelle eines statischen Passworts.
+  # Der Platzhalter wird später hart ignoriert, muss aber gesetzt und nicht leer sein dafür. 
+  # Nur für mehr als 1 Instanz je K8s interessant
+  # existingSecret: synapse-redis <- Was hab ich damit gemeint und was geändert
   auth:
     enabled: true
-  # XXX Change me!
     password: synapse
 
-  ## Or use existing secret with "redis-password" key
-  ## instead of static password
-  ## der Platzhalter wird später hart ignoriert, muss aber gesetzt und nicht leer sein dafür. Nur für mehr als 1 Instanz je K8s interessant
-  #existingSecret: synapse-redis
-
+  # -- (string) Form der Architektur des Deployments
   architecture: standalone
   master:
     persistence:
-      ## Note that Synapse only uses redis as a synchronization utility, so no
-      ## data will ever need to be persisted.
-      ##
+    # -- (bool) Persistenzkonfiration des Redis
+    # Beachten Sie, dass Synapse redis nur als Synchronisierungsdienstprogramm verwendet, so dass keine
+    # Daten jemals persistiert werden müssen.
       enabled: false
     service:
+      # -- (int) Serviceport
       port: 6379
     statefulset:
+      # -- (string) Wie soll bei Update mit dem Pod verfahren werden
+      # https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
       updateStrategy: RollingUpdate
 
-## An externally configured Redis server to use for workers/sharding.
-##
+# -- (map) Ein extern konfigurierter Redis-Server, der für Worker/Sharding verwendet wird
+# Wird erst ausgewertet, wenn `redis.enabled=false` ist.
+# Alternativ zum statischen Passwort:
+# Der Name eines bestehenden Secret mit Redis-Anmeldeinformationen
+# existingSecret: redis-secrets
+# Passwortschlüssel, der aus dem bestehenden Secret abgerufen wirdq
+# existingSecretPasswordKey: redis-password
 externalRedis:
-  # host: redis
+  host: redis
   port: 6379
-  # password: synapse
+  password: synapse
 
-  ## The name of an existing secret with redis credentials
-  #existingSecret: redis-secrets
-
-  ## Password key to be retrieved from existing secret
-  #existingSecretPasswordKey: redis-password
 
 
 ######################################################################################
 ##          Konfiguration für Ingress
 ######################################################################################
-## The K8s ingress configuration, this will be quite heavily used in order to
-## set up all routing necessary for use with a sharded Synapse instance.
-## If you're not using a Ingress compatible K8s ingress, you will need to set up
-## your own routing instead.
+## Die K8s Ingress-Konfiguration wird sehr häufig verwendet, um
+## das gesamte Routing einzurichten, das für die Verwendung mit einer gesplitteten Synapse-Instanz erforderlich ist.
+## Wenn Sie keinen Ingress-kompatiblen K8s-Ingress verwenden, müssen Sie 
+## stattdessen Ihr eigenes Routing einrichten.
 ##
 ingress:
+  # -- (bool) Aktiviert Ingress-Konfiguration
   enabled: true
 
-  ## Generate traefik-compatible regex paths instead of nginx-compatible ones.
-  ##
+  # -- (bool) Generierung von Traefik-kompatiblen Regex-Pfaden anstelle von Nginx-kompatiblen Pfaden. 
+  # UNGETESTET!
   traefikPaths: false
 
   ## Annotations to apply to the created ingress resource.
   ##
   annotations: 
+    # -- (bool) Annotiation um Regex-Regeln nutzen zu können
     nginx.ingress.kubernetes.io/use-regex: "true"
-  #  # Sync proxy-body-size with Synapse's max_upload_size which is 10M by default
+    # -- (string) Annotiation, um Body-size zu vergößern (Default Limit 1 oder 10MB)
     nginx.ingress.kubernetes.io/proxy-body-size: 50m
   #  kubernetes.io/ingress.class: nginx
   #  kubernetes.io/tls-acme: "true"
 
-  ## Hosts to add to the ingress configuration for handling Client-to-Server
-  ## API request paths.
-  ##
-  ## NB; config.serverName is included if includeServerName is set. (default)
-  ##
-  csHosts: []
+  # -- (list) Hosts, die der Ingress-Konfiguration für die Verarbeitung von 
+  # Client-to-Server-API-Anfragepfade hinzugefügt werden sollen.
+  # Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
+  # Beispiel:
   #  - matrix.beispiel.org
+  csHosts: []
 
-  ## Additional hosts to add to the ingress configuration for handling
-  ## Server-to-Server API requests.
-  ##
-  ## NB; config.serverName is included if includeServerName is set. (default)
-  ##
+  # -- (list) Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung von
+  # Server-zu-Server-API-Anfragen hinzugefügt werden sollen.
+  # Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
+  # Beispiel:
+  #  - beispiel.org
   hosts: []
-  #  - beispiel.org
 
-  ## Additional hosts to add to the ingress configuration for handling
-  ## well-known requests.
-  ##
-  ## NB; config.serverName is included if includeServerName is set. (default)
-  ##
+  # -- (list) Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung von
+  # wellknown-Anfragen hinzugefügt werden sollen.
+  # Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
+  # Beispiel:
+  #  - beispiel.org
   wkHosts: []
-  #  - beispiel.org
 
-  ## Additional paths to add to the Server-to-Server ingress blocks, will be
-  ## inserted before the /_matrix catch-all path.
-  ##
-  paths:  []
+  # -- (path) Zusätzliche Pfade, die zu den Server-zu-Server-Eingangsblöcken hinzugefügt werden sollen
+  # Werden vor dem `/_matrix` Catch-all-Pfad eingefügt.
+  # Beispiele:
   #  # K8s 1.19+
   #  - path: /_matrix/media
   #    pathType: Prefix
@@ -1133,73 +1151,76 @@ ingress:
   #    backend:
   #      serviceName: matrix-media-repo
   #      servicePort: 8000
+  paths:  []
 
-  ## Additional paths to add to the Client-to-Server ingress blocks, will be
-  ## inserted before the /_matrix and /_synapse catch-all paths.
-  ##
-  csPaths: [] 
+  # -- (path) Zusätzliche Pfade, die zu den Client-zu-Server Blöcken hinzugefügt werden sollen
+  # Werden vor dem `/_matrix` und `/_synapse` Catch-all-Pfade eingefügt.
+  # Beispiele:
   #  # K8s 1.19+
   #  - path: /_matrix/media
   #    pathType: Prefix
   #    backend:
   #      service:
   #        name: matrix-media-repo
-  #        port:
-  #          number: 8000
+  #        port: 8000
   #  # K8s <1.19
   #  - path: /_matrix/media
   #    backend:
   #      serviceName: matrix-media-repo
   #      servicePort: 8000
+  csPaths: [] 
 
-  ## Should the /_synapse path be included in the ingress, admin APIs are
-  ## provided under this path.
-  ##
+  # -- (bool) Sollte der `/_synapse`-Pfad im Ingress enthalten sein, werden die Admin-APIs unter diesem Pfad bereitgestellt.
   includeUnderscoreSynapse: true
 
-  ## Should config.serverName be included in the list of ingress paths, can be
-  ## set to false if the main domain is managed in some external way.
-  ##
+  # -- (bool) Sollte `config.serverName` in die Liste der Eingangspfade aufgenommen werden, 
+  # kann auf `false` gesetzt werden, wenn die Hauptdomäne auf irgendeine externe Weise verwaltet wird 
   includeServerName: true
 
-  ## TLS configuration to include in the ingress configuration
-  ##
-  tls: []
+  # -- (map) TLS-Konfiguration für Ingress Konfiguration
+  # Beispiel:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - beispiel.org
   #      - matrix.beispiel.org
+  tls: []
 
-  ## Set the name of the IngressClass cluster resource (optional)
-  ## https://kubernetes.io/docs/reference/kubernetes-api/service-resources/ingress-v1/#IngressSpec
+  # -- (string) Legen Sie den Namen der IngressClass-Cluster-Ressource fest (optional)
+  # https://kubernetes.io/docs/reference/kubernetes-api/service-resources/ingress-v1/#IngressSpec
   className: nginx
 
 ######################################################################################
 ##          Setting up Content-Scanner
 ######################################################################################
 schadcodescanner:
+  # -- (bool) Aktivieren das ClamAV-Pods und Schadcodescanner
   enabled: false
+  # -- (map) Konfiguration des Image/Repository
   image:
     repository: clamav/clamav
     tag: stable
     pullPolicy: IfNotPresent
-#  ## Resource configuration 
-#  ##
+
   resources: 
     limits:
+      # -- (string) Rechenressourcengrenzen, die auf den ClamAV-Pod anzuwenden sind. 
       cpu: 400m
+      # -- (object) RAM Ressourcengrenzen, die auf den ClamAV-Pod anzuwenden sind.
       memory: 3Gi
     requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf den ClamAV-Pod anzuwenden sind. 
       cpu: 150m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den ClamAV-Pod anzuwenden sind. 
       memory: 400Mi
 
+#TODO
 #  podSecurityContext: 
-#   runAsNonRoot: true
-  securityContext:
-    runAsNonRoot: true
+#    runAsNonRoot: true
+#  securityContext:
+#    runAsNonRoot: true
 #    runAsUser: 2333
-    runAsGroup: 1000
-
+#    runAsGroup: 1000
+      
 #  ## Liveness probe configuration to use
 #  ##
 #  livenessProbe:
@@ -1216,7 +1237,7 @@ schadcodescanner:
 #
 #    paths:  
 #    # K8s 1.19+
-#    - path: /_matrix/media
+#    - p0ath: /_matrix/media
 #      pathType: Prefix
 #      backend:
 #        service:
@@ -1266,65 +1287,85 @@ schadcodescanner:
 ######################################################################################
 ##          Setting up CoTurn
 ######################################################################################
-#Standard: if enabled, coturn will be deployed under default namespace, to be used from more than one instance
-# if coturn is enabled and existingcoturn too, it will configure the service to be used
-# with a coturn deployed under the namespace coturn.default_ns
-# Empfohlen nicht zu nutzen, da coturn host-ports nutzen muss um stabil und performant zu arbeiten
+# Standard: wenn aktiviert, wird CoTurn unter dem Standard-Namensraum bereitgestellt,
+# um von mehr als einer Instanz als CoTurn/STUN Server verwendet zu werden
+# Wenn `coturn.enabled=true` und `coturn.existingcoturn=true` ebenfalls, 
+# wird das Deployment so konfiguriert, dass er als Dienst unter dem Namespace 'coturn.default_ns'
+# deployed wird 
 
 coturn:
+  # -- (bool) CoTurn als Deployment aktivieren
+  # Hinweis: Nicht empfohlen!
   enabled: false
+  # -- (map) TurnUris zusammenbauen lassen, aktuell deaktiviert,
+  # Als Liste unter `config.turnUris` konfigurieren 
   turnUris:
     udp: 3478
     tcp: 3478
     realm: "turn.beispiel.org"
   existingcoturn: 
+    # -- (bool) Schalter um bereits existenten CoTurn im K8s-Cluster zu nutzen
     enabled: true
+  # -- (string) Namespace für den CoTurn-Dienst
   default_ns: default
+  # -- (map) Konfiguration für das Image vom CoTurn
   image:
     repository: coturn/coturn
     tag: docker/4.5.2-r12
     pullPolicy: IfNotPresent
+  # -- (map) SecurityContext für das Pod
   securityContext:
     runAsUser: 2011
     runAsGroup: 2011
     readOnlyRootFilesystem: true
     allowPrivilegeEscalation: false
 
-# if shared secret:
-# LATER, weil wegen redis
-
 
 ######################################################################################
 ##          Setting up Synapse Admin
 ######################################################################################
 synapse_admin:
+  # -- (bool) Aktivieren des Synapse-Admin-Moduls
   enabled: true
-  adminUri:  
+  # -- (string) URI für die Admin GUI, zwingend notwendig
+  adminUri: 
+  # -- (map) Konfiguration des Image vom Modul
   image:
     repository: awesometechnologies/synapse-admin
     tag: 0.8.5
     pullPolicy: IfNotPresent
-  ## Resource configuration to apply to the synapse-admin server.
-  ##
+
+  ## Ressourcen Konfiguration für Synapse-Admin Server.
   resources: 
     limits:
+      # -- (string) Rechenressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind. 
       cpu: 5m
+      # -- (object) RAM Ressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.
       memory: 15Mi
     requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf den Synapse-Admin Server anzuwenden sind. 
       cpu: 5m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den Synapse-Admin Server anzuwenden sind. 
       memory: 15Mi
 
   podSecurityContext: 
-    #    runAsNonRoot: true
+  # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
+  # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
+  # weitere Beispiele:
+  #    runAsNonRoot: true
     sysctls:
       - name: net.ipv4.ip_unprivileged_port_start
         value: "80"
-#   securityContext:
-    #    runAsNonRoot: true
-    #    readOnlyRootFilesystem: true
-      #    runAsUser: 2010
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
+  # weitere Beispiele:
+  #    runAsNonRoot: true
+  #    readOnlyRootFilesystem: true
+  #    runAsUser: 2010
+   securityContext: {}
+
+
   ## Configuration for mounting additional volumes into the application container.
-  ##
+  ##AKTUELL in Prüfung:
   #  extraVolumes:
   #    - name: confnginx
   #      emptyDir: {}
@@ -1347,18 +1388,18 @@ synapse_admin:
   #    - name: tmpnginx
   #      mountPath: /var/cache/nginx/
 
-
-#  ## Liveness probe configuration to use
-#  ##
+  #Healthcheck
   livenessProbe:
     httpGet:
-      path: /
-      port: 80
+      # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks 
+      path: /health
+      # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks 
+      port: http
 
-  ## Readiness probe configuration to use
-  ##
+  #Bereitschaftscheck
   readinessProbe:
     httpGet:
-      path: /
-      port: 80
+      # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
+      path: /health
+      # -- (string) Konfiguration des Ports vom Bereitschaftscheck
 
