@@ -11,15 +11,11 @@ BWI Matrix BundesMessenger
 | Christian Steinke | <christian.steinke@bwi.de> |  |
 | Alexander Olofsson | <ace@haxalot.com> |  |
 
-## Requirements
+## Bundesmessenger Standard-Values
 
-| Repository | Name | Version |
-|------------|------|---------|
-
-## Values
-
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
+### Synapse
+| Schlüssel | Typ | Default | Beschreibung |
+|-----------|-----|---------|--------------|
 | config.enableRegistration | bool | true | Registrierungskonfiguration, beachten Sie, dass die Registrierung mit dem containerinternen Werkzeug register_new_matrix_user immer möglich ist. |
 | config.extraListeners | list | `[]` | Extra listener  |
 | config.logLevel | string | `"INFO"` | Das Loglevel  für Synapse und alle Module. |
@@ -91,7 +87,7 @@ BWI Matrix BundesMessenger
 | signingkey.job.enabled | bool | `true` | es wird ein Job zu Beginn des Deployments gestartet, der einen Signierschlüssel erzeugt. Wenn abgeschaltet, muss ein vorhandener Schlüssel eingebunden werden, ansonsten ist eine Förderation als nicht vertrauenswürdig eingestuft |
 | signingkey.job.generateImage.pullPolicy | string | `"IfNotPresent"` | PullPolicy für das Image vom Signing-Key-Job |
 | signingkey.job.generateImage.repository | string | `"matrixdotorg/synapse"` | Repository/Image Konfiguration für Synapse-signing-key-job. Es wird dringend  empfohlen, dass die gleiche Konfiguration wie vom Synapse bzw. den Workernodes genutzt wird. |
-| signingkey.job.publishImage | map | `{"pullPolicy":"IfNotPresent","repository":"bitnami/kubectl","tag":"1.21.13-debian-11-r4"}` | Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.  aktuelle Version am 13.06.2022 vom kubectl im bitnami-Repo |
+| signingkey.job.publishImage | map | <details><summary>Klicken zum einsehen</summary> `{"pullPolicy":"IfNotPresent","repository":"bitnami/kubectl","tag":"1.21.13-debian-11-r4"}` </details> | Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.  aktuelle Version am 13.06.2022 vom kubectl im bitnami-Repo |
 | signingkey.resources | object | `{}` |  |
 | synapse | object | wird nachfolgend einzeln aufgeschlüsselt | Konfiguration, die auf den Haupt-Synapse-Pod anzuwenden ist. |
 | synapse.affinity | object | `{}` | Affinität zur Wahl von Nodes für die für den Haupt-Synapse-Pod genutzt werden sollen. |
@@ -111,7 +107,7 @@ BWI Matrix BundesMessenger
 | synapse.resources.limits.memory | object | `"2500Mi"` | RAM Ressourcengrenzen, die auf den Haupt-Synapse-Pod anzuwenden sind. |
 | synapse.resources.requests.cpu | string | `"1000m"` | Anforderungen an Rechenressourcen, die auf den Haupt-Synapse-Pod anzuwenden sind.  |
 | synapse.resources.requests.memory | string | `"2500Mi"` | Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Pod anzuwenden sind.  |
-| synapse.securityContext | map | `{"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":2666}` | Konfiguration für die Container-Sicherheitsrichtlinie, siehe oben podSecurityContext für weitere relevante Informationen. |
+| synapse.securityContext | map | <details><summary>Klicken zum einsehen</summary> `{"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":2666}`</details>  | Konfiguration für die Container-Sicherheitsrichtlinie, siehe oben podSecurityContext für weitere relevante Informationen. |
 | synapse.strategy.type | string | `"RollingUpdate"` | Nur wirklich anwendbar, wenn das Deployment ein RWO PV angehängt hat (z.B. wenn Media Repository für den Haupt-Synapse-Pod aktiviert ist) Da Replikate = 1 sind, kann eine Aktualisierung "hängen bleiben", da der vorherige Pod mit dem PV verbunden bleibt und der "neu-aufgebaute" Pod nie starten kann. Das Ändern der Strategie auf "Recreate" wird den einzelnen vorherigen Pod beenden, so dass der neue, ankommende Pod sich mit dem PV verbinden kann |
 | synapse.tolerations | list | `[]` | Tolerations bzw. Taints die für den Haupt-Synapse-Pod genutzt werden sollen. |
 | volumePermissions.enabled | bool | `true` | Aktivieren des Init-Containers zur Rechtekorrektur, um die Rechte auf dem Volume für Media anzupassen Notwendig für policy 'require-uid-greater-2000' |
@@ -144,8 +140,7 @@ BWI Matrix BundesMessenger
 | workers.default.volumeMounts | map | `[]` | Zusätzliche zu mountende Datenträgerpfade (siehe volumes) DEFAULT gilt für alle Synapse-Worker-Pods. |
 | workers.default.volumes | map | `[]` | Zusätzliche Volumes, die dem Worker hinzugefügt werden sollen. DEFAULT gilt für alle Synapse-Worker-Pods. Nützlich für das Medien-Repo oder zum Hinzufügen von Python-Modulen. Daher besser im entsprechenden Konfigurationsteil der spez. Worker |
 | workers.federation_sender.enabled | bool | `false` | Dieser Worker kümmert sich um den Versand des  Verbundverkehrs(Förderation Traffik) an andere Synapse-Server. |
-| workers.frontend_proxy.csPaths[0] | path | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/keys/upload"` | Client-Side(cs) Pfade für die Ingress-Konfiguration des FrontendProxy-Workers Hinweis: (default Bundesmessenger) Wenn Sie extraConfig.use_presence=false setzen, sollten Sie den folgenden Pfad eintragen: - "/_matrix/client/(api/v1\|r0\|v3\|unstable)/presence/[^/]+/status" |
-| workers.frontend_proxy.csPaths[1] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/presence/[^/]+/status"` |  |
+| workers.frontend_proxy.csPaths | path | werden in der value.yaml gesetzt und können dort eingesehen werden  | Client-Side(cs) Pfade für die Ingress-Konfiguration des FrontendProxy-Workers Hinweis: (default Bundesmessenger) Wenn Sie extraConfig.use_presence=false setzen, sollten Sie den folgenden Pfad eintragen: - "/_matrix/client/(api/v1|r0|v3|unstable)/presence/[^/]+/status" |
 | workers.frontend_proxy.enabled | bool | `false` | Aktivierung des FrontendProxy-Worker Dieser Worker kümmert sich um das Hochladen von Schlüsseln,  und kann auch die Anwesenheit ausblenden, wenn diese deaktiviert ist |
 | workers.frontend_proxy.listeners | list | `["client"]` | Zusätzliche Listener für frontendproxy-Worker |
 | workers.generic_worker.autoscaling.enabled | bool | `true` | schalte das HPA für die Pods ein |
@@ -153,29 +148,7 @@ BWI Matrix BundesMessenger
 | workers.generic_worker.autoscaling.minReplicas | int | `2` | minimale Anzahl der Worker-Pods |
 | workers.generic_worker.autoscaling.targetCPUUtilizationPercentage | int | `80` | Prozentsatz für CPU-Auslastung um Scaling zu triggern |
 | workers.generic_worker.autoscaling.targetMemoryUtilizationPercentage | int | `80` | Prozentsatz für RAM-Auslastung um Scaling zu triggern |
-| workers.generic_worker.csPaths[0] | path | im Folgenden aufgeschlüsselt | Client-Side(cs) Pfad für die Ingress-Konfiguration des Workers auskommentiert: - "/_matrix/client/(v2_alpha|r0|v3)/sync" - "/_matrix/client/(api/v1\|r0\|v3)/initialSync" - "/_matrix/client/(api/v1\|r0\|v3)/rooms/[^/]+/initialSync" |
-| workers.generic_worker.csPaths[10] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/keys/query"` |  |
-| workers.generic_worker.csPaths[11] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/keys/changes"` |  |
-| workers.generic_worker.csPaths[12] | string | `"/_matrix/client/versions"` |  |
-| workers.generic_worker.csPaths[13] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/voip/turnServer"` |  |
-| workers.generic_worker.csPaths[14] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/joined_groups"` |  |
-| workers.generic_worker.csPaths[15] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/publicised_groups"` |  |
-| workers.generic_worker.csPaths[16] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/login"` |  |
-| workers.generic_worker.csPaths[17] | string | `"/_matrix/client/(r0\|v3\|unstable)/register"` |  |
-| workers.generic_worker.csPaths[18] | string | `"/_matrix/client/(r0\|v3\|unstable)/auth/.*/fallback/web"` |  |
-| workers.generic_worker.csPaths[19] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/rooms/.*/send"` |  |
-| workers.generic_worker.csPaths[1] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/publicRooms"` |  |
-| workers.generic_worker.csPaths[20] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/rooms/.*/(join\|invite\|leave\|ban\|unban\|kick)"` |  |
-| workers.generic_worker.csPaths[21] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/join/"` |  |
-| workers.generic_worker.csPaths[22] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/profile/"` |  |
-| workers.generic_worker.csPaths[2] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/rooms/.*/joined_members"` |  |
-| workers.generic_worker.csPaths[3] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/rooms/.*/context/.*"` |  |
-| workers.generic_worker.csPaths[4] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/rooms/.*/members"` |  |
-| workers.generic_worker.csPaths[5] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/rooms/.*/state"` |  |
-| workers.generic_worker.csPaths[6] | string | `"/_matrix/client/unstable/org.matrix.msc2946/rooms/.*/spaces"` |  |
-| workers.generic_worker.csPaths[7] | string | `"/_matrix/client/unstable/org.matrix.msc2946/rooms/.*/hierarchy"` |  |
-| workers.generic_worker.csPaths[8] | string | `"/_matrix/client/unstable/im.nheko.summary/rooms/.*/summary"` |  |
-| workers.generic_worker.csPaths[9] | string | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/account/3pid"` |  |
+| workers.generic_worker.csPaths | path | werden in der value.yaml gesetzt und können dort eingesehen werden  | Client-Side(cs) Pfad für die Ingress-Konfiguration des Workers auskommentiert: - "/_matrix/client/(v2_alpha|r0|v3)/sync" - "/_matrix/client/(api/v1|r0|v3)/initialSync" - "/_matrix/client/(api/v1|r0|v3)/rooms/[^/]+/initialSync" |
 | workers.generic_worker.enabled | bool | `true` | Aktivieren von Workern |
 | workers.generic_worker.enabled | bool | `false` | Aktiviere spez. Worker für Förderationsanfragen |
 | workers.generic_worker.federation_reader | string | `nil` |  |
@@ -183,44 +156,162 @@ BWI Matrix BundesMessenger
 | workers.generic_worker.generic | bool | `true` | Wird aus dem generischen Worker abgeleitet |
 | workers.generic_worker.listeners | list | `["federation"]` | Zusätzliche Listener für Förderationsworker |
 | workers.generic_worker.listeners | list | `["client","federation"]` | entsprechende Endpunkte für den generischen Worker |
-| workers.generic_worker.paths[0] | path | `"/_matrix/federation/v1/send/"` | Server-Side Pfade für die Ingress-Konfiguration des Förderations-Workers |
-| workers.generic_worker.paths[0] | path | `"/_matrix/federation/v1/event/"` | Server-Side (externer Zugriff) Pfade für die Ingress-Konfiguration des Workers |
-| workers.generic_worker.paths[10] | string | `"/_matrix/federation/v2/send_join/"` |  |
-| workers.generic_worker.paths[11] | string | `"/_matrix/federation/v1/send_leave/"` |  |
-| workers.generic_worker.paths[12] | string | `"/_matrix/federation/v2/send_leave/"` |  |
-| workers.generic_worker.paths[13] | string | `"/_matrix/federation/v1/invite/"` |  |
-| workers.generic_worker.paths[14] | string | `"/_matrix/federation/v2/invite/"` |  |
-| workers.generic_worker.paths[15] | string | `"/_matrix/federation/v1/query_auth/"` |  |
-| workers.generic_worker.paths[16] | string | `"/_matrix/federation/v1/event_auth/"` |  |
-| workers.generic_worker.paths[17] | string | `"/_matrix/federation/v1/exchange_third_party_invite/"` |  |
-| workers.generic_worker.paths[18] | string | `"/_matrix/federation/v1/user/devices/"` |  |
-| workers.generic_worker.paths[19] | string | `"/_matrix/federation/v1/send/"` |  |
-| workers.generic_worker.paths[1] | string | `"/_matrix/federation/v1/state/"` |  |
-| workers.generic_worker.paths[20] | string | `"/_matrix/federation/v1/get_groups_publicised"` |  |
-| workers.generic_worker.paths[21] | string | `"/_matrix/key/v2/query"` |  |
-| workers.generic_worker.paths[2] | string | `"/_matrix/federation/v1/state_ids/"` |  |
-| workers.generic_worker.paths[3] | string | `"/_matrix/federation/v1/backfill/"` |  |
-| workers.generic_worker.paths[4] | string | `"/_matrix/federation/v1/get_missing_events/"` |  |
-| workers.generic_worker.paths[5] | string | `"/_matrix/federation/v1/publicRooms"` |  |
-| workers.generic_worker.paths[6] | string | `"/_matrix/federation/v1/query/"` |  |
-| workers.generic_worker.paths[7] | string | `"/_matrix/federation/v1/make_join/"` |  |
-| workers.generic_worker.paths[8] | string | `"/_matrix/federation/v1/make_leave/"` |  |
-| workers.generic_worker.paths[9] | string | `"/_matrix/federation/v1/send_join/"` |  |
+| workers.generic_worker.paths | path | werden in der value.yaml gesetzt und können dort eingesehen werden  | Server-Side (externer Zugriff) Pfade für die Ingress-Konfiguration des Workers |
 | workers.generic_worker.replicaCount | int | `2` | Anzahl der Worker-Pods |
-| workers.generic_worker.securityContext | map | `{"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":2003}` | Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers |
-| workers.media_repository.csPaths[0] | path | `"/_matrix/media/"` | Client-Side(cs) Pfade für die Ingress-Konfiguration des Media-Workers |
+| workers.generic_worker.securityContext | map | <details><summary>Klicken zum einsehen</summary> `{"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":2003}`</details>  | Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers |
+| workers.media_repository.csPaths | path | werden in der value.yaml gesetzt und können dort eingesehen werden  | Client-Side(cs) Pfade für die Ingress-Konfiguration des Media-Workers |
 | workers.media_repository.enabled | bool | `true` | Aktivieren des Media-Worker Dieser Worker kümmert sich um die Bereitstellung und Speicherung von Medien. Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit Hintergrundaufgaben. |
 | workers.media_repository.listeners | list | `["media"]` | Zusätzliche Listener für Media-Worker |
-| workers.media_repository.paths[0] | path | `"/_matrix/media/"` | Server-Side(externe) Pfade für die Ingress-Konfiguration des Media-Workers |
-| workers.media_repository.securityContext | map | `{"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":2666}` | Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers Überschreibt die Konfiguration von Default und generischen Worker |
+| workers.media_repository.paths | path | werden in der value.yaml gesetzt und können dort eingesehen werden  | Server-Side(externe) Pfade für die Ingress-Konfiguration des Media-Workers |
+| workers.media_repository.securityContext | map | <details><summary>Klicken zum einsehen</summary> `{"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":2666}`</details>  | Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers Überschreibt die Konfiguration von Default und generischen Worker |
 | workers.pusher.enabled | bool | `false` | Dieser Worker kümmert sich um die Übermittlung von Benachrichtigungen. Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden WICHTIGER HINWEIS: Dafür gibt es den Sygnal-Service und Pod!!! |
-| workers.synchrotron.csPaths[0] | path | `"/_matrix/client/(v2_alpha\|r0\|v3)/sync"` | Client-Side(cs) Pfade für die Ingress-Konfiguration des Synchworkers |
-| workers.synchrotron.csPaths[1] | string | `"/_matrix/client/(api/v1\|v2_alpha\|r0\|v3)/events"` |  |
-| workers.synchrotron.csPaths[2] | string | `"/_matrix/client/(api/v1\|r0\|v3)/initialSync"` |  |
-| workers.synchrotron.csPaths[3] | string | `"/_matrix/client/(api/v1\|r0\|v3)/rooms/[^/]+/initialSync"` |  |
+| workers.synchrotron.csPaths | path | werden in der value.yaml gesetzt und können dort eingesehen werden  | Client-Side(cs) Pfade für die Ingress-Konfiguration des Synchworkers |
 | workers.synchrotron.enabled | bool | `false` | Aktivierung des Synch-Workers |
 | workers.synchrotron.generic | bool | `true` | Wird aus dem generischen Worker abgeleitet |
 | workers.synchrotron.listeners | list | `["client"]` | Zusätzliche Listener für Synchworker |
-| workers.user_dir.csPaths[0] | path | `"/_matrix/client/(api/v1\|r0\|v3\|unstable)/user_directory/search"` | Client-Side(cs) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers |
+| workers.user_dir.csPaths | path | werden in der value.yaml gesetzt und können dort eingesehen werden  | Client-Side(cs) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers |
 | workers.user_dir.enabled | bool | `true` | Aktivieren des Nutzersuch-Workers Hinweis: Damit kann die Last vom generischen bzw. Haupt-Worker genommen werden |
 | workers.user_dir.listeners | list | `["client"]` | Zusätzliche Listener für NutzerSuch-Worker |
+
+### Sygnal
+| Schlüssel | Typ | Default | Beschreibung |
+|-----------|-----|---------|--------------|
+| sygnal.affinity | object | `{}` |  |
+| sygnal.apns | object | `{}` |  |
+| sygnal.enabled | bool | `true` |  |
+| sygnal.image.pullPolicy | string | `"IfNotPresent"` |  |
+| sygnal.image.repository | string | `"matrixdotorg/sygnal"` |  |
+| sygnal.image.tag | string | `"v0.11.0"` |  |
+| sygnal.ios_push_enabled | bool | `false` |  |
+| sygnal.ioskey | object | `{}` |  |
+| sygnal.nodeSelector | object | `{}` |  |
+| sygnal.podSecurityContext.sysctls[0].name | string | `"net.ipv4.ip_unprivileged_port_start"` |  |
+| sygnal.podSecurityContext.sysctls[0].value | string | `"80"` |  |
+| sygnal.resources.limits.cpu | string | `"150m"` |  |
+| sygnal.resources.limits.memory | string | `"45Mi"` |  |
+| sygnal.resources.requests.cpu | string | `"150m"` |  |
+| sygnal.resources.requests.memory | string | `"45Mi"` |  |
+| sygnal.securityContext.readOnlyRootFilesystem | bool | `true` |  |
+| sygnal.securityContext.runAsNonRoot | bool | `true` |  |
+| sygnal.securityContext.runAsUser | int | `2111` |  |
+| sygnal.tolerations | list | `[]` |  |
+
+### Schadcodescanner
+| Schlüssel | Typ | Default | Beschreibung |
+|-----------|-----|---------|--------------|
+| schadcodescanner.enabled | bool | `false` |  |
+| schadcodescanner.image.pullPolicy | string | `"IfNotPresent"` |  |
+| schadcodescanner.image.repository | string | `"clamav/clamav"` |  |
+| schadcodescanner.image.tag | string | `"stable"` |  |
+| schadcodescanner.resources.limits.cpu | string | `"400m"` |  |
+| schadcodescanner.resources.limits.memory | string | `"3Gi"` |  |
+| schadcodescanner.resources.requests.cpu | string | `"150m"` |  |
+| schadcodescanner.resources.requests.memory | string | `"400Mi"` |  |
+| schadcodescanner.securityContext.runAsGroup | int | `1000` |  |
+| schadcodescanner.securityContext.runAsNonRoot | bool | `true` |  |
+
+### CoTurn
+| Schlüssel | Typ | Default | Beschreibung |
+|-----------|-----|---------|--------------|
+| coturn.default_ns | string | `"default"` |  |
+| coturn.enabled | bool | `false` |  |
+| coturn.existingcoturn.enabled | bool | `true` |  |
+| coturn.image.pullPolicy | string | `"IfNotPresent"` |  |
+| coturn.image.repository | string | `"coturn/coturn"` |  |
+| coturn.image.tag | string | `"docker/4.5.2-r12"` |  |
+| coturn.securityContext.allowPrivilegeEscalation | bool | `false` |  |
+| coturn.securityContext.readOnlyRootFilesystem | bool | `true` |  |
+| coturn.securityContext.runAsGroup | int | `2011` |  |
+| coturn.securityContext.runAsUser | int | `2011` |  |
+| coturn.turnUris.realm | string | `"turn.beispiel.org"` |  |
+| coturn.turnUris.tcp | int | `3478` |  |
+| coturn.turnUris.udp | int | `3478` |  |
+
+### WellKnown
+| Schlüssel | Typ | Default | Beschreibung |
+|-----------|-----|---------|--------------|
+| wellknown.affinity | object | `{}` |  |
+| wellknown.client."io.element.e2ee".outbound_keys_pre_sharing_mode | string | `"on_room_opening"` |  |
+| wellknown.client."io.element.e2ee".secure_backup_required | bool | `true` |  |
+| wellknown.client."io.element.e2ee".secure_backup_setup_methods[0] | string | `"passphrase"` |  |
+| wellknown.client."m.homeserver".base_url | string | `"https://matrix.beispiel.org"` |  |
+| wellknown.enabled | bool | `false` |  |
+| wellknown.htdocsPath | string | `"/var/www/localhost/htdocs"` |  |
+| wellknown.image.pullPolicy | string | `"IfNotPresent"` |  |
+| wellknown.image.repository | string | `"sebp/lighttpd"` |  |
+| wellknown.image.tag | string | `"1.4.61-r1"` |  |
+| wellknown.nodeSelector | object | `{}` |  |
+| wellknown.podSecurityContext.runAsNonRoot | bool | `true` |  |
+| wellknown.resources.limits.cpu | string | `"5m"` |  |
+| wellknown.resources.limits.memory | string | `"15Mi"` |  |
+| wellknown.resources.requests.cpu | string | `"5m"` |  |
+| wellknown.resources.requests.memory | string | `"15Mi"` |  |
+| wellknown.securityContext.readOnlyRootFilesystem | bool | `true` |  |
+| wellknown.securityContext.runAsNonRoot | bool | `true` |  |
+| wellknown.securityContext.runAsUser | int | `2022` |  |
+| wellknown.server."m.server" | string | `"matrix.beispiel.org:443"` |  |
+| wellknown.tolerations | list | `[]` |  |
+| wellknown.useIpv6 | bool | `false` | 
+### Element
+| Schlüssel | Typ | Default | Beschreibung |
+|-----------|-----|---------|--------------|
+
+### Redis
+| Schlüssel | Typ | Default | Beschreibung |
+|-----------|-----|---------|--------------|
+| externalRedis.port | int | `6379` |  |
+| redis.architecture | string | `"standalone"` |  |
+| redis.auth.enabled | bool | `true` |  |
+| redis.auth.password | string | `"synapse"` |  |
+| redis.enabled | bool | `true` |  |
+| redis.master.persistence.enabled | bool | `false` |  |
+| redis.master.service.port | int | `6379` |  |
+| redis.master.statefulset.updateStrategy | string | `"RollingUpdate"` |  |
+
+### PostgreSQL
+| Schlüssel | Typ | Default | Beschreibung |
+|-----------|-----|---------|--------------|
+| externalPostgresql.database | string | `"synapse_db"` |  |
+| externalPostgresql.existingSecret | string | `"postgres-secrets"` |  |
+| externalPostgresql.existingSecretPasswordKey | string | `"POSTGRES_PASSWORD"` |  |
+| externalPostgresql.extraArgs | object | `{}` |  |
+| externalPostgresql.host | string | `"postgres-4-matrix-postgresql.postgres.svc.cluster.local"` |  |
+| externalPostgresql.password | string | `"synapse"` |  |
+| externalPostgresql.port | int | `5432` |  |
+| externalPostgresql.username | string | `"synapse"` |  |
+| postgresql.enabled | bool | `false` |  |
+### Synapse-Admin
+| Schlüssel | Typ | Default | Beschreibung |
+|-----------|-----|---------|--------------|
+| synapse_admin.adminUri | string | `nil` |  |
+| synapse_admin.enabled | bool | `true` |  |
+| synapse_admin.image.pullPolicy | string | `"IfNotPresent"` |  |
+| synapse_admin.image.repository | string | `"awesometechnologies/synapse-admin"` |  |
+| synapse_admin.image.tag | string | `"0.8.5"` |  |
+| synapse_admin.livenessProbe.httpGet.path | string | `"/"` |  |
+| synapse_admin.livenessProbe.httpGet.port | int | `80` |  |
+| synapse_admin.podSecurityContext.sysctls[0].name | string | `"net.ipv4.ip_unprivileged_port_start"` |  |
+| synapse_admin.podSecurityContext.sysctls[0].value | string | `"80"` |  |
+| synapse_admin.readinessProbe.httpGet.path | string | `"/"` |  |
+| synapse_admin.readinessProbe.httpGet.port | int | `80` |  |
+| synapse_admin.resources.limits.cpu | string | `"5m"` |  |
+| synapse_admin.resources.limits.memory | string | `"15Mi"` |  |
+| synapse_admin.resources.requests.cpu | string | `"5m"` |  |
+| synapse_admin.resources.requests.memory | string | `"15Mi"` |  |
+
+### Nginx-Ingress
+| Schlüssel | Typ | Default | Beschreibung |
+|-----------|-----|---------|--------------|
+| ingress.annotations."nginx.ingress.kubernetes.io/proxy-body-size" | string | `"50m"` |  |
+| ingress.annotations."nginx.ingress.kubernetes.io/use-regex" | string | `"true"` |  |
+| ingress.className | string | `"nginx"` |  |
+| ingress.csHosts | list | `[]` |  |
+| ingress.csPaths | list | `[]` |  |
+| ingress.enabled | bool | `true` |  |
+| ingress.hosts | list | `[]` |  |
+| ingress.includeServerName | bool | `true` |  |
+| ingress.includeUnderscoreSynapse | bool | `true` |  |
+| ingress.paths | list | `[]` |  |
+| ingress.tls | list | `[]` |  |
+| ingress.traefikPaths | bool | `false` |  |
+| ingress.wkHosts | list | `[]` |  |
