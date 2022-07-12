@@ -20,7 +20,7 @@ BWI Matrix BundesMessenger
 | config.extraListeners | list | `[]` | Extra listener  |
 | config.logLevel | string | `"INFO"` | Das Loglevel  für Synapse und alle Module. |
 | config.macaroonSecretKey | string | `""` | Hinweis: Es wird dringend empfohlen, diesen Wert auf einen secure value (secret) zu setzen. |
-| config.publicBaseurl | string | `""` | Die öffentlich zugängliche URL für die Synapse-Instanz  lautet standardmäßig https://<publicServerName> Beispiel:  publicBaseurl: 'https://matrix.beispiel.org' |
+| config.publicBaseurl | string | `""` | Die öffentlich zugängliche URL für die Synapse-Instanz  lautet standardmäßig  `https://<publicServerName>` Beispiel:  publicBaseurl: 'https://matrix.beispiel.org' |
 | config.registrationSharedSecret | string | `""` | Hinweis: Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge gesetzt, wenn er nicht angegeben wird. |
 | config.reportStats | bool | `true` | Sollen Nutzungsstatistiken gemeldet werden |
 | config.trustedKeyServers | map | `[{"server_name":"matrix.org"}]` | Eine Gruppe von vertrauenswürdigen Servern, die zu kontaktieren sind, wenn ein anderer Server nicht auf eine Signierschlüssel-Anfrage antwortet. |
