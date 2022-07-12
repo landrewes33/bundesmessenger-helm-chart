@@ -230,7 +230,7 @@ extraConfig:
   # sie an einen zentralen Server - im Fall von Synapse: Jaeger.
       enabled: false
   # -- (list) Whitelist (Domainbased) für Föderation
-#  federation_domain_whitelist:
+  federation_domain_whitelist: []
 #    - poc1.dvs.beispiel.org
 #    - poc2.dvs.beispiel.org
 #    - poc3.dvs.beispiel.org
