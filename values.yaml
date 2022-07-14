@@ -322,7 +322,7 @@ synapse:
   #je nachdem, ob es sich bei dem Knoten um einen physischen Host oder eine virtuelle Maschine handelt, 
   #die innerhalb einer physischen Maschine ausgeführt wird.
   #
-  #Bruchteilige Anforderungen sind zulässig. 
+  #Anteilige Anforderungen sind zulässig. 
   #Wenn Sie einen Container definieren und spec.containers[].resources.requests.cpu auf 0,5 setzen, 
   #fordern Sie nur halb so viel CPU-Zeit an, als wenn Sie 1,0 CPU anfordern würden. 
   #Für CPU-Ressourceneinheiten entspricht der Mengenausdruck 0,1 dem Ausdruck 100m, 
@@ -1190,7 +1190,7 @@ ingress:
   className: nginx
 
 ######################################################################################
-##          Setting up Content-Scanner
+##          Konfiguration für Content-Scanner
 ######################################################################################
 schadcodescanner:
   # -- (bool) Aktivieren das ClamAV-Pods und Schadcodescanner
@@ -1214,7 +1214,7 @@ schadcodescanner:
       memory: 400Mi
 
 ######################################################################################
-##          Setting up CoTurn
+##          Konfiguration für CoTurn
 ######################################################################################
 # Standard: wenn aktiviert, wird CoTurn unter dem Standard-Namensraum bereitgestellt,
 # um von mehr als einer Instanz als CoTurn/STUN Server verwendet zu werden
@@ -1251,7 +1251,7 @@ coturn:
 
 
 ######################################################################################
-##          Setting up Synapse Admin
+##          Konfiguration für Synapse Admin
 ######################################################################################
 
 synapse-admin:
