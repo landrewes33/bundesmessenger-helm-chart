@@ -1291,7 +1291,7 @@ synapse-admin:
   #    runAsNonRoot: true
   #    readOnlyRootFilesystem: true
   #    runAsUser: 2010
-   securityContext: {}
+  securityContext: {}
 
 
   ## Configuration for mounting additional volumes into the application container.
