@@ -631,7 +631,7 @@ workers:
   ## noch als TODO offen ist.
   ## https://github.com/matrix-org/synapse/blob/develop/docs/workers.md#load-balancing
 
-    federation_reader:
+  federation_reader:
     # -- (bool) Aktiviere spez. Worker für Förderationsanfragen
     enabled: false
     # -- (bool) Wird aus dem generischen Worker abgeleitet
@@ -1213,77 +1213,6 @@ schadcodescanner:
       # -- (string) Anforderungen an RAM Ressourcen, die auf den ClamAV-Pod anzuwenden sind. 
       memory: 400Mi
 
-#TODO
-#  podSecurityContext: 
-#    runAsNonRoot: true
-#  securityContext:
-#    runAsNonRoot: true
-#    runAsUser: 2333
-#    runAsGroup: 1000
-      
-#  ## Liveness probe configuration to use
-#  ##
-#  livenessProbe:
-#    httpGet:
-#      path: /health
-#      port: http
-#
-#  ## Readiness probe configuration to use
-#  ##
-#  readinessProbe:
-#    httpGet:
-#      path: /health
-#      port: http
-#
-#    paths:  
-#    # K8s 1.19+
-#    - p0ath: /_matrix/media
-#      pathType: Prefix
-#      backend:
-#        service:
-#          name: matrix-media-repo
-#          port: 8000
-#    csPaths: 
-#    - path: /_matrix/media_proxy/
-#      backend:
-#        service:
-#          name: matrix-schadcodescanner       
-#          port:
-#            number: 9000 
-# freshclamConfig-values für Konfiguration von /etc/clamav/freshclam.conf. Beispiel:
-# freshclamConfig: |
-#   HTTPProxyServer your-proxy.beispiel.org
-#   HTTPProxyPort 8080
-#   DatabaseDirectory /data
-#   LogSyslog yes
-#   LogTime yes
-#   PidFile /run/clamav/freshclam.pid
-#   DatabaseOwner root
-#   DatabaseMirror database.clamav.net
-#   ScriptedUpdates yes
-#   NotifyClamd /etc/clamav/clamd.conf
-#   SafeBrowsing yes
-#   Bytecode yes
-
-##
-#  ## Configuration for the pod security policy.
-#  ##
-#  podSecurityContext: {}
-#    fsGroup: 666
-#    runAsGroup: 666
-#    runAsUser: 666
-#
-#  ## Configuration for the container security policy.
-#  ##
-#  securityContext: {}
-#  #  capabilities:
-#  #    drop:
-#  #    - ALL
-#    readOnlyRootFilesystem: true
-#    runAsNonRoot: true
-#    runAsUser: 666
-
-
 ######################################################################################
 ##          Setting up CoTurn
 ######################################################################################
@@ -1324,7 +1253,8 @@ coturn:
 ######################################################################################
 ##          Setting up Synapse Admin
 ######################################################################################
-synapse_admin:
+
+synapse-admin:
   # -- (bool) Aktivieren des Synapse-Admin-Moduls
   enabled: true
   # -- (string) URI für die Admin GUI, zwingend notwendig
