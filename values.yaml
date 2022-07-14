@@ -98,8 +98,8 @@ config:
   # -- (string) Das Loglevel  für Synapse und alle Module.
   logLevel: INFO
 
-  # -- (bool) Nutzungsstatistiken (siehe extraConfig.reportStats)
-  reportStats: true
+  # -- (bool) Nutzungsstatistiken (siehe extraConfig.reportStats) 
+  reportStats: false
 
   ## Schützen Sie die Registrierung mit recaptcha. (optional)
   ##
@@ -184,10 +184,10 @@ extraConfig:
   enable_3pid_lookup: false
   # -- (bool) Gastzugang, abgeschaltet
   allow_guest_access: false
-  # -- (bool) Nutzungsstatistiken, eingeschaltet
+  # -- (bool) Metriken erfassen, eingeschaltet
   enable_metrics: true
-  # -- (bool) Erfassung Nutzungsstatistiken (Hostname, Synapse-Version und -Uptime, total_users usw.)
-  report_stats: true
+  # -- (bool) Erfassung Nutzungsstatistiken (Hostname, Synapse-Version und -Uptime, total_users usw.) an die Entwickler melden
+  report_stats: false
   # -- (object) Passwortkonfiguration
   # @default -- folgende Aufschlüsselung
   password_config:
