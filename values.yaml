@@ -6,10 +6,10 @@ image:
   # -- (string) Repository/Image Konfiguration, für Synapse und Workernodes.
   repository: matrixdotorg/synapse
 
-  # image.tag -- (string) kann die gesetzte Defaultversion überschreiben, wenn gesetzt.
+  # -- (string) kann die gesetzte Defaultversion überschreiben, wenn gesetzt.
   # @default -- wird im Charts.yaml gesetzt
   tag: ''
-  # image.pullSecrets -- (map) Optional kann ein Array von imagePullSecrets angegeben werden. 
+  # -- (map) Optional kann ein Array von imagePullSecrets angegeben werden. 
   # Secrets müssen manuell im Namensraum angelegt werden.
   # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   # Beispiel:
@@ -22,18 +22,18 @@ image:
   # imagePullPolicy „Always“, wenn tag ist „latest“ (imagepullpolicy-always.yaml)
   pullPolicy: IfNotPresent
 
-  # image.nameOverride -- (string) Überschreibt einen Teil des installierten Namens, behält aber den Releasenamen bei.
+  # -- (string) Überschreibt einen Teil des installierten Namens, behält aber den Releasenamen bei.
   nameOverride: ""
 
-  # image.fullnameOverride -- (string) Überschreiben Sie den vollständigen Namen des installierten Charts.
+  # -- (string) Überschreiben Sie den vollständigen Namen des installierten Charts.
   fullnameOverride: ""
 
 
-# serverName -- (string) Der Matrix-Domänenname, der für den Domänenteil in Ihren MXIDs verwendet wird.
+# -- (string) Der Matrix-Domänenname, der für den Domänenteil in Ihren MXIDs verwendet wird.
 # @default -- Nicht gesetzt, aber Voraussetzung!
 serverName: ''
 
-# publicServerName -- (string) Der öffentliche Matrix-Servername, der für alle öffentlichen URLs 
+# -- (string) Der öffentliche Matrix-Servername, der für alle öffentlichen URLs 
 # in der Konfiguration sowie für Client-API-Links im Ingress verwendet wird.
 # @default  -- Nicht gesetzt
 publicServerName: ''
@@ -70,13 +70,11 @@ signingkey:
       tag: 1.21.13-debian-11-r4
       pullPolicy: IfNotPresent
 
-  ## Geben Sie ein bestehendes Signierschlüsselgeheimnis an, das im Voraus erstellt werden muss. 
-  ##
+  ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss. 
   # existingSecret: secret-name
   # existingSecretKey: signing.key
 
   ## Ressourcen für das Image der Erzeugung vom Signierschlüssel
-  ##
   resources: {}
   #  limits:
   #    cpu: 100m
@@ -100,7 +98,7 @@ config:
   # -- (string) Das Loglevel  für Synapse und alle Module.
   logLevel: INFO
 
-  # -- (bool) Sollen Nutzungsstatistiken gemeldet werden
+  # -- (bool) Nutzungsstatistiken (siehe extraConfig.reportStats)
   reportStats: true
 
   ## Schützen Sie die Registrierung mit recaptcha. (optional)
@@ -188,8 +186,8 @@ extraConfig:
   allow_guest_access: false
   # -- (bool) Nutzungsstatistiken, eingeschaltet
   enable_metrics: true
-  # -- (bool) Übermitteln von Nutzungsstatistiken (werden abgeholt nicht übermittelt)
-  report_stats: false
+  # -- (bool) Erfassung Nutzungsstatistiken (Hostname, Synapse-Version und -Uptime, total_users usw.)
+  report_stats: true
   # -- (object) Passwortkonfiguration
   # @default -- folgende Aufschlüsselung
   password_config:
