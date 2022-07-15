@@ -176,82 +176,67 @@ BWI Matrix BundesMessenger
 ### Sygnal
 | Schlüssel | Typ | Default | Beschreibung |
 |-----------|-----|---------|--------------|
-| sygnal.affinity | object | `{}` |  |
-| sygnal.apns | object | `{}` |  |
-| sygnal.enabled | bool | `true` |  |
-| sygnal.image.pullPolicy | string | `"IfNotPresent"` |  |
-| sygnal.image.repository | string | `"matrixdotorg/sygnal"` |  |
-| sygnal.image.tag | string | `"v0.11.0"` |  |
-| sygnal.ios_push_enabled | bool | `false` |  |
-| sygnal.ioskey | object | `{}` |  |
-| sygnal.nodeSelector | object | `{}` |  |
-| sygnal.podSecurityContext.sysctls[0].name | string | `"net.ipv4.ip_unprivileged_port_start"` |  |
-| sygnal.podSecurityContext.sysctls[0].value | string | `"80"` |  |
-| sygnal.resources.limits.cpu | string | `"150m"` |  |
-| sygnal.resources.limits.memory | string | `"45Mi"` |  |
-| sygnal.resources.requests.cpu | string | `"150m"` |  |
-| sygnal.resources.requests.memory | string | `"45Mi"` |  |
-| sygnal.securityContext.readOnlyRootFilesystem | bool | `true` |  |
-| sygnal.securityContext.runAsNonRoot | bool | `true` |  |
-| sygnal.securityContext.runAsUser | int | `2111` |  |
-| sygnal.tolerations | list | `[]` |  |
+| synapse | object | wird nachfolgend einzeln aufgeschlüsselt | Konfiguration, die auf den Haupt-Synapse-Pod anzuwenden ist. |
+| synapse.affinity | object | `{}` | Affinität zur Wahl von Nodes für die für den Haupt-Synapse-Pod genutzt werden sollen. |
+| synapse.annotations | map | `{}` | Annotations, die auf den Haupt-Synapse-Pod anzuwenden sind. Beispiel: (Bundesmessenger lässt alle Services automatisch an Prometheus anbinden)  prometheus.io/scrape: "true"  prometheus.io/path: "/_synapse/metrics"  prometheus.io/port: "9090" |
+| synapse.extraCommands | list | `[]` | Zusätzliche Befehle, die beim Starten von Synapse ausgeführt werden Beispiele: - 'apt-get update -yqq && apt-get install patch -yqq' - 'patch -d/usr/local/lib/python3.7/site-packages/synapse -p2 < /synapse/patches/something.patch' |
+| synapse.extraEnv | map | `[]` | Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind Beispiel:  - name: LD_PRELOAD    value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2  - name: SYNAPSE_CACHE_FACTOR    value: "2" |
+| synapse.extraVolumeMounts | object | `[]` | Zusätzliche in Synapse zu mountende Datenträgerpfade (Volumes) Beispiel:  - name: spamcheck    mountPath: /usr/local/lib/python3.7/site-packages/company |
+| synapse.extraVolumes | object | `[]` | Zusätzliche in Synapse zu mountende Datenträger (Volumes) Beispiel:  - name: spamcheck    flexVolume:      driver: dvs/git-live      options:        repo: https://gitlab.opencode.de/bwi/bundesmessenger/synapse-module        interval: 1d      readOnly: true |
+| synapse.labels | map | `{}` | Labels, die auf den Haupt-Synapse-Pod anzuwenden sind. |
+| synapse.livenessProbe.httpGet.path | string | `"/health"` | Zu verwendende Konfiguration für den Pfad des Healthchecks  |
+| synapse.livenessProbe.httpGet.port | string | `"http"` | Zu verwendende Konfiguration für den Port des Healthchecks  |
+| synapse.nodeSelector | list | `{}` | Node Selektoren, die für den Haupt-Synapse-Pod festgelegt werden. |
+| synapse.podSecurityContext | object | `{"runAsNonRoot":true}` | Konfiguration für die Pod-Sicherheitsrichtlinie, Synapse wird immer als sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist.  Beachten Sie, dass eine Änderung dieser Einstellung auch die Verwendung der volumePermission Hilfsprogramm verwenden müssen, abhängig von Ihrem Speicher. |
+| synapse.readinessProbe.httpGet.path | string | `"/health"` | Konfiguration des Pfads vom Bereitschaftscheck |
+| synapse.readinessProbe.httpGet.port | string | `"http"` | Konfiguration des Ports vom Bereitschaftscheck |
+| synapse.resources.limits.cpu | string | `"1000m"` | Rechenressourcengrenzen, die auf den Haupt-Synapse-Pod anzuwenden sind.  |
+| synapse.resources.limits.memory | object | `"2500Mi"` | RAM Ressourcengrenzen, die auf den Haupt-Synapse-Pod anzuwenden sind. |
+| synapse.resources.requests.cpu | string | `"1000m"` | Anforderungen an Rechenressourcen, die auf den Haupt-Synapse-Pod anzuwenden sind.  |
+| synapse.resources.requests.memory | string | `"2500Mi"` | Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Pod anzuwenden sind.  |
+| synapse.securityContext | map | `{"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":2666}` | Konfiguration für die Container-Sicherheitsrichtlinie, siehe oben podSecurityContext für weitere relevante Informationen. |
+| synapse.strategy.type | string | `"RollingUpdate"` | Nur wirklich anwendbar, wenn das Deployment ein RWO PV angehängt hat (z.B. wenn Media Repository für den Haupt-Synapse-Pod aktiviert ist) Da Replikate = 1 sind, kann eine Aktualisierung "hängen bleiben", da der vorherige Pod mit dem PV verbunden bleibt und der "neu-aufgebaute" Pod nie starten kann. Das Ändern der Strategie auf "Recreate" wird den einzelnen vorherigen Pod beenden, so dass der neue, ankommende Pod sich mit dem PV verbinden kann |
+| synapse.tolerations | list | `[]` | Tolerations bzw. Taints die für den Haupt-Synapse-Pod genutzt werden sollen. |
 
 ### Schadcodescanner
 | Schlüssel | Typ | Default | Beschreibung |
 |-----------|-----|---------|--------------|
-| schadcodescanner.enabled | bool | `false` |  |
-| schadcodescanner.image.pullPolicy | string | `"IfNotPresent"` |  |
-| schadcodescanner.image.repository | string | `"clamav/clamav"` |  |
-| schadcodescanner.image.tag | string | `"stable"` |  |
-| schadcodescanner.resources.limits.cpu | string | `"400m"` |  |
-| schadcodescanner.resources.limits.memory | string | `"3Gi"` |  |
-| schadcodescanner.resources.requests.cpu | string | `"150m"` |  |
-| schadcodescanner.resources.requests.memory | string | `"400Mi"` |  |
-| schadcodescanner.securityContext.runAsGroup | int | `1000` |  |
-| schadcodescanner.securityContext.runAsNonRoot | bool | `true` |  |
+| schadcodescanner.enabled | bool | `false` | Aktivieren das ClamAV-Pods und Schadcodescanner |
+| schadcodescanner.image | map | `{"pullPolicy":"IfNotPresent","repository":"clamav/clamav","tag":"stable"}` | Konfiguration des Image/Repository |
+| schadcodescanner.resources.limits.cpu | string | `"400m"` | Rechenressourcengrenzen, die auf den ClamAV-Pod anzuwenden sind.  |
+| schadcodescanner.resources.limits.memory | object | `"3Gi"` | RAM Ressourcengrenzen, die auf den ClamAV-Pod anzuwenden sind. |
+| schadcodescanner.resources.requests.cpu | string | `"150m"` | Anforderungen an Rechenressourcen, die auf den ClamAV-Pod anzuwenden sind.  |
+| schadcodescanner.resources.requests.memory | string | `"400Mi"` | Anforderungen an RAM Ressourcen, die auf den ClamAV-Pod anzuwenden sind.  |
 
 ### CoTurn
 | Schlüssel | Typ | Default | Beschreibung |
 |-----------|-----|---------|--------------|
-| coturn.default_ns | string | `"default"` |  |
-| coturn.enabled | bool | `false` |  |
-| coturn.existingcoturn.enabled | bool | `true` |  |
-| coturn.image.pullPolicy | string | `"IfNotPresent"` |  |
-| coturn.image.repository | string | `"coturn/coturn"` |  |
-| coturn.image.tag | string | `"docker/4.5.2-r12"` |  |
-| coturn.securityContext.allowPrivilegeEscalation | bool | `false` |  |
-| coturn.securityContext.readOnlyRootFilesystem | bool | `true` |  |
-| coturn.securityContext.runAsGroup | int | `2011` |  |
-| coturn.securityContext.runAsUser | int | `2011` |  |
-| coturn.turnUris.realm | string | `"turn.beispiel.org"` |  |
-| coturn.turnUris.tcp | int | `3478` |  |
-| coturn.turnUris.udp | int | `3478` |  |
+| coturn.default_ns | string | `"default"` | Namespace für den CoTurn-Dienst |
+| coturn.enabled | bool | `false` | CoTurn als Deployment aktivieren Hinweis: Nicht empfohlen! |
+| coturn.existingcoturn.enabled | bool | `true` | Schalter um bereits existenten CoTurn im K8s-Cluster zu nutzen |
+| coturn.image | map | `{"pullPolicy":"IfNotPresent","repository":"coturn/coturn","tag":"docker/4.5.2-r12"}` | Konfiguration für das Image vom CoTurn |
+| coturn.securityContext | map | `{"allowPrivilegeEscalation":false,"readOnlyRootFilesystem":true,"runAsGroup":2011,"runAsUser":2011}` | SecurityContext für das Pod |
+| coturn.turnUris | map | `{"realm":"turn.beispiel.org","tcp":3478,"udp":3478}` | TurnUris zusammenbauen lassen, aktuell deaktiviert, Als Liste unter `config.turnUris` konfigurieren  |
 
 ### WellKnown
 | Schlüssel | Typ | Default | Beschreibung |
 |-----------|-----|---------|--------------|
-| wellknown.affinity | object | `{}` |  |
-| wellknown.client."io.element.e2ee".outbound_keys_pre_sharing_mode | string | `"on_room_opening"` |  |
-| wellknown.client."io.element.e2ee".secure_backup_required | bool | `true` |  |
-| wellknown.client."io.element.e2ee".secure_backup_setup_methods[0] | string | `"passphrase"` |  |
-| wellknown.client."m.homeserver".base_url | string | `"https://matrix.beispiel.org"` |  |
-| wellknown.enabled | bool | `false` |  |
-| wellknown.htdocsPath | string | `"/var/www/localhost/htdocs"` |  |
-| wellknown.image.pullPolicy | string | `"IfNotPresent"` |  |
-| wellknown.image.repository | string | `"sebp/lighttpd"` |  |
-| wellknown.image.tag | string | `"1.4.61-r1"` |  |
-| wellknown.nodeSelector | object | `{}` |  |
-| wellknown.podSecurityContext.runAsNonRoot | bool | `true` |  |
-| wellknown.resources.limits.cpu | string | `"5m"` |  |
-| wellknown.resources.limits.memory | string | `"15Mi"` |  |
-| wellknown.resources.requests.cpu | string | `"5m"` |  |
-| wellknown.resources.requests.memory | string | `"15Mi"` |  |
-| wellknown.securityContext.readOnlyRootFilesystem | bool | `true` |  |
-| wellknown.securityContext.runAsNonRoot | bool | `true` |  |
-| wellknown.securityContext.runAsUser | int | `2022` |  |
-| wellknown.server."m.server" | string | `"matrix.beispiel.org:443"` |  |
-| wellknown.tolerations | list | `[]` |  |
-| wellknown.useIpv6 | bool | `false` | 
+| wellknown.enabled | bool | `false` | Aktivierung des Wellknown-Pods |
+| wellknown.affinity | list | `{}` | Affinitäts-Konfiguration für well-known server. |
+| wellknown.client | map | `{"io.element.e2ee":{"outbound_keys_pre_sharing_mode":"on_room_opening","secure_backup_required":true,"secure_backup_setup_methods":["passphrase"]},"m.homeserver":{"base_url":"https://matrix.beispiel.org"}}` | Daten, die auf .well-known/matrix/client bereitgestellt werden sollen |
+| wellknown.htdocsPath | path | `"/var/www/localhost/htdocs"` | Ein benutzerdefinierter htdocs-Pfad, der nützlich ist, wenn ein anderes Image ausgeführt wird. |
+| wellknown.image | map | `{"pullPolicy":"IfNotPresent","repository":"sebp/lighttpd","tag":"1.4.61-r1"}` | Das lighttpd image optional: pullSecrets:   - myRegistryKeySecretName |
+| wellknown.nodeSelector | list | `{}` | Node Selektor Konfiguration für well-known server. |
+| wellknown.podSecurityContext | map | `{"runAsNonRoot":true}` | Informationen zum Sicherheitskontext, die dem Arbeiter mitgeteilt werden sollen. weitere Möglichkeiten:  fsGroup: 2001  runAsGroup: 2001  runAsUser: 2001 |
+| wellknown.resources.limits.cpu | string | `"5m"` | Rechenressourcengrenzen, die auf den well-known server anzuwenden sind.  |
+| wellknown.resources.limits.memory | object | `"15Mi"` | RAM Ressourcengrenzen, die auf den well-known server anzuwenden sind. |
+| wellknown.resources.requests.cpu | string | `"5m"` | Anforderungen an Rechenressourcen, die auf den well-known server anzuwenden sind.  |
+| wellknown.resources.requests.memory | string | `"15Mi"` | Anforderungen an RAM Ressourcen, die auf den well-known server anzuwenden sind.  |
+| wellknown.securityContext | map | `{"readOnlyRootFilesystem":true,"runAsNonRoot":true,"runAsUser":2022}` | Konfiguration für die Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL |
+| wellknown.server."m.server" | map | `"matrix.beispiel.org:443"` | Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist. |
+| wellknown.tolerations | list | `[]` | Tolerations/Tains Konfiguration für well-known server. |
+| wellknown.useIpv6 | bool | `false` | Lighttpd bindet standardmäßig nicht an IPv6, obwohl dies in IPv6-only-Clustern erforderlich ist. | 
+
 ### Element
 | Schlüssel | Typ | Default | Beschreibung |
 |-----------|-----|---------|--------------|
@@ -280,24 +265,22 @@ BWI Matrix BundesMessenger
 | externalPostgresql.port | int | `5432` |  |
 | externalPostgresql.username | string | `"synapse"` |  |
 | postgresql.enabled | bool | `false` |  |
+
 ### Synapse-Admin
 | Schlüssel | Typ | Default | Beschreibung |
 |-----------|-----|---------|--------------|
-| synapse_admin.adminUri | string | `nil` |  |
-| synapse_admin.enabled | bool | `true` |  |
-| synapse_admin.image.pullPolicy | string | `"IfNotPresent"` |  |
-| synapse_admin.image.repository | string | `"awesometechnologies/synapse-admin"` |  |
-| synapse_admin.image.tag | string | `"0.8.5"` |  |
-| synapse_admin.livenessProbe.httpGet.path | string | `"/"` |  |
-| synapse_admin.livenessProbe.httpGet.port | int | `80` |  |
-| synapse_admin.podSecurityContext.sysctls[0].name | string | `"net.ipv4.ip_unprivileged_port_start"` |  |
-| synapse_admin.podSecurityContext.sysctls[0].value | string | `"80"` |  |
-| synapse_admin.readinessProbe.httpGet.path | string | `"/"` |  |
-| synapse_admin.readinessProbe.httpGet.port | int | `80` |  |
-| synapse_admin.resources.limits.cpu | string | `"5m"` |  |
-| synapse_admin.resources.limits.memory | string | `"15Mi"` |  |
-| synapse_admin.resources.requests.cpu | string | `"5m"` |  |
-| synapse_admin.resources.requests.memory | string | `"15Mi"` |  |
+| synapse-admin.adminUri | string | `nil` | URI für die Admin GUI, zwingend notwendig |
+| synapse-admin.enabled | bool | `true` | Aktivieren des Synapse-Admin-Moduls |
+| synapse-admin.image | map | `{"pullPolicy":"IfNotPresent","repository":"awesometechnologies/synapse-admin","tag":"0.8.5"}` | Konfiguration des Image vom Modul |
+| synapse-admin.livenessProbe.httpGet.path | string | `"/health"` | Zu verwendende Konfiguration für den Pfad des Healthchecks  |
+| synapse-admin.livenessProbe.httpGet.port | string | `"http"` | Zu verwendende Konfiguration für den Port des Healthchecks  |
+| synapse-admin.podSecurityContext.sysctls | map | `[{"name":"net.ipv4.ip_unprivileged_port_start","value":"80"}]` | Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen. Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein weitere Beispiele:    runAsNonRoot: true |
+| synapse-admin.readinessProbe.httpGet.path | string | `"/health"` | Konfiguration des Pfads vom Bereitschaftscheck |
+| synapse-admin.resources.limits.cpu | string | `"5m"` | Rechenressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.  |
+| synapse-admin.resources.limits.memory | object | `"15Mi"` | RAM Ressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind. |
+| synapse-admin.resources.requests.cpu | string | `"5m"` | Anforderungen an Rechenressourcen, die auf den Synapse-Admin Server anzuwenden sind.  |
+| synapse-admin.resources.requests.memory | string | `"15Mi"` | Anforderungen an RAM Ressourcen, die auf den Synapse-Admin Server anzuwenden sind.  |
+| synapse-admin.securityContext | map | `{}` | Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers weitere Beispiele:    runAsNonRoot: true    readOnlyRootFilesystem: true    runAsUser: 2010 |
 
 ### Nginx-Ingress
 | Schlüssel | Typ | Default | Beschreibung |
