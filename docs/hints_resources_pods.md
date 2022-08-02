@@ -1,4 +1,4 @@
-# Clamav:
+# Clamav
 
 The performance impact of running clamd in Docker is negligible. Docker is in essence just a wrapper around Linux's cgroups and cgroups can be thought of as chroot or FreeBSD's jail. All code is executed on the host without any translation. Docker does however do some isolation (through cgroups) to isolate the various systems somewhat.
 

@@ -1,69 +1,110 @@
-BWI Bundesmessenger auf Basis von Matrix Synapse
-================================================
+<div align="center">
+  <img src="https://gitlab.opencode.de/bwi/bundesmessenger/info/-/raw/main/images/logo.png" alt="BundesMessenger Logo" width="256" height="256">
+</div>
+
+<div align="center">
+  <h2 align="center">BundesMessenger</h2>
+</div>
+<div align="center">
+  Der souveräne Messenger für Deutschland 
+</div>
+
+
+# BundesMessenger Backend auf Basis von Matrix Synapse
 
 1. [Übersicht](#übersicht-zum-bundesmessenger)
-2. [Voraussetzungen](#voraussetzungen)
-3. [PoC](#poc)
-4. [Installationsbeispiele](#erweitertes-inhaltsverzeichnis)
+    - [Kontakt und Austausch](#kontakt-und-austausch)
+    - [Voraussetzungen](#voraussetzungen)
+1. [PoC](#poc)
+    - [Hostnamen/DNS](#hostnamen-dns)
+    - [Maschinengröße](#maschinengr--e)
+    - [Container-Basisimages](#container-basisimages)
+    - [Betriebssystem K8s](#betriebssystem-k8s)
+    - [Benutzer](#benutzer)
+    - [Netzwerkbesonderheiten](#netzwerkbesonderheiten)
+    - [Postgresql-Datenbank](#postgresql-datenbank)
+    - [SSL-Zertifikate](#ssl-zertifikate)
+    - [Zusätzliche Konfigurationselemente](#zus-tzliche-konfigurationselemente)
+      - [Backup:](#backup-)
+      - [BestPractise](#bestpractise)
+      - [Kyverno](#kyverno)
+1. [Erweitertes Inhaltsverzeichnis](#erweitertes-inhaltsverzeichnis)
 
-# Übersicht zum [BundesMessenger](https://gitlab.opencode.de/bwi/bundesmessenger/info)
+## Übersicht zum [BundesMessenger](https://gitlab.opencode.de/bwi/bundesmessenger/info)
 
-**Das Helm Chart ist noch nicht Produktionsbereit. Nur für PoC oder Teststellung zu verwenden.** 
+| :warning: Das Helm Chart sollte noch nicht in einer produktiven Umgebung genutzt werden. Es dient dem Einsatz im PoC der DVS und für Teststellungen. |
+| --- |
 
-[Synapse](https://github.com/matrix-org/synapse) ist die aktuelle Implementation des [Matrix Protokoll](https://matrix.org).
-Das Helm-Chart für den Bundesmessenger wurde aus dem Helm Chart von [Alexander Olofsson](https://gitlab.com/ananace/charts/-/tree/master/charts/matrix-synapse) entwickelt.
-Die größten Änderungen zu dem zugrunde liegenden Chart sind:
-- Anpassungen im Storageumfeld
-- Änderung des Sets für die Worker auf Statefulsets
+[Synapse](https://github.com/matrix-org/synapse) ist eine Matrix homeserver Implementierung auf Basis des [Matrix Protokoll](https://matrix.org).
+Das Matrix Protokoll wird in der [Matrix Specification](https://spec.matrix.org/) beschrieben und dokumentiert.
+
+Das Helm-Chart für den BundesMessenger wurde aus dem Helm Chart von [Alexander Olofsson](https://gitlab.com/ananace/charts/-/tree/master/charts/matrix-synapse) entwickelt.
+Die größten Änderungen zu dem zugrundeliegenden Chart sind:
+- Anpassungen im Umfeld des Storage / Speichers
+- Änderung des Sets für die Worker auf `StatefulSets`
 - Hinzufügen und Konfiguration für Horizontal Pod Autoscaling (HPA) für die Generic-Worker
-- Änderung der Benamung/Transport der Pod-Names in die Dienste, für eineindeutiges Logging und Auswertung der internen Kommunikation
-- festes PersistentVolumeClaim für Media-Worker
+- Änderung der Namensgebung/Transport der Pod-Names in die Dienste, für ein eindeutiges Logging und Auswertung der internen Kommunikation
+- festes `PersistentVolumeClaim` für Media-Worker
 - Einfügen/Anpassen von Ingress-Routen 
-- Hinzufügen eines Virenscanners (ClamAV) **(TODO: Einbringung des Contentscanners zum aktivieren des Virenscanners)**
-- Hinzufügen des Synapse Admin von [Awesome-Technologies](https://github.com/Awesome-Technologies/synapse-admin) zur Administration der Instanz (aktuell auf nur intern erreichbarer Domain)
+- Hinzufügen eines Virenscanners (ClamAV) **(ToDo: Einbringung des Contentscanners zum aktivieren des Virenscanners)**
+- Hinzufügen des [Synapse Admin](https://github.com/Awesome-Technologies/synapse-admin) von [Awesome-Technologies](https://awesome-technologies.de/) zur Administration der Instanz (aktuell auf nur intern erreichbarer Domain)
 - Hinzufügen und Konfiguration des Sygnal-Push-Dienstes
-- Konfiguration des kompletten Dienstes für das ServiceMonitoring per Prometheus (wird automatisch an Clustereigenen Prometheus promoted)
-- Integration eines CoTurn-Servers zur Nutzung der VoIP-Dienste 
+- Konfiguration des kompletten Dienstes für das Service-Monitoring per Prometheus (wird automatisch an Clustereigenen Prometheus promoted)
+- Integration eines [CoTurn-Servers](https://github.com/coturn/coturn) zur Nutzung der VoIP-Dienste 
     - *Optional: Installation und Konfiguration eines dedizierten NginX Controllers für UDP Traffic*
-    - **Empfehlung: Installation eines CoTurn außerhalb des Kubernetes und Konfiguration zur Erreichbarkeit dort vornehmen**
-- BestPractise Konfiguration der Dienste nach BWI Erfahrungsgewinn
+    - :pushpin: **Empfehlung: Installation eines CoTurn außerhalb des Kubernetes und Konfiguration zur Erreichbarkeit dort vornehmen**
+- Konfiguration der Dienste nach Best Practice
 
-Für Fragen zur Anwendung des Helm-Charts, Konfiguration und Deployment steht Ihnen Christian.Steinke@bwi.de gerne zur Verfügung.
+### Kontakt und Austausch
 
-## Voraussetzungen
+Für Fragen zur Anwendung des Helm-Charts, Konfiguration, Deployment und BundesMessenger
+haben wir einen [Matrix Raum](https://matrix.to/#/#opencodebum:matrix.org) erstellt.
 
-- Kubernetes 1.19+
-- Helm 3.0+
-- Unix mit Kernel 4.11 oder neuer auf Worker-Nodes (für syscall Anweisung net.ipv4.ip_unprivileged_port_start)
+<div align="center">
+  <img src="https://gitlab.opencode.de/bwi/bundesmessenger/info/-/raw/main/images/qr_matrix_room.png" alt="QR Code Matrix">
+</div>
+
+Kein Matrix Client zur Hand, dann auch gerne über unser [Email Postfach](mailto:bundesmessenger@bwi.de).
+
+Wir freuen uns auf den Austausch.
+
+### Voraussetzungen
+
+- [Kubernetes](https://kubernetes.io/) 1.19+
+- [Helm](https://helm.sh/) 3.0+
+- Unix mit Kernel 4.11 oder neuer auf Worker-Nodes (für syscall Anweisung `net.ipv4.ip_unprivileged_port_start`)
 - Ingress Controller (NginX) im Cluster installiert
-    - *Optional: Nicht Policy-Konform: Bei Nutzung von CoTurn des Helm Charts, muss der IngressController den Port 3478 TCP zugefügt werden(Patch) oder durch vorgeschalteten ReverseProxy an die Nodeports direkt durchgeleitet werden. Weiterhin müsste bei Kubernetesinternem CoTurn ein weiterer NginX-Controller deployed werden, welcher sich um den UDP-Traffic kümmert **(nicht empfohlen)***
+    - *Optional: Nicht Policy-Konform: Bei Nutzung von CoTurn des Helm Charts, muss der IngressController den Port 3478 TCP zugefügt werden (Patch) oder durch vorgeschalteten ReverseProxy an die Nodeports direkt durchgeleitet werden. Weiterhin müsste bei Kubernetesinternem CoTurn ein weiterer NginX-Controller deployed werden, welcher sich um den UDP-Traffic kümmert **(nicht empfohlen)***
 - vorgelagerte Loadbalancer und vorkonfigurierte Firewalls, um den Service in vollem Umfang zu nutzen
     - *Optional: bei Nutzung von CoTurn wird ein NginX-ReverseProxy empfohlen, der die TCP/UDP-Streams weiterleitet (nicht Policykonform, da Host-Ports angesprochen werden müssen.*
-- *Optional: Storage muss PersistentVolumeClaims zulassen und konfiguriert haben (von Vorteil für DB und Media)*
-- Zugriff auf vorhandenen PostgreSQL Server (DVS Konformität)
-    - Datenbank **synapse_db** (**Hinweis: Collation und cType müssen auf "C" gesetzt sein**)  und User **synapse**.
+- *Optional: Storage muss `PersistentVolumeClaims` zulassen und konfiguriert haben (von Vorteil für DB und Media)*
+- Zugriff auf vorhandenen [PostgreSQL](https://www.postgresql.org/) Server (konform zur DVS)
+    - Datenbank `synapse_db` mit einem Benutzer `synapse`.
     - Server muss erreichbar sein aus dem Namespace *Empfehlung: PostgreSQL Server liegt auch im Kubernetes*.
-- *Optional: ein "existingClaim" (persistent volume claim) mit dem Namen "matrix-synapse" (empfohlen 10GB) für den Media-Worker als Speicher.*
+    - :pushpin: **Hinweis:** Collation und cType müssen auf `C` gesetzt sein. Siehe [Postgresql-Datenbank](#postgresql-datenbank)
+- *Optional: ein `existingClaim` (persistent volume claim) mit dem Namen `matrix-synapse` (empfohlen 10 GB) für den Media-Worker als Speicher.*
 
- *Hinweis: Sollte die storageClass nfs-client nicht existent sein, muss diese erstellt oder mit dem folgenden Parameter gesetzt werden:*
+:pushpin: **Hinweis:** Sollte die `storageClass` `nfs-client` nicht existent sein, muss diese erstellt oder mit dem folgenden Parameter gesetzt werden:
 ```console
-    helm install bundesmessenger bundesmessenger/bundesmessenger --set persistence.storageClass=STORAGECLASS
+helm install bundesmessenger bundesmessenger/bundesmessenger --set persistence.storageClass=STORAGECLASS
 ```
-**Anmerkung** Matrix benötigt valide Zertifikate um voll funktionsfähig zu sein.
 
-## PoC
+| :warning: Anmerkung: Matrix benötigt valide TLS-Zertifikate um voll funktionsfähig zu sein.|
+| --- |
 
-So installieren Sie eine PoC-Umgebung
+## Messenger-PoC
+So installieren Sie eine PoC-Umgebung.
 
-Unser Helm Chart kann die Installation von Matrix/Synapse Proof of Concept (PoC) Umgebungen übernehmen. Unsere Standard-PoC-Umgebung ist ein 4-Node-Cluster mit vanilla Kubernetes, auf dem wir unsere Testumgebung bereitstellen, was zu einem voll funktionsfähigen Synapse-Server mit Element Web führt, der zur Durchführung eines PoC verwendet werden kann. Lokale Produktionsbereitstellungen verwenden dasselbe Installationsprogramm und denselben Operator, sind jedoch für die Bereitstellung in einer vollständigen Kubernetes-Umgebung vorgesehen und müssen erst noch getestet werden und das PoC erfolgreich verlassen.
+Unser Helm Chart kann die Installation von Matrix/Synapse Proof of Concept (PoC) Umgebungen übernehmen. Unsere Kubernetes-Infrastruktur ist ein 4-Node-Cluster mit vanilla Kubernetes. Auf dem Cluster wird der Messenger-PoC bereitgestellt, der einen voll funktionsfähigen Synapse-Server mit Element Web Client bereitstellt.
 
-PoC-Anlagen sind nicht dazu bestimmt, zu Produktionszwecken betrieben zu werden. Sie sollten eine andere Installation für Ihre Produktionsumgebung planen. Die Einstellungen, die Sie mit dem Installationsprogramm verwenden, können für Ihre Produktionsinstallation übernommen, Ihre Räume und Bereiche jedoch nicht.
+Messenger-PoCs auf Basis dieser Helm Charts sind nicht dazu bestimmt in einem produktiven Umfeld betrieben zu werden. Sie sollten eine andere Installation für Ihre Produktionsumgebung planen. Einstellungen, die Sie mit dem Installationsprogramm verwenden, können für eine Installation in einer Produktivumgebung übernommen werden. Daten innerhalb des Messengers (Benutzer, Räume, Chatinhalte, etc.) werden nicht zwischen den Umgebungen (PoC/Test/Integration/Produktion) überführt.
 
 Um mit einer PoC-Installation zu beginnen, müssen mehrere Dinge berücksichtigt werden, die in diesem Leitfaden behandelt werden:
 
 - [Hostnamen/DNS](#hostnamendns)
 - [Maschinengröße](#maschinengröße)
-- [Betriebssystem](#betriebssystem)
+- [Container-Basisimages](#container-basisimages)
+- [Betriebssystem K8s](#betriebssystem-k8s)
 - [Benutzer](#benutzer)
 - [Netzwerkbesonderheiten](#netzwerkbesonderheiten)
 - [Postgresql-Datenbank](#postgresql-datenbank)
@@ -76,30 +117,41 @@ Sobald diese Bereiche abgedeckt sind, können Sie eine PoC-Umgebung installieren
 ### Hostnamen/DNS
 Sie benötigen Hostnamen für die folgenden Infrastrukturkomponenten:
 
-- Elementserver (erforderlich)
-- Synapse-Server (erforderlich)
+- Element Web Client (erforderlich)
+- Synapse (erforderlich)
+- Synapse-Admin (empfohlen für eine Erreichbarkeit nur von intern, `.local`-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :smiley:)
+- Monitoring (empfohlen) - ToDo: Beschreiben
 - CoTurn-Server (optional)
-- Synapse-Admin-Server (empfohlen für nur intern erreichbar, .local-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :) )
-- Monitoring (empfohlen)
  
-Diese Hostnamen müssen in die entsprechenden IP-Adressen aufgelöst werden. Wenn Sie über einen geeigneten DNS-Server mit Einträgen (auch mit SRV-Einträgen für Matrix) für diese Hostnamen verfügen, können Sie loslegen.
+Diese Hostnamen müssen in die entsprechenden IP-Adressen aufgelöst werden. Wenn Sie über einen geeigneten DNS-Server mit Einträgen (auch mit SRV-Einträgen für Matrix, siehe [separater Subdomain](docs/installation.md#auf-separater-subdomain)) für diese Hostnamen verfügen, können Sie loslegen.
 
 ### Maschinengröße
-Für die Durchführung eines Proof of Concept mit unserem Installationschart unterstützen wir nur die x86_64-Architektur und empfehlen die folgenden Mindestanforderungen für ein eigenständig aufgebautes PoC-Umfeld:
+Für die Durchführung eines Proof of Concept mit unserem Installationschart unterstützen wir nur die x86_64-Architektur und empfehlen die folgenden Mindestanforderungen an Ressourcen in einem Kubernetes-Cluster:
 
-- Keine Förderation: 4 vCPUs/CPUs und 16 GB RAM auf 2 Worker-Nodes und eine Master-Node mit 2vCPUs und 4GB RAM
-- Föderation: 8 vCPUs/CPUs und 32 GB RAM auf 3+ Worker-Nodes und mindestens eine Master-Node mit 2vCPUs und 4GB RAM
+- Ohne Föderation
+  - zwei Worker-Nodes mit je 2 vCPUs/CPUs und 8 GB RAM
+  - eine Master-Node mit 2 vCPUs und 4GB RAM
+- Mit Föderation
+  - mind. drei Worker-Nodes mit je 4 vCPUs/CPUs und 16 GB RAM
+  - mind. eine Master-Node mit 2 vCPUs und 4GB RAM
 
-*Es wird empfohlen auf mehr als eine Master-Node zu setzen. Weiterhin ist eine zusätzliche Node, welche persistenten Speicher präsentiert, von Vorteil. **Diese Funktionalität muss später vom Plattformbetreiber zur Verfügung gestellt werden und sollte somit aus dem PoC-Fokus frühzeitig gelöst sein.***
+:pushpin: **Hinweis:** Es wird empfohlen auf mehr als eine Master-Node zu setzen. Weiterhin ist eine zusätzliche Node, welche persistenten Speicher präsentiert, von Vorteil. Diese Funktionalität sollte vom Plattformbetreiber zur Verfügung gestellt werden und ist kein Bestandteil dieser Helm Charts.
 
-### Betriebssystem
-Im Rahmen der DVS und der Entwicklung des Bundesmessenger ist die Nutzung von OSADL-Images die wahrscheinlichste Variante.
-Aus der Sicht der Sicherheit ist zu Alpine oder Debian bzw. Ubuntu-Server (LTS) zu raten. Es gibt aber keine Einschränkungen zu RedHead oder SLES, jedoch müssen Abhängigkeiten zu nötigen Paketen selbst vorgenommen werden.
+### Container-Basisimages
+In Zukunft soll auf die Nutzung von Container aus [Docker Hub](https://hub.docker.com/) verzichtet werden.
+Hierzu werden wir eigene CI-Pipelines aufbauen um eigene Applikations- bzw. Basis-Images im OpenCoDE zur Verfügung zu stellen.
 
-*Empfehlung: Als OS für die PoC-Umgebung wird Debian empfohlen. Da dort iptables-legacy-mode ohne große Umstände mit der aktuellen Version von kubelet und containerd.io lauffähig ist.*
+Veröffentlichen von eigenen Basis-Images stellt eine Verbreitung einer Linux-Distribution dar.
+Daher werden wir zur Herstellung unserer Appikations-Images auf spezielle Basis-Images aufbauen.
+Folgende Optionen werden geprüft:
+- DVS Basis-Image
+- [OSADL Basis-Image](https://www.osadl.org/OSADL-Docker-Base-Image.osadl-docker-base-image.0.html)
+
+### Betriebssystem K8s
+ToDo: *Empfehlung: Als Betriebssystem für die k8s-Worker wird Debian empfohlen, da dort `iptables-legacy-mode` ohne große Umstände mit der aktuellen Version von kubelet und containerd.io lauffähig ist.*
 
 ### Benutzer
-Es wird empfohlen im Rahmen das PoC auf alle sicherheitsrelevanten Umgebungs- und Rahmenbedigungen zu achten. Dazu zählen nicht previligierte Benutzer auf den Maschinen um dort eventuelle Arbeiten umzusetzen. Damit ist eine lauffähige und stabile Infrastrukur gewährleistet.
+Es wird empfohlen im Rahmen das PoC auf alle sicherheitsrelevanten Umgebungs- und Rahmenbedingungen zu achten. Dazu zählen nicht privilegierte Benutzer auf den Maschinen um dort eventuelle Arbeiten umzusetzen. Damit ist eine lauffähige und stabile Infrastruktur gewährleistet.
 
 ### Netzwerkbesonderheiten
 Der Messengerservice muss Inhalte binden und bereitstellen über:
@@ -115,28 +167,28 @@ Für zusätzliche Dienste wie CoTurn, müssen die entsprechenden Ports in der Si
 - Port 5349 TCP (bei TLS)
 
 ### Postgresql-Datenbank
-Die Installation erfordert, dass Sie eine postgresql-Datenbank mit einem LOCALE von C und UTF8-Codierung eingerichtet haben. 
-Siehe https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#set-up-database für weitere Details.
+Die Installation erfordert, dass Sie eine postgresql-Datenbank mit einem `locale` von `C` und `encoding` `UTF8` eingerichtet haben. 
+Siehe [Synapse Dokumentation](https://matrix-org.github.io/synapse/latest/postgres.html#set-up-database) für weitere Details.
 
-Wenn Sie diese bereits haben, notieren Sie sich bitte den Datenbanknamen, den Benutzer und das Passwort, da Sie diese benötigen, um mit der Installation zu beginnen. (per Parameter zu übergeben oder in der value.yaml anzupassen)
+Wenn Sie diese bereitgestellt haben, notieren Sie sich bitte den Datenbanknamen, den Benutzer und das Passwort, da Sie diese benötigen, um mit der Installation zu beginnen. (per Parameter zu übergeben oder in der `value.yaml` anzupassen)
 
-Wenn Sie noch keine Datenbank haben, richtet das PoC-Installationsprogramm PostgreSQL in Ihrem Namen ein. Dies ist per Default so hinterlegt. Dafür benötigt das Chart jedoch ein festes VolumeClaim der StorageClass "nfs-client". Dies kann geändert werden (siehe oben)
+Wenn Sie noch keine Datenbank haben, richtet das PoC-Installationsprogramm PostgreSQL in Ihrem Namen ein. Dies ist standardmäßig hinterlegt. Dafür benötigt das Chart jedoch ein festes `VolumeClaim` der `StorageClass` `nfs-client`. Dies kann geändert werden (siehe oben).
 
-*Optional: Es kann das Helm-Chart mit dazu verwendet werden im gleichen Namespace einen PostgreSQL-Server mit entsprechender Konfiguration zu deployen. Das ist für den PoC auch soweit funkional, sollte aber in eine stabile DVS-konforme Version überführt werden. Dazu kann auch das Subchart für den PostSQL-Server entsprechend angepasst werden, dass ein eigener Namespace für einen "externen" Datenbankserver verwendet wird. Dabei ist zu beachten, das dieses Deployment losgelöst vom Bundesmessenger umgesetzt wird, da sonst die kyverno-Regeln hier einen Verstoß melden würden.*
+*Optional: Es kann das Helm-Chart mit dazu verwendet werden im gleichen Namespace einen PostgreSQL-Server mit entsprechender Konfiguration bereitzustellen. Das ist für den PoC auch funktional, sollte aber in eine stabile DVS-konforme Version überführt werden. Dazu kann auch das Subchart für den PostgreSQL-Server entsprechend angepasst werden, dass ein eigener Namespace für einen "externen" Datenbankserver verwendet wird. Dabei ist zu beachten, dass diese Bereitstellung losgelöst vom BundesMessenger umgesetzt wird, da sonst die kyverno-Regeln hier einen Verstoß melden würden.*
 
 ### SSL-Zertifikate
-Es ist von Vorteil, wie auch in der folgenden Installationsanweisung, valide Zertifikate für die Hauptdomain und wenn notwendig auch die entsprechende Subdomain auf dem der Synapse-Host erreichbar ist. 
+Es wird empfohlen, wie auch in der folgenden Installationsanweisung, valide TLS-Zertifikate für alle genutzten Domains auf dem der Synapse-Host und die verknüpften Services (siehe: [Hostnamen/DNS](#hostnamen-dns)) erreichbar sind, zur Verfügung zu stellen.
 
-*Es ist auch möglich Lets-Encrypt-Zertifikate zu nutzen, allerdings führt dies zu Fehlverhalten bei Nutzung von Goggle-Chrome als Browser.*
+Die Bereitstellung der TLS-Zertifikate ist nicht Bestandteil dieser Helm Charts.
 
 ### Zusätzliche Konfigurationselemente
 
 Die Anbindung an eine IAM-Sicherheitsinfrastruktur ist noch ein offener Punkt, der während des PoCs zur Klärung bereit ist.
-Einhergehend auch die Thematik SSO per SAML oder anderen Mechaniken.
+Einhergehend auch die Thematik Single Sign-on (SSO) per SAML, OIDC oder anderen Mechaniken.
 
 #### Backup:
-Für den Messenger ist die Datenbank der Hauptfokus, zusammen mit dem ```signing-key``` von Matrix. Dahingehend muss die Datenbank persistiert und regelmäßig gebackupt werden. Der Schlüssel liegt als Secret im laufenden Deployment und sollte gesichert werden. Für ein aktives Redeployment, bzw. Migration in eine andere Umgebung (PRD), wird dieser Schlüssel benötigt und kann bei der initialen Ausführung des Helm-Charts mit angegeben werden: 
-```
+Für den Messenger ist die Datenbank der Hauptfokus, zusammen mit dem `signing-key` von Matrix. Dahingehend muss die Datenbank persistiert und regelmäßig gesichert werden. Der Schlüssel liegt als Secret im laufenden Deployment und sollte gesichert werden. Für ein aktives Redeployment, bzw. Migration in eine andere Umgebung (z.B. Produktionsumgebung), wird dieser Schlüssel benötigt und kann bei der initialen Ausführung des Helm-Charts mit angegeben werden: 
+```yaml
 extraConfig:
 #  old_signing_keys:
 #    "ed25519:id": { key: "base64string", expired_ts: 123456789123 }
@@ -145,16 +197,21 @@ extraConfig:
 #### BestPractise 
 
     Netzwerk Policies 
-    Noch im TODO
+    Noch im ToDo
+    Wahl der Domain und Delegation
 
-
-#### Kyverno
+#### [Kyverno](https://kyverno.io/)
 Siehe Dokumentation der einzelnen Rulesets im Dokument [DVS Policies retentions](./DVS-Policies-restrictions.md)
 
-Erweitertes Inhaltsverzeichnis
-==================
-Eine Installationsanweisung finden sie hier, so wie auch Hinweise zu den einzelnen zusätzlichen Diensten:
+# Erweitertes Inhaltsverzeichnis
 
-- [Installation](/docs/installation.md)
-- [TURN (Audio / Video)](/docs/turn.md)
-- [Sygnal (Push-Service)](/docs/Sygnal_push.md)
+Eine Installationsanweisung finden Sie hier, so wie auch Hinweise zu den einzelnen zusätzlichen Diensten:
+
+- [Installation](./docs/installation.md)
+- [TURN (Audio / Video)](./docs/turn.md)
+- [Sygnal (Push-Service)](./docs/sygnal_push.md)
+
+ToDo: Neustrukturierung der Dokumente
+ToDo: Klären DVS DMZ, etc. Port 80 und TLS/443 in Helm Chart
+ToDo: Infrastruktur-Bild
+ToDo: Ingress
