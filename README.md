@@ -211,7 +211,8 @@ Eine Installationsanweisung finden Sie hier, so wie auch Hinweise zu den einzeln
 - [TURN (Audio / Video)](./docs/turn.md)
 - [Sygnal (Push-Service)](./docs/sygnal_push.md)
 
-ToDo: Neustrukturierung der Dokumente
-ToDo: Klären DVS DMZ, etc. Port 80 und TLS/443 in Helm Chart
-ToDo: Infrastruktur-Bild
-ToDo: Ingress
+# ToDo
+- Neustrukturierung der Dokumente
+- Klären DVS DMZ, etc. Port 80 und TLS/443 in Helm Chart
+- Infrastruktur-Bild
+- Ingress
