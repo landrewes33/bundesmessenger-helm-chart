@@ -514,19 +514,19 @@ workers:
         path: /health
         # -- (string) Konfiguration des Ports vom Bereitschaftscheck
         # DEFAULT gilt für alle Synapse-Worker-Pods. 
-        port: metrics                                                                                                                         |          port: listener
-                                                                                                                                                |  ---------------------------------------------------------------------------------------------------------------------------------------------
-      #Startup-Check                                                                                                                            |  ---------------------------------------------------------------------------------------------------------------------------------------------
-      startupProbe:                                                                                                                             |  ---------------------------------------------------------------------------------------------------------------------------------------------
-        # -- (int) Anzahl der Fehlversuche, damit Startzeit für Worker bei 60 Sekunden landet; Timeout default bei 10 Sekunden                  |  ---------------------------------------------------------------------------------------------------------------------------------------------
-        failureThreshold: 6                                                                                                                     |  ---------------------------------------------------------------------------------------------------------------------------------------------
-        httpGet:                                                                                                                                |  ---------------------------------------------------------------------------------------------------------------------------------------------
-          # -- (string) Konfiguration des Pfads vom Startup-Check                                                                               |  ---------------------------------------------------------------------------------------------------------------------------------------------
-          # DEFAULT gilt für alle Synapse-Worker-Pods.                                                                                          |  ---------------------------------------------------------------------------------------------------------------------------------------------
-          path: /health                                                                                                                         |  ---------------------------------------------------------------------------------------------------------------------------------------------
-          # -- (string) Konfiguration des Ports vom Startup-Check                                                                               |  ---------------------------------------------------------------------------------------------------------------------------------------------
-          # DEFAULT gilt für alle Synapse-Worker-Pods.                                                                                          |  ---------------------------------------------------------------------------------------------------------------------------------------------
-          port: metrics 
+        port: metrics
+      
+      #Startup-Check
+      startupProbe:
+        # -- (int) Anzahl der Fehlversuche, damit Startzeit für Worker bei 60 Sekunden landet; Timeout default bei 10 Sekunden
+        failureThreshold: 6
+        httpGet:
+          # -- (string) Konfiguration des Pfads vom Startup-Check
+          # DEFAULT gilt für alle Synapse-Worker-Pods.
+          path: /health
+          # -- (string) Konfiguration des Ports vom Startup-Check
+          # DEFAULT gilt für alle Synapse-Worker-Pods.
+          port: metrics
 
     # -- (list) Node Selektor Konfiguration, die auf alle Synapse-Worker-Pod anzuwenden sind.
     # DEFAULT gilt für alle Synapse-Worker-Pods. 
