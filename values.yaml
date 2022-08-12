@@ -409,11 +409,6 @@ workers:
     # Siehe dazu die Informations-URL https://github.com/matrix-org/synapse/blob/master/docs/workers.md
     replicaCount: 1
 
-    ## Update strategy - only really applicable for deployments with RWO PVs attached (e.g. media repository)
-    ## If replicas = 1, an update can get "stuck", as the previous pod remains attached to the
-    ## PV, and the "incoming" pod can never start. Changing the strategy to "Recreate" will
-    ## terminate the single previous pod, so that the new, incoming pod can attach to the PV
-    ##
     strategy:
       # -- (string) DEFAULT gilt für alle Synapse-Worker-Pods
       # Nur wirklich anwendbar, wenn das Deployment ein RWO PV angehängt hat (z.B. Media Repository)
@@ -509,7 +504,7 @@ workers:
         path: /health
         # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks 
         # DEFAULT gilt für alle Synapse-Worker-Pods. 
-        port: listener
+        port: metrics
 
     #Bereitschaftscheck
     readinessProbe:
@@ -519,7 +514,19 @@ workers:
         path: /health
         # -- (string) Konfiguration des Ports vom Bereitschaftscheck
         # DEFAULT gilt für alle Synapse-Worker-Pods. 
-        port: listener
+        port: metrics                                                                                                                         |          port: listener
+                                                                                                                                                |  ---------------------------------------------------------------------------------------------------------------------------------------------
+      #Startup-Check                                                                                                                            |  ---------------------------------------------------------------------------------------------------------------------------------------------
+      startupProbe:                                                                                                                             |  ---------------------------------------------------------------------------------------------------------------------------------------------
+        # -- (int) Anzahl der Fehlversuche, damit Startzeit für Worker bei 60 Sekunden landet; Timeout default bei 10 Sekunden                  |  ---------------------------------------------------------------------------------------------------------------------------------------------
+        failureThreshold: 6                                                                                                                     |  ---------------------------------------------------------------------------------------------------------------------------------------------
+        httpGet:                                                                                                                                |  ---------------------------------------------------------------------------------------------------------------------------------------------
+          # -- (string) Konfiguration des Pfads vom Startup-Check                                                                               |  ---------------------------------------------------------------------------------------------------------------------------------------------
+          # DEFAULT gilt für alle Synapse-Worker-Pods.                                                                                          |  ---------------------------------------------------------------------------------------------------------------------------------------------
+          path: /health                                                                                                                         |  ---------------------------------------------------------------------------------------------------------------------------------------------
+          # -- (string) Konfiguration des Ports vom Startup-Check                                                                               |  ---------------------------------------------------------------------------------------------------------------------------------------------
+          # DEFAULT gilt für alle Synapse-Worker-Pods.                                                                                          |  ---------------------------------------------------------------------------------------------------------------------------------------------
+          port: metrics 
 
     # -- (list) Node Selektor Konfiguration, die auf alle Synapse-Worker-Pod anzuwenden sind.
     # DEFAULT gilt für alle Synapse-Worker-Pods. 
@@ -553,38 +560,79 @@ workers:
     # -- (list) entsprechende Endpunkte für den generischen Worker
     listeners: [client, federation]
     # -- (path) Client-Side(cs) Pfad für die Ingress-Konfiguration des Workers
-    # auskommentiert:
-    # - "/_matrix/client/(v2_alpha|r0|v3)/sync"
-    # - "/_matrix/client/(api/v1|r0|v3)/initialSync"
-    # - "/_matrix/client/(api/v1|r0|v3)/rooms/[^/]+/initialSync"
-    # @default -- werden in der value.yaml gesetzt und können dort eingesehen werden 
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
     csPaths:
-      - "/_matrix/client/(api/v1|v2_alpha|r0|v3)/events"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/publicRooms"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/joined_members"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/context/.*"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/members"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/state"
-      - "/_matrix/client/unstable/org.matrix.msc2946/rooms/.*/spaces"
-      - "/_matrix/client/unstable/org.matrix.msc2946/rooms/.*/hierarchy"
-      - "/_matrix/client/unstable/im.nheko.summary/rooms/.*/summary"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/account/3pid"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/keys/query"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/keys/changes"
-      - "/_matrix/client/versions"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/voip/turnServer"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/joined_groups"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/publicised_groups"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/login"
-      - "/_matrix/client/(r0|v3|unstable)/register"
-      - "/_matrix/client/(r0|v3|unstable)/auth/.*/fallback/web"
+      ## Sync requests
+      # - "/_matrix/client/(r0|v3)/sync$"
+      - "/_matrix/client/(api/v1|r0|v3)/events$"
+      # - "/_matrix/client/(api/v1|r0|v3)/initialSync$"
+      # - "/_matrix/client/(api/v1|r0|v3)/rooms/[^/]+/initialSync$"
+
+      ## Client API requests
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/createRoom$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/publicRooms$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/joined_members$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/context/"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/members$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/state$"
+      - "/_matrix/client/v1/rooms/.*/hierarchy$"
+      - "/_matrix/client/unstable/org.matrix.msc2716/rooms/.*/batch_send$"
+      - "/_matrix/client/unstable/im.nheko.summary/rooms/.*/summary$"
+      - "/_matrix/client/(r0|v3|unstable)/account/3pid$"
+      - "/_matrix/client/(r0|v3|unstable)/account/whoami$"
+      - "/_matrix/client/(r0|v3|unstable)/devices$"
+      - "/_matrix/client/versions$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/voip/turnServer$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/event/"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/joined_rooms$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/search$"
+      
+      ## Encryption requests
+      - "/_matrix/client/(r0|v3|unstable)/keys/query$"
+      - "/_matrix/client/(r0|v3|unstable)/keys/changes$"
+      - "/_matrix/client/(r0|v3|unstable)/keys/claim$"
+      - "/_matrix/client/(r0|v3|unstable)/room_keys/"
+      
+      ## Registration/login requests
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/login$"
+      - "/_matrix/client/(r0|v3|unstable)/register$"
+      - "/_matrix/client/v1/register/m.login.registration_token/validity$"
+      
+      ## Event sending requests
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/redact"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/send"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/(join|invite|leave|ban|unban|kick)"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/(join|invite|leave|ban|unban|kick)$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/join/"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/profile/"
+             
+      ## User directory search requests
+      - "/_matrix/client/(r0|v3|unstable)/user_directory/search"
+
+      ## Worker event streams, deaktiviert!
+      ## See https://matrix-org.github.io/synapse/latest/workers.html#stream-writers
+      ## auskommentiert, da nicht auf generic worker sondern zum master
+
+      ## The typing event stream
+      # - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/typing"
+      
+      ## The to_device event stream
+      # - "/_matrix/client/(r0|v3|unstable)/sendToDevice/"
+
+      ## The account_data event stream
+      # - "/_matrix/client/(r0|v3|unstable)/.*/tags"
+      # - "/_matrix/client/(r0|v3|unstable)/.*/account_data"
+      
+      ## The receipts event stream
+      # - "/_matrix/client/(r0|v3|unstable)/rooms/.*/receipt"
+      # - "/_matrix/client/(r0|v3|unstable)/rooms/.*/read_markers"
+      
+      ## The presence event stream
+      # - "/_matrix/client/(api/v1|r0|v3|unstable)/presence/"
+
     # -- (path) Server-Side (externer Zugriff) Pfade für die Ingress-Konfiguration des Workers
     # @default -- werden in der value.yaml gesetzt und können dort eingesehen werden 
     paths:
+          ## Federation requests
       - "/_matrix/federation/v1/event/"
       - "/_matrix/federation/v1/state/"
       - "/_matrix/federation/v1/state_ids/"
@@ -594,26 +642,28 @@ workers:
       - "/_matrix/federation/v1/query/"
       - "/_matrix/federation/v1/make_join/"
       - "/_matrix/federation/v1/make_leave/"
-      - "/_matrix/federation/v1/send_join/"
-      - "/_matrix/federation/v2/send_join/"
-      - "/_matrix/federation/v1/send_leave/"
-      - "/_matrix/federation/v2/send_leave/"
-      - "/_matrix/federation/v1/invite/"
-      - "/_matrix/federation/v2/invite/"
-      - "/_matrix/federation/v1/query_auth/"
+      - "/_matrix/federation/(v1|v2)/send_join/"
+      - "/_matrix/federation/(v1|v2)/send_leave/"
+      - "/_matrix/federation/(v1|v2)/invite/"
       - "/_matrix/federation/v1/event_auth/"
       - "/_matrix/federation/v1/exchange_third_party_invite/"
       - "/_matrix/federation/v1/user/devices/"
-      - "/_matrix/federation/v1/send/"
-      - "/_matrix/federation/v1/get_groups_publicised"
       - "/_matrix/key/v2/query"
+      - "/_matrix/federation/v1/hierarchy/"
+
+      ## Inbound federation transaction request
+      - "/_matrix/federation/v1/send/"
 
     # -- (int) Anzahl der Worker-Pods
+    # Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas 
+    # oder wenn nicht gesetzt, dann wird autoscaling.minReplicas übernommen
     replicaCount: 2
-    
+
     ## Konfiguration für das auto-scaling der Applikation.
     autoscaling:
       # -- (bool) schalte das HPA für die Pods ein
+      # Hinweis: Kann für alle spezifischen Worker benutzt werden
+      # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden
       enabled: true
       # -- (int) minimale Anzahl der Worker-Pods
       minReplicas: 2
@@ -625,7 +675,7 @@ workers:
       targetMemoryUtilizationPercentage: 80
 
   ## Um den allgemeinen Worker in spezifische Belange aufzuteilen - zum Beispiel den Empfang von Föderationstransaktionen;
-  ## Hinweis: Dieser Worker sollte eingehenden Datenverkehr basierend auf der Quell-IP routen lassen, was
+  ## Hinweis: Diese Worker sollten eingehenden Datenverkehr basierend auf der Quell-IP routen lassen, was
   ## noch als TODO offen ist.
   ## https://github.com/matrix-org/synapse/blob/develop/docs/workers.md#load-balancing
 
@@ -655,10 +705,10 @@ workers:
     # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des Synchworkers
     # @default -- werden in der value.yaml gesetzt und können dort eingesehen werden 
     csPaths:
-      - "/_matrix/client/(v2_alpha|r0|v3)/sync"
-      - "/_matrix/client/(api/v1|v2_alpha|r0|v3)/events"
-      - "/_matrix/client/(api/v1|r0|v3)/initialSync"
-      - "/_matrix/client/(api/v1|r0|v3)/rooms/[^/]+/initialSync"
+      - "/_matrix/client/(v2_alpha|r0|v3)/sync$"
+      - "/_matrix/client/(api/v1|v2_alpha|r0|v3)/events$"
+      - "/_matrix/client/(api/v1|r0|v3)/initialSync$"
+      - "/_matrix/client/(api/v1|r0|v3)/rooms/[^/]+/initialSync$"
 
   pusher:
   # -- (bool) Dieser Worker kümmert sich um die Übermittlung von Benachrichtigungen.
@@ -694,17 +744,17 @@ workers:
     # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des Media-Workers
     # @default -- werden in der value.yaml gesetzt und können dort eingesehen werden 
     csPaths:
-      - "/_matrix/media/"
-      - "/_synapse/admin/v1/purge_media_cache"
-      - "/_synapse/admin/v1/room/.*/media.*"
-      - "/_synapse/admin/v1/user/.*/media.*"
-      - "/_synapse/admin/v1/media/.*"
-      - "/_synapse/admin/v1/quarantine_media/.*"
-      - "/_synapse/admin/v1/users/.*/media"
+      - "/_matrix/media/.*"
+      - "/_synapse/admin/v1/purge_media_cache$"
+      - "/_synapse/admin/v1/room/.*/media"
+      - "/_synapse/admin/v1/user/.*/media"
+      - "/_synapse/admin/v1/media/"
+      - "/_synapse/admin/v1/quarantine_media/"
+      - "/_synapse/admin/v1/users/.*/media$"
     # -- (path) Server-Side(externe) Pfade für die Ingress-Konfiguration des Media-Workers
     # @default -- werden in der value.yaml gesetzt und können dort eingesehen werden 
     paths:
-      - "/_matrix/media/"
+      - "/_matrix/media/.*"
 
   ## This worker deals with user directory searches.
   user_dir:
@@ -716,7 +766,7 @@ workers:
     # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers
     # @default -- werden in der value.yaml gesetzt und können dort eingesehen werden 
     csPaths:
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/user_directory/search"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/user_directory/search$"
 
   ## This worker handles key uploads, and may also stub out presence if that is
   ## disabled. If you set extraConfig.use_presence=false then you may want to
@@ -817,9 +867,12 @@ sygnal:
   #  runAsGroup: 2000
   #  runAsUser: 2000
   podSecurityContext:  
-    sysctls:
-      - name: net.ipv4.ip_unprivileged_port_start
-        value: "80"
+    runAsNonRoot: true
+    runAsGroup: 2000
+    runAsUser: 2000
+    #    sysctls:
+    #      - name: net.ipv4.ip_unprivileged_port_start
+    #        value: "80"
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
   # weitere Beispiele:
@@ -870,10 +923,6 @@ sygnal:
   # -- (list) Affinitäts-Konfiguration für Sygnal-Pod.
   affinity: {}
 
-  # -- (bool) IOS-Push Schalter
-  # Wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden
-  ios_push_enabled: false
-
   # -- (map) APN-Konfigurationsteil
   # Beispiel:
   # apns:
@@ -882,12 +931,18 @@ sygnal:
   #      keyfile: /etc/matrix/sygnal/
   apns: {}
   
+  ios_push:
+  # -- (bool) IOS-Push Schalter
+  # Wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden, sonst schlägt das Modul fehl
+    enabled: true
+
   # -- (map) iOS-Key Konfiguration
   # bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden. Weitereres siehe README.md
   # Beispiel: 
-  #    name: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Datenamen aus dem APN-File übereinstimmen!!!!
-  #    key: 'HIER KÖNNTE IHR KEY IN STEHEN'
-  ioskey: {}
+  #    ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus dem APN-File übereinstimmen!
+  #    ioskey_keyvalue: 'HIER KÖNNTE IHR KEY IN STEHEN'
+    ioskey_filename: {}
+    ioskey_keyvalue: {}
 
 
 ######################################################################################
@@ -907,7 +962,18 @@ wellknown:
 
   server: 
     # -- (map) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
-    m.server: matrix.beispiel.org:443
+   m.server: matrix.beispiel.org:443
+     
+  # -- (map) Zusätzliche Daten, die unter .well-known/matrix/<data> bereitgestellt werden
+  # Dictionaries werden in JSON umgewandelt, einfache Strings werden direkt ausgeliefert
+  # MSC1929 Beispiel:
+  # support:
+  #   admins:
+  #     - matrix_id: '@admin:beispiel.org'
+  #       email_address: 'admin@beispiel.org'
+  #       role: 'admin'
+  #   support_page: 'https://beispiel.org/support'
+  extraData: {}
 
   # -- (map) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
   client:
@@ -1168,8 +1234,13 @@ ingress:
   #      servicePort: 8000
   csPaths: [] 
 
-  # -- (bool) Sollte der `/_synapse`-Pfad im Ingress enthalten sein, werden die Admin-APIs unter diesem Pfad bereitgestellt.
+  # -- (bool) Soll der `/_synapse/client`-Pfad im Ingress enthalten sein, werden die Client-APIs unter diesem Pfad bereitgestellt.
   includeUnderscoreSynapse: true
+
+  # -- (bool) Soll der `/_synapse/admin`-Pfad im Ingress enthalten sein 
+  # Hinweis: Ist `synapse_admin.enabled = true` und `adminUri` gesetzt wird über diesen Host die Admin-APIs unter diesem Pfad bereitgestellt.
+  # Hinweis: Ist der Synapse-Admin deaktiviert, wird der Pfad in serverDomain/publicServerName mit in den Ingress geschrieben
+  includeSynapseAdmin: true
 
   # -- (bool) Sollte `config.serverName` in die Liste der Eingangspfade aufgenommen werden, 
   # kann auf `false` gesetzt werden, wenn die Hauptdomäne auf irgendeine externe Weise verwaltet wird 
@@ -1185,6 +1256,7 @@ ingress:
 
   # -- (string) Legen Sie den Namen der IngressClass-Cluster-Ressource fest (optional)
   # https://kubernetes.io/docs/reference/kubernetes-api/service-resources/ingress-v1/#IngressSpec
+  # HINWEIS: Wir setzen dem Nginx voraus, da wir auch die entsprechenden Annotiations setzen
   className: nginx
 
 ######################################################################################
@@ -1232,7 +1304,7 @@ coturn:
     realm: "turn.beispiel.org"
   existingcoturn: 
     # -- (bool) Schalter um bereits existenten CoTurn im K8s-Cluster zu nutzen
-    enabled: true
+    enabled: false
   # -- (string) Namespace für den CoTurn-Dienst
   default_ns: default
   # -- (map) Konfiguration für das Image vom CoTurn
@@ -1252,7 +1324,7 @@ coturn:
 ##          Konfiguration für Synapse Admin
 ######################################################################################
 
-synapse-admin:
+synapse_admin:
   # -- (bool) Aktivieren des Synapse-Admin-Moduls
   enabled: true
   # -- (string) URI für die Admin GUI, zwingend notwendig
@@ -1320,7 +1392,7 @@ synapse-admin:
   livenessProbe:
     httpGet:
       # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks 
-      path: /health
+      path: /
       # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks 
       port: http
 
@@ -1328,6 +1400,7 @@ synapse-admin:
   readinessProbe:
     httpGet:
       # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
-      path: /health
+      path: /
       # -- (string) Konfiguration des Ports vom Bereitschaftscheck
+      port: http
 
