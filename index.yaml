@@ -1,37 +1,11 @@
 apiVersion: v1
 entries:
-  bundesmessenger:
-  - apiVersion: v2
-    appVersion: 1.61.1
-    created: "2022-07-05T09:21:30.622583751+02:00"
-    dependencies:
-    - condition: redis.enabled
-      name: redis
-      repository: https://charts.bitnami.com/bitnami
-      version: ^16.1.0
-    - condition: postgresql.enabled
-      name: postgresql
-      repository: https://charts.bitnami.com/bitnami
-      version: ^10.9.4
-    description: BWI Matrix BundesMessenger
-    digest: 312145bf3a17fa713bea8cb436300d95548f45289e6f32eeac842d61236e27cd
-    icon: https://matrix.org/images/matrix-logo.svg
-    maintainers:
-    - email: christian.steinke@bwi.de
-      name: Christian Steinke
-    - email: ace@haxalot.com
-      name: Alexander Olofsson
-    name: bundesmessenger
-    type: application
-    urls:
-    - bundesmessenger-0.9.1.tgz
-    version: 0.9.1
   postgresql:
   - annotations:
       category: Database
     apiVersion: v2
     appVersion: 11.14.0
-    created: "2022-07-05T09:21:30.627231141+02:00"
+    created: "2022-07-04T14:43:27.397799021+02:00"
     dependencies:
     - name: common
       repository: https://charts.bitnami.com/bitnami
@@ -65,7 +39,7 @@ entries:
       category: Database
     apiVersion: v2
     appVersion: 6.2.7
-    created: "2022-07-05T09:21:30.635248326+02:00"
+    created: "2022-07-04T14:43:27.405111349+02:00"
     dependencies:
     - name: common
       repository: https://charts.bitnami.com/bitnami
@@ -75,7 +49,7 @@ entries:
     description: Redis(R) is an open source, advanced key-value store. It is often
       referred to as a data structure server since keys can contain strings, hashes,
       lists, sets and sorted sets.
-    digest: 358c629ca6d1d5f96cfa4191b57f04244d55a4884c95cb76c0cf256b0a5b6826
+    digest: 8a32deca238399eed2ddf8302e016ccfb5a8070faa081bb5c485870aa6d1b63a
     home: https://github.com/bitnami/charts/tree/master/bitnami/redis
     icon: https://bitnami.com/assets/stacks/redis/img/redis-stack-220x234.png
     keywords:
@@ -91,6 +65,6 @@ entries:
     sources:
     - https://github.com/bitnami/bitnami-docker-redis
     urls:
-    - charts/redis-16.13.2.tgz
-    version: 16.13.2
-generated: "2022-07-05T09:21:30.601667034+02:00"
+    - charts/redis-16.13.1.tgz
+    version: 16.13.1
+generated: "2022-07-04T14:43:27.393511285+02:00"

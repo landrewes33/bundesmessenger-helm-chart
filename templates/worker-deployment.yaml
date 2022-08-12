@@ -12,7 +12,13 @@ metadata:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
     app.kubernetes.io/component: {{ $name }}
 spec:
+{{- if hasKey $config "autoscaling" }}
+  {{- if and $config.autoscaling.enabled (lt ($config.replicaCount | default $default.replicaCount) $config.autoscaling.minReplicas) }}
+  replicas: {{ $config.autoscaling.minReplicas }}
+  {{ else }}
   replicas: {{ $config.replicaCount | default $default.replicaCount }}
+  {{- end }}
+{{- end }}
   updateStrategy:
     type: RollingUpdate
   serviceName: "matrix-synapse"
@@ -140,14 +146,18 @@ spec:
             - name: listener
               containerPort: 8083
               protocol: TCP
-            {{- if (or $config.livenessProbe $default.livenessProbe) }}
-          livenessProbe:
-              {{- $config.livenessProbe | default $default.livenessProbe | toYaml | nindent 12 }}
-            {{- end }}
             {{- if (or $config.readinessProbe $default.readinessProbe) }}
           readinessProbe:
               {{- $config.readinessProbe | default $default.readinessProbe | toYaml | nindent 12 }}
             {{- end }}
+          {{- end }}
+                    {{- if (or $config.livenessProbe $default.livenessProbe) }}
+          livenessProbe:
+              {{- $config.livenessProbe | default $default.livenessProbe | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if (or $config.startupProbe $default.startupProbe) }}
+          startupProbe:
+              {{- $config.startupProbe | default $default.startupProbe | toYaml | nindent 12 }}
           {{- end }}
           resources:
             {{- $config.resources | default $default.resources | toYaml | nindent 12 }}
@@ -223,39 +233,41 @@ spec:
         {{ . | toYaml | nindent 8 }}
       {{- end }}
 
-{{- end }}
-{{- end }}
-
-{{- if $.Values.workers.generic_worker.autoscaling.enabled }}
+{{- if hasKey $config "autoscaling" }}
+  {{- if $config.autoscaling.enabled }}
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name:  hpa-generic-worker
+  name:  hpa-{{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}
   labels:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v2
     kind: StatefulSet
-    name: {{ $.Release.Name }}-generic-worker
-  minReplicas: {{ $.Values.workers.generic_worker.autoscaling.minReplicas }}
-  maxReplicas: {{ $.Values.workers.generic_worker.autoscaling.maxReplicas }}
+    name: {{ $.Release.Name }}"-"{{ $name }}
+  minReplicas: {{ $config.autoscaling.minReplicas }}
+  maxReplicas: {{ $config.autoscaling.maxReplicas }}
   metrics:
-  {{- if $.Values.workers.generic_worker.autoscaling.targetCPUUtilizationPercentage }}
+  {{- if $config.autoscaling.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
-          averageUtilization: {{ $.Values.workers.generic_worker.autoscaling.targetCPUUtilizationPercentage }}
+          averageUtilization: {{ $config.autoscaling.targetCPUUtilizationPercentage }}
   {{- end }}
-  {{- if $.Values.workers.generic_worker.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- if $config.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
-          averageUtilization: {{ $.Values.workers.generic_worker.autoscaling.targetMemoryUtilizationPercentage }}
+          averageUtilization: {{ $config.autoscaling.targetMemoryUtilizationPercentage }}
   {{- end }}
+{{- end }}
+{{- end }}
+
+{{- end }}
 {{- end }}

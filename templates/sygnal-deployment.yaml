@@ -4,6 +4,8 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: matrix-synapse-sygnal
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
 stringData:
   sygnal.yaml: |
     ##
@@ -105,7 +107,7 @@ stringData:
 
       # Specify the port number to listen on.
       #
-      port: 80
+      port: 5000
 
     ## Proxying for outgoing connections #
     #
@@ -176,12 +178,15 @@ stringData:
     ############################# Apps - Config ###########################
     #######################################################################
     apps:
-    {{- with .Values.sygnal.apns }}
+    {{- with $.Values.sygnal.apns }}
     ## APNs aus value ##
       {{ . | toYaml | nindent 6 }}
     {{- end }}
-{{- if $.Values.sygnal.ios_push_enabled }}
-  {{- $iosKey := $.Values.sygnal.ioskey.name | required "sygnal.ioskey is required for the sygnal push service for iOS." -}}
+
+
+{{- if $.Values.sygnal.ios_push.enabled }}
+{{- $iosKey := $.Values.sygnal.ios_push.ioskey_filename | required "sygnal.ios_push.ioskey_filename ist notwendig für den Sygnal Push Service für iOS." }}
+
 ---
 apiVersion: v1
 kind: Secret
@@ -190,10 +195,11 @@ metadata:
     helm.sh/resource-policy: keep
   name: ioskey
 data:
-  {{ $iosKey }}: {{ $.Values.sygnal.ioskey.key | toYaml | quote }}
-  #  de.bwi.bwmessenger.ios.dev.p8: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JR1RBZ0VBTUJNR0J5cUdTTTQ5QWdFR0NDcUdTTTQ5QXdFSEJIa3dkd0lCQVFRZ0lHUUFwU0hWcEpOVm9neTkKQXdIZWVpNC9pVXZ0QlR2TDU3N2R2OC9PTGN5Z0NnWUlLb1pJemowREFRZWhSQU5DQUFSTkJTMG5ra0RwR04zNQpIcjYrb3FyNDEwZTd6MG1Vc1ZOQUdmQjVmL0QwbVJna3RCV1dhN3lZM3c3ZlFHZVUybHl4aEtOSVhsQ2h6MElECnJ0blZLY2NI"
----
+  {{ $iosKey }}: {{ $.Values.sygnal.ios_push.ioskey_keyvalue | toYaml | quote }}
+
 {{ end  }}
+
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -227,16 +233,16 @@ spec:
            - name: config
              mountPath: /sygnal.yaml
              subPath: sygnal.yaml
-           {{- if $.Values.sygnal.ios_push_enabled }}
-           {{- range $.Values.sygnal.apns }}
-           {{- with . }}
-             {{- if hasKey . "keyfile" }}
+           {{- if $.Values.sygnal.ios_push.enabled }}
+            {{- range $.Values.sygnal.apns }}
+              {{- with . }}
+                {{- if hasKey . "keyfile" }}
            - name: ioskey
              mountPath: {{ .keyfile }}
-             subPath: {{ $.Values.sygnal.ioskey.name }}
-             {{ end }}
-           {{ end }}
-           {{ end }}
+             subPath: {{ $.Values.sygnal.ios_push.ioskey_filename }}
+                {{ end }}
+              {{ end }}
+            {{ end }}
            {{ end }}
            - mountPath: /tmp
              name: sygnal-tmp

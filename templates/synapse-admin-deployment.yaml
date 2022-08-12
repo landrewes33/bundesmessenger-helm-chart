@@ -26,7 +26,8 @@ spec:
           securityContext:
             {{- $.Values.synapse_admin.securityContext | toYaml | nindent 12 }}
           ports:
-            - containerPort: 80
+            - name: http
+              containerPort: 80
           resources:
             {{- toYaml .Values.synapse_admin.resources | nindent 12 }}
           {{- with .Values.synapse_admin.livenessProbe }}
