@@ -630,7 +630,7 @@ workers:
       # - "/_matrix/client/(api/v1|r0|v3|unstable)/presence/"
 
     # -- (path) Server-Side (externer Zugriff) Pfade für die Ingress-Konfiguration des Workers
-    # @default -- werden in der value.yaml gesetzt und können dort eingesehen werden 
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
     paths:
           ## Federation requests
       - "/_matrix/federation/v1/event/"
@@ -687,7 +687,7 @@ workers:
     # -- (list) Zusätzliche Listener für Förderationsworker
     listeners: [federation]
     # -- (path) Server-Side Pfade für die Ingress-Konfiguration des Förderations-Workers
-    # @default -- werden in der value.yaml gesetzt und können dort eingesehen werden 
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
     paths:
        - "/_matrix/federation/v1/send/"
 
@@ -703,7 +703,7 @@ workers:
     # -- (list) Zusätzliche Listener für Synchworker
     listeners: [client]
     # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des Synchworkers
-    # @default -- werden in der value.yaml gesetzt und können dort eingesehen werden 
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
     csPaths:
       - "/_matrix/client/(v2_alpha|r0|v3)/sync$"
       - "/_matrix/client/(api/v1|v2_alpha|r0|v3)/events$"
@@ -742,7 +742,7 @@ workers:
     # -- (list) Zusätzliche Listener für Media-Worker
     listeners: [media]
     # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des Media-Workers
-    # @default -- werden in der value.yaml gesetzt und können dort eingesehen werden 
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
     csPaths:
       - "/_matrix/media/.*"
       - "/_synapse/admin/v1/purge_media_cache$"
@@ -752,7 +752,7 @@ workers:
       - "/_synapse/admin/v1/quarantine_media/"
       - "/_synapse/admin/v1/users/.*/media$"
     # -- (path) Server-Side(externe) Pfade für die Ingress-Konfiguration des Media-Workers
-    # @default -- werden in der value.yaml gesetzt und können dort eingesehen werden 
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
     paths:
       - "/_matrix/media/.*"
 
@@ -764,7 +764,7 @@ workers:
     # -- (list) Zusätzliche Listener für NutzerSuch-Worker
     listeners: [client]
     # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers
-    # @default -- werden in der value.yaml gesetzt und können dort eingesehen werden 
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
     csPaths:
       - "/_matrix/client/(api/v1|r0|v3|unstable)/user_directory/search$"
 
@@ -783,7 +783,7 @@ workers:
     # Hinweis: (default Bundesmessenger)
     # Wenn Sie extraConfig.use_presence=false setzen, sollten Sie den folgenden Pfad eintragen:
     # - "/_matrix/client/(api/v1|r0|v3|unstable)/presence/[^/]+/status"
-    # @default -- werden in der value.yaml gesetzt und können dort eingesehen werden 
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
     csPaths:
       - "/_matrix/client/(api/v1|r0|v3|unstable)/keys/upload"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/presence/[^/]+/status"
