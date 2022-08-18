@@ -15,16 +15,17 @@
 1. [Übersicht](#übersicht-zum-bundesmessenger)
     - [Kontakt und Austausch](#kontakt-und-austausch)
     - [Voraussetzungen](#voraussetzungen)
+    - [Infrastruktur](#infrastruktur)
 1. [PoC](#poc)
     - [Hostnamen/DNS](#hostnamen-dns)
-    - [Maschinengröße](#maschinengr--e)
+    - [Maschinengröße](#maschinengröße)
     - [Container-Basisimages](#container-basisimages)
     - [Betriebssystem K8s](#betriebssystem-k8s)
     - [Benutzer](#benutzer)
     - [Netzwerkbesonderheiten](#netzwerkbesonderheiten)
     - [Postgresql-Datenbank](#postgresql-datenbank)
     - [SSL-Zertifikate](#ssl-zertifikate)
-    - [Zusätzliche Konfigurationselemente](#zus-tzliche-konfigurationselemente)
+    - [Zusätzliche Konfigurationselemente](#zusätzliche-konfigurationselemente)
       - [Backup:](#backup-)
       - [BestPractise](#bestpractise)
       - [Kyverno](#kyverno)
@@ -91,6 +92,14 @@ helm install bundesmessenger bundesmessenger/bundesmessenger --set persistence.s
 
 | :warning: Anmerkung: Matrix benötigt valide TLS-Zertifikate um voll funktionsfähig zu sein.|
 | --- |
+
+### Infrastruktur
+
+Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
+
+Nicht Bestandteil sind eine DMZ, PAP-Infrastruktur oder ähnliches.
+
+![Infrastruktur](./docs/images/Infrastruktur_Scope.jpg "Übersicht über die Infrastruktur")
 
 ## Messenger-PoC
 So installieren Sie eine PoC-Umgebung.
