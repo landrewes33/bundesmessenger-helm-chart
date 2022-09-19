@@ -1,0 +1,115 @@
+---
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: {{ include "matrix-synapse.schadcodescannername" . }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+data:
+  c-icap.conf: |
+    Include virus_scan.conf
+    PidFile /var/run/c-icap/c-icap.pid
+    CommandsSocket /var/run/c-icap/c-icap.ctl
+    Timeout 300
+    MaxKeepAliveRequests 100
+    KeepAliveTimeout 600
+    StartServers 1
+    MaxServers 1
+    MinSpareThreads     10
+    MaxSpareThreads     20
+    ThreadsPerChild     10
+    MaxRequestsPerChild  0
+    Port 1344
+    ServerAdmin you@your.address
+    ServerName YourServerName
+    TmpDir /var/tmp
+    MaxMemObject 131072
+    DebugLevel 1
+    Pipelining on
+    SupportBuggyClients off
+    ModulesDir /opt/c-icap/lib/c_icap
+    ServicesDir /opt/c-icap/lib/c_icap
+    TemplateDir /opt/c-icap/share/c_icap/templates/
+    TemplateDefaultLanguage en
+    LoadMagicFile /opt/c-icap/etc/c-icap.magic
+    RemoteProxyUsers off
+    RemoteProxyUserHeader X-Authenticated-User
+    RemoteProxyUserHeaderEncoded on
+    acl all src 0.0.0.0/0.0.0.0
+    acl PERMIT_REQUESTS type REQMOD RESPMOD OPTIONS
+    icap_access allow all PERMIT_REQUESTS
+    ServerLog /var/log/c-icap/server.log
+    AccessLog /var/log/c-icap/access.log
+    ServerLog /opt/c-icap/var/log/server.log
+    AccessLog /opt/c-icap/var/log/access.log
+    Service echo srv_echo.so    
+
+  virus_scan.conf: |
+    Service antivirus_module virus_scan.so
+    ServiceAlias srv_clamav virus_scan
+    ServiceAlias  avscan virus_scan?allow204=on&sizelimit=off&mode=simple
+    virus_scan.ScanFileTypes TEXT DATA EXECUTABLE ARCHIVE GIF JPEG MSOFFICE
+    virus_scan.SendPercentData 5
+    virus_scan.StartSendPercentDataAfter 2M
+    virus_scan.MaxObjectSize  5M
+    virus_scan.DefaultEngine clamav
+    Include clamd_mod.conf
+
+  clamd_mod.conf: |
+    Module common clamd_mod.so
+    clamd_mod.ClamdSocket /run/clamav/clamd.sock
+
+  clamd.conf: |
+    LogTime yes
+    LogClean yes
+    LogSyslog no
+    LogVerbose no
+    LogFileMaxSize 0
+    LogFile /dev/stdout
+    DatabaseDirectory /var/lib/clamav
+    TCPSocket 3310
+    LocalSocket /run/clamav/clamd.sock
+    User clamav
+    ExitOnOOM yes
+    Foreground yes
+    MaxScanSize {{.Values.schadcodescanner.limits.scanSize}}
+    MaxFileSize {{.Values.schadcodescanner.limits.fileSize}}
+    #  Close the connection when the data size limit is exceeded.
+    #  The value should match your MTA's limit for a maximum attachment size.
+    #  Default: 25M
+    StreamMaxLength {{.Values.schadcodescanner.limits.scanSize}}
+    # Maximum length the queue of pending connections may grow to.
+    # Default: 200
+    MaxConnectionQueueLength {{.Values.schadcodescanner.limits.connectionQueueLength}}
+    # Maximum number of threads running at the same time.
+    # Default: 10
+    MaxThreads {{.Values.schadcodescanner.limits.maxThreads}}
+    # This option specifies how long to wait (in milliseconds) if the send buffer
+    # is full.
+    # Keep this value low to prevent clamd hanging.
+    #
+    # Default: 500
+    SendBufTimeout {{.Values.schadcodescanner.limits.sendBufTimeout}}
+
+  freshclam.conf: |
+    LogTime yes
+    LogVerbose yes
+    NotifyClamd /etc/clamav/clamd.conf
+    Checks 24
+    LogSyslog no
+    DatabaseOwner root
+    DatabaseMirror {{ .Values.schadcodescanner.freshclam.mirrors }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clamav-restapi-config
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+data:
+  node-env: 'test'
+  clamd-ip: {{ include "matrix-synapse.schadcodescannername" . }}
+  app-form-key: 'FILES'
+  app-max-file-size: '10485760'
+

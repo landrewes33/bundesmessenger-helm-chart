@@ -1,0 +1,77 @@
+{{- if  .Values.contentscanner.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "matrix-synapse.contentscannername" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" $ | nindent 4 }}
+    app.kubernetes.io/component:  {{ include "matrix-synapse.contentscannername" . }}
+spec:
+  replicas: {{ .Values.contentscanner.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "matrix-synapse.contentscannerselectorLabels" . | nindent 6 }}
+  serviceName: {{ include "matrix-synapse.contentscannername" . }}
+  template:
+    metadata:
+      labels:
+        {{- include "matrix-synapse.contentscannerselectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/contentscanner-configuration.yaml") . | sha256sum }}
+    spec:
+      securityContext:
+        fsGroup: 1001
+      containers:
+      - name: matrix-content-scanner
+        image: node:14
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: contentscanner
+          protocol: TCP
+        command:
+        - sh
+        - -c
+        - |
+          apt-get update && apt-get install -y secure-delete clamdscan && apt-get clean &&\
+          ssh-keyscan github.com >>~/.ssh/known_hosts  &&\
+          cd /usr/src/app && git clone https://github.com/matrix-org/matrix-content-scanner.git matrix-content-scanner &&\
+          cd matrix-content-scanner && cp /config/matrix-content-scanner-config.yaml config/matrix-content-scanner-config.yaml &&\
+          npm install && npm run start -- /config/matrix-content-scanner-config.yaml
+        volumeMounts:
+          - name: root-ssh
+            mountPath: /root/.ssh
+          - name: workdir
+            mountPath: /usr/src/app/
+          - name: temp
+            mountPath: /tmp
+          - name: scannerconfig
+            mountPath: /config/matrix-content-scanner-config.yaml
+            subPath: matrix-content-scanner-config.yaml
+          - name: scanner
+            mountPath: /opt/scanner.sh
+            subPath: scanner.sh
+      volumes:
+       - name: root-ssh
+         emptyDir: {}
+       - name: temp
+         emptyDir: {}
+       - name: workdir
+         emptyDir: {}
+       - name: scanner
+         configMap:
+            name: scanner
+            items:
+            - key: "scanner.sh"
+              path: "scanner.sh"
+            defaultMode: 0755
+       - name: clamdconf
+         configMap:
+           name: clam
+       - name: scannerconfig
+         projected:
+           sources:
+           - configMap:
+               name: contentscannerconfig
+{{- end }}

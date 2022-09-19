@@ -1,135 +1,103 @@
-{{- if .Values.schadcodescanner.enabled }}
+{{- if and .Values.contentscanner.enabled .Values.schadcodescanner.enabled }}
+{{  $config := .Values.schadcodescanner }}
 
-{{- if .Values.schadcodescanner.freshclamConfig -}}
-kind: ConfigMap
-apiVersion: v1
-metadata:
-  name: {{ include "matrix-synapse.schadcodescannername" . }}-freshclam
-  labels:
-    app: {{ template "matrix-synapse.schadcodescannername" . }}
-data:
-  freshclam.conf:
-    {{ toYaml .Values.schadcodescannername.freshclamConfig | indent 4 }}
-{{- end }}
-
----
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: matrix-schadcodescanner
+  name: {{ include "matrix-synapse.schadcodescannername" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
-    app: matrix-schadcodescanner
+    {{- include "matrix-synapse.labels" $ | nindent 4 }}
+    app.kubernetes.io/component:  {{ include "matrix-synapse.schadcodescannername" . }}
 spec:
-  replicas: 1
-  strategy:
-    type: Recreate
+  replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      app: matrix-schadcodescanner
+      {{- include "matrix-synapse.schadcodescannerselectorLabels" . | nindent 6 }}
+  serviceName: {{ include "matrix-synapse.schadcodescannername" . }}
   template:
     metadata:
       labels:
-        app: matrix-schadcodescanner
+        {{- include "matrix-synapse.schadcodescannerselectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/schadcodescanner-configuration.yaml") . | sha256sum }}
     spec:
-      serviceAccountName: bundesmessenger
       securityContext:
-        {{- toYaml .Values.schadcodescanner.podSecurityContext | nindent 8 }}
-#      initContainers:
-#       - name: update-config
-#         image:  "{{ $.Values.schadcodescanner.image.repository }}:{{ $.Values.schadcodescanner.image.tag }}"
-#         command:
-#           - sh
-#           - -c
-#           - |
-#             addgroup -g 2001 clamavgroup && \
-#             adduser -D -u 2002 -g clamavgroup -s /bin/false clamavuser && \
-#             chown -R clamavuser:clamavgroup /var/lib/clamav && \
-#             sed -i 's/DatabaseOwner clamav/DatabaseOwner clamavuser/g' /etc/clamav/freshclam.conf && \
-#             sed -i 's/^User clamav/User clamavuser/g' /etc/clamav/clamd.conf && \
-#             cat /etc/clamav/freshclam.conf && \
-#             echo "##################clamav#########################" && grep -v "^#" /etc/clamav/clamd.conf && echo "###################freshclam#################" && grep -v "^#" /etc/clamav/freshclam.conf && ls -lah /var/lib/clamav &&  echo "done! :)"
-#             apt-get update && \
-#             apt-get -y upgrade && \
-#             apt-get install -y c-icap libicapapi-dev clamav curl less vim libc-icap-mod-virus-scan && \
-#             usermod -a -G c-icap c-icap && \
-#             mkdir -p /var/run/c-icap && \
-#             touch /var/run/c-icap/c-icap.id && \
-#             chown -R c-icap:c-icap /var/run/c-icap && \
-#             /usr/bin/freshclam && \
-#             chown -R c-icap:c-icap /etc/c-icap/ && \
-#             echo "acl all src 0.0.0.0/0.0.0.0" >> /etc/c-icap/c-icap.conf && \
-#             echo "icap_access allow all" >> /etc/c-icap/c-icap.conf && \
-#             echo "Include /etc/c-icap/virus_scan.conf" >> /etc/c-icap/c-icap.conf && \
-#             sed -i "s/^StartServers.*/StartServers 1/" /etc/c-icap/c-icap.conf && \
-#             sed -i "s/^MaxServers.*/StartServers 1/" /etc/c-icap/c-icap.conf && \
-#             sed -i "s/^Service echo srv/#Service echo srv/" /etc/c-icap/c-icap.conf && \
-#             sed -i "s/^Group c-icap/Group nogroup/" /etc/c-icap/c-icap.conf && \
-#             echo "Include clamav_mod.conf" >> /etc/c-icap/virus_scan.conf
-#         securityContext:
-#           runAsNonRoot: false
-#           runAsUser: 0
-#         volumeMounts:
-#           - name: tmpdata
-#             mountPath: /var/lib/clamav
+        fsGroup: 1001
       containers:
-       - name: matrix-schadcodescanner
-         image:  "{{ $.Values.schadcodescanner.image.repository }}:{{ $.Values.schadcodescanner.image.tag }}"
-         imagePullPolicy: {{ .Values.schadcodescanner.image.pullPolicy }}
-         resources:
-           {{- .Values.schadcodescanner.resources | toYaml | nindent 12 }}
-         securityContext:
-           {{- toYaml .Values.schadcodescanner.securityContext | nindent 12 }}
-#                    command: ["/usr/bin/c-icap"]
-#         args: ["-f /etc/c-icap/c-icap.conf -D -N"]
-#         command:
-#           - sh
-#           - -c
-#           - |
-#             echo "##################clamav#########################" && grep -v "^#" /etc/clamav/clamd.conf && echo "###################freshclam#################" && grep -v "^#" /etc/clamav/freshclam.conf && cat /etc/group && cat /etc/passwd 
-#
-#             apt-get update && \
-#             apt-get -y upgrade && \
-#             apt-get install -y c-icap libicapapi-dev clamav clamav-daemon curl less vim libc-icap-mod-virus-scan && \
-#             usermod -a -G c-icap c-icap && \
-#             mkdir -p /var/run/c-icap && \
-#             touch /var/run/c-icap/c-icap.id && \
-#             chown -R c-icap:c-icap /var/run/c-icap && \
-#             /usr/bin/freshclam && \
-#             chown -R c-icap:c-icap /etc/c-icap/ && \
-#             echo "acl all src 0.0.0.0/0.0.0.0" >> /etc/c-icap/c-icap.conf && \
-#             echo "icap_access allow all" >> /etc/c-icap/c-icap.conf && \
-#             echo "Include /etc/c-icap/virus_scan.conf" >> /etc/c-icap/c-icap.conf && \
-#             sed -i "s/^StartServers.*/StartServers 1/" /etc/c-icap/c-icap.conf && \
-#             sed -i "s/^MaxServers.*/StartServers 1/" /etc/c-icap/c-icap.conf && \
-#             sed -i "s/^Service echo srv/#Service echo srv/" /etc/c-icap/c-icap.conf && \
-#             sed -i "s/^Group c-icap/Group nogroup/" /etc/c-icap/c-icap.conf && \
-#             echo "Include clamav_mod.conf" >> /etc/c-icap/virus_scan.conf && \
-#             /usr/bin/c-icap -f /etc/c-icap/c-icap.conf -D -N
-#
-         {{- with .Values.schadcodescanner.livenessProbe }}
-         livenessProbe:
-           {{- . | toYaml | nindent 12 }}
-         {{- end }}
-         {{- with $.Values.schadcodescanner.readinessProbe }}
-         readinessProbe:
-           {{- . | toYaml | nindent 12 }}
-         {{- end }}
-         volumeMounts:
-           - mountPath: /tmp
-             name: schadcodescannertmp
-           - mountPath: /log
-             name: schadcodescannerlog
-           - name: tmprun
-             mountPath: /run
-      restartPolicy: Always
-      terminationGracePeriodSeconds: 30
+      - name: clamav
+        image: "{{ $config.image.repository }}:{{ $config.image.tag }}"
+        imagePullPolicy: {{ $config.image.pullPolicy }}
+        ports:
+          - name: clamav
+            containerPort: {{ $config.service.port }}
+            protocol: TCP
+        resources:
+          {{- toYaml $config.resources | nindent 10 }}
+        volumeMounts:
+          - name: clamsocket
+            mountPath: /run/clamav/
+          - name: signatures
+            mountPath: /var/lib/clamav
       volumes:
-        - name: schadcodescannertmp
-          emptyDir: {}
-        - name: schadcodescannerlog
-          emptyDir: {}
-        - name: tmpdata
-          emptyDir: {}
-        - name: tmprun
-          emptyDir: {}
+      - name: clamsocket
+        emptyDir: {}
+      - name: config-volume
+        projected:
+          sources:
+          - configMap:
+              name: {{ include "matrix-synapse.schadcodescannername" . }}
+      - name: signatures
+        persistentVolumeClaim:
+            claimName: {{ $config.persistence.claimName }} 
+      {{- with $config.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $config.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with $config.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+{{- if hasKey $config "autoscaling" }}
+  {{- if $config.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name:  hpa-{{ include "matrix-synapse.schadcodescannername" . }}
+  labels:
+    {{- include "matrix-synapse.labels" $ | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v2
+    kind: StatefulSet
+    name: {{ include "matrix-synapse.schadcodescannername" . }}
+  minReplicas: {{ $config.autoscaling.minReplicas }}
+  maxReplicas: {{ $config.autoscaling.maxReplicas }}
+  metrics:
+  {{- if $config.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $config.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if $config.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ $config.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+{{- end }}
+{{- end }}
+
+
 {{- end }}

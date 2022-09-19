@@ -92,7 +92,7 @@ config:
   # -- (string) Die öffentlich zugängliche URL für die Synapse-Instanz 
   # lautet standardmäßig `https://<publicServerName>`
   # Beispiel: 
-  # publicBaseurl: 'https://matrix.beispiel.org'
+  # publicBaseurl: 'https://matrix.example.com'
   publicBaseurl: ''
 
   # -- (string) Das Loglevel  für Synapse und alle Module.
@@ -109,15 +109,15 @@ config:
 
   # -- (list) URIs die zum Aufbau von 1:1 WebRTC Anrufe aufzubauen.
   # Beispiel:
-  # turnUris: ["turn:turn.beispiel.org:3478?transport=udp"]
+  # turnUris: ["turn:turn.example.com:3478?transport=udp"]
   turnUris: []
   # -- (string) geheime Schlüssel für TURN-Server
   # turnSecret: ''
 
   # -- (bool) Registrierungskonfiguration, beachten Sie, dass die Registrierung mit dem
-  # containerinternen Werkzeug register_new_matrix_user immer möglich ist.
-  # @default -- true
-  enableRegistration: true
+  # containerinternen Werkzeug register_new_matrix_user immer möglich ist. Synapse-Admin kann dafür genutzt werden.
+  # @default -- false
+  enableRegistration: false
 
   # -- (string) Hinweis: Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge gesetzt, wenn er nicht angegeben wird.
   registrationSharedSecret: ''
@@ -229,9 +229,9 @@ extraConfig:
       enabled: false
   # -- (list) Whitelist (Domainbased) für Föderation
   federation_domain_whitelist: []
-#    - poc1.dvs.beispiel.org
-#    - poc2.dvs.beispiel.org
-#    - poc3.dvs.beispiel.org
+#    - poc1.dvs.example.com
+#    - poc2.dvs.example.com
+#    - poc3.dvs.example.com
   # -- (bool) dynamisches Vorschaubild, eingeschaltet
   dynamic_thumbnails: true
 
@@ -243,25 +243,25 @@ extraConfig:
 #    pepper: ''
 extraSecrets: {}
 
-# -- (object) Konfiguration, die auf den Haupt-Synapse-Pod anzuwenden ist.
+# -- (object) Konfiguration, die auf den Haupt-Synapse-Container anzuwenden ist.
 # @default -- wird nachfolgend einzeln aufgeschlüsselt
 synapse:
   strategy:
   # -- (string) Nur wirklich anwendbar, wenn das Deployment ein RWO PV angehängt hat (z.B. wenn Media Repository
-  # für den Haupt-Synapse-Pod aktiviert ist)
-  # Da Replikate = 1 sind, kann eine Aktualisierung "hängen bleiben", da der vorherige Pod mit dem
-  # PV verbunden bleibt und der "neu-aufgebaute" Pod nie starten kann. Das Ändern der Strategie auf "Recreate" wird
-  # den einzelnen vorherigen Pod beenden, so dass der neue, ankommende Pod sich mit dem PV verbinden kann
+  # für den Haupt-Synapse-Container aktiviert ist)
+  # Da Replikate = 1 sind, kann eine Aktualisierung "hängen bleiben", da der vorherige Container mit dem
+  # PV verbunden bleibt und der "neu-aufgebaute" Container nie starten kann. Das Ändern der Strategie auf "Recreate" wird
+  # den einzelnen vorherigen Container beenden, so dass der neue, ankommende Container sich mit dem PV verbinden kann
     type: RollingUpdate
 
-  # -- (map) Annotations, die auf den Haupt-Synapse-Pod anzuwenden sind.
+  # -- (map) Annotations, die auf den Haupt-Synapse-Container anzuwenden sind.
   # Beispiel: (Bundesmessenger lässt alle Services automatisch an Prometheus anbinden)
   #  prometheus.io/scrape: "true"
   #  prometheus.io/path: "/_synapse/metrics"
   #  prometheus.io/port: "9090"
   annotations: {} 
 
-  # -- (map) Labels, die auf den Haupt-Synapse-Pod anzuwenden sind.
+  # -- (map) Labels, die auf den Haupt-Synapse-Container anzuwenden sind.
   labels: {}
 
   # -- (map) Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind
@@ -295,7 +295,7 @@ synapse:
   # - 'patch -d/usr/local/lib/python3.7/site-packages/synapse -p2 < /synapse/patches/something.patch'
   extraCommands: []
 
-  # -- (object) Konfiguration für die Pod-Sicherheitsrichtlinie, Synapse wird immer als
+  # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie, Synapse wird immer als
   # sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist. 
   # Beachten Sie, dass eine Änderung dieser Einstellung auch die Verwendung der volumePermission
   # Hilfsprogramm verwenden müssen, abhängig von Ihrem Speicher.
@@ -328,14 +328,14 @@ synapse:
   #Manche Leute sagen "einhundert Millicores", und das bedeutet dasselbe.
   resources: 
     limits:
-      # -- (string) Rechenressourcengrenzen, die auf den Haupt-Synapse-Pod anzuwenden sind. 
+      # -- (string) Rechenressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind. 
       cpu: 1000m
-      # -- (object) RAM Ressourcengrenzen, die auf den Haupt-Synapse-Pod anzuwenden sind.
+      # -- (object) RAM Ressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
       memory: 2500Mi
     requests:
-      # -- (string) Anforderungen an Rechenressourcen, die auf den Haupt-Synapse-Pod anzuwenden sind. 
+      # -- (string) Anforderungen an Rechenressourcen, die auf den Haupt-Synapse-Container anzuwenden sind. 
       cpu: 1000m
-      # -- (string) Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Pod anzuwenden sind. 
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Container anzuwenden sind. 
       memory: 2500Mi
 
   #Healthcheck
@@ -344,7 +344,7 @@ synapse:
       # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks 
       path: /health
       # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks 
-      port: http
+      port: metrics
 
   #Bereitschaftscheck
   readinessProbe:
@@ -352,9 +352,22 @@ synapse:
       # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
       path: /health
       # -- (string) Konfiguration des Ports vom Bereitschaftscheck
-      port: http
+      port: metrics
 
-  # -- (list) Node Selektoren, die für den Haupt-Synapse-Pod festgelegt werden.
+  #Startup-Check
+  startupProbe:
+    # -- (int) Anzahl der Fehlversuche, damit Startzeit für Worker bei 60 Sekunden landet; Timeout default bei 10 Sekunden
+    failureThreshold: 6
+    httpGet:
+      # -- (string) Konfiguration des Pfads vom Startup-Check
+      # DEFAULT gilt für alle Synapse-Worker-Container. 
+      path: /health
+      # -- (string) Konfiguration des Ports vom Startup-Check
+      # DEFAULT gilt für alle Synapse-Worker-Container. 
+      port: metrics
+
+
+  # -- (list) Node Selektoren, die für den Haupt-Synapse-Container festgelegt werden.
   nodeSelector: {}
 
 #Die folgenden Taints sind eingebaut:
@@ -368,23 +381,23 @@ synapse:
 #    node.kubernetes.io/disk-pressure
 #       Der Knoten hat IO-Last auf die Festplatte. 
 #       Im Falle einer hohen Festplattenauslastung auf den Knoten kann dies zu einer 
-#       Verlangsamung der Anwendung führen, so dass es besser ist, die Pods zu verlagern.
+#       Verlangsamung der Anwendung führen, so dass es besser ist, die Container zu verlagern.
 #    node.kubernetes.io/pid-pressure
 #       Ein Knoten hat Prozess-Last(PID-Druck). 
 #       Die Prozess-ID ist eine begrenzte Ressource und ihre Sättigung 
 #       kann zu einer Verlangsamung der Anwendungen führen, so dass es besser ist, 
-#       Pods an einen anderen Ort zu verlagern.
+#       Container an einen anderen Ort zu verlagern.
 #    node.kubernetes.io/network-unavailable
 #       Das Netzwerk des Knotens ist nicht verfügbar. Wie oben erklärt.
 #    node.kubernetes.io/unschedulable
 #       Der Knoten ist nicht planbar. 
-#       Jeder andere Grund, der dazu führt, dass der Knoten für das Hosting von Pods ungeeignet ist, 
+#       Jeder andere Grund, der dazu führt, dass der Knoten für das Hosting von Container ungeeignet ist, 
 #       z. B. wenn der Cluster verkleinert und der Knoten entfernt wird.
 
-  # -- (list) Tolerations bzw. Taints die für den Haupt-Synapse-Pod genutzt werden sollen.
+  # -- (list) Tolerations bzw. Taints die für den Haupt-Synapse-Container genutzt werden sollen.
   tolerations: []
 
-  # -- Affinität zur Wahl von Nodes für die für den Haupt-Synapse-Pod genutzt werden sollen.
+  # -- Affinität zur Wahl von Nodes für die für den Haupt-Synapse-Container genutzt werden sollen.
   affinity: {}
 
 ## Konfiguration für die Handhabung von Synapse-Arbeitern(im Folgenden weiter Worker), 
@@ -394,7 +407,7 @@ synapse:
 ## https://github.com/matrix-org/synapse/blob/master/docs/workers.md
 ##
 workers:
-  # -- (map) Annotations, die auf die Synapse-Worker-Pods anzuwenden sind.
+  # -- (map) Annotations, die auf die Synapse-Worker-Container anzuwenden sind.
   # Standardkonfiguration, diese wird an alle Worker vererbt und kann auch
   # für jeden Workertyp überschrieben werden.
   # Beispiel: (Bundesmessenger lässt alle Services automatisch an Prometheus anbinden)
@@ -410,11 +423,11 @@ workers:
     replicaCount: 1
 
     strategy:
-      # -- (string) DEFAULT gilt für alle Synapse-Worker-Pods
+      # -- (string) DEFAULT gilt für alle Synapse-Worker-Container
       # Nur wirklich anwendbar, wenn das Deployment ein RWO PV angehängt hat (z.B. Media Repository)
-      # Da Replikate = 1 sind, kann eine Aktualisierung "hängen bleiben", da der vorherige Pod mit dem
-      # PV verbunden bleibt und der "neu-aufgebaute" Pod nie starten kann. Das Ändern der Strategie auf "Recreate" wird
-      # den einzelnen vorherigen Pod beenden, so dass der neue, ankommende Pod sich mit dem PV verbinden kann
+      # Da Replikate = 1 sind, kann eine Aktualisierung "hängen bleiben", da der vorherige Container mit dem
+      # PV verbunden bleibt und der "neu-aufgebaute" Container nie starten kann. Das Ändern der Strategie auf "Recreate" wird
+      # den einzelnen vorherigen Container beenden, so dass der neue, ankommende Container sich mit dem PV verbinden kann
       type: RollingUpdate
 
     # -- (string)  Ein spezifischer Name für diesen Worker, kann nicht global gesetzt werden.
@@ -425,14 +438,14 @@ workers:
     ## Zusätzliche Konfiguration für die Worker, kann nicht global gesetzt werden.
     #extraConfig: {}
 
-    # -- (map) DEFAULT Annotations, die auf alle Synapse-Worker-Pods anzuwenden sind.
+    # -- (map) DEFAULT Annotations, die auf alle Synapse-Worker-Container anzuwenden sind.
     # Beispiel: (Bundesmessenger lässt alle Services automatisch an Prometheus anbinden)
     #  prometheus.io/scrape: "true"
     #  prometheus.io/path: "/_synapse/metrics"
     #  prometheus.io/port: "9090"
     annotations: {}
 
-    # -- (object) DEFAULT Zusätzliche Umgebungsvariablen, die auf alle Synapse-Worker-Pods anzuwenden sind
+    # -- (object) DEFAULT Zusätzliche Umgebungsvariablen, die auf alle Synapse-Worker-Container anzuwenden sind
     # Beispiel:
     #  - name: LD_PRELOAD
     #    value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
@@ -441,24 +454,24 @@ workers:
     extraEnv: []
 
     # -- (map) Zusätzliche Volumes, die dem Worker hinzugefügt werden sollen.
-    # DEFAULT gilt für alle Synapse-Worker-Pods.
+    # DEFAULT gilt für alle Synapse-Worker-Container.
     # Nützlich für das Medien-Repo oder zum Hinzufügen von Python-Modulen.
     # Daher besser im entsprechenden Konfigurationsteil der spez. Worker
     volumes: []
 
     # -- (map) Zusätzliche zu mountende Datenträgerpfade (siehe volumes)
-    # DEFAULT gilt für alle Synapse-Worker-Pods.
+    # DEFAULT gilt für alle Synapse-Worker-Container.
     volumeMounts: []
 
     # -- (list) Zusätzliche Befehle, die beim Starten von Synapse ausgeführt werden
-    # DEFAULT gilt für alle Synapse-Worker-Pods.
+    # DEFAULT gilt für alle Synapse-Worker-Container.
     # Beispiele:
     # - 'apt-get update -yqq && apt-get install patch -yqq'
     # - 'patch -d/usr/local/lib/python3.7/site-packages/synapse -p2 < /synapse/patches/something.patch'
     extraCommands: []
 
     # -- (map) Informationen zum Sicherheitskontext, die dem Arbeiter mitgeteilt werden sollen.
-    # DEFAULT gilt für alle Synapse-Worker-Pods.
+    # DEFAULT gilt für alle Synapse-Worker-Container.
     # Beispiele:
     #   fsGroup: 2003
     #   runAsGroup: 2003
@@ -466,7 +479,7 @@ workers:
     podSecurityContext: {} 
 
     # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
-    # DEFAULT gilt für alle Synapse-Worker-Pods.
+    # DEFAULT gilt für alle Synapse-Worker-Container.
     # Beispiele:
     #   readOnlyRootFilesystem: true
     #   runAsNonRoot: true
@@ -478,21 +491,21 @@ workers:
 
     resources: 
        limits:
-         # -- (string) Rechenressourcengrenzen, die auf alle Synapse-Worker-Pod anzuwenden sind. 
-         # DEFAULT gilt für alle Synapse-Worker-Pods. 
+         # -- (string) Rechenressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind. 
+         # DEFAULT gilt für alle Synapse-Worker-Container. 
          # Epmfohlen gesondert zu verwalten
          cpu: 100m
-         # -- (object) RAM Ressourcengrenzen, die auf alle Synapse-Worker-Pod anzuwenden sind.
-         # DEFAULT gilt für alle Synapse-Worker-Pods. 
+         # -- (object) RAM Ressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind.
+         # DEFAULT gilt für alle Synapse-Worker-Container. 
          # Epmfohlen gesondert zu verwalten
          memory: 128Mi
        requests:
-         # -- (string) Anforderungen an Rechenressourcen, die auf alle Synapse-Worker-Pod anzuwenden sind. 
-         # DEFAULT gilt für alle Synapse-Worker-Pods. 
+         # -- (string) Anforderungen an Rechenressourcen, die auf alle Synapse-Worker-Container anzuwenden sind. 
+         # DEFAULT gilt für alle Synapse-Worker-Container. 
          # Epmfohlen gesondert zu verwalten
          cpu: 100m
-         # -- (string) Anforderungen an RAM Ressourcen, die auf alle Synapse-Worker-Pod anzuwenden sind. 
-         # DEFAULT gilt für alle Synapse-Worker-Pods. 
+         # -- (string) Anforderungen an RAM Ressourcen, die auf alle Synapse-Worker-Container anzuwenden sind. 
+         # DEFAULT gilt für alle Synapse-Worker-Container. 
          # Epmfohlen gesondert zu verwalten
          memory: 128Mi
   
@@ -500,44 +513,44 @@ workers:
     livenessProbe:
       httpGet:
         # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks 
-        # DEFAULT gilt für alle Synapse-Worker-Pods. 
+        # DEFAULT gilt für alle Synapse-Worker-Container. 
         path: /health
         # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks 
-        # DEFAULT gilt für alle Synapse-Worker-Pods. 
+        # DEFAULT gilt für alle Synapse-Worker-Container. 
         port: metrics
 
     #Bereitschaftscheck
     readinessProbe:
       httpGet:
         # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
-        # DEFAULT gilt für alle Synapse-Worker-Pods. 
+        # DEFAULT gilt für alle Synapse-Worker-Container. 
         path: /health
         # -- (string) Konfiguration des Ports vom Bereitschaftscheck
-        # DEFAULT gilt für alle Synapse-Worker-Pods. 
+        # DEFAULT gilt für alle Synapse-Worker-Container. 
         port: metrics
-      
-      #Startup-Check
-      startupProbe:
-        # -- (int) Anzahl der Fehlversuche, damit Startzeit für Worker bei 60 Sekunden landet; Timeout default bei 10 Sekunden
-        failureThreshold: 6
-        httpGet:
-          # -- (string) Konfiguration des Pfads vom Startup-Check
-          # DEFAULT gilt für alle Synapse-Worker-Pods.
-          path: /health
-          # -- (string) Konfiguration des Ports vom Startup-Check
-          # DEFAULT gilt für alle Synapse-Worker-Pods.
-          port: metrics
 
-    # -- (list) Node Selektor Konfiguration, die auf alle Synapse-Worker-Pod anzuwenden sind.
-    # DEFAULT gilt für alle Synapse-Worker-Pods. 
+    #Startup-Check
+    startupProbe:
+      # -- (int) Anzahl der Fehlversuche, damit Startzeit für Worker bei 60 Sekunden landet; Timeout default bei 10 Sekunden
+      failureThreshold: 6
+      httpGet:
+        # -- (string) Konfiguration des Pfads vom Startup-Check
+        # DEFAULT gilt für alle Synapse-Worker-Container.
+        path: /health
+        # -- (string) Konfiguration des Ports vom Startup-Check
+        # DEFAULT gilt für alle Synapse-Worker-Container.
+        port: metrics
+
+    # -- (list) Node Selektor Konfiguration, die auf alle Synapse-Worker-Container anzuwenden sind.
+    # DEFAULT gilt für alle Synapse-Worker-Container. 
     nodeSelector: {}
 
-    # -- (list) Tolerations/Tains Konfiguration, die auf alle Synapse-Worker-Pod anzuwenden sind.
-    # DEFAULT gilt für alle Synapse-Worker-Pods. 
+    # -- (list) Tolerations/Tains Konfiguration, die auf alle Synapse-Worker-Container anzuwenden sind.
+    # DEFAULT gilt für alle Synapse-Worker-Container. 
     tolerations: []
 
-    # -- (list) Affinitäts-Konfiguration, die auf alle Synapse-Worker-Pod anzuwenden sind.
-    # DEFAULT gilt für alle Synapse-Worker-Pods. 
+    # -- (list) Affinitäts-Konfiguration, die auf alle Synapse-Worker-Container anzuwenden sind.
+    # DEFAULT gilt für alle Synapse-Worker-Container. 
     affinity: {}
 
   ## Der generische Worker kann für die meisten Endpunkte verwendet werden.
@@ -654,20 +667,20 @@ workers:
       ## Inbound federation transaction request
       - "/_matrix/federation/v1/send/"
 
-    # -- (int) Anzahl der Worker-Pods
+    # -- (int) Anzahl der Worker-Container
     # Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas 
     # oder wenn nicht gesetzt, dann wird autoscaling.minReplicas übernommen
     replicaCount: 2
 
     ## Konfiguration für das auto-scaling der Applikation.
     autoscaling:
-      # -- (bool) schalte das HPA für die Pods ein
+      # -- (bool) schalte das HPA für die Container ein
       # Hinweis: Kann für alle spezifischen Worker benutzt werden
       # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden
       enabled: true
-      # -- (int) minimale Anzahl der Worker-Pods
+      # -- (int) minimale Anzahl der Worker-Container
       minReplicas: 2
-      # -- (int) maximale Anzahl der Worker-Pods
+      # -- (int) maximale Anzahl der Worker-Container
       maxReplicas: 10
       # -- (int) Prozentsatz für CPU-Auslastung um Scaling zu triggern
       targetCPUUtilizationPercentage: 80
@@ -713,7 +726,7 @@ workers:
   pusher:
   # -- (bool) Dieser Worker kümmert sich um die Übermittlung von Benachrichtigungen.
   # Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden
-  # WICHTIGER HINWEIS: Dafür gibt es den Sygnal-Service und Pod!!!
+  # WICHTIGER HINWEIS: Dafür gibt es den Sygnal-Service und Container!!!
     enabled: false
 
   appservice:
@@ -744,7 +757,6 @@ workers:
     # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des Media-Workers
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
     csPaths:
-      - "/_matrix/media/.*"
       - "/_synapse/admin/v1/purge_media_cache$"
       - "/_synapse/admin/v1/room/.*/media"
       - "/_synapse/admin/v1/user/.*/media"
@@ -754,7 +766,7 @@ workers:
     # -- (path) Server-Side(externe) Pfade für die Ingress-Konfiguration des Media-Workers
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
     paths:
-      - "/_matrix/media/.*"
+      - "/_matrix/media/"
 
   ## This worker deals with user directory searches.
   user_dir:
@@ -851,7 +863,7 @@ service:
 ######################################################################################
 #Reference: https://github.com/matrix-org/sygnal
 sygnal:
-  # -- (bool) Aktivieren des Sygnal-Pod
+  # -- (bool) Aktivieren des Sygnal-Container
   enabled: true
   # -- (map) Image/Repo-Konfiguration von Sygnal
   image:
@@ -888,14 +900,14 @@ sygnal:
   ##
   resources: 
     limits:
-      # -- (string) Rechenressourcengrenzen, die auf den Sygnal-Pod anzuwenden sind. 
+      # -- (string) Rechenressourcengrenzen, die auf den Sygnal-Container anzuwenden sind. 
       cpu: 150m
-      # -- (object) RAM Ressourcengrenzen, die auf den Sygnal-Pod anzuwenden sind.
+      # -- (object) RAM Ressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.
       memory: 45Mi
     requests:
-      # -- (string) Anforderungen an Rechenressourcen, die auf den Sygnal-Pod anzuwenden sind. 
+      # -- (string) Anforderungen an Rechenressourcen, die auf den Sygnal-Container anzuwenden sind. 
       cpu: 150m
-      # -- (string) Anforderungen an RAM Ressourcen, die auf den Sygnal-Pod anzuwenden sind. 
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den Sygnal-Container anzuwenden sind. 
       memory: 45Mi
 
   #Healthcheck
@@ -914,13 +926,13 @@ sygnal:
       # -- (string) Konfiguration des Ports vom Bereitschaftscheck
       port: http
 
-  # -- (list) Node Selektor Konfiguration für Sygnal-Pod.
+  # -- (list) Node Selektor Konfiguration für Sygnal-Container.
   nodeSelector: {}
 
-  # -- (list) Tolerations/Tains Konfiguration für Sygnal-Pod.
+  # -- (list) Tolerations/Tains Konfiguration für Sygnal-Container.
   tolerations: []
 
-  # -- (list) Affinitäts-Konfiguration für Sygnal-Pod.
+  # -- (list) Affinitäts-Konfiguration für Sygnal-Container.
   affinity: {}
 
   # -- (map) APN-Konfigurationsteil
@@ -953,8 +965,8 @@ sygnal:
 ## Hinzufügen von SRV-Einträgen zu DNS.
 
 wellknown:
-  # -- (bool) Aktivierung des Wellknown-Pods
-  enabled: false
+  # -- (bool) Aktivierung des Wellknown-Container
+  enabled: true
 
   # -- (bool) Lighttpd bindet standardmäßig nicht an IPv6, obwohl dies in
   # IPv6-only-Clustern erforderlich ist.
@@ -962,17 +974,17 @@ wellknown:
 
   server: 
     # -- (map) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
-   m.server: matrix.beispiel.org:443
+   m.server: matrix.example.com:443
      
   # -- (map) Zusätzliche Daten, die unter .well-known/matrix/<data> bereitgestellt werden
   # Dictionaries werden in JSON umgewandelt, einfache Strings werden direkt ausgeliefert
   # MSC1929 Beispiel:
   # support:
   #   admins:
-  #     - matrix_id: '@admin:beispiel.org'
-  #       email_address: 'admin@beispiel.org'
+  #     - matrix_id: '@admin:example.com'
+  #       email_address: 'admin@example.com'
   #       role: 'admin'
-  #   support_page: 'https://beispiel.org/support'
+  #   support_page: 'https://example.com/support'
   extraData: {}
 
   # -- (map) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
@@ -982,7 +994,7 @@ wellknown:
       secure_backup_setup_methods: ["passphrase"]
       outbound_keys_pre_sharing_mode: "on_room_opening" 
     m.homeserver:
-      base_url: https://matrix.beispiel.org
+      base_url: https://matrix.example.com
 
   # -- (path) Ein benutzerdefinierter htdocs-Pfad, der nützlich ist, wenn ein anderes Image ausgeführt wird.
   htdocsPath: /var/www/localhost/htdocs
@@ -1135,7 +1147,7 @@ redis:
       # -- (int) Serviceport
       port: 6379
     statefulset:
-      # -- (string) Wie soll bei Update mit dem Pod verfahren werden
+      # -- (string) Wie soll bei Update mit dem Container verfahren werden
       # https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
       updateStrategy: RollingUpdate
 
@@ -1183,21 +1195,21 @@ ingress:
   # Client-to-Server-API-Anfragepfade hinzugefügt werden sollen.
   # Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
   # Beispiel:
-  #  - matrix.beispiel.org
+  #  - matrix.example.com
   csHosts: []
 
   # -- (list) Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung von
   # Server-zu-Server-API-Anfragen hinzugefügt werden sollen.
   # Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
   # Beispiel:
-  #  - beispiel.org
+  #  - example.com
   hosts: []
 
   # -- (list) Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung von
   # wellknown-Anfragen hinzugefügt werden sollen.
   # Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
   # Beispiel:
-  #  - beispiel.org
+  #  - example.com
   wkHosts: []
 
   # -- (path) Zusätzliche Pfade, die zu den Server-zu-Server-Eingangsblöcken hinzugefügt werden sollen
@@ -1250,8 +1262,8 @@ ingress:
   # Beispiel:
   #  - secretName: chart-example-tls
   #    hosts:
-  #      - beispiel.org
-  #      - matrix.beispiel.org
+  #      - example.com
+  #      - matrix.example.com
   tls: []
 
   # -- (string) Legen Sie den Namen der IngressClass-Cluster-Ressource fest (optional)
@@ -1262,26 +1274,89 @@ ingress:
 ######################################################################################
 ##          Konfiguration für Content-Scanner
 ######################################################################################
+contentscanner:
+  # -- (bool) Aktivieren des Matrix-Content-Scanner
+  # Mittelsmann zwischen AV und Matrix-Synapse
+  enabled: true
+
+  replicaCount: 1
+  resources: 
+    limits:
+      # -- (string) Rechenressourcengrenzen, die auf den Contentscanner-Container anzuwenden sind. 
+      cpu: 500m
+      # -- (object) RAM Ressourcengrenzen, die auf den Contentscanner-Container anzuwenden sind.
+      memory: 1Gi
+    requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf den Contentscanner-Container anzuwenden sind. 
+      cpu: 300m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den Contentscanner-Container anzuwenden sind. 
+      memory: 500Mi
+
+
+######################################################################################
+##          Konfiguration für CLAMAV
+######################################################################################
 schadcodescanner:
-  # -- (bool) Aktivieren das ClamAV-Pods und Schadcodescanner
-  enabled: false
+  # -- (bool) Aktivieren des ClamAV-Container 
+  enabled: true
   # -- (map) Konfiguration des Image/Repository
   image:
     repository: clamav/clamav
-    tag: stable
+    tag: 0.104.1
     pullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    claimName: signatures-matrix-synapse-clamav-0
+  service:
+  # service.port -- The port to be used by the clamav service
+    port: 3310
+  freshclam:
+    # clamav.freshclam.mirrors -- A list of clamav mirrors to be used by the clamav service
+    mirrors: database.clamav.net
+
+  # -- (int) Anzahl der Worker-Container
+  # Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas
+  # oder wenn nicht gesetzt, dann wird autoscaling.minReplicas übernommen
+  replicaCount: 1
+
+  ## Konfiguration für das auto-scaling der Applikation.
+  autoscaling:
+    # -- (bool) schalte das HPA für die Container ein
+    # Hinweis: Kann für alle spezifischen Worker benutzt werden
+    # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden
+    enabled: true
+    # -- (int) minimale Anzahl der Worker-Container
+    minReplicas: 1
+    # -- (int) maximale Anzahl der Worker-Container
+    maxReplicas: 4
+    # -- (int) Prozentsatz für CPU-Auslastung um Scaling zu triggern
+    targetCPUUtilizationPercentage: 90
+    # -- (int) Prozentsatz für RAM-Auslastung um Scaling zu triggern
+    targetMemoryUtilizationPercentage: 80
+
+  limits:
+    # clamav.limits.fileSize -- The largest file size scanable by clamav, in MB
+    fileSize: 20
+    # clamav.limits.scanSize -- The largest scan size permitted in clamav, in MB
+    scanSize: 100
+    # clamav.limits.connectionQueueLength -- Maximum length the queue of pending connections may grow to
+    connectionQueueLength: 100
+    # clamav.limits.maxThreads --Maximum number of threads running at the same time.
+    maxThreads: 4
+    # clamav.sendBufTimeout -- This option specifies how long to wait (in milliseconds) if the send buffer is full, keep low to avoid clamd hanging
+    sendBufTimeout: 500
 
   resources: 
     limits:
-      # -- (string) Rechenressourcengrenzen, die auf den ClamAV-Pod anzuwenden sind. 
-      cpu: 400m
-      # -- (object) RAM Ressourcengrenzen, die auf den ClamAV-Pod anzuwenden sind.
+      # -- (string) Rechenressourcengrenzen, die auf den ClamAV-Container anzuwenden sind. 
+      cpu: 1500m
+      # -- (object) RAM Ressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.
       memory: 3Gi
     requests:
-      # -- (string) Anforderungen an Rechenressourcen, die auf den ClamAV-Pod anzuwenden sind. 
-      cpu: 150m
-      # -- (string) Anforderungen an RAM Ressourcen, die auf den ClamAV-Pod anzuwenden sind. 
-      memory: 400Mi
+      # -- (string) Anforderungen an Rechenressourcen, die auf den ClamAV-Container anzuwenden sind. 
+      cpu: 300m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den ClamAV-Container anzuwenden sind. 
+      memory: 2Gi
 
 ######################################################################################
 ##          Konfiguration für CoTurn
@@ -1301,7 +1376,7 @@ coturn:
   turnUris:
     udp: 3478
     tcp: 3478
-    realm: "turn.beispiel.org"
+    realm: "turn.example.com"
   existingcoturn: 
     # -- (bool) Schalter um bereits existenten CoTurn im K8s-Cluster zu nutzen
     enabled: false
@@ -1312,7 +1387,7 @@ coturn:
     repository: coturn/coturn
     tag: docker/4.5.2-r12
     pullPolicy: IfNotPresent
-  # -- (map) SecurityContext für das Pod
+  # -- (map) SecurityContext für den Container
   securityContext:
     runAsUser: 2011
     runAsGroup: 2011

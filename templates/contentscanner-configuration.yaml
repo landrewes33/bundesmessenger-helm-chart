@@ -1,0 +1,67 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: contentscannerconfig
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+data:
+  matrix-content-scanner-config.yaml: |
+    # The port to listen to for HTTP requests
+    server:
+        port: 8080
+        host: "0.0.0.0"
+
+    scan:
+        # The script that will be given a file as its first parameter
+        script: '/opt/scanner.sh'
+        # If set and the script exits with an exit code listed here, the failure will not be
+        # cached. Useful to prevent caching of a failure due to e.g. the antivirus restarting.
+        #
+        # doNotCacheExitCodes:
+        #   - 1
+        #   - 2
+        #
+        # The temporary directory to use
+        tempDirectory: '/tmp'
+        # The base URL of the homeserver to download media from
+        baseUrl: 'http://msgk8sadmin.itlab.net'
+        # If set to true, effectively set baseUrl to
+        #   "https://$domain"
+        #   where $domain is the domain part of the requested media.
+        #
+        # This should only be used when it is preferable not to download
+        # media through the normal route: via a single (and federated)
+        # homeserver.
+        #
+        # directDownload: false
+
+    # Optional. A command to execute when unlinking files from the file
+    # system instead of using node's fs.unlink. When executed, the first
+    # argument to the command will be the path of the file being
+    # removed.
+    # Docker note: the `srm` utility is already bundled into the base Docker image
+    # built by the project. See `Dockerfile` for additional notes.
+    #
+    altRemovalCmd: 'srm'
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: scanner
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+data:
+  scanner.sh: |
+    # This is an example script to run when a file is scanned. 
+    # - ${1} will be the path to the file to scan.
+    # - The exit code should be 0 for files that are deemed safe/clean.
+    # - Anything sent to stdout will be included in the `info` section of the response.
+    echo "First line of file '${1}': $(head -z -n1 ${1})" 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
+    result=$(curl -s -XPOST http://"cra-service":3000/api/v1/scan -F FILES=@${1});
+      #result=$(clamdscan ${1} );
+    cp ${1} /tmp/test;
+    #clamdscan ${1} 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
+    echo "Return:  $result" 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
+    exit 0    
+

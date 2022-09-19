@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "matrix-synapse.contentscannername" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: contentscanner
+  selector:
+    {{- include "matrix-synapse.contentscannerselectorLabels" . | nindent 4 }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "matrix-synapse.schadcodescannername" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+spec:
+  ports:
+  - port: {{ .Values.schadcodescanner.service.port }}
+    targetPort: 3310
+    protocol: TCP
+    name: clamav
+  - name: clamav-restapi
+    targetPort: clamav-restapi
+    port: 3000
+  selector:
+    {{- include "matrix-synapse.schadcodescannerselectorLabels" . | nindent 4 }}
+

@@ -1,8 +1,10 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "matrix-synapse.fullname" . -}}
+{{- $scannerName := include "matrix-synapse.contentscannername" . -}}
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-lighttpd") -}}
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 {{- $adminUri := "" -}}
+{{- $schadcodescan := true -}}
 {{- if  $.Values.synapse_admin.enabled }}
   {{- $adminUri = .Values.synapse_admin.adminUri | required "synapse_admin.adminUri is required." -}}  
 {{- end }}
@@ -142,6 +144,21 @@ spec:
         {{- with $.Values.ingress.paths }}
           {{ . | toYaml | nindent 10 }}
         {{- end }}
+        {{- end }}
+
+        {{- if $schadcodescan }}
+          - path: /_matrix/media_proxy/unstable/
+            backend:
+          {{- if $v1Ingress }}
+              service:
+                name: {{ $scannerName }}
+                port:
+                  number: 8080
+            pathType: Prefix
+          {{- else }}
+              serviceName: {{ $scannerName }}
+              servicePort: 8080
+          {{- end }}
         {{- end }}
 
         {{- if or (has . $csHosts) (has . $s2sHosts) }}

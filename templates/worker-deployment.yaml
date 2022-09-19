@@ -246,7 +246,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v2
     kind: StatefulSet
-    name: {{ $.Release.Name }}"-"{{ $name }}
+    name: {{ $.Release.Name }}-{{ $name }}
   minReplicas: {{ $config.autoscaling.minReplicas }}
   maxReplicas: {{ $config.autoscaling.maxReplicas }}
   metrics:
