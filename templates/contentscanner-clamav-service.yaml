@@ -28,9 +28,6 @@ spec:
     targetPort: 3310
     protocol: TCP
     name: clamav
-  - name: clamav-restapi
-    targetPort: clamav-restapi
-    port: 3000
   selector:
     {{- include "matrix-synapse.schadcodescannerselectorLabels" . | nindent 4 }}
 
