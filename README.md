@@ -11,8 +11,8 @@
 
 # BundesMessenger Backend
 
-Das BundesMessenger Backend ist Bestanteil verschiedenen Repositories zum BundesMessenger.
-Allgemeine Informationen befinden sich im übergeordneten
+Das BundesMessenger Backend ist Bestandteil einer Sammlung von Repositories zum BundesMessenger.
+Allgemeine Informationen zum Projekt befinden sich im übergeordneten
 [**BundesMessenger Repository**](https://gitlab.opencode.de/bwi/bundesmessenger/info).
 
 Dieses Repository stellt ein [Helm Chart](https://helm.sh/) zur automatisierten Bereitstellung
@@ -167,11 +167,16 @@ Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
 Internet bezogen werden dürfen.
 - Anpassung der [`values.yaml`](./values.yaml) zur Nutzung der richtigen Images und Registry
   - :pushpin: Informationen zur Bereitstellung der [Container-Basisimages](./docs/requirements_poc.md#container-basisimages)
+  und [BundesMessenger Container Registry](https://gitlab.opencode.de/bwi/bundesmessenger/backend/container-images/)
+- Bereitstellen des Helm Charts im eigenen Repository (`helm repo add`). In den Beispielen
+`bundesmessenger`. Alternativ die Installation des Helm Charts aus dem Dateisystem (z.B. `./bundesmessenger/`).
 - ([Sub-)Domains mit dazugehörigen TLS-Zertifikaten](./docs/requirements_poc.md#hostnamendns)
   ([Sicherheitshinweis](https://github.com/matrix-org/synapse/blob/develop/README.rst#security-note))
   - Eine (Sub-)Domain für den Applikationsserver z.B.: `matrix.example.com`
+  (Parameter `serverName` bzw. `publicServerName`)
   - Eine (Sub-)Domain für den WebClient z.B. `app.example.com`, besser `app.example.net`
-  - Eine (Sub-)Domain für die Administrationsoberfläche um den Zugriff zu separieren bzw. die Admin-Schnittstelle vor öffentlichen Zugriff zu schützen
+  - Eine (Sub-)Domain für die Administrationsoberfläche um den Zugriff zu separieren
+  bzw. die Admin-Schnittstelle vor öffentlichen Zugriff zu schützen (Parameter `synapse_admin.adminUri`)
 - [Kubernetes](https://kubernetes.io/) 1.19+
 - [Helm](https://helm.sh/) 3.0+
 - Ingress Controller (NginX) im Cluster installiert
@@ -210,18 +215,25 @@ auf der gewünschten Domain für Ihre MXIDs ausführen. Eine [Delegation](#deleg
 **Die Server-Adresse `example.com` entspricht den Benutzernamen `@localpart:example.com`.**
 
 ```console
-helm install bundesmessenger nextmessage/bundesmessenger --set serverName=example.com --set wellknown.enabled=true
+helm install bundesmessenger bundesmessenger/bundesmessenger \
+  --set serverName=example.com \
+  --set wellknown.enabled=true \
+  --set synapse_admin.adminUri=admin.example.com
 ```
 
 Es wird bereitgestellt:
 
 - Synapse für Client- und Föderations-Verbindungen auf `example.com/_matrix`
 - lighttp Server für well-known-Anfragen auf `example.com/.well-known/matrix/server`
+- Administrations-Oberfläche auf `admin.example.com`
 
 Es ist auch möglich, Synapse auf einer Subdomain laufen zu lassen, wobei diese dann Teil Ihrer MXIDs wird: (`@localpart:matrix.example.com` in folgenden Beispiel)
 
 ```console
-helm install matrix-synapse bundesmessenger/bundesmessenger --set serverName=matrix.example.com --set wellknown.enabled=true
+helm install bundesmessenger bundesmessenger/bundesmessenger \
+  --set serverName=matrix.example.com \
+  --set wellknown.enabled=true \
+  --set synapse_admin.adminUri=admin.example.com
 ```
 
 ## Option 2: Domain entspricht nicht den Benutzernamen (mit Delegation)
@@ -236,13 +248,18 @@ erreicht werden. Hierfür gibt es zwei Möglichkeiten: DNS (:warning: nicht empf
 - Für die **well-known-Variante** erfolgt die Installation wie folgt:
 
   ```console
-  helm install matrix-synapse bundesmessenger/bundesmessenger --set serverName=example.com --set publicServerName=matrix.example.com --set wellknown.enabled=true
+  helm install bundesmessenger bundesmessenger/bundesmessenger \
+    --set serverName=example.com \
+    --set publicServerName=matrix.example.com \
+    --set wellknown.enabled=true \
+    --set synapse_admin.adminUri=admin.example.com
   ```
 
   Es wird bereitgestellt:
 
   - Synapse für Client- und Föderations-Verbindungen auf `matrix.example.com/_matrix`
   - lighttp Server für well-known-Anfragen auf `example.com/.well-known/matrix/server`
+  - Administrations-Oberfläche auf `admin.example.com`
 
   :pushpin: Sie benötigen zusätzlich zum Zertifikat für `matrix.example.com` ein weiteres für `example.com`.
 
@@ -253,12 +270,16 @@ erreicht werden. Hierfür gibt es zwei Möglichkeiten: DNS (:warning: nicht empf
 - Für die **DNS-Variante** installieren Sie den Messenger-Service wie folgt:
 
   ```console
-  helm install matrix-synapse bundesmessenger/bundesmessenger --set serverName=example.com --set publicServerName=matrix.example.com
+  helm install bundesmessenger bundesmessenger/bundesmessenger \
+    --set serverName=example.com \
+    --set publicServerName=matrix.example.com \
+    --set synapse_admin.adminUri=admin.example.com
   ```
 
   Es wird bereitgestellt:
 
   - Synapse für Client- und Föderations-Verbindungen auf `matrix.example.com/_matrix`
+  - Administrations-Oberfläche auf `admin.example.com`
 
    Zusätzlich wird für die Föderation der DNS SRV-Record benötigt, siehe dem [Kapitel zur Delegation](#delegation).
 

@@ -17,15 +17,15 @@ Sobald diese Bereiche abgedeckt sind, können Sie eine PoC-Umgebung installieren
 
 ## Hostnamen/DNS
 
-Sie benötigen Hostnamen für die folgenden Infrastrukturkomponenten:
+Sie benötigen Hostnamen inkl. DNS-Auflösung für die folgenden Infrastrukturkomponenten:
 
-- Element Web Client (erforderlich)
-- Synapse (erforderlich)
-- Synapse-Admin (empfohlen für eine Erreichbarkeit nur von intern, `.local`-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :smiley:)
-- Monitoring (empfohlen) - ToDo: Beschreiben
-- CoTurn-Server (optional)
- 
-Diese Hostnamen müssen in die entsprechenden IP-Adressen aufgelöst werden. Wenn Sie über einen geeigneten DNS-Server mit Einträgen (auch mit SRV-Einträgen für Matrix, siehe [separater Subdomain](docs/installation.md#auf-separater-subdomain)) für diese Hostnamen verfügen, können Sie loslegen.
+| Komponente | Status | Parameter | Bemerkung |
+| ------ | ------ | ------ | ------ |
+| Web Client | erforderlich | tbd | |
+| Synapse | erforderlich | `serverName` bzw. `publicServerName` | |
+| Synapse-Admin | erforderlich | `synapse_admin.adminUri` | empfohlen für eine Erreichbarkeit nur von intern, `.local`-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :smiley:<br />Kann deaktiviert werden mit `synapse_admin.enabled=false`. |
+| Monitoring | empfohlen | tbd | ToDo |
+| CoTurn-Server | optional | tbd | derzeit nicht im Scope |
 
 ## Maschinengröße
 
@@ -44,6 +44,8 @@ Für die Durchführung eines Proof of Concept mit unserem Installationschart unt
 
 In Zukunft wird auf die Nutzung von Containern aus [Docker Hub](https://hub.docker.com/) verzichtet werden.
 Hierzu werden eigene CI-Pipelines aufgebaut um eigene Applikations- bzw. Basis-Images im OpenCoDE zur Verfügung zu stellen.
+
+- [BundesMessenger Container Registry](https://gitlab.opencode.de/bwi/bundesmessenger/backend/container-images/)
 
 Das Veröffentlichen von eigenen Basis-Images stellt eine Verbreitung einer Linux-Distribution dar.
 Daher werden wir zur Herstellung unserer Appikations-Images auf spezielle Basis-Images aufbauen.
