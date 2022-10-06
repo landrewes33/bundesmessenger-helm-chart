@@ -4,17 +4,18 @@
 ######################################################################################
 image:
   # -- (string) Repository/Image Konfiguration, für Synapse und Workernodes.
-  repository: matrixdotorg/synapse
+  #ursprünglich: "repository: matrixdotorg/synapse"
+  repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse
 
   # -- (string) kann die gesetzte Defaultversion überschreiben, wenn gesetzt.
   # @default -- wird im Charts.yaml gesetzt
-  tag: ''
+  tag: '1.64.0'
   # -- (map) Optional kann ein Array von imagePullSecrets angegeben werden. 
   # Secrets müssen manuell im Namensraum angelegt werden.
   # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   # Beispiel:
   # pullSecrets: 
-  #   - myRegistryKeySecretName
+  #   - name: myRegistryKeySecretName
   # @default -- nicht gesetzt
   pullSecrets: []
 
@@ -59,7 +60,10 @@ signingkey:
     generateImage:
       # -- (string) Repository/Image Konfiguration für Synapse-signing-key-job. Es wird dringend 
       # empfohlen, dass die gleiche Konfiguration wie vom Synapse bzw. den Workernodes genutzt wird.
-      repository: matrixdotorg/synapse
+      # ursprüngölich: "repository: matrixdotorg/synapse"
+      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-1.64.0
+      pullSecrets: 
+        - name: bum-gittoken
       #tag: latest
       # -- (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
@@ -1188,6 +1192,7 @@ ingress:
     nginx.ingress.kubernetes.io/use-regex: "true"
     # -- (string) Annotiation, um Body-size zu vergößern (Default Limit 1 oder 10MB)
     nginx.ingress.kubernetes.io/proxy-body-size: 50m
+    nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
   #  kubernetes.io/ingress.class: nginx
   #  kubernetes.io/tls-acme: "true"
 
@@ -1478,4 +1483,33 @@ synapse_admin:
       path: /
       # -- (string) Konfiguration des Ports vom Bereitschaftscheck
       port: http
+
+
+######################################################################################
+##          Konfiguration für Element-WebClient
+######################################################################################
+
+webclient:
+  # -- (bool) Element-Webclient im Deployment aktivieren
+  enabled: false
+  # -- (string) URL für den Webclient
+  uri: app.example.com
+  # -- (map) Konfiguration für das Image vom CoTurn
+  image:
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
+    tag: latest
+    pullPolicy: IfNotPresent
+  annotations:
+       nginx.ingress.kubernetes.io/configuration-snippet: |
+          add_header X-Frame-Options SAMEORIGIN;
+          add_header X-Content-Type-Options nosniff;
+          add_header X-XSS-Protection "1; mode=block";
+          add_header Content-Security-Policy "frame-ancestors 'none'";
+  # -- (map) SecurityContext für den Container
+  securityContext:
+    runAsUser: 2011
+    runAsGroup: 2011
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+
 
