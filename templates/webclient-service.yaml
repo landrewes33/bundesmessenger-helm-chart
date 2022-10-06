@@ -1,0 +1,19 @@
+{{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $wkName }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: webclient
+spec:
+  selector:
+    {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: webclient
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: http
