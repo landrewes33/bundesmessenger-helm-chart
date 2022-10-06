@@ -138,7 +138,8 @@ data:
 
         {{- else if eq $worker "user_dir" }}
     # For user_dir worker
-    update_user_directory: false
+    #old: update_user_directory: false
+    update_user_directory_from_worker: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $worker) }}
 
         {{- end }}
       {{- end }}

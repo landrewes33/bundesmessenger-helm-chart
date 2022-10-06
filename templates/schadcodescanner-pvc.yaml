@@ -1,0 +1,21 @@
+{{- if and .Values.schadcodescanner.persistence.enabled (not .Values.schadcodescanner.persistence.existingClaim) -}}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ template "matrix-synapse.schadcodescannername" . }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - {{ .Values.schadcodescanner.persistence.accessMode | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.schadcodescanner.persistence.size | quote }}
+        {{- if .Values.schadcodescanner.persistence.storageClass }}
+                {{- if (eq "-" .Values.schadcodescanner.persistence.storageClass) }}
+  storageClassName: ""
+                {{- else }}
+  storageClassName: "{{ .Values.schadcodescanner.persistence.storageClass }}"
+                {{- end }}
+        {{- end }}
+{{- end -}}

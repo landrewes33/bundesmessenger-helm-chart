@@ -86,7 +86,7 @@ spec:
               {{- end }}
               {{- end }}
 
-              exec python -B -m synapse.app.homeserver \
+              exec python3 -B -m synapse.app.homeserver \
                           -c /synapse/config/homeserver.yaml \
                           -c /synapse/config/conf.d/
           env:

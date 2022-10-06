@@ -58,7 +58,7 @@ data:
     # - The exit code should be 0 for files that are deemed safe/clean.
     # - Anything sent to stdout will be included in the `info` section of the response.
     echo "First line of file '${1}': $(head -z -n1 ${1})" 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
-    result=$(curl -s -XPOST http://"cra-service":3000/api/v1/scan -F FILES=@${1});
+    result=$(curl -s -XPOST http://"{{ include "matrix-synapse.schadcodescannername" . }}":3310 -F FILES=@${1});
       #result=$(clamdscan ${1} );
     cp ${1} /tmp/test;
     #clamdscan ${1} 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
