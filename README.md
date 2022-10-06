@@ -64,7 +64,7 @@ Die größten Änderungen zu dem zugrundeliegenden Chart sind:
   **(ToDo: Einbringung des [Matrix-Content-Scanners](https://github.com/matrix-org/matrix-content-scanner) zum aktivieren des Virenscanners)**
 - Hinzufügen des [Synapse Admin](https://github.com/Awesome-Technologies/synapse-admin)
   von [Awesome-Technologies](https://awesome-technologies.de/) zur Administration der
-  Instanz (aktuell auf nur intern erreichbarer Domain)
+  Instanz (empfohlen auf nur intern erreichbarer Domain)
 - Hinzufügen und Konfiguration des Sygnal-Push-Dienstes
 - Konfiguration des kompletten Dienstes für das Service-Monitoring per Prometheus
   (wird automatisch an Clustereigenen Prometheus promoted)
@@ -218,16 +218,16 @@ auf der gewünschten Domain für Ihre MXIDs ausführen. Eine [Delegation](#deleg
 helm install bundesmessenger bundesmessenger/bundesmessenger \
   --set serverName=example.com \
   --set wellknown.enabled=true \
-  --set synapse_admin.adminUri=admin.example.com
+  --set synapse_admin.adminUri=example.com
 ```
 
 Es wird bereitgestellt:
 
 - Synapse für Client- und Föderations-Verbindungen auf `example.com/_matrix`
 - lighttp Server für well-known-Anfragen auf `example.com/.well-known/matrix/server`
-- Administrations-Oberfläche auf `admin.example.com`
+- Administrations-Oberfläche auf `example.com` 
 
-Es ist auch möglich, Synapse auf einer Subdomain laufen zu lassen, wobei diese dann Teil Ihrer MXIDs wird: (`@localpart:matrix.example.com` in folgenden Beispiel)
+Es ist auch möglich, Synapse-Admin und Synapse auf je einer Subdomain laufen zu lassen, wobei die Synapse-Subdomain dann Teil Ihrer MXIDs wird: (`@localpart:matrix.example.com` in folgenden Beispiel)
 
 ```console
 helm install bundesmessenger bundesmessenger/bundesmessenger \
