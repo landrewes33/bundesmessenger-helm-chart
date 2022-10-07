@@ -176,7 +176,7 @@ Internet bezogen werden dürfen.
   (Parameter `serverName` bzw. `publicServerName`)
   - Eine (Sub-)Domain für den WebClient z.B. `app.example.com`, besser `app.example.net`
   - Eine (Sub-)Domain für die Administrationsoberfläche um den Zugriff zu separieren
-  bzw. die Admin-Schnittstelle vor öffentlichen Zugriff zu schützen (Parameter `synapse_admin.adminUri`)
+  bzw. die Admin-Schnittstelle vor öffentlichen Zugriff zu schützen (Parameter `synapse_admin.uri`)
 - [Kubernetes](https://kubernetes.io/) 1.19+
 - [Helm](https://helm.sh/) 3.0+
 - Ingress Controller (NginX) im Cluster installiert
