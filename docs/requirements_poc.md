@@ -21,9 +21,9 @@ Sie benötigen Hostnamen inkl. DNS-Auflösung für die folgenden Infrastrukturko
 
 | Komponente | Status | Parameter | Bemerkung |
 | ------ | ------ | ------ | ------ |
-| Webclient | optional | tbd | |
+| [WebClient](webclient.md) | optional | `webclient.uri` | Kann aktiviert werden mit `webclient.enabled=true`. |
 | Synapse | erforderlich | `serverName` bzw. `publicServerName` | |
-| Synapse-Admin | optional | `synapse_admin.uri` | empfohlen für eine Erreichbarkeit nur von intern, `.local`-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :smiley:<br />Kann deaktiviert werden mit `synapse_admin.enabled=false`. |
+| [Synapse-Admin](synapse_admin.md) | optional | `synapse_admin.uri` | empfohlen für eine Erreichbarkeit nur von intern, `.local`-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :smiley:<br />Kann aktiviert werden mit `synapse_admin.enabled=true`. |
 | Monitoring | empfohlen | tbd | ToDo |
 | CoTurn-Server | optional | tbd | nicht empfohlen in Kubernetes umzusetzen, derzeit nicht im Scope |
 
