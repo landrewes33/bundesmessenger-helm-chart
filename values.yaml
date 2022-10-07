@@ -644,7 +644,7 @@ workers:
       # - "/_matrix/client/(r0|v3|unstable)/rooms/.*/read_markers"
       
       ## The presence event stream
-      # - "/_matrix/client/(api/v1|r0|v3|unstable)/presence/"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/presence/"
 
     # -- (path) Server-Side (externer Zugriff) Pfade für die Ingress-Konfiguration des Workers
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
@@ -764,26 +764,6 @@ workers:
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
     csPaths:
       - "/_matrix/client/(api/v1|r0|v3|unstable)/user_directory/search$"
-
-  ## This worker handles key uploads, and may also stub out presence if that is
-  ## disabled. If you set extraConfig.use_presence=false then you may want to
-  ## uncomment the second path.
-  ##
-  frontend_proxy:
-    # -- (bool) Aktivierung des FrontendProxy-Worker
-    # Dieser Worker kümmert sich um das Hochladen von Schlüsseln, 
-    # und kann auch die Anwesenheit ausblenden, wenn diese deaktiviert ist
-    enabled: false
-    # -- (list) Zusätzliche Listener für frontendproxy-Worker
-    listeners: [client]
-    # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des FrontendProxy-Workers
-    # Hinweis: (default Bundesmessenger)
-    # Wenn Sie extraConfig.use_presence=false setzen, sollten Sie den folgenden Pfad eintragen:
-    # - "/_matrix/client/(api/v1|r0|v3|unstable)/presence/[^/]+/status"
-    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
-    csPaths:
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/keys/upload"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/presence/[^/]+/status"
 
 persistence:
   # -- (bool) Aktivieren der Persistenz-Konfiguration für die Medien-Repository-Funktion.
