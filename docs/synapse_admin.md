@@ -5,7 +5,7 @@ Zur Administration mit Hilfe einer Weboberfläche kann
 
 In dem folgenden Beispiel wir zusätzlich zur Synapse Installation Synapse Admin
 - aktiviert (`synapse_admin.enabled=true`) und
-- eine URL festgelegt (`synapse_admin.adminUri`).
+- eine URL festgelegt (`synapse_admin.uri`).
 
 Die Administrations-Oberfläche ist im Anschluss auf `admin.example.com` erreichbar.
 
@@ -13,5 +13,5 @@ Die Administrations-Oberfläche ist im Anschluss auf `admin.example.com` erreich
 helm install bundesmessenger bundesmessenger/bundesmessenger \
   --set serverName=example.com \
   --set synapse_admin.enabled=true \
-  --set synapse_admin.adminUri=admin.example.com
+  --set synapse_admin.uri=admin.example.com
 ```
