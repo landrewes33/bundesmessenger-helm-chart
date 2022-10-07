@@ -1255,7 +1255,7 @@ ingress:
   includeUnderscoreSynapse: true
 
   # -- (bool) Soll der `/_synapse/admin`-Pfad im Ingress enthalten sein 
-  # Hinweis: Ist `synapse_admin.enabled = true` und `adminUri` gesetzt wird über diesen Host die Admin-APIs unter diesem Pfad bereitgestellt.
+  # Hinweis: Ist `synapse_admin.enabled = true` und `synapse_admin.uri` gesetzt wird über diesen Host die Admin-APIs unter diesem Pfad bereitgestellt.
   # Hinweis: Ist der Synapse-Admin deaktiviert, wird der Pfad in serverDomain/publicServerName mit in den Ingress geschrieben
   includeSynapseAdmin: true
 
@@ -1408,7 +1408,7 @@ synapse_admin:
   # -- (bool) Aktivieren des Synapse-Admin-Moduls
   enabled: true
   # -- (string) URI für die Admin GUI, zwingend notwendig
-  adminUri: 
+  uri: 
   # -- (map) Konfiguration des Image vom Modul
   image:
     repository: awesometechnologies/synapse-admin
