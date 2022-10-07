@@ -1,3 +1,5 @@
+{{- if  .Values.contentscanner.enabled }}
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -13,7 +15,9 @@ spec:
     name: contentscanner
   selector:
     {{- include "matrix-synapse.contentscannerselectorLabels" . | nindent 4 }}
+{{- end }}
 
+{{- if .Values.schadcodescanner.enabled }}
 ---
 apiVersion: v1
 kind: Service
@@ -30,4 +34,4 @@ spec:
     name: clamav
   selector:
     {{- include "matrix-synapse.schadcodescannerselectorLabels" . | nindent 4 }}
-
+{{- end }}

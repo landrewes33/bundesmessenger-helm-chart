@@ -1,3 +1,4 @@
+{{- if .Values.webclient.enabled }}
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
 
 ---
@@ -24,7 +25,7 @@ spec:
   ingressClassName: {{ .Values.ingress.className }}
 {{- end }}
   rules:
-    - host: {{ .Values.webclient.uri }}
+    - host: {{ .Values.webclient.uri | required "webclient.uri is required." }}
       http:
         paths:
           - pathType: Prefix
@@ -40,3 +41,4 @@ spec:
               serviceName: {{ $wkName }}
               servicePort: 80
             {{- end }}
+{{- end }}

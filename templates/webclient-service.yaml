@@ -1,3 +1,4 @@
+{{- if .Values.webclient.enabled }}
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
 
 ---
@@ -17,3 +18,4 @@ spec:
       protocol: TCP
       port: 80
       targetPort: http
+{{- end }}
