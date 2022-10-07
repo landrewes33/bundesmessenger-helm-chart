@@ -60,8 +60,8 @@ Die größten Änderungen zu dem zugrundeliegenden Chart sind:
 - Änderung der Namensgebung/Transport der Pod-Names in die Dienste, für ein eindeutiges Logging und Auswertung der internen Kommunikation
 - festes `PersistentVolumeClaim` für Media-Worker
 - Einfügen/Anpassen von Ingress-Routen
-- Hinzufügen eines Virenscanners (ClamAV)
-  **(ToDo: Einbringung des [Matrix-Content-Scanners](https://github.com/matrix-org/matrix-content-scanner) zum aktivieren des Virenscanners)**
+- Hinzufügen eines [Virenscanner (ClamAV)](https://www.clamav.net/) zusammen mit dem
+  [Matrix-Content-Scanner](https://github.com/matrix-org/matrix-content-scanner)
 - Hinzufügen des [Synapse Admin](https://github.com/Awesome-Technologies/synapse-admin)
   von [Awesome-Technologies](https://awesome-technologies.de/) zur Administration der
   Instanz (empfohlen auf nur intern erreichbarer Domain)
@@ -217,23 +217,21 @@ auf der gewünschten Domain für Ihre MXIDs ausführen. Eine [Delegation](#deleg
 ```console
 helm install bundesmessenger bundesmessenger/bundesmessenger \
   --set serverName=example.com \
-  --set wellknown.enabled=true \
-  --set synapse_admin.adminUri=example.com
+  --set wellknown.enabled=true
 ```
 
 Es wird bereitgestellt:
 
 - Synapse für Client- und Föderations-Verbindungen auf `example.com/_matrix`
 - lighttp Server für well-known-Anfragen auf `example.com/.well-known/matrix/server`
-- Administrations-Oberfläche auf `example.com` 
 
-Es ist auch möglich, Synapse-Admin und Synapse auf je einer Subdomain laufen zu lassen, wobei die Synapse-Subdomain dann Teil Ihrer MXIDs wird: (`@localpart:matrix.example.com` in folgenden Beispiel)
+Es ist auch möglich, Synapse auf einer Subdomain (`matrix.example.com`) laufen zu lassen,
+wobei diese dann Teil Ihrer MXIDs wird: (`@localpart:matrix.example.com` in folgenden Beispiel)
 
 ```console
 helm install bundesmessenger bundesmessenger/bundesmessenger \
   --set serverName=matrix.example.com \
-  --set wellknown.enabled=true \
-  --set synapse_admin.adminUri=admin.example.com
+  --set wellknown.enabled=true
 ```
 
 ## Option 2: Domain entspricht nicht den Benutzernamen (mit Delegation)
@@ -251,15 +249,13 @@ erreicht werden. Hierfür gibt es zwei Möglichkeiten: DNS (:warning: nicht empf
   helm install bundesmessenger bundesmessenger/bundesmessenger \
     --set serverName=example.com \
     --set publicServerName=matrix.example.com \
-    --set wellknown.enabled=true \
-    --set synapse_admin.adminUri=admin.example.com
+    --set wellknown.enabled=true
   ```
 
   Es wird bereitgestellt:
 
   - Synapse für Client- und Föderations-Verbindungen auf `matrix.example.com/_matrix`
   - lighttp Server für well-known-Anfragen auf `example.com/.well-known/matrix/server`
-  - Administrations-Oberfläche auf `admin.example.com`
 
   :pushpin: Sie benötigen zusätzlich zum Zertifikat für `matrix.example.com` ein weiteres für `example.com`.
 
@@ -272,14 +268,12 @@ erreicht werden. Hierfür gibt es zwei Möglichkeiten: DNS (:warning: nicht empf
   ```console
   helm install bundesmessenger bundesmessenger/bundesmessenger \
     --set serverName=example.com \
-    --set publicServerName=matrix.example.com \
-    --set synapse_admin.adminUri=admin.example.com
+    --set publicServerName=matrix.example.com
   ```
 
   Es wird bereitgestellt:
 
   - Synapse für Client- und Föderations-Verbindungen auf `matrix.example.com/_matrix`
-  - Administrations-Oberfläche auf `admin.example.com`
 
    Zusätzlich wird für die Föderation der DNS SRV-Record benötigt, siehe dem [Kapitel zur Delegation](#delegation).
 
@@ -306,6 +300,8 @@ kubectl delete pod matrix-synapse-bundesmessenger
 Eine Anweisung für die Installation einer PoC-Umgebung finden Sie hier, so wie auch Hinweise zu den einzelnen zusätzlichen Diensten:
 
 - [PoC Requirements](./docs/requirements_poc.md)
+- [BundesMessenger WebClient](./docs/webclient.md)
+- [Synapse Admin](./docs/synapse_admin.md)
 - [TURN (Audio / Video)](./docs/turn.md)
 - [Sygnal (Push-Service)](./docs/sygnal_push.md)
 
