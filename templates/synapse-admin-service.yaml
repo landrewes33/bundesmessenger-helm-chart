@@ -1,3 +1,5 @@
+{{- if  .Values.synapse_admin.enabled }}
+---
 apiVersion: v1
 kind: Service
 metadata: 
@@ -11,3 +13,4 @@ spec:
     - name: "admin-port"
       port: 8080
       targetPort: 80
+{{- end }}

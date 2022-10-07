@@ -1,3 +1,4 @@
+{{- if .Values.webclient.enabled }}
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
 
 ---
@@ -46,3 +47,4 @@ spec:
       - name: files
         configMap:
           name: {{ $wkName }}
+{{- end }}

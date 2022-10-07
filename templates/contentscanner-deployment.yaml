@@ -1,4 +1,5 @@
 {{- if  .Values.contentscanner.enabled }}
+---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:

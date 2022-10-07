@@ -1299,7 +1299,7 @@ contentscanner:
 
 
 ######################################################################################
-##          Konfiguration für CLAMAV
+##          Konfiguration für ClamAV
 ######################################################################################
 schadcodescanner:
   # -- (bool) Aktivieren des ClamAV-Container 
@@ -1492,9 +1492,9 @@ synapse_admin:
 webclient:
   # -- (bool) Element-Webclient im Deployment aktivieren
   enabled: false
-  # -- (string) URL für den Webclient
-  uri: app.example.com
-  # -- (map) Konfiguration für das Image vom CoTurn
+  # -- (string) URL für den Webclient, zwingend notwendig
+  uri:
+  # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
     tag: latest

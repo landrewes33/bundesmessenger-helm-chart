@@ -74,6 +74,7 @@ spec:
 {{- end }}
 {{- end }}
 
+{{- if $.Values.sygnal.enabled }}
 ---
 apiVersion: v1
 kind: Service
@@ -89,3 +90,4 @@ spec:
     - name: sygnal-port
       port: 80
       targetPort: 5000
+{{- end }}
