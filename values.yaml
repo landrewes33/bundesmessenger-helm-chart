@@ -1406,7 +1406,7 @@ coturn:
 
 synapse_admin:
   # -- (bool) Aktivieren des Synapse-Admin-Moduls
-  enabled: true
+  enabled: false
   # -- (string) URI für die Admin GUI, zwingend notwendig
   uri: 
   # -- (map) Konfiguration des Image vom Modul
@@ -1505,11 +1505,3 @@ webclient:
           add_header X-Content-Type-Options nosniff;
           add_header X-XSS-Protection "1; mode=block";
           add_header Content-Security-Policy "frame-ancestors 'none'";
-  # -- (map) SecurityContext für den Container
-  securityContext:
-    runAsUser: 2011
-    runAsGroup: 2011
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-
-
