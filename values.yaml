@@ -713,9 +713,10 @@ workers:
        - "/_matrix/federation/v1/send/"
 
   pusher:
-  # -- (bool) Dieser Worker kümmert sich um die Übermittlung von Benachrichtigungen.
+  # -- (bool) Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen.
+  # (pusher-worker -> Sygnal -> Push-Provider (Apple od. Google))
   # Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden
-  # WICHTIGER HINWEIS: Dafür gibt es den Sygnal-Service und Container!!!
+  # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
     enabled: false
 
   appservice:
