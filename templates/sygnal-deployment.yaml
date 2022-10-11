@@ -221,6 +221,7 @@ spec:
       serviceAccountName: bundesmessenger
       securityContext:
         {{- $.Values.sygnal.podSecurityContext | toYaml | nindent 8 }}
+      {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
        - name: matrix-synapse-sygnal
          image:  "{{ $.Values.sygnal.image.repository }}:{{ include "matrix-synapse.sygnal.imageTag" $ }}"
