@@ -12,7 +12,7 @@ spec:
   namespaceSelector:
     matchNames:
     - kube-system
-    - bum
+    - {{ .Release.Namespace }}
   endpoints:
   - port: metrics
     path: /_synapse/metrics
