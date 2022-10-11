@@ -777,7 +777,7 @@ persistence:
   enabled: true
   # -- (string) Name des VolumeClaims
   # @default -- auskommentiert, damit dynamische Volumes genutzt werden können (dennoch persistent)
-  existingClaim: 
+  # existingClaim: 
   # -- (string) Name der entsprechenden Storage-Klasse
   storageClass: ''
   # -- (string) Zugriffsmodus
