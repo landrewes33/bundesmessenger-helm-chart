@@ -19,9 +19,10 @@ data:
 {{- range $worker, $config := .Values.workers -}}
   {{- if $config.enabled -}}
     {{- $name := $worker | replace "_" "-" }}
+    {{- $app := $config.app | default $worker }}
 
   {{ $name }}.worker: |
-    worker_app: "synapse.app.{{ (not (not $config.generic)) | ternary "generic_worker" $worker }}"
+    worker_app: "synapse.app.{{ (not (not $config.generic)) | ternary "generic_worker" $app }}"
 
     worker_name: "PLATZHALTER"
     
