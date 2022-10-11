@@ -49,7 +49,7 @@ spec:
               name: {{ include "matrix-synapse.schadcodescannername" . }}
       - name: signatures
         persistentVolumeClaim:
-            claimName: {{ $config.persistence.claimName }} 
+            claimName: {{ template "matrix-synapse.schadcodescannername" . }} 
       {{- with $config.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
