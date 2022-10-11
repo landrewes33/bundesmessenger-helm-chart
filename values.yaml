@@ -39,6 +39,10 @@ serverName: ''
 # @default  -- Nicht gesetzt
 publicServerName: ''
 
+# -- (bool) Aktivieren des Monitoringservices für Synapse-Dienste in Prometheus 
+# @default -- false
+monitoringService: false
+
 ## Die Quelle des von Synapse im Verbund verwendeten Signierschlüssels.
 ##
 signingkey:
@@ -772,9 +776,10 @@ persistence:
   # accessMode auf RWX/ReadWriteMany setzen.
   enabled: true
   # -- (string) Name des VolumeClaims
-  existingClaim: matrix-synapse
+  # @default -- auskommentiert, damit dynamische Volumes genutzt werden können (dennoch persistent)
+  existingClaim: 
   # -- (string) Name der entsprechenden Storage-Klasse
-  storageClass: nfs-client
+  storageClass: ''
   # -- (string) Zugriffsmodus
   accessMode: ReadWriteOnce
   # -- (string) Größe des zu nutzenden Volumes
@@ -1046,7 +1051,7 @@ postgresql:
   
   # -- (map) Persistenzkonfiguration für Storage für PostgreSQL
   persistence:
-    storageClass: nfs-client
+    storageClass: ''
     size: 16Gi
 
   # -- (list) Zusätzliche Argumente für die Datenbankverbindung
