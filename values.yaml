@@ -681,7 +681,7 @@ workers:
       # -- (bool) schalte das HPA für die Container ein
       # Hinweis: Kann für alle spezifischen Worker benutzt werden
       # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden
-      enabled: true
+      enabled: false
       # -- (int) minimale Anzahl der Worker-Container
       minReplicas: 2
       # -- (int) maximale Anzahl der Worker-Container
@@ -1086,6 +1086,11 @@ externalPostgresql:
 ## false setzen und den externalRedis-Block konfigurieren.
 ##
 redis:
+  image:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/jammy-redis-5
+    tag: 6.0.16-1ubuntu1-latest
+    pullSecrets: ["myRegistryKeySecretName"]
   # -- (bool) Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
   # Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
   # false setzen und den externalRedis-Block konfigurieren.
@@ -1264,7 +1269,7 @@ contentscanner:
 ######################################################################################
 schadcodescanner:
   # -- (bool) Aktivieren des ClamAV-Container 
-  enabled: true
+  enabled: false
   # -- (map) Konfiguration des Image/Repository
   image:
     repository: clamav/clamav
@@ -1290,7 +1295,7 @@ schadcodescanner:
     # -- (bool) schalte das HPA für die Container ein
     # Hinweis: Kann für alle spezifischen Worker benutzt werden
     # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden
-    enabled: true
+    enabled: false
     # -- (int) minimale Anzahl der Worker-Container
     minReplicas: 1
     # -- (int) maximale Anzahl der Worker-Container
