@@ -67,7 +67,7 @@ spec:
             - -c
             - |
               cat /tmp/{{ $name }}.worker | sed "s/PLATZHALTER/${HOSTNAME}/" > /synapse/config/{{ $name }}.worker
-          image: "{{ .Values.image.repository }}:{{ include "matrix-synapse.imageTag" . }}"     
+          image: "{{ $.Values.image.repository }}:{{ include "matrix-synapse.imageTag" $ }}"     
           volumeMounts:
           - mountPath: "/tmp/"
             name: temp-worker-config
