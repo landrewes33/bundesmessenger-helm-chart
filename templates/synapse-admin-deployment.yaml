@@ -21,6 +21,7 @@ spec:
       serviceAccountName: bundesmessenger
       securityContext:
         {{- $.Values.synapse_admin.podSecurityContext | toYaml | nindent 8 }}
+      {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
         - name: synapse-admin
           image:  "{{ $.Values.synapse_admin.image.repository }}:{{ $.Values.synapse_admin.image.tag }}"
