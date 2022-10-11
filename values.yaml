@@ -1253,7 +1253,7 @@ ingress:
 contentscanner:
   # -- (bool) Aktivieren des Matrix-Content-Scanner
   # Mittelsmann zwischen AV und Matrix-Synapse
-  enabled: true
+  enabled: false
 
   replicaCount: 1
   resources: 
