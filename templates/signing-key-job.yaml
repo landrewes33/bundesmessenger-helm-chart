@@ -64,6 +64,7 @@ spec:
         {{- include "matrix-synapse.labels" . | nindent 8 }}
         app.kubernetes.io/component: signingkey-job
     spec:
+      {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
         - command:
             - sh
