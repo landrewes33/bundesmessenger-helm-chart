@@ -178,7 +178,8 @@ stringData:
     ############################# Apps - Config ###########################
     #######################################################################
     apps:
-    {{- with $.Values.sygnal.apns }}
+    {{- $apns = $.Values.sygnal.apns | required "Es müssen Daten für die Push-Notifications hinterlegt werden!" -}}
+    {{- with $apns }}
     ## APNs aus value ##
       {{ . | toYaml | nindent 6 }}
     {{- end }}
@@ -195,7 +196,7 @@ metadata:
     helm.sh/resource-policy: keep
   name: ioskey
 data:
-  {{ $iosKey }}: {{ $.Values.sygnal.ios_push.ioskey_keyvalue | toYaml | quote }}
+  {{ $iosKey }}: {{ required "Es ist der Schlüsselinhalt mit anzugeben unter sygnal.ios_push.ioskey_keyvalue" $.Values.sygnal.ios_push.ioskey_keyvalue | toYaml | quote }}
 
 {{ end  }}
 
