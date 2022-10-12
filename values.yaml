@@ -917,7 +917,7 @@ sygnal:
   ios_push:
   # -- (bool) IOS-Push Schalter
   # Wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden, sonst schlägt das Modul fehl
-    enabled: true
+    enabled: false
 
   # -- (map) iOS-Key Konfiguration
   # bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden. Weitereres siehe README.md
