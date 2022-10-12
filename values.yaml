@@ -762,7 +762,7 @@ workers:
   user_dir:
     # -- (bool) Aktivieren des Nutzersuch-Workers
     # Hinweis: Damit kann die Last vom generischen bzw. Haupt-Worker genommen werden
-    enabled: true
+    enabled: false
     # -- (list) Zusätzliche Listener für NutzerSuch-Worker
     listeners: [client]
     # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers
