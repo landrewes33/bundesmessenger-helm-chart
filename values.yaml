@@ -835,11 +835,11 @@ service:
 #Reference: https://github.com/matrix-org/sygnal
 sygnal:
   # -- (bool) Aktivieren des Sygnal-Container
-  enabled: true
+  enabled: false
   # -- (map) Image/Repo-Konfiguration von Sygnal
   image:
-    repository: matrixdotorg/sygnal
-    tag: v0.11.0 
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-sygnal-v0.12.0
+    tag: latest
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
