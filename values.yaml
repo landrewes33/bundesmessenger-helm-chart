@@ -758,17 +758,22 @@ workers:
     paths:
       - "/_matrix/media/"
 
-  ## This worker deals with user directory searches.
+  ## Dieser Worker aktualisiert das Benutzerverzeichnis und kann auch darin suchen
+  ## Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der Worker optional.
   user_dir:
     # -- (bool) Aktivieren des Nutzersuch-Workers
     # Hinweis: Damit kann die Last vom generischen bzw. Haupt-Worker genommen werden
     enabled: false
+    # -- (string) Eindeutiger Name des Workers
+    name: user_directory_worker
+    # -- (bool) Wird aus dem generischen Worker abgeleitet
+    generic: true
     # -- (list) Zusätzliche Listener für NutzerSuch-Worker
     listeners: [client]
     # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden 
     csPaths:
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/user_directory/search$"
+      - "/_matrix/client/(r0|v3|unstable)/user_directory/search$"
 
 persistence:
   # -- (bool) Aktivieren der Persistenz-Konfiguration für die Medien-Repository-Funktion.

@@ -138,8 +138,7 @@ data:
 
         {{- else if or (eq $worker "user_dir") (eq ($config.app | default "") "user_dir") }}
     # For user_dir worker
-    #old: update_user_directory: false
-    update_user_directory_from_worker: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $worker) }}
+    update_user_directory_from_worker: {{ required "You need to specify a workers.user_dir.name" $config.name }}
 
         {{- end }}
       {{- end }}
