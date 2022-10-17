@@ -46,17 +46,25 @@ data:
     listeners:
       - port: 8008
         tls: false
+        {- if .Values.config.ipv4Only }
+        bind_addresses: ['0.0.0.0']
+        {- else }
         bind_addresses: ['::']
+        {- end }
         type: http
         x_forwarded: true
 
         resources:
-          - names: [client,federation]
+          - names: [client, federation]
             compress: false
 
       - port: 9090
         tls: false
+        {- if .Values.config.ipv4Only }
+        bind_addresses: ['0.0.0.0']
+        {- else }
         bind_addresses: ['::']
+        {- end }
         type: http
 
         resources:
@@ -65,7 +73,11 @@ data:
 
       - port: 9093
         tls: false
+        {- if .Values.config.ipv4Only }
+        bind_addresses: ['0.0.0.0']
+        {- else }
         bind_addresses: ['::']
+        {- end }
         type: http
 
         resources:

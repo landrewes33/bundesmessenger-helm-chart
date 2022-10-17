@@ -40,7 +40,11 @@ data:
     worker_listeners:
       - port: 9090
         tls: false
+        {- if .Values.config.ipv4Only }
         bind_addresses: ['0.0.0.0']
+        {- else }
+        bind_addresses: ['::']
+        {- end }
         type: http
 
         resources:
@@ -50,7 +54,11 @@ data:
 
       - port: 8083
         tls: false
+        {- if .Values.config.ipv4Only }
+        bind_addresses: ['0.0.0.0']
+        {- else }
         bind_addresses: ['::']
+        {- end }
         type: http
         x_forwarded: true
 

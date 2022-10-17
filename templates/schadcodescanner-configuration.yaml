@@ -36,7 +36,11 @@ data:
     RemoteProxyUsers off
     RemoteProxyUserHeader X-Authenticated-User
     RemoteProxyUserHeaderEncoded on
+    {- if .Values.config.ipv4Only }
     acl all src 0.0.0.0/0.0.0.0
+    {- else }
+    acl all src ::/::
+    {- end }
     acl PERMIT_REQUESTS type REQMOD RESPMOD OPTIONS
     icap_access allow all PERMIT_REQUESTS
     ServerLog /var/log/c-icap/server.log

@@ -109,6 +109,13 @@ config:
   # -- (bool) Nutzungsstatistiken (siehe extraConfig.reportStats) 
   reportStats: false
 
+  # -- (bool) Schaltet alle internen IP-Adressevergaben auf IPv4-only
+  # Wenn `true` sind alle Listener `0.0.0.0`, wenn `false` sind alle Listener `::` (IPv6)
+  # Derzeit wird nur reine IPv4 (https://github.com/matrix-org/synapse/issues/13107)
+  # oder Dual-Stack Umgebungen unterstützt. Kommunikation zu Redis muss IPv4 sein.
+  # @default -- false
+  ipv4Only: true
+  
   ## Schützen Sie die Registrierung mit recaptcha. (optional)
   ##
   # recaptcha:
