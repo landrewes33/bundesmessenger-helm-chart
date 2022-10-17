@@ -97,13 +97,11 @@ stringData:
     #
     http:
       # Specify a list of interface addresses to bind to.
-      #
-      # This example listens on the IPv4 loopback device:
-      #bind_addresses: ['127.0.0.1']
-      # This example listens on all IPv4 interfaces:
+      {- if .Values.config.ipv4Only }
       bind_addresses: ['0.0.0.0']
-      # This example listens on all IPv4 and IPv6 interfaces:
-      #bind_addresses: ['0.0.0.0', '::']
+      {- else }
+      bind_addresses: ['::']
+      {- end }
 
       # Specify the port number to listen on.
       #
@@ -133,7 +131,11 @@ stringData:
 
         # Specify an address for the Prometheus HTTP Server to listen on.
         #
-        address: '127.0.0.1'
+        {- if .Values.config.ipv4Only }
+        address: '0.0.0.0'
+        {- else }
+        address: '::'
+        {- end }
 
         # Specify a port for the Prometheus HTTP Server to listen on.
         #
