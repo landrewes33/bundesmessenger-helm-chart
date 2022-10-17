@@ -56,9 +56,9 @@ Die größten Änderungen zu dem zugrundeliegenden Chart sind:
 
 - Anpassungen im Umfeld des Storage / Speichers
 - Änderung des Sets für die Worker auf `StatefulSets`
-- Hinzufügen und Konfiguration für Horizontal Pod Autoscaling (HPA) für die Generic-Worker
+- Hinzufügen und Konfiguration für Horizontal Pod Autoscaling (HPA) für die Generic-Worker und den ClamAV
 - Änderung der Namensgebung/Transport der Pod-Names in die Dienste, für ein eindeutiges Logging und Auswertung der internen Kommunikation
-- festes `PersistentVolumeClaim` für Media-Worker
+- festes `PersistentVolumeClaim` für Media-Worker 
 - Einfügen/Anpassen von Ingress-Routen
 - Hinzufügen eines [Virenscanner (ClamAV)](https://www.clamav.net/) zusammen mit dem
   [Matrix-Content-Scanner](https://github.com/matrix-org/matrix-content-scanner)
@@ -73,6 +73,8 @@ Die größten Änderungen zu dem zugrundeliegenden Chart sind:
   - *Optional: Installation und Konfiguration eines dedizierten NginX Controllers für UDP Traffic*
   - :pushpin: **Empfehlung: Installation eines CoTurn außerhalb des Kubernetes und Konfiguration zur Erreichbarkeit dort vornehmen**
 - Konfiguration der Dienste nach Best Practice
+- Anpassung an Dual-Stack bzw. reine IPv4-Umgebungen
+- Integration eines eigenen gehärteten WebClients
 
 # Hinweise zu Matrix
 
@@ -200,6 +202,7 @@ Internet bezogen werden dürfen.
 ```console
 helm install bundesmessenger bundesmessenger/bundesmessenger --set persistence.storageClass=STORAGECLASS
 ```
+:pushpin: **Hinweis:** Alternativ können auch dynamisch erstellte PersistentVolumeClaim (PVC) genutzt werden, wenn eine entsprechende StorageClass mit CSI-Volume-Plug-ins (Container Storage Interface) konfiguriert wurde.
 
 | :warning: Zum aktuellen Zeitpunkt stellt das Helm Chart die Infrastruktur auf Basis eines `http`-Listeners bereit.<br />Vor der Infrastruktur muss ein Loadbalancer oder Reverse-Proxy für die Bereitstellung der `https`-Verbindung sorgen und ein Offloading durchführen. |
 | --- |
