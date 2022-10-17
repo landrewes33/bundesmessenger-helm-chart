@@ -202,7 +202,7 @@ Internet bezogen werden dürfen.
 ```console
 helm install bundesmessenger bundesmessenger/bundesmessenger --set persistence.storageClass=STORAGECLASS
 ```
-:pushpin: **Hinweis:** Alternativ können auch dynamisch erstellte PersistentVolumeClaim (PVC) genutzt werden, wenn eine entsprechende StorageClass mit CSI-Volume-Plug-ins (Container Storage Interface) konfiguriert wurde.
+:pushpin: **Hinweis:** Alternativ können auch dynamisch erstellte PersistentVolumeClaim (PVC) genutzt werden, wenn eine entsprechende [StorageClass](https://kubernetes.io/docs/concepts/storage/storage-classes/) mit CSI-Volume-Plug-ins [(**C**ontainer **S**torage **I**nterface](https://kubernetes.io/docs/concepts/storage/volumes/#csi)) konfiguriert wurde.
 
 | :warning: Zum aktuellen Zeitpunkt stellt das Helm Chart die Infrastruktur auf Basis eines `http`-Listeners bereit.<br />Vor der Infrastruktur muss ein Loadbalancer oder Reverse-Proxy für die Bereitstellung der `https`-Verbindung sorgen und ein Offloading durchführen. |
 | --- |
