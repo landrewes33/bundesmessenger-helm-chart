@@ -110,9 +110,10 @@ config:
   reportStats: false
 
   # -- (bool) Schaltet alle internen IP-Adressevergaben auf IPv4-only
-  # Wenn `true` sind alle Listener `0.0.0.0`, wenn `false` sind alle Listener `::` (IPv6)
+  # Wenn `true` sind alle Listener und Anbindungspunkte `0.0.0.0`, 
+  # wenn `false` sind einige Listener bzw. Anbindungspunkte `::` (IPv6)
   # Derzeit wird nur reine IPv4 (https://github.com/matrix-org/synapse/issues/13107)
-  # oder Dual-Stack Umgebungen unterstützt. Kommunikation zu Redis muss IPv4 sein.
+  # oder Dual-Stack Umgebungen unterstützt, keine reine IPv6 Umgebung.
   # @default -- false
   ipv4Only: true
   
