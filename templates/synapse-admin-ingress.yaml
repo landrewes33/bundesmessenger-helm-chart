@@ -1,6 +1,8 @@
 {{- if  .Values.synapse_admin.enabled }}
 {{- $adminUri := .Values.synapse_admin.uri | required "synapse_admin.uri is required." -}}
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
+
+---
 {{- if $v1Ingress -}}
 apiVersion: networking.k8s.io/v1
 {{- else -}}
@@ -12,16 +14,33 @@ metadata:
   labels:
     app: synapse-admin
 spec:
-  ingressClassName: nginx
+{{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+{{- end }}
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    - hosts:
+        - {{ $adminUri }}
+      {{- if .secretName }}
+      secretName: {{ .secretName }}
+      {{- end }}
+  {{- end }}
+{{- end }}
   rules:
     - host: {{ $adminUri }}
       http:
         paths:
           - path: /
-            pathType: Prefix
             backend:
+            {{- if $v1Ingress }}
               service:
                 name: synapse-admin
                 port:
                   number: 8080
+            pathType: Prefix
+            {{- else }}
+              serviceName: synapse-admin
+              servicePort: 8080
+            {{- end }}
 {{- end }}
