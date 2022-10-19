@@ -11,11 +11,11 @@ data:
     # The port to listen to for HTTP requests
     server:
         port: 8080
-        {- if .Values.config.ipv4Only }
+        {{- if $.Values.config.ipv4Only }}
         host: "0.0.0.0"
-        {- else }
+        {{- else }}
         host: "::"
-        {- end }
+        {{- end }}
 
     scan:
         # The script that will be given a file as its first parameter

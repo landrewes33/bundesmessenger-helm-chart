@@ -97,11 +97,11 @@ stringData:
     #
     http:
       # Specify a list of interface addresses to bind to.
-      {- if .Values.config.ipv4Only }
+      {{- if $.Values.config.ipv4Only }}
       bind_addresses: ['0.0.0.0']
-      {- else }
+      {{- else }}
       bind_addresses: ['::']
-      {- end }
+      {{- end }}
 
       # Specify the port number to listen on.
       #
@@ -131,11 +131,11 @@ stringData:
 
         # Specify an address for the Prometheus HTTP Server to listen on.
         #
-        {- if .Values.config.ipv4Only }
+        {{- if $.Values.config.ipv4Only }}
         address: '0.0.0.0'
-        {- else }
+        {{- else }}
         address: '::'
-        {- end }
+        {{- end }}
 
         # Specify a port for the Prometheus HTTP Server to listen on.
         #
