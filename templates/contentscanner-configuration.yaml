@@ -30,7 +30,7 @@ data:
         # The temporary directory to use
         tempDirectory: '/tmp'
         # The base URL of the homeserver to download media from
-        baseUrl: 'http://msgk8sadmin.itlab.net'
+        baseUrl: {{ .Values.config.publicBaseurl | default (printf "https://%s" (.Values.publicServerName | default .Values.serverName)) | quote }}
         # If set to true, effectively set baseUrl to
         #   "https://$domain"
         #   where $domain is the domain part of the requested media.
