@@ -1249,11 +1249,15 @@ ingress:
   includeServerName: true
 
   # -- (map) TLS-Konfiguration für Ingress Konfiguration
+  # Enthält für alle benötigten Domains die notwendigen Secrets vzw. TLS-Zertifikate
   # Beispiel:
   #  - secretName: chart-example-tls
   #    hosts:
   #      - example.com
   #      - matrix.example.com
+  #  - secretName: admin-example-tls
+  #    hosts:
+  #      - admin.example.com
   tls: []
 
   # -- (string) Legen Sie den Namen der IngressClass-Cluster-Ressource fest (optional)
