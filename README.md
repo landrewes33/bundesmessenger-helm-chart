@@ -45,6 +45,7 @@ Weitere Komponenten, die durch das Helm Chart bereitgestellt werden:
   - [Voraussetzungen](#voraussetzungen)
   - [Option 1: Domain entspricht den Benutzernamen (ohne Delegation)](#option-1-domain-entspricht-den-benutzernamen-ohne-delegation)
   - [Option 2: Domain entspricht nicht den Benutzernamen (mit Delegation)](#option-2-domain-entspricht-nicht-den-benutzernamen-mit-delegation)
+  - [Erster Benutzer](#erster-benutzer)
   - [Upgrading](#upgrading)
 - [Weiterführende Dokumentation](#weiterführende-dokumentation)
 - [Kontakt und Austausch](#kontakt-und-austausch)
@@ -58,7 +59,7 @@ Die größten Änderungen zu dem zugrundeliegenden Chart sind:
 - Änderung des Sets für die Worker auf `StatefulSets`
 - Hinzufügen und Konfiguration für Horizontal Pod Autoscaling (HPA) für die Generic-Worker und den ClamAV
 - Änderung der Namensgebung/Transport der Pod-Names in die Dienste, für ein eindeutiges Logging und Auswertung der internen Kommunikation
-- festes `PersistentVolumeClaim` für Media-Worker 
+- festes `PersistentVolumeClaim` für Media-Worker
 - Einfügen/Anpassen von Ingress-Routen
 - Hinzufügen eines [Virenscanner (ClamAV)](https://www.clamav.net/) zusammen mit dem
   [Matrix-Content-Scanner](https://github.com/matrix-org/matrix-content-scanner)
@@ -283,6 +284,12 @@ erreicht werden. Hierfür gibt es zwei Möglichkeiten: DNS (:warning: nicht empf
 | :pushpin: Weitere Setups, Erweiterungen und Services wie Loadbalancer und TLS-Listener werden noch folgen. |
 | --- |
 
+## Erster Benutzer
+
+Nach der Installation sind in der Umgebung keine Benutzer vorhanden.
+
+* [Dokumentation um den ersten Benutzer anzulegen](./docs/nutzerverwaltung.md)
+
 ## Upgrading
 
 Beispiel:
@@ -303,6 +310,7 @@ kubectl delete pod matrix-synapse-bundesmessenger
 Eine Anweisung für die Installation einer PoC-Umgebung finden Sie hier, so wie auch Hinweise zu den einzelnen zusätzlichen Diensten:
 
 - [PoC Requirements](./docs/requirements_poc.md)
+- [Benutzerverwaltung](./docs/nutzerverwaltung.md)
 - [BundesMessenger WebClient](./docs/webclient.md)
 - [Synapse Admin](./docs/synapse_admin.md)
 - [TURN (Audio / Video)](./docs/turn.md)
@@ -320,12 +328,3 @@ haben wir einen [Matrix Raum](https://matrix.to/#/#opencodebum:matrix.org) erste
 Kein Matrix Client zur Hand, dann auch gerne über unser [Email Postfach](mailto:bundesmessenger@bwi.de).
 
 Wir freuen uns auf den Austausch.
-
-# ToDo
-
-- Neustrukturierung der Dokumente
-- Klären DVS DMZ, etc. Port 80 und TLS/443 in Helm Chart
-- Infrastruktur-Bild
-- Ingress
-- Step by Step Guide
-- Föderation und Client auf verschiedenen Ports
