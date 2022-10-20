@@ -1,4 +1,4 @@
-{{- if .Values.webclient.enabled }}
+{{- if and .Values.ingress.enabled .Values.webclient.enabled }}
 {{- $webclientUri := Values.webclient.uri | required "webclient.uri is required." -}}
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}

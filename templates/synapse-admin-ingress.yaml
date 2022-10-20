@@ -1,4 +1,4 @@
-{{- if  .Values.synapse_admin.enabled }}
+{{- if and .Values.ingress.enabled .Values.synapse_admin.enabled }}
 {{- $adminUri := .Values.synapse_admin.uri | required "synapse_admin.uri is required." -}}
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 
