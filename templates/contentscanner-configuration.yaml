@@ -1,4 +1,4 @@
-{{- if  .Values.contentscanner.enabled }}
+{{- if .Values.contentscanner.enabled }}
 ---
 apiVersion: v1
 kind: ConfigMap
