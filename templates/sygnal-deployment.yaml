@@ -3,9 +3,10 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: matrix-synapse-sygnal
+  name: matrix-sygnal
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: matrix-sygnal
 stringData:
   sygnal.yaml: |
     ##
@@ -210,27 +211,30 @@ data:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: matrix-synapse-sygnal
+  name: matrix-sygnal
   labels:
-    app: matrix-synapse-sygnal
+    {{- include "matrix-synapse.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: matrix-sygnal
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app: matrix-synapse-sygnal
+      {{- include "matrix-synapse.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: matrix-sygnal
   template:
     metadata:
       labels:
-        app: matrix-synapse-sygnal
+        {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: matrix-sygnal
     spec:
-      serviceAccountName: bundesmessenger
+      serviceAccountName: {{ .Release.Name }}
       securityContext:
         {{- $.Values.sygnal.podSecurityContext | toYaml | nindent 8 }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
-       - name: matrix-synapse-sygnal
+       - name: matrix-sygnal
          image:  "{{ $.Values.sygnal.image.repository }}:{{ include "matrix-synapse.sygnal.imageTag" $ }}"
          imagePullPolicy: {{ $.Values.sygnal.image.pullPolicy }}
          ports:
@@ -265,7 +269,7 @@ spec:
       volumes:
         - name: config
           secret:
-            secretName: matrix-synapse-sygnal
+            secretName: matrix-sygnal
         - name: ioskey
           secret: 
             secretName: ioskey

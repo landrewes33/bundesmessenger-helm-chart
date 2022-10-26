@@ -5,10 +5,12 @@ kind: Service
 metadata: 
   name: synapse-admin
   labels:
-    app: synapse-admin
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: synapse-admin
 spec: 
   selector:
-    app: synapse-admin
+    {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: synapse-admin
   ports: 
     - name: "admin-port"
       port: 8080
