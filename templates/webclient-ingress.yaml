@@ -11,7 +11,7 @@ apiVersion: networking.k8s.io/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $wkName }}
+  name: {{ $webclientName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
@@ -43,12 +43,12 @@ spec:
             backend:
             {{- if $v1Ingress }}
               service:
-                name: {{ $wkName }}
+                name: {{ $webclientName }}
                 port:
                   number: 80
             pathType: Prefix
             {{- else }}
-              serviceName: {{ $wkName }}
+              serviceName: {{ $webclientName }}
               servicePort: 80
             {{- end }}
 {{- end }}

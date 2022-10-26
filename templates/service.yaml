@@ -81,10 +81,10 @@ kind: Service
 metadata:
   name: "push-local"
   labels:
-    app: matrix-synapse-sygnal
+    app: matrix-sygnal
 spec:
   selector:
-    app: matrix-synapse-sygnal
+    app: matrix-sygnal
   type: ClusterIP
   ports:
     - name: sygnal-port
