@@ -40,7 +40,7 @@ spec:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: well-known
     spec:
-      serviceAccountName: bundesmessenger
+      serviceAccountName: {{ .Release.Name }}
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.wellknown.podSecurityContext | nindent 8 }}

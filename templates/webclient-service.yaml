@@ -1,11 +1,11 @@
 {{- if .Values.webclient.enabled }}
-{{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
+{{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $wkName }}
+  name: {{ $webclientName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: webclient

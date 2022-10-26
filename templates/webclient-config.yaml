@@ -1,5 +1,5 @@
 {{- if .Values.webclient.enabled }}
-{{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
+{{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
 
 # The config.json file is to be put into Kubernetes as a config file in such a way that
 # the element web instance can read it.
@@ -8,7 +8,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $wkName }}
+  name: {{ $webclientName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     component: webclient
