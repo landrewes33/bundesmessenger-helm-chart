@@ -18,6 +18,7 @@ spec:
       labels:
         app.kubernetes.io/component: {{ $webclientName }}
     spec:
+      serviceAccountName: {{ $.Release.Name }}
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       containers:
       - name: element

@@ -12,7 +12,7 @@ kind: ServiceAccount
 metadata:
   labels:
   {{- include "matrix-synapse.labels" . | nindent 4 }}
-  name: {{ .Release.Name }}
+  name: {{ $.Release.Name }}
   namespace: {{ .Release.Namespace }}
 
 ---
@@ -45,7 +45,7 @@ spec:
         {{ . | toYaml | nindent 8 }}
         {{- end }}
     spec:
-      serviceAccountName: bundesmessenger
+      serviceAccountName: {{ $.Release.Name }}
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.synapse.podSecurityContext | nindent 8 }}

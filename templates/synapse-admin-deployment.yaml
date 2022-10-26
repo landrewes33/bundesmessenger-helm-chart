@@ -21,7 +21,7 @@ spec:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: synapse-admin
     spec:
-      serviceAccountName: {{ .Release.Name }}
+      serviceAccountName: {{ $.Release.Name }}
       securityContext:
         {{- $.Values.synapse_admin.podSecurityContext | toYaml | nindent 8 }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}

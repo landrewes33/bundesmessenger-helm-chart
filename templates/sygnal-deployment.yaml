@@ -229,7 +229,7 @@ spec:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: matrix-sygnal
     spec:
-      serviceAccountName: {{ .Release.Name }}
+      serviceAccountName: {{ $.Release.Name }}
       securityContext:
         {{- $.Values.sygnal.podSecurityContext | toYaml | nindent 8 }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
