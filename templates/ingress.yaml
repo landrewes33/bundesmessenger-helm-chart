@@ -3,10 +3,11 @@
 {{- $scannerName := include "matrix-synapse.contentscannername" . -}}
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-lighttpd") -}}
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
-{{- $adminUri := "" -}}
-{{- $schadcodescan := true -}}
+{{- $schadcodescan := $.Values.contentscanner.enabled -}}
 {{- if  $.Values.synapse_admin.enabled }}
-  {{- $adminUri = .Values.synapse_admin.uri | required "synapse_admin.uri is required." -}}  
+  {{- $adminUri = .Values.synapse_admin.uri | required "synapse_admin.uri is required." -}}
+{{- else }}
+  {{- $adminUri := "" -}}
 {{- end }}
 {{- if $v1Ingress -}}
 apiVersion: networking.k8s.io/v1
