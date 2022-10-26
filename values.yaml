@@ -72,10 +72,10 @@ signingkey:
       # -- (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
     # -- (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels. 
-    # aktuelle Version am 13.06.2022 vom kubectl im bitnami-Repo
+    # finaler Tag kann sich noch ändern
     publishImage:
-      repository: bitnami/kubectl
-      tag: 1.21.13-debian-11-r4
+      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-kubectl
+      tag: 1.21.14-b3
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss. 
@@ -813,10 +813,10 @@ volumePermissions:
 
   image:
     # -- (string) das Repository für das zu nutzende Image zur Rechtebereinigung
-    repository: alpine
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-base
     # -- (string) das Tag für das zu nutzende Image zur Rechtebereinigung
-    # Hinweis: alles außer latest ist hier sinnfrei
-    tag: latest
+    # Hinweis: noch kein finaler Tag
+    tag: b4
     # -- (string) da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung
     pullPolicy: Always
 
@@ -1044,7 +1044,18 @@ postgresql:
   # -- (bool) Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht,
   # Wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie
   # enabled auf false setzen und den externalPostgresql-Block konfigurieren.
+  # @default: false da externe DB vorausgesetzt wird
   enabled: false
+
+  # -- (map) Das postgresql Image
+  # @default: WIRD NICHT EMPFOHLEN!!
+  # pullSecrets:
+  #   - myRegistryKeySecretName
+  image:
+    registry: registry.opencode.de
+    repository: ig-bvc/demo-apps/postgresql/postgres
+    tag: 14
+    pullSecrets: ["myRegistryKeySecretName"]
 
   # -- (string) Name für PostgreSQL-DB
   postgresqlDatabase: synapse_db
@@ -1107,8 +1118,8 @@ externalPostgresql:
 redis:
   image:
     registry: registry.opencode.de
-    repository: bwi/bundesmessenger/backend/container-images/jammy-redis-5
-    tag: 6.0.16-1ubuntu1-latest
+    repository: bwi/bundesmessenger/backend/container-images/jammy-redis
+    tag: 5_6.0.16-1ubuntu1
     pullSecrets: ["myRegistryKeySecretName"]
   # -- (bool) Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
   # Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
@@ -1400,8 +1411,8 @@ synapse_admin:
   uri: 
   # -- (map) Konfiguration des Image vom Modul
   image:
-    repository: awesometechnologies/synapse-admin
-    tag: 0.8.5
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-admin
+    tag: 0.8.5-b3
     pullPolicy: IfNotPresent
 
   ## Ressourcen Konfiguration für Synapse-Admin Server.
