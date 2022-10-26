@@ -1480,7 +1480,7 @@ synapse_admin:
 
 webclient:
   # -- (bool) Element-Webclient im Deployment aktivieren
-  enabled: true
+  enabled: false
   # -- (string) URL für den Webclient, zwingend notwendig
   uri:
   # -- (map) Konfiguration für das Image vom Element-Webclient
