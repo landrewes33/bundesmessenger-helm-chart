@@ -127,7 +127,11 @@ stringData:
       prometheus:
         # Specify whether or not to enable Prometheus.
         #
+        {{- if .Values.monitoringService }}
         enabled: true
+        {{- else }}
+        enabled: false
+        {{- end }}
 
         # Specify an address for the Prometheus HTTP Server to listen on.
         #
@@ -229,6 +233,10 @@ spec:
        - name: matrix-synapse-sygnal
          image:  "{{ $.Values.sygnal.image.repository }}:{{ include "matrix-synapse.sygnal.imageTag" $ }}"
          imagePullPolicy: {{ $.Values.sygnal.image.pullPolicy }}
+         ports:
+          - containerPort: 5000
+            name: sygnal-port
+            protocol: TCP
          resources:
            {{- $.Values.sygnal.resources | toYaml | nindent 12 }}
          securityContext:
