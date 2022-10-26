@@ -1,4 +1,4 @@
-{{- if  .Values.synapse_admin.enabled }}
+{{- if .Values.synapse_admin.enabled }}
 ---
 apiVersion: apps/v1
 kind: Deployment
