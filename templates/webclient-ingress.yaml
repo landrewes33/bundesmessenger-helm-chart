@@ -42,6 +42,7 @@ spec:
       http:
         paths:
           - path: /
+            pathType: Prefix
             backend:
             {{- if $v1Ingress }}
               service:

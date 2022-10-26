@@ -4,11 +4,7 @@
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-lighttpd") -}}
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 {{- $schadcodescan := $.Values.contentscanner.enabled -}}
-{{- if  $.Values.synapse_admin.enabled }}
-  {{- $adminUri = .Values.synapse_admin.uri | required "synapse_admin.uri is required." -}}
-{{- else }}
-  {{- $adminUri := "" -}}
-{{- end }}
+{{- $adminUri := include "synapse-admin.host" . -}}
 {{- if $v1Ingress -}}
 apiVersion: networking.k8s.io/v1
 {{- else -}}
@@ -41,7 +37,7 @@ spec:
 {{- end }}
   rules:
   {{- $csHosts := .Values.ingress.csHosts }}
-  {{- if and .Values.ingress.includeServerName .Values.synapse_admin.enabled }}
+  {{- if and $.Values.ingress.includeServerName $.Values.synapse_admin.enabled }}
     {{- $csHosts = concat (list (.Values.publicServerName | default .Values.serverName)) $csHosts (list $adminUri) }}
   {{- else if .Values.ingress.includeServerName }}
     {{- $csHosts = concat (list (.Values.publicServerName | default .Values.serverName)) $csHosts }}

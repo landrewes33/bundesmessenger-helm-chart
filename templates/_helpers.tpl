@@ -356,3 +356,16 @@ Set redis password
 {{ .Values.externalRedis.password }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Set synapse_admin uri
+*/}}
+{{- define "synapse-admin.host" -}}
+{{- if .Values.synapse_admin.enabled -}}
+{{- printf "%s" .Values.synapse_admin.uri | required "A valid URI for the synapse Admin webGUI ist required." -}}
+{{- else -}}
+{{- printf "" -}}
+{{- end -}}
+{{- end -}}
+
+
