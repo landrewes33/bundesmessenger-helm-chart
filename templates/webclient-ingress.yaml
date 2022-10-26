@@ -1,5 +1,5 @@
 {{- if and .Values.ingress.enabled .Values.webclient.enabled }}
-{{- $webclientUri := Values.webclient.uri | required "webclient.uri is required." -}}
+{{- $webclientUri := .Values.webclient.uri | required "webclient.uri is required." -}}
 {{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 
@@ -26,13 +26,15 @@ spec:
   ingressClassName: {{ .Values.ingress.className }}
 {{- end }}
 {{- if .Values.ingress.tls }}
-  tls:
   {{- range .Values.ingress.tls }}
+    {{- if has $webclientUri .hosts }}
+  tls:
     - hosts:
         - {{ $webclientUri }}
       {{- if .secretName }}
       secretName: {{ .secretName }}
       {{- end }}
+    {{- end }}
   {{- end }}
 {{- end }}
   rules:
@@ -46,7 +48,6 @@ spec:
                 name: {{ $webclientName }}
                 port:
                   number: 80
-            pathType: Prefix
             {{- else }}
               serviceName: {{ $webclientName }}
               servicePort: 80
