@@ -1,4 +1,5 @@
 {{- if .Values.contentscanner.enabled }}
+{{- $config := .Values.contentscanner -}}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -21,58 +22,37 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/contentscanner-configuration.yaml") . | sha256sum }}
     spec:
+      {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       securityContext:
-        fsGroup: 1001
+        fsGroup: 1334
       containers:
       - name: matrix-content-scanner
-        image: node:14
-        imagePullPolicy: IfNotPresent
+        image: "{{ $config.image.repository }}:{{ $config.image.tag }}"
+        imagePullPolicy: "{{ $config.image.pullPolicy }}"
         ports:
         - containerPort: 8080
           name: contentscanner
           protocol: TCP
-        command:
-        - sh
-        - -c
-        - |
-          apt-get update && apt-get install -y secure-delete clamdscan && apt-get clean &&\
-          ssh-keyscan github.com >>~/.ssh/known_hosts  &&\
-          cd /usr/src/app && git clone https://github.com/matrix-org/matrix-content-scanner.git matrix-content-scanner &&\
-          cd matrix-content-scanner && cp /config/matrix-content-scanner-config.yaml config/matrix-content-scanner-config.yaml &&\
-          npm install && npm run start -- /config/matrix-content-scanner-config.yaml
         volumeMounts:
-          - name: root-ssh
-            mountPath: /root/.ssh
-          - name: workdir
-            mountPath: /usr/src/app/
+          - name: scannerconfig
+            mountPath: /config/
+            subPath: config2.yaml
           - name: temp
             mountPath: /tmp
-          - name: scannerconfig
-            mountPath: /config/matrix-content-scanner-config.yaml
-            subPath: matrix-content-scanner-config.yaml
           - name: scanner
-            mountPath: /opt/scanner.sh
-            subPath: scanner.sh
+            mountPath: /opt/scanner
       volumes:
-       - name: root-ssh
-         emptyDir: {}
        - name: temp
          emptyDir: {}
-       - name: workdir
-         emptyDir: {}
        - name: scanner
-         configMap:
-            name: scanner
-            items:
-            - key: "scanner.sh"
-              path: "scanner.sh"
-            defaultMode: 0755
+         projected:
+           sources:
+           - configMap:
+               name: scanner
        - name: clamdconf
          configMap:
            name: clam
        - name: scannerconfig
-         projected:
-           sources:
-           - configMap:
-               name: contentscannerconfig
+         configMap:
+           name: contentscannerconfig
 {{- end }}
