@@ -102,7 +102,6 @@ config:
   # lautet standardmäßig `https://<publicServerName>`
   # Beispiel: 
   # publicBaseurl: 'https://matrix.example.com'
-  publicBaseurl: ''
 
   # -- (string) Das Loglevel  für Synapse und alle Module.
   logLevel: INFO
