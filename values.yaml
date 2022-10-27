@@ -957,9 +957,9 @@ wellknown:
   # IPv6-only-Clustern erforderlich ist.
   useIpv6: false
 
-  server: 
-    # -- (map) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
-   m.server: matrix.example.com:443
+  # -- (map) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
+  server: {}
+  #  m.server: matrix.example.com:443
      
   # -- (map) Zusätzliche Daten, die unter .well-known/matrix/<data> bereitgestellt werden
   # Dictionaries werden in JSON umgewandelt, einfache Strings werden direkt ausgeliefert
@@ -973,13 +973,13 @@ wellknown:
   extraData: {}
 
   # -- (map) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
-  client:
-    io.element.e2ee:
-      secure_backup_required: true
-      secure_backup_setup_methods: ["passphrase"]
-      outbound_keys_pre_sharing_mode: "on_room_opening" 
-    m.homeserver:
-      base_url: https://matrix.example.com
+  client: {}
+  #  io.element.e2ee:
+  #    secure_backup_required: true
+  #    secure_backup_setup_methods: ["passphrase"]
+  #    outbound_keys_pre_sharing_mode: "on_room_opening" 
+  #  m.homeserver:
+  #    base_url: https://matrix.example.com
 
   # -- (path) Ein benutzerdefinierter htdocs-Pfad, der nützlich ist, wenn ein anderes Image ausgeführt wird.
   htdocsPath: /var/www/localhost/htdocs
