@@ -64,8 +64,9 @@ signingkey:
     generateImage:
       # -- (string) Repository/Image Konfiguration für Synapse-signing-key-job. Es wird dringend 
       # empfohlen, dass die gleiche Konfiguration wie vom Synapse bzw. den Workernodes genutzt wird.
-      # ursprüngölich: "repository: matrixdotorg/synapse"
-      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-1.64.0
+      # ursprünglich: "repository: matrixdotorg/synapse"
+      # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen
+      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse
       pullSecrets: 
         - name: bum-gittoken
       #tag: latest
@@ -75,7 +76,7 @@ signingkey:
     # finaler Tag kann sich noch ändern
     publishImage:
       repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-kubectl
-      tag: 1.21.14-b3
+      tag: 1.21.14
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss. 
