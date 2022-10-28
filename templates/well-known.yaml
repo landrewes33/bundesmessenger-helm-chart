@@ -1,5 +1,5 @@
 {{- if .Values.wellknown.enabled }}
-{{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-lighttpd") -}}
+{{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") -}}
 ---
 apiVersion: v1
 kind: Service
@@ -7,7 +7,7 @@ metadata:
   name: {{ $wkName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    app.kubernetes.io/component: well-known
+    app.kubernetes.io/component: {{ $wkName }}
 spec:
   type: ClusterIP
   ports:
@@ -17,7 +17,7 @@ spec:
       name: http
   selector:
     {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
-    app.kubernetes.io/component: well-known
+    app.kubernetes.io/component: {{ $wkName }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -25,27 +25,27 @@ metadata:
   name: {{ $wkName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    app.kubernetes.io/component: well-known
+    app.kubernetes.io/component: {{ $wkName }}
 spec:
   replicas: {{ .Values.wellknown.replicaCount | default 1 }}
   selector:
     matchLabels:
       {{- include "matrix-synapse.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: well-known
+      app.kubernetes.io/component: {{ $wkName }}
   template:
     metadata:
       annotations:
         checksum/config: {{ include (print .Template.BasePath "/well-known-config.yaml") . | sha256sum }}
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: well-known
+        app.kubernetes.io/component: {{ $wkName }}
     spec:
       serviceAccountName: {{ $.Release.Name }}
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.wellknown.podSecurityContext | nindent 8 }}
       containers:
-        - name: lighttpd
+        - name: nginx
           image: "{{ .Values.wellknown.image.repository }}:{{ .Values.wellknown.image.tag }}"
           imagePullPolicy: {{ .Values.wellknown.image.pullPolicy }}
           securityContext:
@@ -54,21 +54,31 @@ spec:
             - containerPort: 8080
               name: http
               protocol: TCP
+          {{- if .Values.monitoringService }}
+            - containerPort: 9090
+              name: metrics
+              protocol: TCP
+          {{- end }}
           readinessProbe:
             tcpSocket:
               port: http
           livenessProbe:
             httpGet:
-              path: /server-status
+              path: /status
               port: http
           volumeMounts:
-            - mountPath: /etc/lighttpd/lighttpd.conf
-              name: files
-              subPath: lighttpd.conf
+            - mountPath: /etc/nginx/nginx.conf
+              name: nginx-conf
+              readOnly: true
+              subPath: nginx.conf
+            - mountPath: /etc/nginx/sites-enabled/bundesmessenger.conf
+              name: nginx-conf
+              readOnly: true
+              subPath: bundesmessenger.conf
 {{- $keys := concat (list "client" "server") (keys .Values.wellknown.extraData) }}
 {{- range $key := $keys }}
             - mountPath: {{ $.Values.wellknown.htdocsPath }}/{{ $key }}.json
-              name: files
+              name: nginx-conf
               subPath: {{ $key }}.json
 {{- end }}
             - mountPath: /run
@@ -76,7 +86,7 @@ spec:
           resources:
             {{- toYaml .Values.wellknown.resources | nindent 12 }}
       volumes:
-        - name: files
+        - name: nginx-conf
           configMap:
             name: {{ $wkName }}
         - name: run

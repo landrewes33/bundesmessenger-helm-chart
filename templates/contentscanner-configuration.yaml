@@ -11,7 +11,7 @@ data:
     # The port to listen to for HTTP requests
     server:
         port: 8080
-        {{- if $.Values.config.ipv4Only }}
+        {{- if $.Values.ipv4Only }}
         host: "0.0.0.0"
         {{- else }}
         host: "::"

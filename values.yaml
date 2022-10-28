@@ -92,6 +92,14 @@ signingkey:
   #    cpu: 100m
   #    memory: 250Mi
 
+# -- (bool) Schaltet alle internen IP-Adressevergaben auf IPv4-only
+# Wenn `true` sind alle Listener und Anbindungspunkte `0.0.0.0`, 
+# wenn `false` sind einige Listener bzw. Anbindungspunkte `::` (IPv6)
+# Derzeit wird nur reine IPv4 (https://github.com/matrix-org/synapse/issues/13107)
+# oder Dual-Stack Umgebungen unterstützt, keine reine IPv6 Umgebung.
+# @default -- false
+ipv4Only: true
+
 ## Matrix-Konfigurationswerte, die sich auf andere Teile des Charts auswirken, für jeden
 ## Wert, der nicht von diesem Block behandelt wird, sollten Sie ihn stattdessen in
 ## extraConfig unten einstellen.
@@ -109,14 +117,6 @@ config:
   # -- (bool) Nutzungsstatistiken (siehe extraConfig.reportStats) 
   reportStats: false
 
-  # -- (bool) Schaltet alle internen IP-Adressevergaben auf IPv4-only
-  # Wenn `true` sind alle Listener und Anbindungspunkte `0.0.0.0`, 
-  # wenn `false` sind einige Listener bzw. Anbindungspunkte `::` (IPv6)
-  # Derzeit wird nur reine IPv4 (https://github.com/matrix-org/synapse/issues/13107)
-  # oder Dual-Stack Umgebungen unterstützt, keine reine IPv6 Umgebung.
-  # @default -- false
-  ipv4Only: true
-  
   ## Schützen Sie die Registrierung mit recaptcha. (optional)
   ##
   # recaptcha:
@@ -950,16 +950,23 @@ sygnal:
 
 wellknown:
   # -- (bool) Aktivierung des Wellknown-Container
-  enabled: true
-
-  # -- (bool) Lighttpd bindet standardmäßig nicht an IPv6, obwohl dies in
-  # IPv6-only-Clustern erforderlich ist.
-  useIpv6: false
-
+  enabled: false
+  
   # -- (map) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
-  server: {}
+  # Beispiel:
   #  m.server: matrix.example.com:443
-     
+  server: {}
+
+  # -- (map) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
+  # Beispiel:
+  #    io.element.e2ee:
+  #    secure_backup_required: true
+  #    secure_backup_setup_methods: ["passphrase"]
+  #    outbound_keys_pre_sharing_mode: "on_room_opening" 
+  #  m.homeserver:
+  #    base_url: https://matrix.example.com
+  client: {}
+
   # -- (map) Zusätzliche Daten, die unter .well-known/matrix/<data> bereitgestellt werden
   # Dictionaries werden in JSON umgewandelt, einfache Strings werden direkt ausgeliefert
   # MSC1929 Beispiel:
@@ -971,25 +978,17 @@ wellknown:
   #   support_page: 'https://example.com/support'
   extraData: {}
 
-  # -- (map) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
-  client: {}
-  #  io.element.e2ee:
-  #    secure_backup_required: true
-  #    secure_backup_setup_methods: ["passphrase"]
-  #    outbound_keys_pre_sharing_mode: "on_room_opening" 
-  #  m.homeserver:
-  #    base_url: https://matrix.example.com
-
   # -- (path) Ein benutzerdefinierter htdocs-Pfad, der nützlich ist, wenn ein anderes Image ausgeführt wird.
-  htdocsPath: /var/www/localhost/htdocs
+  # @default /usr/share/nginx/html (nginx)
+  htdocsPath: /usr/share/nginx/html
 
   # -- (map) Das lighttpd image
   # optional:
   # pullSecrets:
   #   - myRegistryKeySecretName
   image:
-    repository: sebp/lighttpd
-    tag: 1.4.61-r1
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-nginx
+    tag: 1.18.0-6ubuntu14.2
     pullPolicy: IfNotPresent
 
 
@@ -998,18 +997,16 @@ wellknown:
   #  fsGroup: 2001
   #  runAsGroup: 2001
   #  runAsUser: 2001
-  podSecurityContext: 
-    runAsNonRoot: true
+  podSecurityContext: {}
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
   # weitere Möglichkeiten:
   #  capabilities:
   #    drop:
   #    - ALL
-  securityContext: 
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
-    runAsUser: 2022
+  securityContext: {}
+  #  readOnlyRootFilesystem: true
+  #  runAsNonRoot: true
 
   ## Ressource Konfiguration für well-known server.
   resources: 
@@ -1247,13 +1244,8 @@ ingress:
   #      servicePort: 8000
   csPaths: [] 
 
-  # -- (bool) Soll der `/_synapse/client`-Pfad im Ingress enthalten sein, werden die Client-APIs unter diesem Pfad bereitgestellt.
+  # -- (bool) Soll der `/_synapse`-Pfad im Ingress enthalten sein, werden die Client-APIs unter diesem Pfad bereitgestellt.
   includeUnderscoreSynapse: true
-
-  # -- (bool) Soll der `/_synapse/admin`-Pfad im Ingress enthalten sein 
-  # Hinweis: Ist `synapse_admin.enabled = true` und `synapse_admin.uri` gesetzt wird über diesen Host die Admin-APIs unter diesem Pfad bereitgestellt.
-  # Hinweis: Ist der Synapse-Admin deaktiviert, wird der Pfad in serverDomain/publicServerName mit in den Ingress geschrieben
-  includeSynapseAdmin: true
 
   # -- (bool) Sollte `config.serverName` in die Liste der Eingangspfade aufgenommen werden, 
   # kann auf `false` gesetzt werden, wenn die Hauptdomäne auf irgendeine externe Weise verwaltet wird 

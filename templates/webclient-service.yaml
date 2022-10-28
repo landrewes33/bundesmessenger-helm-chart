@@ -8,11 +8,10 @@ metadata:
   name: {{ $webclientName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    app.kubernetes.io/component: webclient
+    app.kubernetes.io/component: {{ $webclientName }}
 spec:
   selector:
-    {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
-    app.kubernetes.io/component: webclient
+    app.kubernetes.io/component: {{ $webclientName }}
   ports:
     - name: http
       protocol: TCP

@@ -36,7 +36,7 @@ data:
     RemoteProxyUsers off
     RemoteProxyUserHeader X-Authenticated-User
     RemoteProxyUserHeaderEncoded on
-    {{- if $.Values.config.ipv4Only }}
+    {{- if $.Values.ipv4Only }}
     acl all src 0.0.0.0/0.0.0.0
     {{- else }}
     acl all src ::/::
