@@ -1,5 +1,6 @@
 {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (or .Values.persistence.enabled .Values.persistence.existingClaim)  }}
 {{- $default := .Values.workers.default }}
+{{- $releaseName := .Release.Name }}
 {{- range $worker, $config := .Values.workers }}
 {{- if $config.enabled }}
 {{- $name := $worker | replace "_" "-" }}
@@ -73,7 +74,7 @@ spec:
             name: temp-worker-config
           - mountPath: "/synapse/config/"
             name: worker-config
-      serviceAccountName: {{ $.Release.Name }}
+      serviceAccountName: {{ $releaseName }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       securityContext:
         {{- $config.podSecurityContext | default $default.podSecurityContext | toYaml | nindent 8 }}
@@ -125,7 +126,7 @@ spec:
                   {{- if $.Values.redis.enabled }}
 #um redis-secret auf Namespace zu begrenzen, damit mehrere instanzen in einem K8s laufen können.
 #alt:                  name: {{ $.Values.redis.existingSecret | default (include "matrix-synapse.redis.fullname" $) }}
-                  name: {{ $.Release.Name }}-redis 
+                  name: {{ $releaseName }}-redis 
                   key: redis-password
                   {{- else }}
                   name: {{ $.Values.externalRedis.existingSecret }}
@@ -234,8 +235,7 @@ spec:
         {{ . | toYaml | nindent 8 }}
       {{- end }}
 
-{{- if hasKey $config "autoscaling" }}
-  {{- if $config.autoscaling.enabled }}
+{{- if and (hasKey $config "autoscaling") $config.autoscaling.enabled }}
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -247,7 +247,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v2
     kind: StatefulSet
-    name: {{ $.Release.Name }}-{{ $name }}
+    name: {{ $releaseName }}-{{ $name }}
   minReplicas: {{ $config.autoscaling.minReplicas }}
   maxReplicas: {{ $config.autoscaling.maxReplicas }}
   metrics:
@@ -267,7 +267,6 @@ spec:
           type: Utilization
           averageUtilization: {{ $config.autoscaling.targetMemoryUtilizationPercentage }}
   {{- end }}
-{{- end }}
 {{- end }}
 
 {{- end }}

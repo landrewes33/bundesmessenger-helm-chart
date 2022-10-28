@@ -12,7 +12,7 @@ kind: ServiceAccount
 metadata:
   labels:
   {{- include "matrix-synapse.labels" . | nindent 4 }}
-  name: {{ $.Release.Name }}
+  name: {{ .Release.Name }}
   namespace: {{ .Release.Namespace }}
 
 ---
