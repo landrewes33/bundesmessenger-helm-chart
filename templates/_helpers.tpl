@@ -98,7 +98,7 @@ Get the correct image tag name
 Get the correct image tag (sygnal)
 */}}
 {{- define "matrix-synapse.sygnal.imageTag" -}}
-{{- .Values.sygnal.image.tag | default ("v0.11.0") -}}
+{{- .Values.sygnal.image.tag | default ("v0.12.0") -}}
 {{- end -}}
 
 {{/*
