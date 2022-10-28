@@ -46,7 +46,7 @@ data:
     listeners:
       - port: 8008
         tls: false
-        {{- if $.Values.config.ipv4Only }}
+        {{- if $.Values.ipv4Only }}
         bind_addresses: ['0.0.0.0']
         {{- else }}
         bind_addresses: ['::']
@@ -60,7 +60,7 @@ data:
 
       - port: 9090
         tls: false
-        {{- if $.Values.config.ipv4Only }}
+        {{- if $.Values.ipv4Only }}
         bind_addresses: ['0.0.0.0']
         {{- else }}
         bind_addresses: ['::']
@@ -73,7 +73,7 @@ data:
 
       - port: 9093
         tls: false
-        {{- if $.Values.config.ipv4Only }}
+        {{- if $.Values.ipv4Only }}
         bind_addresses: ['0.0.0.0']
         {{- else }}
         bind_addresses: ['::']

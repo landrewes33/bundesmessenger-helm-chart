@@ -1,10 +1,12 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "matrix-synapse.fullname" . -}}
 {{- $scannerName := include "matrix-synapse.contentscannername" . -}}
-{{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-lighttpd") -}}
+{{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") -}}
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 {{- $schadcodescan := $.Values.contentscanner.enabled -}}
+{{- $isSynapseAdmin := $.Values.synapse_admin.enabled -}}
 {{- $adminUri := include "synapse-admin.host" . -}}
+{{- $matrixUri := .Values.publicServerName | default .Values.serverName }}
 {{- if $v1Ingress -}}
 apiVersion: networking.k8s.io/v1
 {{- else -}}
@@ -14,7 +16,7 @@ kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    {{- include "matrix-synapse.labels" . | nindent 4 }}
+  {{- include "matrix-synapse.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -26,6 +28,7 @@ spec:
 {{- if .Values.ingress.tls }}
   tls:
   {{- range .Values.ingress.tls }}
+    {{- if or (has $adminUri .hosts) (has $matrixUri .hosts) }}
     - hosts:
       {{- range .hosts }}
         - {{ . | quote }}
@@ -33,11 +36,12 @@ spec:
       {{- if .secretName }}
       secretName: {{ .secretName }}
       {{- end }}
+    {{- end }}
   {{- end }}
 {{- end }}
   rules:
   {{- $csHosts := .Values.ingress.csHosts }}
-  {{- if and $.Values.ingress.includeServerName $.Values.synapse_admin.enabled }}
+  {{- if and $.Values.ingress.includeServerName $isSynapseAdmin }}
     {{- $csHosts = concat (list (.Values.publicServerName | default .Values.serverName)) $csHosts (list $adminUri) }}
   {{- else if .Values.ingress.includeServerName }}
     {{- $csHosts = concat (list (.Values.publicServerName | default .Values.serverName)) $csHosts }}
@@ -53,7 +57,7 @@ spec:
   {{- $hosts := uniq (concat $s2sHosts $csHosts $wkHosts) }}
   {{- range $hosts }}
   {{- $inPublicServerName := true }}
-  {{- if and (eq . $adminUri ) $.Values.synapse_admin.enabled }}
+  {{- if and (eq . $adminUri ) $isSynapseAdmin }}
     {{- $inPublicServerName = false }}
   {{- end }}
     {{- $host := . }}
@@ -67,7 +71,9 @@ spec:
             {{- $service := include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}
             {{- if has $host $csHosts }}
               {{- range $config.csPaths }}
-                {{- if or (not $inPublicServerName) (and ( not (contains "/_synapse/admin" .)) $inPublicServerName $.Values.synapse_admin.enabled) (and $inPublicServerName (not $.Values.synapse_admin.enabled)) }}
+#if 2 hosts and one the actual one is NOT synapse-admin-host and path doesnt include "/_synapse/admin" 
+#OR single url and no synapse-admin is disabled
+                {{- if or (not $inPublicServerName) (and ( not (contains "/_synapse/admin" .)) $inPublicServerName $isSynapseAdmin) (and $inPublicServerName (not $isSynapseAdmin)) }}
                   {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
             backend:
@@ -188,7 +194,8 @@ spec:
           {{- end }}
         {{- end }}
 
-        {{- if or (and (has . $csHosts) $.Values.ingress.includeSynapseAdmin (not $inPublicServerName) $.Values.synapse_admin.enabled) (and (has . $csHosts) $.Values.ingress.includeSynapseAdmin $inPublicServerName (not $.Values.synapse_admin.enabled)) }}
+#if host is synapse_admin or no synapse_admin enabled and host is matrix-host
+        {{- if or (and (has . $csHosts) $isSynapseAdmin (not $inPublicServerName)) (and (has . $csHosts) $inPublicServerName (not $isSynapseAdmin)) }}
           - path: /_synapse
             backend:
           {{- if $v1Ingress }}

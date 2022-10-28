@@ -11,7 +11,7 @@ metadata:
   name: {{ $webclientName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    component: webclient
+    app.kubernetes.io/component: {{ $webclientName }}
 data:
   config.json: |
     {
