@@ -235,7 +235,8 @@ spec:
         {{ . | toYaml | nindent 8 }}
       {{- end }}
 
-{{- if and (hasKey $config "autoscaling") $config.autoscaling.enabled }}
+{{- if hasKey $config "autoscaling" }}
+  {{- if $config.autoscaling.enabled }}
 ---
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
@@ -251,21 +252,22 @@ spec:
   minReplicas: {{ $config.autoscaling.minReplicas }}
   maxReplicas: {{ $config.autoscaling.maxReplicas }}
   metrics:
-  {{- if $config.autoscaling.targetCPUUtilizationPercentage }}
+    {{- if $config.autoscaling.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:
         name: cpu
         target:
           type: Utilization
           averageUtilization: {{ $config.autoscaling.targetCPUUtilizationPercentage }}
-  {{- end }}
-  {{- if $config.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+    {{- if $config.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
         target:
           type: Utilization
           averageUtilization: {{ $config.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
   {{- end }}
 {{- end }}
 

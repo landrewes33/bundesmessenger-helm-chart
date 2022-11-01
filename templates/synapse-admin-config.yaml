@@ -1,5 +1,5 @@
-{{- if .Values.webclient.enabled }}
-{{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
+{{- if .Values.synapse_admin.enabled }}
+{{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
 
 # The config.json file is to be put into Kubernetes as a config file in such a way that
 # the element web instance can read it.
@@ -8,71 +8,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $webclientName }}
+  name: {{ $adminName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    app.kubernetes.io/component: {{ $webclientName }}
+    app.kubernetes.io/component: {{ $adminName }}
 data:
-  config.json: |
-    {
-        "default_server_config": {
-            "m.homeserver": {
-                "base_url": "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}",
-                "server_name": "BuM Demo"
-            }
-        },
-        "disable_custom_urls": true,
-        "disable_guests": true,
-        "disable_3pid_login": true,
-        "brand": "BundesMessenger",
-        "defaultCountryCode": "DE",
-        "show_labs_settings": false,
-        "features": { },
-        "default_federate": true,
-        "room_directory": {
-            "servers": []
-        },
-        "branding": {
-          "showMatrixBrand": false,
-          "home_title": "Willkommen im BundesMessenger",
-          "home_byline": "Dein Messenger für unser Land",
-          "welcome_background_url": "bwi/img/bm_background.svg",
-          "auth_header_logo_url": "bwi/img/dlms_logo.svg",
-          "auth_footer_links": [
-            {
-              "text": "Handgemacht mit \u2764 von der BWI",
-              "url": https://bwi.de
-            }
-          ]
-        },
-        "bwi_themes": [
-          {
-            "name": "light",
-            "is_dark": false,
-            "default": true,
-            "colors": {
-              "accent": "#004972",
-              "quinary-content": "#EEEEEE"
-            }
-          },
-          {
-            "name": "dark",
-            "is_dark": true,
-            "default": true,
-            "colors": {
-              "accent": "#217DB1",
-              "primary-content": "#FFFFFF",
-              "secondary-content": "#EEEEEE",
-              "tertiary-content": "#DDDDDD"
-            }
-          }
-        ],
-        "default_theme": "bwi-light",
-        "suppressNotification": [
-          "MESSAGE_EDIT", "org.matrix.msc3381.poll.response", "m.room.redaction", "m.reaction"
-        ],
-        "enabledLanguages": ["de", "en"]
-    }
   nginx.conf: |
     user www-data;
     error_log  /dev/stderr;
@@ -80,9 +20,9 @@ data:
     http {
       access_log  /dev/stdout;
       server_tokens off;
-      include /etc/nginx/sites-enabled/default.conf;
+      include /etc/nginx/sites-enabled/sadm.conf;
     }
-  default.conf: |
+  sadm.conf: |
      # Default server configuration
      #
      server {
@@ -106,7 +46,7 @@ data:
              #
              # include snippets/snakeoil.conf;
      
-             root /usr/share/nginx/html/;
+             root /opt/sadm;
      
              # Add index.php to the list if you are using PHP
              index index.html index.htm index.nginx-debian.html;

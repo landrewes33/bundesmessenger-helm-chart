@@ -48,10 +48,10 @@ spec:
               service:
                 name: {{ $webclientName }}
                 port:
-                  number: 80
+                  number: 8080
             pathType: Prefix
             {{- else }}
               serviceName: {{ $webclientName }}
-              servicePort: 80
+              servicePort: 8080
             {{- end }}
 {{- end }}

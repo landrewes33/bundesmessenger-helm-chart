@@ -1,12 +1,13 @@
 {{- if .Values.synapse_admin.enabled }}
+{{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: synapse-admin
+  name: {{ $adminName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    app.kubernetes.io/component: synapse-admin
+    app.kubernetes.io/component: {{ $adminName }}
 spec:
   replicas: 1
   strategy: 
@@ -14,26 +15,26 @@ spec:
   selector:
     matchLabels:
       {{- include "matrix-synapse.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: synapse-admin
+      app.kubernetes.io/component: {{ $adminName }}
   template:
     metadata:
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: synapse-admin
+        app.kubernetes.io/component: {{ $adminName }}
     spec:
       serviceAccountName: {{ .Release.Name }}
       securityContext:
         {{- $.Values.synapse_admin.podSecurityContext | toYaml | nindent 8 }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
-        - name: synapse-admin
+        - name: {{ $adminName }}
           image:  "{{ $.Values.synapse_admin.image.repository }}:{{ $.Values.synapse_admin.image.tag }}"
           imagePullPolicy: {{ $.Values.synapse_admin.image.pullPolicy }}
           securityContext:
             {{- $.Values.synapse_admin.securityContext | toYaml | nindent 12 }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
           resources:
             {{- toYaml .Values.synapse_admin.resources | nindent 12 }}
           {{- with .Values.synapse_admin.livenessProbe }}
@@ -45,11 +46,20 @@ spec:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
           volumeMounts:
+          - name: files
+            mountPath: /etc/nginx/sites-enabled/sadm.conf
+            subPath: sadm.conf
+          - name: files
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
           {{- with .Values.synapse_admin.extraVolumeMounts }}
           {{- . | toYaml | nindent 12 }}
           {{- end }}
       restartPolicy: Always
       volumes:
+      - name: files
+        configMap:
+          name: {{ $adminName }}
       {{- with .Values.synapse_admin.extraVolumes }}
       {{- . | toYaml | nindent 8 }}
       {{- end }}

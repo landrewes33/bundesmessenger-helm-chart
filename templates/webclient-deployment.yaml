@@ -28,8 +28,14 @@ spec:
         - name: files
           mountPath: /app/config.json
           subPath: config.json
+        - name: files
+          mountPath: /etc/nginx/sites-enabled/default.conf
+          subPath: default.conf
+        - name: files
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
         ports:
-        - containerPort: 80
+        - containerPort: 8080
           name: http
           protocol: TCP
         readinessProbe:
@@ -40,7 +46,7 @@ spec:
             periodSeconds: 3
         livenessProbe:
             httpGet:
-                path: /
+                path: /status
                 port: http
             initialDelaySeconds: 10
             periodSeconds: 10
