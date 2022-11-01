@@ -1,16 +1,17 @@
 {{- if .Values.synapse_admin.enabled }}
+{{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
 ---
 apiVersion: v1
 kind: Service
 metadata: 
-  name: synapse-admin
+  name: {{ $adminName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    app.kubernetes.io/component: synapse-admin
+    app.kubernetes.io/component: {{ $adminName }}
 spec: 
   selector:
     {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
-    app.kubernetes.io/component: synapse-admin
+    app.kubernetes.io/component: {{ $adminName }}
   ports: 
     - name: "admin-port"
       port: 8080
