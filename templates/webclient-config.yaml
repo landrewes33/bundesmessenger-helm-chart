@@ -119,6 +119,12 @@ data:
              location ~ /config.{{ .Values.webclient.uri }}.json {
                 rewrite /config.{{ .Values.webclient.uri }}.json /config.json break;
              }
+             location = /favicon.ico {
+                alias /app/bwi/img/favicon.ico;
+             }
+             location ~ \.css {
+                 add_header  Content-Type    text/css;
+             }
              location / {
                      # First attempt to serve request as file, then
                      # as directory, then fall back to displaying a 404.
