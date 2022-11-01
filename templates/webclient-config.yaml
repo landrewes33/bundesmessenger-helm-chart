@@ -81,6 +81,7 @@ data:
       access_log  /dev/stdout;
       server_tokens off;
       include /etc/nginx/sites-enabled/default.conf;
+      include mime.types;
     }
   default.conf: |
      # Default server configuration
@@ -121,9 +122,6 @@ data:
              }
              location = /favicon.ico {
                 alias /app/bwi/img/favicon.ico;
-             }
-             location ~ \.css {
-                 add_header  Content-Type    text/css;
              }
              location / {
                      # First attempt to serve request as file, then
