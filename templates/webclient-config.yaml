@@ -116,7 +116,9 @@ data:
              location /status {
                return 200;
              }
-   
+             location ~ /config.{{ .Values.webclient.uri }}.json {
+                rewrite /config.{{ .Values.webclient.uri }}.json /config.json break;
+             }
              location / {
                      # First attempt to serve request as file, then
                      # as directory, then fall back to displaying a 404.
