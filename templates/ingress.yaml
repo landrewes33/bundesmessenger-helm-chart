@@ -5,6 +5,7 @@
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 {{- $schadcodescan := $.Values.contentscanner.enabled -}}
 {{- $isSynapseAdmin := $.Values.synapse_admin.enabled -}}
+{{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
 {{- $adminUri := include "synapse-admin.host" . -}}
 {{- $matrixUri := .Values.publicServerName | default .Values.serverName }}
 {{- if $v1Ingress -}}
@@ -212,12 +213,12 @@ spec:
             backend:
           {{- if $v1Ingress }}
               service:
-                name: synapse-admin
+                name: {{ $adminName }}
                 port:
                   number: 8080
             pathType: Prefix
           {{- else }}
-              serviceName: synapse-admin
+              serviceName: {{ $adminName }}
               servicePort: 8080
           {{- end }}
         {{- end }}
