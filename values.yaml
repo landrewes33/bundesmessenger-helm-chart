@@ -5,7 +5,7 @@
 image:
   # -- (string) Repository/Image Konfiguration, für Synapse und Workernodes.
   #ursprünglich: "repository: matrixdotorg/synapse"
-  repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse
+  repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-production
 
   # -- (string) kann die gesetzte Defaultversion überschreiben, wenn gesetzt.
   # @default -- wird im Charts.yaml gesetzt
@@ -67,8 +67,8 @@ signingkey:
       # ursprünglich: "repository: matrixdotorg/synapse"
       # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen
       repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse
-      pullSecrets: 
-        - name: bum-gittoken
+      pullSecrets: []
+      #  - name: bum-gittoken
       #tag: latest
       # -- (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
@@ -813,10 +813,10 @@ volumePermissions:
 
   image:
     # -- (string) das Repository für das zu nutzende Image zur Rechtebereinigung
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-base
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-base-production
     # -- (string) das Tag für das zu nutzende Image zur Rechtebereinigung
     # Hinweis: noch kein finaler Tag
-    tag: b4
+    tag: latest
     # -- (string) da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung
     pullPolicy: Always
 
@@ -851,7 +851,7 @@ sygnal:
   enabled: false
   # -- (map) Image/Repo-Konfiguration von Sygnal
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-sygnal
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-sygnal-production
     tag: v0.12.0
     pullPolicy: IfNotPresent
 
@@ -987,7 +987,7 @@ wellknown:
   # pullSecrets:
   #   - myRegistryKeySecretName
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-nginx
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-nginx-production
     tag: 1.18.0-6ubuntu14.2
     pullPolicy: IfNotPresent
 
@@ -1115,7 +1115,7 @@ externalPostgresql:
 redis:
   image:
     registry: registry.opencode.de
-    repository: bwi/bundesmessenger/backend/container-images/jammy-redis
+    repository: bwi/bundesmessenger/backend/container-images/jammy-redis-production
     tag: 5_6.0.16-1ubuntu1
     pullSecrets: ["myRegistryKeySecretName"]
   # -- (bool) Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
@@ -1275,6 +1275,11 @@ contentscanner:
   # -- (bool) Aktivieren des Matrix-Content-Scanner
   # Mittelsmann zwischen AV und Matrix-Synapse
   enabled: false
+  # -- (map) Konfiguration des Image/Repository
+  image:
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-content-scanner-production
+    tag: v1.9.0
+    pullPolicy: IfNotPresent
 
   replicaCount: 1
   resources: 
@@ -1298,8 +1303,8 @@ schadcodescanner:
   enabled: false
   # -- (map) Konfiguration des Image/Repository
   image:
-    repository: clamav/clamav
-    tag: 0.104.1
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-clamav-production
+    tag: latest
     pullPolicy: IfNotPresent
   persistence:
     enabled: true
@@ -1403,7 +1408,7 @@ synapse_admin:
   uri: 
   # -- (map) Konfiguration des Image vom Modul
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-admin
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-admin-production
     tag: 0.8.5-b3
     pullPolicy: IfNotPresent
 
