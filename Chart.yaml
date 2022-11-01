@@ -10,8 +10,6 @@ version: 0.9.5
 maintainers:
   - name: Christian Steinke
     email: christian.steinke@bwi.de
-  - name: Alexander Olofsson
-    email: ace@haxalot.com
 
 dependencies:
   - name: redis
