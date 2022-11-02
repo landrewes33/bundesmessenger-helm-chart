@@ -15,63 +15,172 @@ metadata:
 data:
   config.json: |
     {
-        "default_server_config": {
-            "m.homeserver": {
-                "base_url": "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}",
-                "server_name": "BuM Demo"
-            }
-        },
-        "disable_custom_urls": true,
-        "disable_guests": true,
-        "disable_3pid_login": true,
-        "brand": "BundesMessenger",
-        "defaultCountryCode": "DE",
-        "show_labs_settings": false,
-        "features": { },
-        "default_federate": true,
-        "room_directory": {
-            "servers": []
-        },
-        "branding": {
-          "showMatrixBrand": false,
-          "home_title": "Willkommen im BundesMessenger",
-          "home_byline": "Dein Messenger für unser Land",
-          "welcome_background_url": "bwi/img/bm_background.svg",
-          "auth_header_logo_url": "bwi/img/dlms_logo.svg",
-          "auth_footer_links": [
-            {
-              "text": "Handgemacht mit \u2764 von der BWI",
-              "url": https://bwi.de
-            }
-          ]
-        },
-        "bwi_themes": [
+      "default_server_config": {
+        "m.homeserver": {
+          "base_url": "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}",
+          "server_name": "TEST-DEMO"
+        }
+      },
+      "enable_presence_by_hs_url": {
+        "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}": false
+      },
+      "brand": "BundesMessenger",
+      "permalink_prefix": "{{- printf "https://%s/latest" (.Values.publicServerName | default .Values.serverName) }}",
+      "show_labs_settings": false,
+      "branding": {
+        "showMatrixBrand": false,
+        "home_title": "Willkommen im BundesMessenger",
+        "home_byline": "Dein Messenger für unser Land",
+        "welcome_background_url": "bwi/img/bm_background.svg",
+        "auth_header_logo_url": "bwi/img/dlms_logo.svg",
+        "auth_footer_links": [
           {
-            "name": "light",
-            "is_dark": false,
-            "default": true,
-            "colors": {
-              "accent": "#004972",
-              "quinary-content": "#EEEEEE"
-            }
+            "text": "Handgemacht mit \u2764 von der BWI",
+            "url": "https://bwi.de"
           },
           {
-            "name": "dark",
-            "is_dark": true,
-            "default": true,
-            "colors": {
-              "accent": "#217DB1",
-              "primary-content": "#FFFFFF",
-              "secondary-content": "#EEEEEE",
-              "tertiary-content": "#DDDDDD"
-            }
+            "text": "Copyright",
+            "url": "https://messenger.bwi.de/copyright"
           }
+        ]
+      },
+      "embedded_pages": {
+        "loginForWelcome": true
+      },
+      "content_scanner": {
+        "enabled": true
+      },
+      "desktop_builds": {
+        "available": false
+      },
+      "disable_3pid_login": true,
+      "community_support": false,
+      "faq_url": "https://messenger.bwi.de/#FAQ",
+      "bwi_themes": [
+        {
+          "name": "light",
+          "is_dark": false,
+          "default": true,
+          "colors": {
+            "accent": "#108194",
+            "quinary-content": "#EEEEEE"
+          }
+        },
+        {
+          "name": "dark",
+          "is_dark": true,
+          "default": true,
+          "colors": {
+            "accent": "#108194",
+            "primary-content": "#FFFFFF",
+            "secondary-content": "#EEEEEE",
+            "tertiary-content": "#DDDDDD"
+          }
+        }
+      ],
+      "default_theme": "bwi-light",
+      "suppressNotification": [
+        "MESSAGE_EDIT", "org.matrix.msc3381.poll.response", "m.room.redaction", "m.reaction"
+      ],
+      "enabledLanguages": ["de", "en"],
+      "terms_and_conditions_links": [
+        {
+          "text": "Copyright",
+          "url": "https://messenger.bwi.de/copyright"
+        }
+      ],
+      "feature_overview_url":"https://messenger.bwi.de/#c4783",
+      "bwi_setting_defaults": {
+        "BwiFeature.closeImageViewOnNavigate": true,
+        "BwiFeature.hideIpAdresses": true,
+        "BwiFeature.hideArchivedRooms": true,
+        "BwiFeature.hideLowPriorityRoomOption": true,
+        "BwiFeature.roomSecuritySettings": false,
+        "BwiFeature.roomAutoPublish": true,
+        "BwiFeature.hideDebug": true,
+        "BwiFeature.createRoomHideDetails": true,
+        "BwiFeature.restorePassphraseHideDeviceHint": false,
+        "BwiFeature.skipUpdateChangesDialog": true,
+        "BwiFeature.hideRoomHeaderNotifsButton": true,
+        "BwiFeature.roomSummaryHideFiles": true,
+        "BwiFeature.shareLinkToClipboard": true,
+        "BwiFeature.hideNerdyUserSettings": true,
+        "BwiFeature.disableKeyExport": true,
+        "BwiFeature.adminToolsEnabled": [
+          "KICK",
+          "BAN"
         ],
-        "default_theme": "bwi-light",
-        "suppressNotification": [
-          "MESSAGE_EDIT", "org.matrix.msc3381.poll.response", "m.room.redaction", "m.reaction"
+        "BwiFeature.disableHistorySharing": true,
+        "BwiFeature.showReadReceiptsAsDialog": true,
+        "BwiFeature.hideDmInviteLink": true,
+        "BwiFeature.userLinkPreview": true,
+        "BwiFeature.hidePersonalNotes": false,
+        "BwiFeature.enforcePassphrase": true,
+        "BwiFeature.exportChat": false,
+        "BwiFeature.celebration": true,
+        "BwiFeature.newFeatures": true,
+        "BwiFeature.registrationDetails": true,
+        "BwiFeature.hideAliasSettings": false,
+        "BwiFeature.singleParticipantDms": true,
+        "BwiFeature.hideSearchButton": true,
+        "BwiFeature.hideRoomAccessSettings": true,
+        "BwiFeature.powerLevelToggles": [
+          "m.room.avatar",
+          "m.room.name",
+          "m.room.power_levels",
+          "m.room.topic",
+          "m.room.tombstone",
+          "m.room.encryption"
         ],
-        "enabledLanguages": ["de", "en"]
+        "BwiFeature.disableProfileAvatarDl": true,
+        "BwiFeature.disableFeedbackToast": true,
+        "BwiFeature.hideCrossSigning": false,
+        "BwiFeature.hideKeyImport": true,
+        "BwiFeature.roomLinkPreview": true,
+        "BwiFeature.showMaintenanceInfo": true,
+        "BwiFeature.jumpToRoomSummary": true,
+        "BwiFeature.passwordResetHint": true,
+        "BwiFeature.disableCustomPowerlevel": true,
+        "BwiFeature.disablePoll": false,
+        "BwiFeature.hideUserId": true,
+        "BwiFeature.hideSpaces": true,
+        "BwiFeature.composerTransformLonoSnippetToUrl": true,
+        "BwiFeature.personalStatus": false,
+        "BwiFeature.personalStatusMulti": false,
+        "BwiFeature.disableLoginServerLookup": false,
+        "BwiFeature.disableUndisclosedPolls": false,
+        "BwiFeature.hideLayoutSwitcher": true,
+        "BwiFeature.mandatoryCrossSigning": true,
+        "BwiFeature.whiteListSlashCommands": true,
+        "BwiFeature.locationShareTypesEnabled": ["Pin"],
+        "BwiFeature.disableGeolocation": true,
+        "BwiFeature.hideOSMLink": true
+      },
+      "setting_defaults": {
+        "language": "de",
+        "layout": "bubble",
+        "UIFeature.passwordReset": false,
+        "UIFeature.registration": false,
+        "UIFeature.serverConfig": false,
+        "UIFeature.languageChange": false,
+        "UIFeature.displayNameMutable": false,
+        "UIFeature.notificationToggles": false,
+        "UIFeature.userEncryption": false,
+        "UIFeature.exploreServers": false,
+        "UIFeature.roomHistorySettings": false,
+        "breadcrumbs": false,
+        "UIFeature.urlPreviews": false,
+        "UIFeature.widgets": false,
+        "UIFeature.advancedSettings": false,
+        "UIFeature.shareQrCode": false,
+        "UIFeature.shareSocial": false,
+        "UIFeature.feedback": false,
+        "UIFeature.identityServer": false,
+        "UIFeature.thirdPartyId": false,
+        "UIFeature.deactivate": false,
+        "UIFeature.advancedEncryption": false,
+        "UIFeature.voip": false
+      }
     }
   nginx.conf: |
     user www-data;
