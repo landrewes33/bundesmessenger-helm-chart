@@ -29,7 +29,7 @@ metadata:
 spec:
   ports:
   - port: {{ .Values.schadcodescanner.service.port }}
-    targetPort: 3310
+    targetPort: {{ .Values.schadcodescanner.service.port }}
     protocol: TCP
     name: clamav
   selector:

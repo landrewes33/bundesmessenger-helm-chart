@@ -21,8 +21,7 @@ data:
     ThreadsPerChild     10
     MaxRequestsPerChild  0
     Port 1344
-    ServerAdmin you@your.address
-    ServerName YourServerName
+    ServerName {{ include "matrix-synapse.schadcodescannername" . }}
     TmpDir /var/tmp
     MaxMemObject 131072
     DebugLevel 1
@@ -71,7 +70,7 @@ data:
     LogVerbose no
     LogFileMaxSize 0
     LogFile /dev/stdout
-    DatabaseDirectory /var/lib/clamav
+    DatabaseDirectory /clamav/database
     TCPSocket 3310
     LocalSocket /run/clamav/clamd.sock
     User clamav
@@ -99,11 +98,12 @@ data:
   freshclam.conf: |
     LogTime yes
     LogVerbose yes
-    NotifyClamd /etc/clamav/clamd.conf
+    NotifyClamd /clamav/config/clamd.conf
     Checks 24
     LogSyslog no
     DatabaseOwner root
     DatabaseMirror {{ .Values.schadcodescanner.freshclam.mirrors }}
+    ReceiveTimeout 35
 
 ---
 apiVersion: v1

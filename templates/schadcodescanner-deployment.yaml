@@ -22,23 +22,36 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/schadcodescanner-configuration.yaml") . | sha256sum }}
     spec:
-      securityContext:
-        fsGroup: 1001
+    {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
       - name: clamav
         image: "{{ $config.image.repository }}:{{ $config.image.tag }}"
         imagePullPolicy: {{ $config.image.pullPolicy }}
         ports:
-          - name: clamav
+          - name: c-icap-clamav
             containerPort: {{ $config.service.port }}
             protocol: TCP
+        env:
+        {{- if .Values.extraEnv }}
+          {{- with .Values.extraEnv }}
+              {{- . | toYaml | nindent 12 }}
+          {{- end }}
+        {{- end }}
+        command:
+          - sh
+          - -c
+          - |
+            echo 'Acquire::http::Proxy "http://pa-bwm-vm014.example.com:3128";'| tee > /etc/apt/apt.conf && \
+            apt-get -y install clamav-daemon #&& clamd -c /clamav/config/clamd.conf 
         resources:
           {{- toYaml $config.resources | nindent 10 }}
         volumeMounts:
           - name: clamsocket
             mountPath: /run/clamav/
           - name: signatures
-            mountPath: /var/lib/clamav
+            mountPath: /clamav/database
+          - name: config-volume
+            mountPath: /clamav/config/
       volumes:
       - name: clamsocket
         emptyDir: {}

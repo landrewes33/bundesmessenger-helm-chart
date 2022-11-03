@@ -7,7 +7,7 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 data:
-  matrix-content-scanner-config.yaml: |
+  config.yaml: |
     # The port to listen to for HTTP requests
     server:
         port: 8080
@@ -30,7 +30,7 @@ data:
         # The temporary directory to use
         tempDirectory: '/tmp'
         # The base URL of the homeserver to download media from
-        baseUrl: {{ .Values.config.publicBaseurl | default (printf "https://%s" (.Values.publicServerName | default .Values.serverName)) | quote }}
+        baseUrl: http://{{ include "matrix-synapse.workername" (dict "global" $ "worker" "media-repository") }}.{{ .Release.Namespace }}.svc:8083
         # If set to true, effectively set baseUrl to
         #   "https://$domain"
         #   where $domain is the domain part of the requested media.
@@ -59,15 +59,28 @@ metadata:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 data:
   scanner.sh: |
+    #!/bin/bash
     # This is an example script to run when a file is scanned. 
     # - ${1} will be the path to the file to scan.
     # - The exit code should be 0 for files that are deemed safe/clean.
     # - Anything sent to stdout will be included in the `info` section of the response.
     echo "First line of file '${1}': $(head -z -n1 ${1})" 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
-    result=$(curl -s -XPOST http://"{{ include "matrix-synapse.schadcodescannername" . }}":3310 -F FILES=@${1});
-      #result=$(clamdscan ${1} );
-    cp ${1} /tmp/test;
+    #result=$(curl -s -XPOST http://"{{ include "matrix-synapse.schadcodescannername" . }}":3310 -F FILES=@${1});
+    result=$(clamdscan -c /opt/clamd.conf --fdpass --stream ${1} );
+    #cp ${1} /tmp/test;
     #clamdscan ${1} 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
     echo "Return:  $result" 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
     exit 0    
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clam
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+data:
+  clamd.conf: |
+    TCPSocket 3310
+    TCPAddr {{ include "matrix-synapse.schadcodescannername" . }}.{{ .Release.Namespace }}
 {{- end }}
