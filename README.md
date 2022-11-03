@@ -208,8 +208,9 @@ helm install bundesmessenger bundesmessenger/bundesmessenger --set persistence.s
 | :warning: Zum aktuellen Zeitpunkt stellt das Helm Chart die Infrastruktur auf Basis eines `http`-Listeners bereit.<br />Vor der Infrastruktur muss ein Loadbalancer oder Reverse-Proxy für die Bereitstellung der `https`-Verbindung sorgen und ein Offloading durchführen. |
 | --- |
 
-| :pushpin: Matrix benötigt valide TLS-Zertifikate um voll funktionsfähig zu sein. |
+| :pushpin: Matrix benötigt valide TLS-Zertifikate um voll funktionsfähig zu sein. <br /> :warning: Diese müssen von einer öffentlichen CA abgeleitet sein, wenn die mobilen Clients genutzt werden. :warning: |
 | --- |
+
 
 ## Option 1: Domain entspricht den Benutzernamen (ohne Delegation)
 
