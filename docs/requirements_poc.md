@@ -90,6 +90,8 @@ Wenn Sie noch keine Datenbank haben, richtet das PoC-Installationsprogramm Postg
 
 Es wird empfohlen, wie auch in der folgenden Installationsanweisung, valide TLS-Zertifikate für alle genutzten Domains auf dem der Synapse-Host und die verknüpften Services (siehe: [Hostnamen/DNS](#hostnamen-dns)) erreichbar sind, zur Verfügung zu stellen.
 
+:warning: Weiterhin wird empfohlen diese Zertifikate gegen eine öffentliche und offizielle CAs signieren zu lassen, damit die mobilen Clients des Bundesmessenger diese auch abrufen kann. Selbstsignierte Zertifikate werden nicht in den Client importiert und nicht vertraut, eine Kommunikation ist damit nicht möglich!
+
 Die Bereitstellung der TLS-Zertifikate ist nicht Bestandteil dieser Helm Charts.
 
 ## Zusätzliche Konfigurationselemente
