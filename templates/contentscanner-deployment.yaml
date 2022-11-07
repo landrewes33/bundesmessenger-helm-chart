@@ -39,29 +39,14 @@ spec:
           - name: temp
             mountPath: /tmp
           - name: scannerscript
-            mountPath: /opt/scanner.sh
-            subPath: scanner.sh
-          - name: clamdscan
-            mountPath: /opt/clamd.conf
-            subPath: clamd.conf
+            mountPath: /opt
       volumes:
        - name: temp
          emptyDir: {}
        - name: scannerscript
          configMap:
            name: scanner
-           items:
-            - key: scanner.sh
-              path: scanner.sh
-       - name: clamdscan
-         configMap:
-           name: clam
-           items:
-            - key: clamd.conf
-              path: clamd.conf
-       - name: clamdconf
-         configMap:
-           name: clam
+           defaultMode: 0755
        - name: scannerconfig
          configMap:
            name: contentscannerconfig

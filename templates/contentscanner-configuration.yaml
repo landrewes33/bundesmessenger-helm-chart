@@ -19,7 +19,7 @@ data:
 
     scan:
         # The script that will be given a file as its first parameter
-        script: '/opt/scanner'
+        script: '/opt/scanner.sh'
         # If set and the script exits with an exit code listed here, the failure will not be
         # cached. Useful to prevent caching of a failure due to e.g. the antivirus restarting.
         #
@@ -66,11 +66,16 @@ data:
     # - Anything sent to stdout will be included in the `info` section of the response.
     echo "First line of file '${1}': $(head -z -n1 ${1})" 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
     #result=$(curl -s -XPOST http://"{{ include "matrix-synapse.schadcodescannername" . }}":3310 -F FILES=@${1});
-    result=$(clamdscan -c /opt/clamd.conf --fdpass --stream ${1} );
+    result=$(c-icap-client -i  {{ include "matrix-synapse.schadcodescannername" . }} -p 1344 -f ${1} -s virus_scan | grep -c "VIRUS FOUND" );
     #cp ${1} /tmp/test;
     #clamdscan ${1} 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
+    #c-icap-client -i {{ include "matrix-synapse.schadcodescannername" . }} -p 1344 -d 10 -f ${1}  1>> /proc/1/fd/1 2>> /proc/1/fd/2;
     echo "Return:  $result" 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
-    exit 0    
+    if [[ $result == 0 ]]; then
+      exit 0    
+    else
+      exit 2
+    fi
 
 ---
 apiVersion: v1
