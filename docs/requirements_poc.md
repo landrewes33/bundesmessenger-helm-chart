@@ -30,13 +30,10 @@ Sie benötigen Hostnamen inkl. DNS-Auflösung für die folgenden Infrastrukturko
 ## Maschinengröße
 
 Für die Durchführung eines Proof of Concept mit unserem Installationschart unterstützen wir nur die x86_64-Architektur und empfehlen die folgenden Mindestanforderungen an Ressourcen in einem Kubernetes-Cluster:
-
-- Ohne Föderation
-  - zwei Worker-Nodes mit je 2 vCPUs/CPUs und 8 GB RAM
-  - eine Master-Node mit 2 vCPUs und 4GB RAM
-- Mit Föderation
-  - mind. drei Worker-Nodes mit je 4 vCPUs/CPUs und 16 GB RAM
-  - mind. eine Master-Node mit 2 vCPUs und 4GB RAM
+| Ausführung | Anzahl Worker Nodes | Ressourcen Worker-Nodes | Anzahl Control-Planes (Master-Nodes) | Ressourcen Control-Plane|
+| ------ | ------ | ------ | ------ | ------ |
+| Ohne Föderation | 2 | je 2 vCPUs/CPUs und 8 GB RAM | 1 | mit 2 vCPUs und 4GB RAM |
+| Mit Föderation (expterimentell) | 3+ | je 4 vCPUs/CPUs und 16 GB RAM | 3+ |mit 2 vCPUs und 4GB RAM |
 
 :pushpin: **Hinweis:** Es wird empfohlen auf mehr als eine Master-Node zu setzen. Weiterhin ist eine zusätzliche Node, welche persistenten Speicher präsentiert, von Vorteil. Diese Funktionalität sollte vom Plattformbetreiber zur Verfügung gestellt werden und ist kein Bestandteil dieser Helm Charts.
 
