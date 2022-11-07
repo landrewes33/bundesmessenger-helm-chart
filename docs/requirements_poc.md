@@ -1,5 +1,6 @@
 Um mit einer PoC-Installation zu beginnen, müssen mehrere Dinge berücksichtigt werden, die in diesem Leitfaden behandelt werden:
 
+  - [Ausbaustufen des Deployments](#ausbaustufen-des-deployments-vom-bundesmessenger)
   - [Hostnamen/DNS](#hostnamendns)
   - [Maschinengröße](#maschinengröße)
   - [Container-Basisimages](#container-basisimages)
@@ -15,40 +16,59 @@ Um mit einer PoC-Installation zu beginnen, müssen mehrere Dinge berücksichtigt
 
 Sobald diese Bereiche abgedeckt sind, können Sie eine PoC-Umgebung installieren!
 
+
+## Ausbaustufen des Deployments vom BundesMessenger
+
+| Größe | Module | Typ |
+| ------ | ------ | ------ |
+| Default | Synapse-Main, generische Worker Nodes (2), Media Repository (1), Redis Server, Ingress | Default minimum |
+| Minimum PoC| Synapse-Main, Redis Server, Ingress | Minimum für PoC / Demo |
+| Full PoC | Synapse-Main, generische Worker Nodes (2), Media Repository (1), Redis Server, Ingress, Webclient, Contentscanner, ClamAV, Wellknown-Server, Synapse-Admin, Anbindung an Monitoring | vollwertiges PoC Deployment |
+| Full-Stack Deployment| Synapse-Main, generische Worker Nodes (2), Media Repository (1), Redis Server, Ingress, Webclient, Contentscanner, ClamAV, Wellknown-Server, Synapse-Admin, PostgreSQL, spezifische Worker für Userdirectory (Nutzerverzeichnis) usw., Anbindung an Monitoring | Deployment aller möglichen und benötigten Module aus dem HelmChart. |
+
+## Maschinengröße
+
+Für die Durchführung eines Proof of Concept mit unserem Installationschart unterstützen wir nur die x86_64-Architektur (Virtualisiert oder BareMetall) und empfehlen die folgenden Mindestanforderungen an Ressourcen in einem Kubernetes-Cluster
+
+### Für die Ausbaustufe Minimum PoC oder Default:
+| Ausführung | Anzahl Worker Nodes | Ressourcen Worker-Nodes | Anzahl Control-Planes (Master-Nodes) | Ressourcen Control-Plane|
+| ------ | ------ | ------ | ------ | ------ |
+| Ohne Föderation | 2 | je 2 vCPUs/CPUs und 8 GB RAM | 1 |  2 vCPUs und 4GB RAM |
+| Mit Föderation (expterimentell) | 3 | je 4 vCPUs/CPUs und 16 GB RAM | 3 | 2 vCPUs und 4GB RAM |
+
+### Für die Ausbaustufe Full PoC bzw. Full-Stack Deployment:
+| Ausführung | Anzahl Worker Nodes | Ressourcen Worker-Nodes | Anzahl Control-Planes (Master-Nodes) | Ressourcen Control-Plane|
+| ------ | ------ | ------ | ------ | ------ |
+| Ohne Föderation | 4 | je 4 vCPUs/CPUs und 8 GB RAM | 1 |  4 vCPUs und 4GB RAM |
+| Mit Föderation (expterimentell) | 5 | je 4 vCPUs/CPUs und 16 GB RAM | 3 | 2 vCPUs und 4GB RAM |
+
+:pushpin: **Hinweis:** Es wird empfohlen auf mehr als eine Master-Node zu setzen. Weiterhin ist eine zusätzliche Node (VM oder BareMetall), welche persistenten Speicher präsentiert, von Vorteil. Diese Funktionalität sollte vom Plattformbetreiber zur Verfügung gestellt werden und ist **kein** Bestandteil des Helm Charts.
+
 ## Hostnamen/DNS
 
 Sie benötigen Hostnamen inkl. DNS-Auflösung für die folgenden Infrastrukturkomponenten:
 
 | Komponente | Status | Parameter | Bemerkung |
 | ------ | ------ | ------ | ------ |
-| [WebClient](webclient.md) | optional | `webclient.uri` | Kann aktiviert werden mit `webclient.enabled=true`. |
+| [WebClient](webclient.md) | optional, aber empfohlen | `webclient.uri` | Kann aktiviert werden mit `webclient.enabled=true`. <br /> Der inkludierte gehärtete WebClient des BundesMessenger wird hauptsächlich für den "internen" Gebrauch ausgelegt und per Browser aufgerufen. <br /> Für die externe Nutzung von Clients über mobile Endgeräte stehen die Apps des BundesMessengers zur Verfügung. |
 | Synapse | erforderlich | `serverName` bzw. `publicServerName` | |
-| [Synapse-Admin](synapse_admin.md) | optional | `synapse_admin.uri` | empfohlen für eine Erreichbarkeit nur von intern, `.local`-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :smiley:<br />Kann aktiviert werden mit `synapse_admin.enabled=true`. |
+| [Synapse-Admin](synapse_admin.md) | optional, aber empfohlen | `synapse_admin.uri` | Empfohlen für eine Erreichbarkeit nur von intern, `.local`-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :smiley:<br />Kann aktiviert werden mit `synapse_admin.enabled=true`. |
 | Monitoring | empfohlen | tbd | ToDo |
 | CoTurn-Server | optional | tbd | nicht empfohlen in Kubernetes umzusetzen, derzeit nicht im Scope |
 
-## Maschinengröße
-
-Für die Durchführung eines Proof of Concept mit unserem Installationschart unterstützen wir nur die x86_64-Architektur und empfehlen die folgenden Mindestanforderungen an Ressourcen in einem Kubernetes-Cluster:
-| Ausführung | Anzahl Worker Nodes | Ressourcen Worker-Nodes | Anzahl Control-Planes (Master-Nodes) | Ressourcen Control-Plane|
-| ------ | ------ | ------ | ------ | ------ |
-| Ohne Föderation | 2 | je 2 vCPUs/CPUs und 8 GB RAM | 1 | mit 2 vCPUs und 4GB RAM |
-| Mit Föderation (expterimentell) | 3+ | je 4 vCPUs/CPUs und 16 GB RAM | 3+ |mit 2 vCPUs und 4GB RAM |
-
-:pushpin: **Hinweis:** Es wird empfohlen auf mehr als eine Master-Node zu setzen. Weiterhin ist eine zusätzliche Node, welche persistenten Speicher präsentiert, von Vorteil. Diese Funktionalität sollte vom Plattformbetreiber zur Verfügung gestellt werden und ist kein Bestandteil dieser Helm Charts.
 
 ## Container-Basisimages
 
-In Zukunft wird auf die Nutzung von Containern aus [Docker Hub](https://hub.docker.com/) verzichtet werden.
-Hierzu werden eigene CI-Pipelines aufgebaut um eigene Applikations- bzw. Basis-Images im OpenCoDE zur Verfügung zu stellen.
+Es werden eigene CI-Pipelines aufgebaut um eigene Applikations- bzw. Basis-Images im OpenCoDE zur Verfügung zu stellen.
 
 - [BundesMessenger Container Registry](https://gitlab.opencode.de/bwi/bundesmessenger/backend/container-images/)
 
-Das Veröffentlichen von eigenen Basis-Images stellt eine Verbreitung einer Linux-Distribution dar.
+Das Veröffentlichen eigener Basis-Images stellt eine Verbreitung von Linux-Distribution dar.
 Daher werden wir zur Herstellung unserer Appikations-Images auf spezielle Basis-Images aufbauen.
 Folgende Optionen werden in Betracht gezogen:
-- DVS Basis-Image
+- eigene Base Images auf Basis von Ubuntu Jammy
 - [OSADL Basis-Image](https://www.osadl.org/OSADL-Docker-Base-Image.osadl-docker-base-image.0.html)
+- DVS Basis-Image (noch nicht verfügbar)
 
 ## Betriebssystem K8s
 
@@ -60,9 +80,11 @@ Es wird empfohlen im Rahmen das PoC auf alle sicherheitsrelevanten Umgebungs- un
 
 ## Netzwerkbesonderheiten
 
+Das Helm Chart unterstützt IPv4-Only Netzwerke über die Konfiguration des Schalter `ipv4Only=true`.
+
 Der Messengerservice muss Inhalte binden und bereitstellen über:
 
-- Port 80 TCP
+- Port 80 TCP (bei SSL Offload vor dem Kubernetes)
 - Port 443 TCP
 
 Entsprechende Ports müssen auch entweder lokal auf der PoC-Umgebung freigegeben werden oder in der vorgeschalteten Sicherheitsinfrastruktur.
@@ -79,7 +101,7 @@ Siehe [Synapse Dokumentation](https://matrix-org.github.io/synapse/latest/postgr
 
 Wenn Sie diese bereitgestellt haben, notieren Sie sich bitte den Datenbanknamen, den Benutzer und das Passwort, da Sie diese benötigen, um mit der Installation zu beginnen. (per Parameter zu übergeben oder in der `value.yaml` anzupassen)
 
-Wenn Sie noch keine Datenbank haben, richtet das PoC-Installationsprogramm PostgreSQL in Ihrem Namen ein. Dies ist standardmäßig hinterlegt. Dafür benötigt das Chart jedoch ein festes `VolumeClaim` der `StorageClass` `nfs-client`. Dies kann geändert werden (siehe oben).
+Wenn Sie noch keine Datenbank haben, richten Sie sich eine Datenbank nach den Vorgaben im Kubernetes ein. Die Nutzung eines SubChart für die Einrichtung des PostgreSQL wäre über das Chart möglich. Es ist aber davon abzureten und ein selbstständige Installation über HelmChart oder manuelle Installation umzusetzen.
 
 *Optional: Es kann das Helm-Chart mit dazu verwendet werden im gleichen Namespace einen PostgreSQL-Server mit entsprechender Konfiguration bereitzustellen. Das ist für den PoC auch funktional, sollte aber in eine stabile DVS-konforme Version überführt werden. Dazu kann auch das Subchart für den PostgreSQL-Server entsprechend angepasst werden, dass ein eigener Namespace für einen "externen" Datenbankserver verwendet wird. Dabei ist zu beachten, dass diese Bereitstellung losgelöst vom BundesMessenger umgesetzt wird, da sonst die kyverno-Regeln hier einen Verstoß melden würden.*
 

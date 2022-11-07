@@ -69,7 +69,7 @@ Die größten Änderungen zu dem zugrundeliegenden Chart sind:
 - Hinzufügen und Konfiguration des Sygnal-Push-Dienstes
 - Konfiguration des kompletten Dienstes für das Service-Monitoring per Prometheus
   (wird automatisch an Clustereigenen Prometheus promoted)
-- Integration eines [CoTurn-Servers](https://github.com/coturn/coturn)
+- **Out of scope!** mögliche Integration eines [CoTurn-Servers](https://github.com/coturn/coturn)
   zur Nutzung der VoIP-Dienste
   - *Optional: Installation und Konfiguration eines dedizierten NginX Controllers für UDP Traffic*
   - :pushpin: **Empfehlung: Installation eines CoTurn außerhalb des Kubernetes und Konfiguration zur Erreichbarkeit dort vornehmen**
