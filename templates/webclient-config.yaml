@@ -91,6 +91,7 @@ data:
       ],
       "feature_overview_url":"https://messenger.bwi.de/#c4783",
       "bwi_setting_defaults": {
+        "BwiFeature.disableLoginServerLookup": true,
         "BwiFeature.closeImageViewOnNavigate": true,
         "BwiFeature.hideIpAdresses": true,
         "BwiFeature.hideArchivedRooms": true,

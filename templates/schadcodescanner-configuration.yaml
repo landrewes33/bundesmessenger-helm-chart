@@ -8,9 +8,8 @@ metadata:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 data:
   c-icap.conf: |
-    Include virus_scan.conf
-    PidFile /var/run/c-icap/c-icap.pid
-    CommandsSocket /var/run/c-icap/c-icap.ctl
+    PidFile /run/clamav/c-icap.pid
+    CommandsSocket /run/clamav/c-icap.ctl
     Timeout 300
     MaxKeepAliveRequests 100
     KeepAliveTimeout 600
@@ -21,18 +20,17 @@ data:
     ThreadsPerChild     10
     MaxRequestsPerChild  0
     Port 1344
-    ServerAdmin you@your.address
-    ServerName YourServerName
+    ServerName {{ include "matrix-synapse.schadcodescannername" . }}
     TmpDir /var/tmp
     MaxMemObject 131072
     DebugLevel 1
     Pipelining on
     SupportBuggyClients off
-    ModulesDir /opt/c-icap/lib/c_icap
-    ServicesDir /opt/c-icap/lib/c_icap
-    TemplateDir /opt/c-icap/share/c_icap/templates/
+    ModulesDir /usr/lib/x86_64-linux-gnu/c_icap
+    ServicesDir /usr/lib/x86_64-linux-gnu/c_icap
+    TemplateDir /usr/share/c_icap/templates/
     TemplateDefaultLanguage en
-    LoadMagicFile /opt/c-icap/etc/c-icap.magic
+    LoadMagicFile /etc/c-icap/c-icap.magic
     RemoteProxyUsers off
     RemoteProxyUserHeader X-Authenticated-User
     RemoteProxyUserHeaderEncoded on
@@ -43,11 +41,10 @@ data:
     {{- end }}
     acl PERMIT_REQUESTS type REQMOD RESPMOD OPTIONS
     icap_access allow all PERMIT_REQUESTS
-    ServerLog /var/log/c-icap/server.log
-    AccessLog /var/log/c-icap/access.log
-    ServerLog /opt/c-icap/var/log/server.log
-    AccessLog /opt/c-icap/var/log/access.log
+    ServerLog /dev/stdout
+    AccessLog /dev/stdout
     Service echo srv_echo.so    
+    Include /clamav/config/virus_scan.conf
 
   virus_scan.conf: |
     Service antivirus_module virus_scan.so
@@ -58,11 +55,14 @@ data:
     virus_scan.StartSendPercentDataAfter 2M
     virus_scan.MaxObjectSize  5M
     virus_scan.DefaultEngine clamav
-    Include clamd_mod.conf
+    Include /clamav/config/clamd_mod.conf
 
   clamd_mod.conf: |
     Module common clamd_mod.so
     clamd_mod.ClamdSocket /run/clamav/clamd.sock
+
+  clamdcheck.conf: |
+    LocalSocket /run/clamav/clamd.sock
 
   clamd.conf: |
     LogTime yes
@@ -71,8 +71,7 @@ data:
     LogVerbose no
     LogFileMaxSize 0
     LogFile /dev/stdout
-    DatabaseDirectory /var/lib/clamav
-    TCPSocket 3310
+    DatabaseDirectory /clamav/database
     LocalSocket /run/clamav/clamd.sock
     User clamav
     ExitOnOOM yes
@@ -99,11 +98,12 @@ data:
   freshclam.conf: |
     LogTime yes
     LogVerbose yes
-    NotifyClamd /etc/clamav/clamd.conf
+    NotifyClamd /clamav/config/clamd.conf
     Checks 24
     LogSyslog no
     DatabaseOwner root
     DatabaseMirror {{ .Values.schadcodescanner.freshclam.mirrors }}
+    ReceiveTimeout 35
 
 ---
 apiVersion: v1

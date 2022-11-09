@@ -4,7 +4,7 @@
 {{- end }}
 {{- $name := include "matrix-synapse.workername" (dict "global" . "worker" "signingkey-job") }}
 {{- $secretName := include "matrix-synapse.workername" (dict "global" . "worker" "signingkey") }}
-#{{- if not (lookup "v1" "secret" .Release.Namespace $secretName)}}
+{{- if not (lookup "v1" "secret" .Release.Namespace $secretName)}}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -124,5 +124,5 @@ spec:
   parallelism: 1
   completions: 1
   backoffLimit: 1
-#{{- end }}
+{{- end }}
 {{- end }}

@@ -35,23 +35,18 @@ spec:
           protocol: TCP
         volumeMounts:
           - name: scannerconfig
-            mountPath: /config/
-            subPath: config2.yaml
+            mountPath: /config
           - name: temp
             mountPath: /tmp
-          - name: scanner
-            mountPath: /opt/scanner
+          - name: scannerscript
+            mountPath: /opt
       volumes:
        - name: temp
          emptyDir: {}
-       - name: scanner
-         projected:
-           sources:
-           - configMap:
-               name: scanner
-       - name: clamdconf
+       - name: scannerscript
          configMap:
-           name: clam
+           name: scanner
+           defaultMode: 0755
        - name: scannerconfig
          configMap:
            name: contentscannerconfig
