@@ -46,6 +46,8 @@ spec:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
           volumeMounts:
+          - name: emptyconf
+            mountPath: /etc/nginx/sites-enabled 
           - name: files
             mountPath: /etc/nginx/sites-enabled/sadm.conf
             subPath: sadm.conf
@@ -57,6 +59,8 @@ spec:
           {{- end }}
       restartPolicy: Always
       volumes:
+      - name: emptyconf
+        emptyDir: {}
       - name: files
         configMap:
           name: {{ $adminName }}

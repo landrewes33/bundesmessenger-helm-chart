@@ -25,24 +25,25 @@ spec:
     {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
       - name: c-icap-server
-        image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-base:latest
+        image: "{{ $config.imagecicap.repository }}:{{ $config.imagecicap.tag }}"
+#        image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-base:latest
         ports:
           - name: c-icap-clamav
             containerPort: {{ $config.service.port }}
             protocol: TCP
-        command:
-          - sh
-          - -c
-          - |
-            echo 'Acquire::http::Proxy "http://pa-bwm-vm014.example.com:3128";' > /etc/apt/apt.conf && apt -y install c-icap libc-icap-mod-virus-scan libc-icap-mod-urlcheck libc-icap-mod-contentfiltering clamav-daemon && clamdscan --ping 1000 -c /clamav/config/clamdcheck.conf && /usr/bin/c-icap -f /clamav/config/c-icap.conf -D -N
+#        command:
+#          - sh
+#          - -c
+#          - |
+#            echo 'Acquire::http::Proxy "http://pa-bwm-vm014.example.com:3128";' > /etc/apt/apt.conf && apt -y install c-icap libc-icap-mod-virus-scan libc-icap-mod-urlcheck libc-icap-mod-contentfiltering clamav-daemon && clamdscan --ping 1000 -c /clamav/config/clamdcheck.conf && /usr/bin/c-icap -f /clamav/config/c-icap.conf -D -N
         volumeMounts:
           - name: clamsocket
             mountPath: /run/clamav/
           - name: config-volume
             mountPath: /clamav/config/
       - name: clamav
-#        image: "{{ $config.image.repository }}:{{ $config.image.tag }}"
-        image: clamav/clamav:latest
+        image: "{{ $config.imageclamav.repository }}:{{ $config.imageclamav.tag }}"
+#        image: clamav/clamav:latest
 #        imagePullPolicy: {{ $config.image.pullPolicy }}
         env:
         {{- if .Values.extraEnv }}
@@ -77,7 +78,11 @@ spec:
               name: {{ include "matrix-synapse.schadcodescannername" . }}
       - name: signatures
         persistentVolumeClaim:
+      {{- if .Values.schadcodescanner.persistence.claimName }}
+            claimName: {{ .Values.schadcodescanner.persistence.claimName }}
+      {{- else }}
             claimName: {{ template "matrix-synapse.schadcodescannername" . }} 
+      {{- end }}
       {{- with $config.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -237,6 +237,14 @@ spec:
        - name: matrix-sygnal
          image:  "{{ $.Values.sygnal.image.repository }}:{{ include "matrix-synapse.sygnal.imageTag" $ }}"
          imagePullPolicy: {{ $.Values.sygnal.image.pullPolicy }}
+#         env:
+#           - name: SYGNAL_CONF
+#             value: sygnal.yaml
+#         command: 
+#           - sh
+#           - -c
+#           - |
+#             SYGNAL_CONF=/sygnal.yaml python -m sygnal.sygnal
          ports:
           - containerPort: 5000
             name: sygnal-port
