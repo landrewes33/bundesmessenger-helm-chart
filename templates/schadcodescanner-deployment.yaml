@@ -78,8 +78,8 @@ spec:
               name: {{ include "matrix-synapse.schadcodescannername" . }}
       - name: signatures
         persistentVolumeClaim:
-      {{- if .Values.schadcodescanner.persistence.claimName }}
-            claimName: {{ .Values.schadcodescanner.persistence.claimName }}
+      {{- if .Values.schadcodescanner.persistence.existingClaim }}
+            claimName: {{ .Values.schadcodescanner.persistence.existingClaim }}
       {{- else }}
             claimName: {{ template "matrix-synapse.schadcodescannername" . }} 
       {{- end }}
