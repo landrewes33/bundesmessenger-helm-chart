@@ -76,16 +76,4 @@ data:
     else
       exit 2
     fi
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: clam
-  labels:
-    {{- include "matrix-synapse.labels" . | nindent 4 }}
-data:
-  clamd.conf: |
-    TCPSocket 3310
-    TCPAddr {{ include "matrix-synapse.schadcodescannername" . }}.{{ .Release.Namespace }}
 {{- end }}
