@@ -1306,9 +1306,11 @@ schadcodescanner:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-clamav-production
     tag: latest
     pullPolicy: IfNotPresent
+    # -- (map) Konfiguration des persistenten Speichers für ClamAV
+    # empfohlen: ExistingClaim mit ReadWriteMany, so dass mehrere Pods die ClamAV-DB nutzen können. (TBD: freshclam darf dann nur einmal laufen: Abfrage PID)
   persistence:
     enabled: true
-    claimName: signatures-matrix-synapse-clamav-0
+    existingClaim: signatures-matrix-synapse-clamav-0
   service:
   # service.port -- The port to be used by the clamav service
     port: 3310
