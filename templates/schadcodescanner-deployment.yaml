@@ -26,16 +26,10 @@ spec:
       containers:
       - name: c-icap-server
         image: "{{ $config.imagecicap.repository }}:{{ $config.imagecicap.tag }}"
-#        image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-base:latest
         ports:
           - name: c-icap-clamav
             containerPort: {{ $config.service.port }}
             protocol: TCP
-#        command:
-#          - sh
-#          - -c
-#          - |
-#            echo 'Acquire::http::Proxy "http://pa-bwm-vm014.example.com:3128";' > /etc/apt/apt.conf && apt -y install c-icap libc-icap-mod-virus-scan libc-icap-mod-urlcheck libc-icap-mod-contentfiltering clamav-daemon && clamdscan --ping 1000 -c /clamav/config/clamdcheck.conf && /usr/bin/c-icap -f /clamav/config/c-icap.conf -D -N
         volumeMounts:
           - name: clamsocket
             mountPath: /run/clamav/
@@ -43,22 +37,12 @@ spec:
             mountPath: /clamav/config/
       - name: clamav
         image: "{{ $config.imageclamav.repository }}:{{ $config.imageclamav.tag }}"
-#        image: clamav/clamav:latest
-#        imagePullPolicy: {{ $config.image.pullPolicy }}
         env:
         {{- if .Values.extraEnv }}
           {{- with .Values.extraEnv }}
               {{- . | toYaml | nindent 12 }}
           {{- end }}
         {{- end }}
-#        command:
-#          - sh
-#          - -c
-#          - |
-#            echo 'Acquire::http::Proxy "http://pa-bwm-vm014.example.com:3128";' > /etc/apt/apt.conf && \
-#            apt -y install libc-icap-mod-virus-scan libc-icap-mod-urlcheck libc-icap-mod-contentfiltering sudo && \ 
-#            clamdbin=$(which clamd) && sudo -u clamav "$clamdbin -c /clamav/config/clamd.conf -F" && \
-#            freshclambin=$(which freshclam) &&  sudo -u clamav "$freshclambin /clamav/config/freshclam.conf --foreground --datadir=/clamav/database --verbose"
         resources:
           {{- toYaml $config.resources | nindent 10 }}
         volumeMounts:
