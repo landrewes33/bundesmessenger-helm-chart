@@ -30,7 +30,7 @@ data:
         # The temporary directory to use
         tempDirectory: '/tmp'
         # The base URL of the homeserver to download media from
-        baseUrl: http://{{ include "matrix-synapse.workername" (dict "global" $ "worker" "media-repository") }}.{{ .Release.Namespace }}.svc:8083
+        baseUrl: http://{{ include "matrix-synapse.workername" (dict "global" $ "worker" "media-repository") | default  include "matrix-synapse.fullname" $ }}.{{ .Release.Namespace }}.svc:8083
         # If set to true, effectively set baseUrl to
         #   "https://$domain"
         #   where $domain is the domain part of the requested media.
