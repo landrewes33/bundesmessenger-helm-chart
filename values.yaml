@@ -66,7 +66,7 @@ signingkey:
       # empfohlen, dass die gleiche Konfiguration wie vom Synapse bzw. den Workernodes genutzt wird.
       # ursprünglich: "repository: matrixdotorg/synapse"
       # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen
-      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse
+      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-production
       pullSecrets: []
       #  - name: bum-gittoken
       #tag: latest
@@ -75,7 +75,7 @@ signingkey:
     # -- (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels. 
     # finaler Tag kann sich noch ändern
     publishImage:
-      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-kubectl
+      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-kubectl-production
       tag: 1.21.14
       pullPolicy: IfNotPresent
 
@@ -815,10 +815,10 @@ volumePermissions:
     # -- (string) das Repository für das zu nutzende Image zur Rechtebereinigung
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-base-production
     # -- (string) das Tag für das zu nutzende Image zur Rechtebereinigung
-    # Hinweis: noch kein finaler Tag
-    tag: latest
+    # Hinweis: noch kein finaler Tag, build version 10 als Alternative zu latest
+    tag: b10
     # -- (string) da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
 
   # -- (map) Ressourcen des Init-Containers zur Rechtekorrektur
   # Hier keine gesetzt, da kurzlebig und von Hause aus klein
@@ -862,10 +862,7 @@ sygnal:
   #  fsGroup: 27
   #  runAsGroup: 2000
   #  runAsUser: 2000
-  podSecurityContext:  
-    runAsNonRoot: true
-    runAsGroup: 2000
-    runAsUser: 2000
+  podSecurityContext:  {}
     #    sysctls:
     #      - name: net.ipv4.ip_unprivileged_port_start
     #        value: "80"
@@ -875,10 +872,10 @@ sygnal:
   #  capabilities:
   #    drop:
   #    - ALL
-  securityContext: 
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
-    runAsUser: 2111
+  #  readOnlyRootFilesystem: true
+  #  runAsNonRoot: true
+  #  runAsUser: 2111
+  securityContext: {}
 
   ## Ressource konfiguration für Sygnal server.
   ##
@@ -1304,7 +1301,7 @@ schadcodescanner:
   # -- (map) Konfiguration des Image/Repository
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-clamav-production
-    tag: latest
+    tag: 0.103.6_dfsg-0ubuntu0.22.04.1
     pullPolicy: IfNotPresent
     # -- (map) Konfiguration des persistenten Speichers für ClamAV
     # empfohlen: ExistingClaim mit ReadWriteMany-Volume anzugeben, so dass mehrere Pods die ClamAV-DB nutzen können. (TBD: freshclam darf dann nur einmal laufen: Abfrage PID)
@@ -1393,8 +1390,8 @@ coturn:
   default_ns: default
   # -- (map) Konfiguration für das Image vom CoTurn
   image:
-    repository: coturn/coturn
-    tag: docker/4.5.2-r12
+    repository: HIER BITTE EIN REPOSITORY FÜR COTURN EINTRAGEN - NICHT EMPFOHLEN!
+    tag: Hier das Tag für das Image des Coturn eintragen - NICHT EMPFOHLEN!
     pullPolicy: IfNotPresent
   # -- (map) SecurityContext für den Container
   securityContext:
@@ -1416,7 +1413,7 @@ synapse_admin:
   # -- (map) Konfiguration des Image vom Modul
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-admin-production
-    tag: 0.8.5-b3
+    tag: 0.8.5-b12
     pullPolicy: IfNotPresent
 
   ## Ressourcen Konfiguration für Synapse-Admin Server.
@@ -1501,7 +1498,7 @@ webclient:
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: latest
+    tag: v1.26.0
     pullPolicy: IfNotPresent
   annotations:
        nginx.ingress.kubernetes.io/configuration-snippet: |
