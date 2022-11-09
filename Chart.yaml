@@ -3,7 +3,7 @@ apiVersion: v2
 name: bundesmessenger
 description: BWI Matrix BundesMessenger 
 icon: https://matrix.org/images/matrix-logo.svg
-version: 0.9.5
+version: 0.9.8
 
 type: application
 appVersion: 1.64.0
