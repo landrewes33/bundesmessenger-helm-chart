@@ -1307,15 +1307,20 @@ schadcodescanner:
     tag: latest
     pullPolicy: IfNotPresent
     # -- (map) Konfiguration des persistenten Speichers für ClamAV
-    # empfohlen: ExistingClaim mit ReadWriteMany, so dass mehrere Pods die ClamAV-DB nutzen können. (TBD: freshclam darf dann nur einmal laufen: Abfrage PID)
+    # empfohlen: ExistingClaim mit ReadWriteMany-Volume anzugeben, so dass mehrere Pods die ClamAV-DB nutzen können. (TBD: freshclam darf dann nur einmal laufen: Abfrage PID)
+    # @default existingClaim: PVC-Name
+    # ansonsten:
+    # size: 
+    # accessMode: ReadWriteOnce (wird für jedes HPA-skalierte neu angelegt)
+    # storageClass: - (damit wird default genutzt, ansonsten storageClass direkt benennen)
   persistence:
     enabled: true
-    existingClaim: signatures-matrix-synapse-clamav-0
+    existingClaim: PVC-NAME
   service:
-  # service.port -- The port to be used by the clamav service
+  # -- (int) service.port -- The port to be used by the clamav service
     port: 3310
   freshclam:
-    # clamav.freshclam.mirrors -- A list of clamav mirrors to be used by the clamav service
+    # -- (string) clamav.freshclam.mirrors -- A list of clamav mirrors to be used by the clamav service
     mirrors: database.clamav.net
 
   # -- (int) Anzahl der Worker-Container
