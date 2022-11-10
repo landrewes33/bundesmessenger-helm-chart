@@ -1,0 +1,12 @@
+.DS_Store
+.allure
+*.iml
+.idea
+target
+temp
+settings.xml
+homeserver.prod.yaml
+*.setup.log
+*.setup.yml
+*.zip
+/bin

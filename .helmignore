@@ -18,6 +18,17 @@
 # Various IDEs
 .project
 .idea/
+*.iml
 *.tmproj
 .vscode/
 helm-package/
+# Maven
+target/
+.mvn/
+mvnw
+mvnw.cmd
+pom.xml
+# Release Wrapper
+ci_settings.xml
+increase.sh
+RELEASE.md

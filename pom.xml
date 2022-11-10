@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>de.bwi.messenger</groupId>
+    <artifactId>messenger-helm</artifactId>
+    <packaging>jar</packaging>
+    <version>0.9.0-SNAPSHOT</version>
+
+    <properties>
+        <jgitflow-maven-plugin.version>1.0-m5.1</jgitflow-maven-plugin.version>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>external.atlassian.jgitflow</groupId>
+                    <artifactId>jgitflow-maven-plugin</artifactId>
+                    <version>${jgitflow-maven-plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <!-- To use the plugin goals in your POM or parent POM -->
+        <plugins>
+            <plugin>
+                <groupId>external.atlassian.jgitflow</groupId>
+                <artifactId>jgitflow-maven-plugin</artifactId>
+                <configuration>
+                    <enableSshAgent>true</enableSshAgent>
+                    <flowInitContext>
+                        <masterBranchName>master</masterBranchName>
+                        <developBranchName>develop</developBranchName>
+                        <featureBranchPrefix>feature/</featureBranchPrefix>
+                        <releaseBranchPrefix>release/</releaseBranchPrefix>
+                        <hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
+                        <versionTagPrefix>v</versionTagPrefix>
+                    </flowInitContext>
+                    <pushFeatures>true</pushFeatures>
+                    <pushReleases>true</pushReleases>
+                    <scmCommentPrefix>[gitflow-release-plugin] (initiated by ${env.GITLAB_USER_NAME}(${env.GITLAB_USER_LOGIN})) </scmCommentPrefix>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <scm>
+        <url>https://dl-gitlab.example.com/bwmessenger/bundesmessenger-backend/BundesMessenger-HelmChart</url>
+        <connection>scm:git:https://dl-gitlab.example.com/bwmessenger/bundesmessenger-backend/BundesMessenger-HelmChart</connection>
+        <developerConnection>scm:git:https://dl-gitlab.example.com/bwmessenger/bundesmessenger-backend/BundesMessenger-HelmChart</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>bwmessenger-release</id>
+            <url>https://dl-nexus.example.com/repository/bwmessenger-maven-h-release/</url>
+        </repository>
+        <snapshotRepository>
+            <id>bwmessenger-snapshot</id>
+            <url>https://dl-nexus.example.com/repository/bwmessenger-maven-h-snapshot/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+</project>
+
