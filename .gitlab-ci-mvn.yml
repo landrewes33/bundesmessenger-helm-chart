@@ -1,0 +1,150 @@
+---
+# To contribute improvements to CI/CD templates, please follow the Development guide at:
+# https://docs.gitlab.com/ee/development/cicd/templates.html
+# This specific template is located at:
+# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Maven.gitlab-ci.yml
+
+# Build JAVA applications using Apache Maven (http://maven.apache.org)
+# For docker image tags see https://hub.docker.com/_/maven/
+#
+# For general lifecycle information see https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html
+
+# This template will build and test your projects
+# * Caches downloaded dependencies and plugins between invocation.
+# * Verify but don't deploy merge requests.
+# * Deploy built artifacts from develop branch only.
+
+variables:
+  GIT_STRATEGY: clone
+  GIT_DEPTH: 0
+  PROXY_HOST: "pa-bwm-vm014.example.com"
+  PROXY_PORT: "3128"
+  # HTTP_PROXY: "http://pa-bwm-vm014.example.com:3128"
+  # HTTPS_PROXY: "http://pa-bwm-vm014.example.com:3128"
+  # This will suppress any download for dependencies and plugins or upload messages which would clutter the console log.
+  # `showDateTime` will show the passed time in milliseconds. You need to specify `--batch-mode` to make this work.
+  MAVEN_OPTS: "-Dhttps.protocols=TLSv1.2 -Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=WARN -Dorg.slf4j.simpleLogger.showDateTime=true -Djava.awt.headless=true"
+  # As of Maven 3.3.0 instead of this you may define these options in `.mvn/maven.config` so the same config is used
+  # when running from the command line.
+  # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
+  # debug options for analyzing git proxy problem
+  # CI_DEBUG_TRACE: "false"
+  # GIT_CURL_VERBOSE: "0"
+  # GIT_DEBUG_LOOKUP: "0"
+  # GIT_TRANSLOOP_DEBUG: "0"
+  # GIT_TRANSPORT_HELPER_DEBUG: "0"
+
+# This template uses jdk11 for verifying and deploying images
+image: dl-devharbor.example.com/proxy_cache/library/maven:3.8.6-eclipse-temurin-11
+
+default:
+  tags:
+    - pa-bwm-infra
+
+stages:
+  - build
+  - test
+  - analyse
+  - upload
+  - release
+  - deploy
+
+# Cache downloaded dependencies and plugins between builds.
+# To keep cache across branches add 'key: "$CI_JOB_NAME"'
+cache:
+  paths:
+    - .m2/repository
+
+build:
+  stage: build
+  script:
+    - env
+    - if [ ! -f ci_settings.xml ];
+      then echo "CI settings missing\! If deploying to GitLab Maven Repository, please see https://docs.gitlab.com/ee/user/packages/maven_repository/index.html#create-maven-packages-with-gitlab-cicd for instructions.";
+      fi
+    - 'mvn -Dmaven.test.skip=true $MAVEN_CLI_OPTS verify -s ci_settings.xml'
+  artifacts:
+    paths:
+      - target/*.jar
+      - target/*.zip
+  except:
+    - /^release/.*$/
+    - /^stage/.*$/
+  inherit:
+    variables: true
+
+test:
+  stage: test
+  script:
+    - if [ ! -f ci_settings.xml ];
+      then echo "CI settings missing\! If deploying to GitLab Maven Repository, please see https://docs.gitlab.com/ee/user/packages/maven_repository/index.html#create-maven-packages-with-gitlab-cicd for instructions.";
+      fi
+    - 'mvn -Dmaven.test.skip=false $MAVEN_CLI_OPTS verify -s ci_settings.xml'
+  artifacts:
+    paths:
+      - target/jacoco.exec
+      - target/site/jacoco/jacoco.xml
+      - target/site/jacoco-it/jacoco.xml
+      - build/reports/jacoco/test/jacocoTestReport.xml
+  except:
+    - /^release/.*$/
+    - /^stage/.*$/
+  inherit:
+    variables: true
+
+# https://docs.gitlab.com/ee/ci/yaml/#dependencies
+analyse:
+  stage: analyse
+  dependencies:
+    - test
+  script:
+    - 'mvn -Dmaven.test.skip=false $MAVEN_CLI_OPTS -Dsonar.host.url=$SONAR_URL -Dsonar.login=$DSONAR_LOGIN -Dsonar.qualitygate.wait=false compile test-compile sonar:sonar -s ci_settings.xml'
+  only:
+    variables:
+      - $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  except:
+    - /^release/.*$/
+    - /^stage/.*$/
+  inherit:
+    variables: true
+
+# To deploy packages from CI, create a ci_settings.xml file
+# For deploying packages to GitLab's Maven Repository: See https://docs.gitlab.com/ee/user/packages/maven_repository/index.html#create-maven-packages-with-gitlab-cicd for more details.
+# Please note: The GitLab Maven Repository is currently only available in GitLab Premium / Ultimate.
+# For `master` branch run `mvn deploy` automatically.
+upload:
+  stage: upload
+  script:
+    - if [ ! -f ci_settings.xml ];
+      then echo "CI settings missing\! If deploying to GitLab Maven Repository, please see https://docs.gitlab.com/ee/user/packages/maven_repository/index.html#create-maven-packages-with-gitlab-cicd for instructions.";
+      fi
+    - 'mvn -Dmaven.test.skip=true $MAVEN_CLI_OPTS -Ddeploy_username=${S_BWMESSENGER_ID} -Ddeploy_password=${S_BWMESSENGER_PASSWORD} deploy -s ci_settings.xml'
+  only:
+    variables:
+      - $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  inherit:
+    variables: true
+
+release:
+  stage: release
+  script:
+    - CURRENT_SNAPSHOT_VERSION=$(mvn -Dexec.executable='echo' -Dexec.args='${project.version}' --non-recursive exec:exec -s ci_settings.xml -q)
+    - echo $CURRENT_SNAPSHOT_VERSION
+    - CURRENT_RELEASE_VERSION=$(echo $CURRENT_SNAPSHOT_VERSION | sed -e 's/-SNAPSHOT//')
+    - echo $CURRENT_RELEASE_VERSION
+    - NEXT_RELEASE_VERSION=$(./increase.sh $CURRENT_RELEASE_VERSION)
+    - echo $NEXT_RELEASE_VERSION
+    - NEXT_SNAPSHOT_VERSION="${NEXT_RELEASE_VERSION}-SNAPSHOT"
+    - echo $NEXT_SNAPSHOT_VERSION
+    - git checkout $CI_COMMIT_BRANCH
+    - git pull
+    - git clean -f
+    - git clean -fd
+    - git status
+    - 'mvn -Dmaven.repo.local=../.m2 -Dmaven.test.skip=true $MAVEN_CLI_OPTS -DreleaseVersion=${CURRENT_RELEASE_VERSION} -DdevelopmentVersion=${NEXT_SNAPSHOT_VERSION} -Dusername=${S_BWMESSENGER_ID} -Dpassword=${S_BWMESSENGER_PASSWORD} -Ddeploy_username=${S_BWMESSENGER_ID} -Ddeploy_password=${S_BWMESSENGER_PASSWORD} -Dgit.user=${S_BWMESSENGER_ID} -Dgit.password=${S_BWMESSENGER_PASSWORD} jgitflow:release-start jgitflow:release-finish -s ci_settings.xml'
+  only:
+    variables:
+      - ( $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_COMMIT_MESSAGE =~ /quickrelease/ )
+  inherit:
+    variables: true
