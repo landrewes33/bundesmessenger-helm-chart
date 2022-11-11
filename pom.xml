@@ -5,7 +5,7 @@
     <groupId>de.bwi.messenger</groupId>
     <artifactId>messenger-helm</artifactId>
     <packaging>jar</packaging>
-    <version>0.9.0</version>
+    <version>0.9.9</version>
 
     <properties>
         <jgitflow-maven-plugin.version>1.0-m5.1</jgitflow-maven-plugin.version>
