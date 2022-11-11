@@ -11,3 +11,4 @@ homeserver.prod.yaml
 *.zip
 /bin
 /.m2
+/helm-package

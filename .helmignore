@@ -21,7 +21,6 @@
 *.iml
 *.tmproj
 .vscode/
-helm-package/
 # Maven
 target/
 .mvn/
@@ -35,5 +34,8 @@ increase.sh
 RELEASE.md
 # Gitlab
 /.gitlab-ci*
+# Helm
+.helmignore
+helm-package/
 # Filtering
 /filter.txt
