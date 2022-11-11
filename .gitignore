@@ -10,3 +10,4 @@ homeserver.prod.yaml
 *.setup.yml
 *.zip
 /bin
+/.m2
