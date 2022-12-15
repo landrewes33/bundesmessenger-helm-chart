@@ -182,7 +182,8 @@ spec:
               - key: {{ .Values.signingkey.existingSecretKey | default "signing.key" | quote }}
                 path: signing.key
         - name: tmpconf
-          emptyDir: {}
+          emptyDir: 
+            sizeLimit: 10Mi
         - name: media
         {{- $mediaworker := false }}
         {{- range $worker, $config := .Values.workers }}
@@ -194,7 +195,8 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim | default (include "matrix-synapse.fullname" .) }}
         {{- else }}
-          emptyDir: {}
+          emptyDir: 
+            sizeLimit: 1Gi
         {{- end }}
         {{- with .Values.synapse.extraVolumes }}
           {{- . | toYaml | nindent 8 }}

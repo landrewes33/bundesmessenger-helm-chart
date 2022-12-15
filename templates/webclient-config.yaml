@@ -183,16 +183,6 @@ data:
         "UIFeature.voip": false
       }
     }
-  nginx.conf: |
-    user www-data;
-    error_log  /dev/stderr;
-    events {}
-    http {
-      access_log  /dev/stdout;
-      server_tokens off;
-      include /etc/nginx/sites-enabled/default.conf;
-      include mime.types;
-    }
   default.conf: |
      # Default server configuration
      #

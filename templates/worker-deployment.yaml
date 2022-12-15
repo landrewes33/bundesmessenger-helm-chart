@@ -205,7 +205,8 @@ spec:
           configMap:
             name: {{ include "matrix-synapse.fullname" $ }}
         - name: worker-config
-          emptyDir: {}
+          emptyDir: 
+            sizeLimit: 10Mi
         - name: temp-worker-config
           configMap:
             name: {{ include "matrix-synapse.workername" (dict "global" $ "worker" "workers") }}
@@ -219,16 +220,19 @@ spec:
               - key: {{ $.Values.signingkey.existingSecretKey | default "signing.key" | quote }}
                 path: signing.key
         - name: tmpconf
-          emptyDir: {}
+          emptyDir: 
+            sizeLimit: 10Mi
         - name: tempdir
-          emptyDir: {}
+          emptyDir: 
+            sizeLimit: 10Mi
       {{- if regexMatch $name "media-repository" }}
         - name: media
         {{- if $.Values.persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ $.Values.persistence.existingClaim | default (include "matrix-synapse.fullname" $) }}
         {{- else }}
-          emptyDir: {}
+          emptyDir: 
+            sizeLimit: 1Gi
         {{- end }}
       {{- end }}
       {{- with $config.volumes | default $default.volumes }}

@@ -71,14 +71,14 @@ spec:
               name: nginx-conf
               readOnly: true
               subPath: nginx.conf
-            - mountPath: /etc/nginx/sites-enabled/bundesmessenger.conf
-              name: nginx-conf
+            - mountPath: /etc/nginx/sites-enabled/default.conf
+              name: site
               readOnly: true
-              subPath: bundesmessenger.conf
+              subPath: default.conf
 {{- $keys := concat (list "client" "server" "maintenance") (keys .Values.wellknown.extraData) }}
 {{- range $key := $keys }}
             - mountPath: {{ $.Values.wellknown.htdocsPath }}/{{ $key }}.json
-              name: nginx-conf
+              name: files
               subPath: {{ $key }}.json
 {{- end }}
             - mountPath: /run
@@ -88,9 +88,19 @@ spec:
       volumes:
         - name: nginx-conf
           configMap:
+            name: nginx-default-conf
+        - name: files
+          configMap:
             name: {{ $wkName }}
+        - name: site
+          configMap:
+            name: {{ $wkName }}
+            items:
+            - key: bundesmessenger.conf
+              path: default.conf
         - name: run
-          emptyDir: {}
+          emptyDir: 
+            sizeLimit: 10Mi
     {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
