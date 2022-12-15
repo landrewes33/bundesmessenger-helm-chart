@@ -37,11 +37,15 @@ spec:
           - name: scannerconfig
             mountPath: /config
           - name: temp
-            mountPath: /tmp
+            mountPath: /tmp            
+          - name: crypto
+            mountPath: /crypto
           - name: scannerscript
             mountPath: /opt
       volumes:
        - name: temp
+         emptyDir: {}        
+       - name: crypto
          emptyDir: {}
        - name: scannerscript
          configMap:

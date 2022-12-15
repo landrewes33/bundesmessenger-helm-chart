@@ -81,10 +81,10 @@ kind: Service
 metadata:
   name: "push-local"
   labels:
-    app: matrix-sygnal
+    app.kubernetes.io/component: matrix-sygnal
 spec:
   selector:
-    app: matrix-sygnal
+    app.kubernetes.io/component: matrix-sygnal
   type: ClusterIP
   ports:
     - name: sygnal-port

@@ -1,9 +1,9 @@
 ---
 apiVersion: v2
 name: bundesmessenger
-description: BWI Matrix BundesMessenger 
-icon: https://matrix.org/images/matrix-logo.svg
-version: 0.9.10
+description: BWI Matrix BundesMessenger
+icon: https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/raw/main/docs/images/bum_logo.svg
+version: 0.9.8
 
 type: application
 appVersion: 1.64.0
@@ -20,4 +20,3 @@ dependencies:
     version: ^10.9.4
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
-

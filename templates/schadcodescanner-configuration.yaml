@@ -54,7 +54,7 @@ data:
     virus_scan.SendPercentData 5
     virus_scan.StartSendPercentDataAfter 2M
     virus_scan.MaxObjectSize  5M
-    virus_scan.DefaultEngine clamav
+    virus_scan.DefaultEngine clamd
     Include /clamav/config/clamd_mod.conf
 
   clamd_mod.conf: |
@@ -76,8 +76,8 @@ data:
     User clamav
     ExitOnOOM yes
     Foreground yes
-    MaxScanSize {{.Values.schadcodescanner.limits.scanSize}}
-    MaxFileSize {{.Values.schadcodescanner.limits.fileSize}}
+    MaxScanSize {{.Values.schadcodescanner.limits.scanSize}}M
+    MaxFileSize {{.Values.schadcodescanner.limits.fileSize}}M
     #  Close the connection when the data size limit is exceeded.
     #  The value should match your MTA's limit for a maximum attachment size.
     #  Default: 25M
@@ -104,6 +104,7 @@ data:
     DatabaseOwner root
     DatabaseMirror {{ .Values.schadcodescanner.freshclam.mirrors }}
     ReceiveTimeout 35
+    DatabaseDirectory /clamav/database
 
 ---
 apiVersion: v1

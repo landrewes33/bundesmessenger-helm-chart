@@ -1,6 +1,6 @@
 {{- if .Values.webclient.enabled }}
 {{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
-
+{{- $displayName := .Values.webclient.displayName | default "Messenger deiner Organisation" }}
 # The config.json file is to be put into Kubernetes as a config file in such a way that
 # the element web instance can read it.
 
@@ -18,7 +18,7 @@ data:
       "default_server_config": {
         "m.homeserver": {
           "base_url": "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}",
-          "server_name": "TEST-DEMO"
+          "server_name": {{ $displayName | quote }}
         }
       },
       "enable_presence_by_hs_url": {
@@ -115,7 +115,7 @@ data:
         "BwiFeature.showReadReceiptsAsDialog": true,
         "BwiFeature.hideDmInviteLink": true,
         "BwiFeature.userLinkPreview": true,
-        "BwiFeature.hidePersonalNotes": false,
+        "BwiFeature.hidePersonalNotes": true,
         "BwiFeature.enforcePassphrase": true,
         "BwiFeature.exportChat": false,
         "BwiFeature.celebration": true,

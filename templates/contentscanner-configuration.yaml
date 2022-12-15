@@ -8,8 +8,8 @@ metadata:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 data:
   config.yaml: |
-    # The port to listen to for HTTP requests
-    server:
+    # Configuration for hosting the HTTP(S) API.
+    web:
         port: 8080
         {{- if $.Values.ipv4Only }}
         host: "0.0.0.0"
@@ -18,29 +18,24 @@ data:
         {{- end }}
 
     scan:
-        # The script that will be given a file as its first parameter
+    # The script to run to scan a file. This script will be called with a path to the
+    # downloaded file as its only argument, e.g. "./example.sh /temp/foo.bar/my_file".
+    # Required.
         script: '/opt/scanner.sh'
-        # If set and the script exits with an exit code listed here, the failure will not be
-        # cached. Useful to prevent caching of a failure due to e.g. the antivirus restarting.
-        #
-        # doNotCacheExitCodes:
-        #   - 1
-        #   - 2
-        #
+        
         # The temporary directory to use
-        tempDirectory: '/tmp'
-        # The base URL of the homeserver to download media from
-        baseUrl: http://{{ include "matrix-synapse.workername" (dict "global" $ "worker" "media-repository") | default  include "matrix-synapse.fullname" $ }}.{{ .Release.Namespace }}.svc:8083
-        # If set to true, effectively set baseUrl to
-        #   "https://$domain"
-        #   where $domain is the domain part of the requested media.
-        #
-        # This should only be used when it is preferable not to download
-        # media through the normal route: via a single (and federated)
-        # homeserver.
-        #
-        # directDownload: false
+        temp_directory: '/tmp'
 
+        # Command to run to remove files from disk once they have been scanned.
+        # Optional, defaults to "rm".
+        removal_command: "srm"
+        
+        # List of allowed MIME types. If a file has a MIME type that's not in this list, its
+        # scan is considered failed.
+        # Optional, defaults to allowing all MIME types.
+        #allowed_mimetypes: ["image/jpeg"]
+
+        
     # Optional. A command to execute when unlinking files from the file
     # system instead of using node's fs.unlink. When executed, the first
     # argument to the command will be the path of the file being
@@ -48,7 +43,67 @@ data:
     # Docker note: the `srm` utility is already bundled into the base Docker image
     # built by the project. See `Dockerfile` for additional notes.
     #
-    altRemovalCmd: 'srm'
+    # Each entry in the cache includes the result of the scan as well as a copy of the media
+    # that was scanned. If the media fails the scan, however, or is larger than the configured
+    # maximum size (if set), no copy of the media is stored in the result cache.
+    result_cache:
+        # List of exit codes from the scanning script that shouldn't cause the result of the
+        # scan to be cached for future requests.
+        # Optional, defaults to an empty list (i.e. results are cached regardless of the
+        # script's exit code).
+        exit_codes_to_ignore: [1, 2]
+    
+        # Maximum number of results that can be stored in the cache. If more files are
+        # scanned before existing items reach their TTL, the least-recently accessed will be
+        # evicted.
+        # Optional, defaults to 1024.
+        max_size: 2048
+    
+        # The maximum amount of time an entry will stay in the cache before being evicted.
+        # Optional, defaults to 1 week.
+        ttl: "1d"
+    
+        # The maximum cachable file size. If a file is bigger than this size, a copy of it
+        # will be not be cached even if the scan succeeds. If the file is requested again, it
+        # is downloaded again from the homeserver, but is not written to disk or scanned.
+        # Optional, defaults to no maximum size.
+        max_file_size: "100MB"
+    
+    
+    # Configuration for downloading files.
+    # When downloading files directly from their respective homeservers (which is the default
+    # behaviour), the homeservers' default URLs are determined using .well-known discovery
+    # (defaults to using the homeserver's domain if not available).
+    # See https://spec.matrix.org/latest/client-server-api/#server-discovery for more info.
+    # Settings in this section (apart from `base_homeserver_url`) apply to .well-known
+    # discovery requests as well as file download ones.
+    download:
+        # If provided, all files are downloaded using the homeserver at this URL. If this
+        # setting is provided, .well-known discovery is not used to determine the base URL
+        # to use.
+        # Optional, defaults to downloading files directly from their respective homeservers.
+        base_homeserver_url: 'http://{{ include "matrix-synapse.workername" (dict "global" . "worker" "media-repository") | default  (include "matrix-synapse.fullname" .) }}.{{ .Release.Namespace }}.svc:8083'
+    
+        # HTTP(S) proxy to use when sending requests.
+        # Optional, defaults to no proxy.
+        #proxy: "http://10.0.0.1:3128"
+    
+        # Headers to send in outgoing requests.
+        # Optional, defaults to no additional headers.
+        #additional_headers:
+        #    user-agent: "matrix-content-scanner"
+    
+    # Configuration for decrypting Olm-encrypted request bodies.
+    crypto:
+        # The path to the Olm pickle file. This file contains the key pair to use when
+        # encrypting and decrypting encrypted POST request bodies.
+        # A new keypair will be created at startup if the pickle file doesn't already exist.
+        # Required.
+        pickle_path: "/crypto/pickle"
+    
+        # The key to use to decode the pickle file.
+        # Required.
+        pickle_key: {{ randAlphaNum 24 | nospace | quote }}
 
 ---
 apiVersion: v1
@@ -64,16 +119,18 @@ data:
     # - ${1} will be the path to the file to scan.
     # - The exit code should be 0 for files that are deemed safe/clean.
     # - Anything sent to stdout will be included in the `info` section of the response.
-    echo "First line of file '${1}': $(head -z -n1 ${1})" 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
-    #result=$(curl -s -XPOST http://"{{ include "matrix-synapse.schadcodescannername" . }}":3310 -F FILES=@${1});
-    result=$(c-icap-client -i  {{ include "matrix-synapse.schadcodescannername" . }} -p 1344 -f ${1} -s virus_scan | grep -c "VIRUS FOUND" );
-    #cp ${1} /tmp/test;
-    #clamdscan ${1} 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
-    #c-icap-client -i {{ include "matrix-synapse.schadcodescannername" . }} -p 1344 -d 10 -f ${1}  1>> /proc/1/fd/1 2>> /proc/1/fd/2;
-    echo "Return:  $result" 1>> /proc/1/fd/1 2>> /proc/1/fd/2;
-    if [[ $result == 0 ]]; then
-      exit 0    
+    return=$(c-icap-client -i  {{ include "matrix-synapse.schadcodescannername" . }} -p 1344 -f ${1} -s virus_scan);
+    returncode=$?;
+    result=$(echo $return | grep -c "VIRUS FOUND" )
+    echo "Return:  $result - $return" > /dev/stdout;
+    #exit 0=clean, wenn kein String VIRUS FOUND" enthalten, der returncode vom i-cap-client 0 ist und der return-string an sich leer 
+    if [[ $result == 0 ]] &&  [[ $returncode == 0 ]] && [[ $(echo $return | grep -v '^[[:space:]]*$' | wc -l ) == 0 ]]; then
+      exit 0
+    #es stimmt was mit dem file nicht (größe oder irgendwas, so das der returncode ungleich 0 ist)
+    #oder die Rückgabe vom ClamAV nicht leer ist (Rückgabe andere als VIRUS FOUND)
+    elif [[ $returncode != 0 ]]|| [[ $(echo $return | grep -v '^[[:space:]]*$' | wc -l ) != 0 ]] ; then
+      exit 1
     else
-      exit 2
+      exit 3
     fi
 {{- end }}

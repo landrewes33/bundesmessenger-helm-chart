@@ -1,9 +1,8 @@
-- [Erstellen von Benutzern](#erstellen-von-benutzern)
-  * [Identifizieren des anzusprechenden Containers](#identifizieren-des-anzusprechenden-containers)
-  * [Anlegen eines Nutzers mit Administratorrechten](#anlegen-eines-nutzers-mit-administratorrechten)
-  * [Anlegen eines Nutzers ohne Administratorrechten](#anlegen-eines-nutzers-ohne-administratorrechten)
-
 # Erstellen von Benutzern
+
+- [Identifizieren des anzusprechenden Containers](#identifizieren-des-anzusprechenden-containers)
+- [Anlegen eines Nutzers mit Administratorrechten](#anlegen-eines-nutzers-mit-administratorrechten)
+- [Anlegen eines Nutzers ohne Administratorrechten](#anlegen-eines-nutzers-ohne-administratorrechten)
 
 Nach der Installation sind in der Umgebung keine Benutzer vorhanden. Mindestens
 der erste Benutzer muss per Kommandozeile angelegt werden. Weitere Benutzer lassen
@@ -20,12 +19,13 @@ Folgende Schritte sind erforderlich:
 
 1. [Identifizieren des anzusprechenden Containers (Synapse-Hauptprozess)](#identifizieren-des-anzusprechenden-containers)
 1. Anlegen des Benutzers auf der Kommandozeile innerhalb des Pods
-    * [Benutzer **mit** Administratorrechten](#anlegen-eines-nutzers-mit-administratorrechten)
-    * [Benutzer **ohne** Administratorrechten](#anlegen-eines-nutzers-ohne-administratorrechten)
+    - [Benutzer **mit** Administratorrechten](#anlegen-eines-nutzers-mit-administratorrechten)
+    - [Benutzer **ohne** Administratorrechten](#anlegen-eines-nutzers-ohne-administratorrechten)
 
 ## Identifizieren des anzusprechenden Containers
 
-In dem Beispiel wird das Deployment mit den Namen `testmatrix` in dem Namespace `bundesmessenger` verwaltet.
+In dem Beispiel wird das Deployment mit den Namen `testmatrix` in dem Namespace
+`bundesmessenger` verwaltet.
 
 ```console
 export POD_NAME=$(kubectl get pods --namespace bundesmessenger -l "app.kubernetes.io/name=bundesmessenger,app.kubernetes.io/instance=testmatrix,app.kubernetes.io/component=synapse" -o jsonpath="{.items[0].metadata.name}")

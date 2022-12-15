@@ -1,0 +1,18 @@
+{{- if .Values.contentscanner.enabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "matrix-synapse.contentscannername" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: contentscanner
+  selector:
+    {{- include "matrix-synapse.contentscannerselectorLabels" . | nindent 4 }}
+{{- end }}

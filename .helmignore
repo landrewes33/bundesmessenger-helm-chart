@@ -18,7 +18,6 @@
 # Various IDEs
 .project
 .idea/
-*.iml
 *.tmproj
 .vscode/
 # Maven
@@ -39,3 +38,4 @@ RELEASE.md
 helm-package/
 # Filtering
 /filter.txt
+/filter_replace.txt

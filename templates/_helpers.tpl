@@ -362,7 +362,7 @@ Set synapse_admin uri
 */}}
 {{- define "synapse-admin.host" -}}
 {{- if .Values.synapse_admin.enabled -}}
-{{- printf "%s" .Values.synapse_admin.uri | required "A valid URI for the synapse Admin webGUI ist required." -}}
+{{- required "A valid URI for the synapse Admin webGUI ist required." .Values.synapse_admin.uri -}}
 {{- else -}}
 {{- printf "" -}}
 {{- end -}}

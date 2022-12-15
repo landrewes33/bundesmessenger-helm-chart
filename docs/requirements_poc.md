@@ -1,21 +1,23 @@
-Um mit einer PoC-Installation zu beginnen, müssen mehrere Dinge berücksichtigt werden, die in diesem Leitfaden behandelt werden:
+# Anforderungen
 
-  - [Ausbaustufen des Deployments](#ausbaustufen-des-deployments-vom-bundesmessenger)
-  - [Hostnamen/DNS](#hostnamendns)
-  - [Maschinengröße](#maschinengröße)
-  - [Container-Basisimages](#container-basisimages)
-  - [Betriebssystem K8s](#betriebssystem-k8s)
-  - [Benutzer](#benutzer)
-  - [Netzwerkbesonderheiten](#netzwerkbesonderheiten)
-  - [Postgresql-Datenbank](#postgresql-datenbank)
-  - [SSL-Zertifikate](#ssl-zertifikate)
-  - [Zusätzliche Konfigurationselemente](#zusätzliche-konfigurationselemente)
-    - [Backup](#backup)
-    - [BestPractise](#bestpractise)
-    - [Kyverno](#kyverno)
+Um mit einer PoC-Installation zu beginnen, müssen mehrere Dinge berücksichtigt
+werden, die in diesem Leitfaden behandelt werden:
+
+- [Ausbaustufen des Deployments](#ausbaustufen-des-deployments-vom-bundesmessenger)
+- [Hostnamen/DNS](#hostnamendns)
+- [Maschinengröße](#maschinengröße)
+- [Container-Basisimages](#container-basisimages)
+- [Betriebssystem K8s](#betriebssystem-k8s)
+- [Benutzer](#benutzer)
+- [Netzwerkbesonderheiten](#netzwerkbesonderheiten)
+- [Postgresql-Datenbank](#postgresql-datenbank)
+- [SSL-Zertifikate](#ssl-zertifikate)
+- [Zusätzliche Konfigurationselemente](#zusätzliche-konfigurationselemente)
+  - [Backup](#backup)
+  - [BestPractise](#bestpractise)
+  - [Kyverno](#kyverno)
 
 Sobald diese Bereiche abgedeckt sind, können Sie eine PoC-Umgebung installieren!
-
 
 ## Ausbaustufen des Deployments vom BundesMessenger
 
@@ -28,21 +30,30 @@ Sobald diese Bereiche abgedeckt sind, können Sie eine PoC-Umgebung installieren
 
 ## Maschinengröße
 
-Für die Durchführung eines Proof of Concept mit unserem Installationschart unterstützen wir nur die x86_64-Architektur (Virtualisiert oder BareMetall) und empfehlen die folgenden Mindestanforderungen an Ressourcen in einem Kubernetes-Cluster
+Für die Durchführung eines Proof of Concept mit unserem Installationschart
+unterstützen wir nur die x86_64-Architektur (Virtualisiert oder BareMetall)
+und empfehlen die folgenden Mindestanforderungen an Ressourcen in einem
+Kubernetes-Cluster.
 
-### Für die Ausbaustufe Minimum PoC oder Default:
+### Für die Ausbaustufe Minimum PoC oder Default
+
 | Ausführung | Anzahl Worker Nodes | Ressourcen Worker-Nodes | Anzahl Control-Planes (Master-Nodes) | Ressourcen Control-Plane|
 | ------ | ------ | ------ | ------ | ------ |
 | Ohne Föderation | 2 | je 2 vCPUs/CPUs und 8 GB RAM | 1 |  2 vCPUs und 4GB RAM |
 | Mit Föderation (expterimentell) | 3 | je 4 vCPUs/CPUs und 16 GB RAM | 3 | 2 vCPUs und 4GB RAM |
 
-### Für die Ausbaustufe Full PoC bzw. Full-Stack Deployment:
+### Für die Ausbaustufe Full PoC bzw. Full-Stack Deployment
+
 | Ausführung | Anzahl Worker Nodes | Ressourcen Worker-Nodes | Anzahl Control-Planes (Master-Nodes) | Ressourcen Control-Plane|
 | ------ | ------ | ------ | ------ | ------ |
 | Ohne Föderation | 4 | je 4 vCPUs/CPUs und 8 GB RAM | 1 |  4 vCPUs und 4GB RAM |
 | Mit Föderation (expterimentell) | 5 | je 4 vCPUs/CPUs und 16 GB RAM | 3 | 2 vCPUs und 4GB RAM |
 
-:pushpin: **Hinweis:** Es wird empfohlen auf mehr als eine Master-Node zu setzen. Weiterhin ist eine zusätzliche Node (VM oder BareMetall), welche persistenten Speicher präsentiert, von Vorteil. Diese Funktionalität sollte vom Plattformbetreiber zur Verfügung gestellt werden und ist **kein** Bestandteil des Helm Charts.
+:pushpin: **Hinweis:** Es wird empfohlen auf mehr als eine Master-Node zu
+setzen. Weiterhin ist eine zusätzliche Node (VM oder BareMetall), welche
+persistenten Speicher präsentiert, von Vorteil. Diese Funktionalität sollte
+vom Plattformbetreiber zur Verfügung gestellt werden und ist **kein**
+Bestandteil des Helm Charts.
 
 ## Hostnamen/DNS
 
@@ -56,82 +67,145 @@ Sie benötigen Hostnamen inkl. DNS-Auflösung für die folgenden Infrastrukturko
 | Monitoring | empfohlen | tbd | ToDo |
 | CoTurn-Server | optional | tbd | nicht empfohlen in Kubernetes umzusetzen, derzeit nicht im Scope |
 
-
 ## Container-Basisimages
 
-Es werden eigene CI-Pipelines aufgebaut um eigene Applikations- bzw. Basis-Images im OpenCoDE zur Verfügung zu stellen.
+Es werden eigene CI-Pipelines aufgebaut um eigene Applikations- bzw.
+Basis-Images im OpenCoDE zur Verfügung zu stellen.
 
 - [BundesMessenger Container Registry](https://gitlab.opencode.de/bwi/bundesmessenger/backend/container-images/)
 
-Das Veröffentlichen eigener Basis-Images stellt eine Verbreitung von Linux-Distribution dar.
-Daher werden wir zur Herstellung unserer Appikations-Images auf spezielle Basis-Images aufbauen.
+Das Veröffentlichen eigener Basis-Images stellt eine Verbreitung von
+Linux-Distribution dar. Daher werden wir zur Herstellung unserer
+Appikations-Images auf spezielle Basis-Images aufbauen.
+
 Folgende Optionen werden in Betracht gezogen:
+
 - eigene Base Images auf Basis von Ubuntu Jammy
 - [OSADL Basis-Image](https://www.osadl.org/OSADL-Docker-Base-Image.osadl-docker-base-image.0.html)
 - DVS Basis-Image (noch nicht verfügbar)
 
 ## Betriebssystem K8s
 
-ToDo: *Empfehlung: Als Betriebssystem für die k8s-Worker wird Debian empfohlen, da dort `iptables-legacy-mode` ohne große Umstände mit der aktuellen Version von kubelet und containerd.io lauffähig ist.*
+ToDo: *Empfehlung: Als Betriebssystem für die k8s-Worker wird Debian empfohlen,
+da dort `iptables-legacy-mode` ohne große Umstände mit der aktuellen Version
+von kubelet und containerd.io lauffähig ist.*
 
 ## Benutzer
 
-Es wird empfohlen im Rahmen das PoC auf alle sicherheitsrelevanten Umgebungs- und Rahmenbedingungen zu achten. Dazu zählen nicht privilegierte Benutzer auf den Maschinen um dort eventuelle Arbeiten umzusetzen. Damit ist eine lauffähige und stabile Infrastruktur gewährleistet.
+Es wird empfohlen im Rahmen das PoC auf alle sicherheitsrelevanten Umgebungs-
+und Rahmenbedingungen zu achten. Dazu zählen nicht privilegierte Benutzer auf
+den Maschinen um dort eventuelle Arbeiten umzusetzen. Damit ist eine lauffähige
+und stabile Infrastruktur gewährleistet.
 
 ## Netzwerkbesonderheiten
 
-Das Helm Chart unterstützt IPv4-Only Netzwerke über die Konfiguration des Schalter `ipv4Only=true`.
+Das Helm Chart unterstützt IPv4-Only Netzwerke über die Konfiguration des
+Schalter `ipv4Only=true`.
 
 Der Messengerservice muss Inhalte binden und bereitstellen über:
 
 - Port 80 TCP (bei SSL Offload vor dem Kubernetes)
 - Port 443 TCP
 
-Entsprechende Ports müssen auch entweder lokal auf der PoC-Umgebung freigegeben werden oder in der vorgeschalteten Sicherheitsinfrastruktur.
+Entsprechende Ports müssen auch entweder lokal auf der PoC-Umgebung freigegeben
+werden oder in der vorgeschalteten Sicherheitsinfrastruktur.
 
-Für zusätzliche Dienste wie CoTurn, müssen die entsprechenden Ports in der Sicherheitsinfrastruktur freigegeben werden:
+Für zusätzliche Dienste wie CoTurn, müssen die entsprechenden Ports in der
+Sicherheitsinfrastruktur freigegeben werden:
 
 - Port 3478 UDP/TCP
 - Port 5349 TCP (bei TLS)
 
 ## Postgresql-Datenbank
 
-Die Installation erfordert, dass Sie eine postgresql-Datenbank mit einem `locale` von `C` und `encoding` `UTF8` eingerichtet haben. 
-Siehe [Synapse Dokumentation](https://matrix-org.github.io/synapse/latest/postgres.html#set-up-database) für weitere Details.
+Die Installation erfordert, dass Sie eine postgresql-Datenbank mit einem
+`locale` von `C` und `encoding` `UTF8` eingerichtet haben.
+Siehe [Synapse Dokumentation](https://matrix-org.github.io/synapse/latest/postgres.html#set-up-database)
+für weitere Details.
 
-Wenn Sie diese bereitgestellt haben, notieren Sie sich bitte den Datenbanknamen, den Benutzer und das Passwort, da Sie diese benötigen, um mit der Installation zu beginnen. (per Parameter zu übergeben oder in der `value.yaml` anzupassen)
+Wenn Sie diese bereitgestellt haben, notieren Sie sich bitte den
+Datenbanknamen, den Benutzer und das Passwort, da Sie diese benötigen, um mit
+der Installation zu beginnen. (per Parameter zu übergeben oder in der
+`values.yaml` anzupassen)
 
-Wenn Sie noch keine Datenbank haben, richten Sie sich eine Datenbank nach den Vorgaben im Kubernetes ein. Die Nutzung eines SubChart für die Einrichtung des PostgreSQL wäre über das Chart möglich. Es ist aber davon abzureten und ein selbstständige Installation über HelmChart oder manuelle Installation umzusetzen.
+Wenn Sie noch keine Datenbank haben, richten Sie sich eine Datenbank nach den
+Vorgaben im Kubernetes ein. Die Nutzung eines SubChart für die Einrichtung des
+PostgreSQL wäre über das Chart möglich. Es ist aber davon abzureten und ein
+selbstständige Installation über HelmChart oder manuelle Installation
+umzusetzen.
 
-*Optional: Es kann das Helm-Chart mit dazu verwendet werden im gleichen Namespace einen PostgreSQL-Server mit entsprechender Konfiguration bereitzustellen. Das ist für den PoC auch funktional, sollte aber in eine stabile DVS-konforme Version überführt werden. Dazu kann auch das Subchart für den PostgreSQL-Server entsprechend angepasst werden, dass ein eigener Namespace für einen "externen" Datenbankserver verwendet wird. Dabei ist zu beachten, dass diese Bereitstellung losgelöst vom BundesMessenger umgesetzt wird, da sonst die kyverno-Regeln hier einen Verstoß melden würden.*
+*Optional: Es kann das Helm-Chart mit dazu verwendet werden im gleichen
+Namespace einen PostgreSQL-Server mit entsprechender Konfiguration
+bereitzustellen. Das ist für den PoC auch funktional, sollte aber in eine
+stabile DVS-konforme Version überführt werden. Dazu kann auch das Subchart für
+den PostgreSQL-Server entsprechend angepasst werden, dass ein eigener Namespace
+für einen "externen" Datenbankserver verwendet wird. Dabei ist zu beachten,
+dass diese Bereitstellung losgelöst vom BundesMessenger umgesetzt wird, da
+sonst die kyverno-Regeln hier einen Verstoß melden würden.*
 
 ## SSL-Zertifikate
 
-Es wird empfohlen, wie auch in der folgenden Installationsanweisung, valide TLS-Zertifikate für alle genutzten Domains auf dem der Synapse-Host und die verknüpften Services (siehe: [Hostnamen/DNS](#hostnamen-dns)) erreichbar sind, zur Verfügung zu stellen.
+Es wird empfohlen, wie auch in der folgenden Installationsanweisung, valide
+TLS-Zertifikate für alle genutzten Domains auf dem der Synapse-Host und die
+verknüpften Services (siehe: [Hostnamen/DNS](#hostnamendns)) erreichbar sind,
+zur Verfügung zu stellen.
 
-:warning: Weiterhin wird empfohlen, diese Zertifikate gegen eine öffentliche und offizielle CAs signieren zu lassen, damit die mobilen Clients des Bundesmessenger diese auch abrufen kann. Selbstsignierte Zertifikate werden nicht in den Client importiert und nicht vertraut, eine Kommunikation ist damit nicht möglich!
+:warning: Weiterhin wird empfohlen, diese Zertifikate gegen eine öffentliche
+und offizielle CAs signieren zu lassen, damit die mobilen Clients des
+BundesMessenger diese auch abrufen können. Selbstsignierte Zertifikate werden
+nicht in den Client importiert und nicht vertraut, eine Kommunikation ist
+damit nicht möglich!
 
-Die Bereitstellung der TLS-Zertifikate ist nicht Bestandteil dieser Helm Charts.
+Die Bereitstellung (Ausstellung bzw. Generierung) der TLS-Zertifikate ist nicht
+Bestandteil dieses Helm Charts. Vorhandene Zertifikate können dem Ingress
+mit Hilfe von Secrets über den Parameter `ingress.tls` übergeben werden.
+
+Beispiel:
+
+```yaml
+ingress:
+  tls:
+    # Enthält für alle benötigten Domains die notwendigen Secrets bzw. TLS-Zertifikate
+    - secretName: chart-example-tls
+      hosts:
+        - example.com
+        - matrix.example.com
+    - secretName: admin-example-tls
+      hosts:
+        - admin.example.com
+```
+
+Alternativ kann vor der Infrastruktur ein Loadbalancer oder Reverse-Proxy für
+die Bereitstellung der `https`-Verbindung sorgen und ein Offloading durchführen.
 
 ## Zusätzliche Konfigurationselemente
 
-Die Anbindung an eine IAM-Sicherheitsinfrastruktur ist noch ein offener Punkt, der während des PoCs zur Klärung bereit ist.
-Einhergehend auch die Thematik Single Sign-on (SSO) per SAML, OIDC oder anderen Mechaniken.
+Die Anbindung an eine IAM-Sicherheitsinfrastruktur ist noch ein offener Punkt,
+der während des PoCs zur Klärung bereit ist.
+Einhergehend auch die Thematik Single Sign-on (SSO) per SAML, OIDC oder anderen
+Mechaniken.
 
 ### Backup
 
-Für den Messenger ist die Datenbank der Hauptfokus, zusammen mit dem `signing-key` von Matrix. Dahingehend muss die Datenbank persistiert und regelmäßig gesichert werden. Der Schlüssel liegt als Secret im laufenden Deployment und sollte gesichert werden. Für ein aktives Redeployment, bzw. Migration in eine andere Umgebung (z.B. Produktionsumgebung), wird dieser Schlüssel benötigt und kann bei der initialen Ausführung des Helm-Charts mit angegeben werden: 
+Für den Messenger ist die Datenbank der Hauptfokus, zusammen mit dem
+`signing-key` von Matrix. Dahingehend muss die Datenbank persistiert und
+regelmäßig gesichert werden. Der Schlüssel liegt als Secret im laufenden
+Deployment und sollte gesichert werden. Für ein aktives Redeployment, bzw.
+Migration in eine andere Umgebung (z.B. Produktionsumgebung), wird dieser
+Schlüssel benötigt und kann bei der initialen Ausführung des Helm-Charts
+mit angegeben werden:
+
 ```yaml
 extraConfig:
 #  old_signing_keys:
 #    "ed25519:id": { key: "base64string", expired_ts: 123456789123 }
 ```
 
-### BestPractise 
+### BestPractise
 
-  - Netzwerk Policies 
-  - Noch im ToDo
-  - Wahl der Domain und Delegation
+- Netzwerk Policies
+- Noch im ToDo
+- Wahl der Domain und Delegation
 
 ### [Kyverno](https://kyverno.io/)
 

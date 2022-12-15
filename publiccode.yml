@@ -1,0 +1,63 @@
+# This repository adheres to the publiccode.yml standard by including this 
+# metadata file that makes public software easily discoverable.
+# More info at https://github.com/italia/publiccode.yml
+
+publiccodeYmlVersion: '0.2'
+applicationSuite: BundesMessenger
+categories:
+  - communications
+  - collaboration
+description:
+  de:
+    features:
+      - Messaging
+    genericName: Messenger
+    longDescription: |
+      Das BundesMessenger Backend ist Bestandteil einer Sammlung von
+      Repositories zum BundesMessenger. Allgemeine Informationen zum Projekt
+      befinden sich im übergeordneten [BundesMessenger
+      Repository](https://gitlab.opencode.de/bwi/bundesmessenger/info).
+
+
+      Dieses Repository stellt ein [Helm Chart](https://helm.sh/) zur
+      automatisierten Bereitstellung eines Backends bzw. Infrastruktur für die
+      Nutzung mit dem BundesMessenger Client zur Verfügung. Hauptbestanteil ist
+      der [Synapse Server](https://github.com/matrix-org/synapse), Dieser ist
+      eine Matrix homeserver Implementierung in Python auf Basis des [Matrix
+      Protokolls](https://matrix.org/).
+    shortDescription: BundesMessenger Backend
+developmentStatus: beta
+intendedAudience:
+  countries:
+    - de
+  scope:
+    - government
+    - local-authorities
+legal:
+  license: Apache-2.0
+  mainCopyrightOwner: BWI GmbH
+localisation:
+  availableLanguages:
+    - de
+  localisationReady: false
+maintenance:
+  contacts:
+    - name: BWI GmbH
+      email: bundesmessenger@bwi.de
+  contractors:
+    - name: BWI GmbH
+      until: '2023-12-31'
+      website: 'https://messenger.bwi.de/'
+  type: internal
+name: BundesMessenger Helm Chart
+platforms:
+  - linux
+releaseDate: '2022-12-15'
+softwareType: standalone/backend
+url: 'https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart'
+logo: |-
+  https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/raw/main/docs/images/bum_logo.svg
+dependsOn:
+  open:
+    - name: Kubernetes
+      optional: false
