@@ -3,7 +3,7 @@ apiVersion: v2
 name: bundesmessenger
 description: BWI Matrix BundesMessenger
 icon: https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/raw/main/docs/images/bum_logo.svg
-version: 0.9.8
+version: 1.0.0
 
 type: application
 appVersion: 1.64.0
