@@ -7,9 +7,10 @@ image:
   # ursprünglich: "repository: matrixdotorg/synapse"
   repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-production
 
-  # -- (string) kann die gesetzte Defaultversion überschreiben, wenn gesetzt.
-  # @default -- wird im Charts.yaml gesetzt
-  tag: '1.64.0'
+  # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
+  # @default -- wird im Chart.yaml gesetzt
+  # tag: ''
+
   # -- (map) Optional kann ein Array von imagePullSecrets angegeben werden.
   # Secrets müssen manuell im Namensraum angelegt werden.
   # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
@@ -69,11 +70,13 @@ signingkey:
       # -- (string) Repository/Image Konfiguration für Synapse-signing-key-job. Es wird dringend
       # empfohlen, dass die gleiche Konfiguration wie vom Synapse bzw. den Workernodes genutzt wird.
       # ursprünglich: "repository: matrixdotorg/synapse"
-      # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen
+      # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen (empfohlen)
       repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-production
+      # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
+      # @default -- wird im Chart.yaml gesetzt
+      # tag: ''
       pullSecrets: []
       #  - name: bum-gittoken
-      # tag: latest
       # -- (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
     # -- (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.
@@ -832,7 +835,7 @@ volumePermissions:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-base-production
     # -- (string) das Tag für das zu nutzende Image zur Rechtebereinigung
     # Hinweis: noch kein finaler Tag, build version 10 als Alternative zu latest
-    tag: b10
+    tag: b2
     # -- (string) da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung
     pullPolicy: IfNotPresent
 
@@ -868,7 +871,7 @@ sygnal:
   # -- (map) Image/Repo-Konfiguration von Sygnal
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-sygnal-production
-    tag: v0.12.0
+    tag: 0.12.0
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
@@ -1066,7 +1069,7 @@ postgresql:
     registry: registry.opencode.de
     repository: ig-bvc/demo-apps/postgresql/postgres
     tag: 14
-    pullSecrets: ["myRegistryKeySecretName"]
+    # pullSecrets: ["myRegistryKeySecretName"]
 
   # -- (string) Name für PostgreSQL-DB
   postgresqlDatabase: synapse_db
@@ -1131,7 +1134,7 @@ redis:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/jammy-redis-production
     tag: 5_6.0.16-1ubuntu1
-    pullSecrets: ["myRegistryKeySecretName"]
+    # pullSecrets: ["myRegistryKeySecretName"]
   # -- (bool) Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
   # Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
   # false setzen und den externalRedis-Block konfigurieren.
@@ -1522,7 +1525,7 @@ webclient:
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: v1.26.0
+    tag: 2.0.0
     pullPolicy: IfNotPresent
   annotations:
     nginx.ingress.kubernetes.io/configuration-snippet: |
