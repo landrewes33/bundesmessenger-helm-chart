@@ -51,8 +51,6 @@ spec:
            {{ end }}
            - mountPath: /tmp
              name: sygnal-tmp
-           - mountPath: /log
-             name: sygnal-log
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
@@ -63,7 +61,7 @@ spec:
           secret: 
             secretName: ioskey
         - name: sygnal-tmp
-          emptyDir: {}
-        - name: sygnal-log
-          emptyDir: {}
+          emptyDir: 
+            sizeLimit: 10Mi
 {{ end }}
+

@@ -9,15 +9,6 @@ metadata:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     component: well-known
 data:
-  nginx.conf: |
-    user www-data;
-    error_log  /dev/stderr;
-    events {}
-    http {
-      access_log  /dev/stdout;
-      server_tokens off;
-      include /etc/nginx/sites-enabled/bundesmessenger.conf;
-    }
   bundesmessenger.conf: |
     server {
       listen 8080 default_server;

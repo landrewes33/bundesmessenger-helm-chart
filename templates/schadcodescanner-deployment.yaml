@@ -54,7 +54,8 @@ spec:
             mountPath: /clamav/config/
       volumes:
       - name: clamsocket
-        emptyDir: {}
+        emptyDir: 
+          sizeLimit: 50Mi
       - name: config-volume
         projected:
           sources:

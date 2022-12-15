@@ -31,7 +31,7 @@ spec:
         - name: files
           mountPath: /etc/nginx/sites-enabled/default.conf
           subPath: default.conf
-        - name: files
+        - name: nginx-conf
           mountPath: /etc/nginx/nginx.conf
           subPath: nginx.conf
         ports:
@@ -54,4 +54,7 @@ spec:
       - name: files
         configMap:
           name: {{ $webclientName }}
+      - name: nginx-conf
+        configMap: 
+          name: nginx-default-conf
 {{- end }}

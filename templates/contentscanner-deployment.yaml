@@ -44,9 +44,11 @@ spec:
             mountPath: /opt
       volumes:
        - name: temp
-         emptyDir: {}        
+         emptyDir: 
+           sizeLimit: 50Mi
        - name: crypto
-         emptyDir: {}
+         emptyDir:
+           sizeLimit: 1Mi
        - name: scannerscript
          configMap:
            name: scanner
