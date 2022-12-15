@@ -1524,8 +1524,8 @@ webclient:
   uri:
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.0.0
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-bundesmessenger-web
+    tag: 2.0.1
     pullPolicy: IfNotPresent
   annotations:
     nginx.ingress.kubernetes.io/configuration-snippet: |

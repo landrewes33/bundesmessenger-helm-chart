@@ -1,6 +1,6 @@
 # bundesmessenger
 
-![Version: 0.9.8](https://img.shields.io/badge/Version-0.9.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.64.0](https://img.shields.io/badge/AppVersion-1.64.0-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.64.0](https://img.shields.io/badge/AppVersion-1.64.0-informational?style=flat-square)
 
 BWI Matrix BundesMessenger
 
@@ -3985,8 +3985,8 @@ null
         <div style="max-width: 300px;"><pre lang="json">
 {
   "pullPolicy": "IfNotPresent",
-  "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web",
-  "tag": "2.0.0"
+  "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-bundesmessenger-web",
+  "tag": "2.0.1"
 }
 </pre>
 </div>
