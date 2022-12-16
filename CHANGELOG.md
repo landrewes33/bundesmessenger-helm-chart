@@ -10,7 +10,10 @@
 ### Fixed
 
 - Aktualisierung der genutzten Images
-- Ergänzung des `podSecurityContext` und `securityContext` für den Wellknow-Service
+- Ergänzung des `podSecurityContext` und `securityContext` für den
+Wellknow-Service, Webclient und Synapse-Admin
+- kleine Korrektur des Scannerscripts vom Contentscanner, entfernen von der
+Umleitung auf `/dev/stdout`
 
 ## v1.0.0 (2022-12-15)
 
