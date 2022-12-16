@@ -122,7 +122,7 @@ data:
     return=$(c-icap-client -i  {{ include "matrix-synapse.schadcodescannername" . }} -p 1344 -f ${1} -s virus_scan);
     returncode=$?;
     result=$(echo $return | grep -c "VIRUS FOUND" )
-    echo "Return:  $result - $return" > /dev/stdout;
+    echo "Return of Scan ${1}:  $result - $return";
     #exit 0=clean, wenn kein String VIRUS FOUND" enthalten, der returncode vom i-cap-client 0 ist und der return-string an sich leer 
     if [[ $result == 0 ]] &&  [[ $returncode == 0 ]] && [[ $(echo $return | grep -v '^[[:space:]]*$' | wc -l ) == 0 ]]; then
       exit 0
