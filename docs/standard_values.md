@@ -1291,7 +1291,7 @@ wird nachfolgend einzeln aufgeschlüsselt
         <div style="max-width: 150px;"><a href="../values.yaml#L502">workers.default.podSecurityContext</a></div>
       </td>
       <td>map</td>
-      <td>Informationen zum Sicherheitskontext, die dem Arbeiter mitgeteilt werden sollen. DEFAULT gilt für alle Synapse-Worker-Container. Beispiele:   fsGroup: 2003   runAsGroup: 2003   runAsUser: 2003</td>
+      <td>Informationen zum Sicherheitskontext, die den Workern mitgeteilt werden sollen. DEFAULT gilt für alle Synapse-Worker-Container. Beispiele:   fsGroup: 2003   runAsGroup: 2003   runAsUser: 2003</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 {}
@@ -2516,7 +2516,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L1017">wellknown.podSecurityContext</a></div>
       </td>
       <td>map</td>
-      <td>Informationen zum Sicherheitskontext, die dem Arbeiter mitgeteilt werden sollen. weitere Möglichkeiten:  fsGroup: 1001</td>
+      <td>Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen. weitere Möglichkeiten:  fsGroup: 1001</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 {
@@ -3799,7 +3799,7 @@ null
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-admin-production",
-  "tag": "0.8.5"
+  "tag": "v0.8.5-b1"
 }
 </pre>
 </div>
@@ -3876,21 +3876,50 @@ null
       </td>
     </tr>
     <tr>
-      <td id="synapse_admin--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1474">synapse_admin.securityContext</a></div>
+      <td id="synapse_admin--podSecurityContext--runAsGroup">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1469">synapse_admin.podSecurityContext.runAsGroup</a></div>
       </td>
-      <td>map</td>
-      <td>Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers weitere Beispiele:    runAsNonRoot: true    readOnlyRootFilesystem: true    runAsUser: 2010</td>
+      <td>int</td>
+      <td></td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-{}
+1001
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="synapse_admin--podSecurityContext--runAsUser">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1470">synapse_admin.podSecurityContext.runAsUser</a></div>
+      </td>
+      <td>int</td>
+      <td></td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+1001
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="synapse_admin--securityContext">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1476">synapse_admin.securityContext</a></div>
+      </td>
+      <td>map</td>
+      <td>Konfiguration für die Container-Sicherheitsrichtlinie des Containers weitere Beispiele:    runAsNonRoot: true    readOnlyRootFilesystem: true    runAsUser: 2010</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+{
+  "readOnlyRootFilesystem": true,
+  "runAsNonRoot": true
+}
 </pre>
 </div>
       </td>
     </tr>
     <tr>
       <td id="synapse_admin--livenessProbe--httpGet--path">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1505">synapse_admin.livenessProbe.httpGet.path</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1508">synapse_admin.livenessProbe.httpGet.path</a></div>
       </td>
       <td>string</td>
       <td>Zu verwendende Konfiguration für den Pfad des Healthchecks</td>
@@ -3903,7 +3932,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--livenessProbe--httpGet--port">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1507">synapse_admin.livenessProbe.httpGet.port</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1510">synapse_admin.livenessProbe.httpGet.port</a></div>
       </td>
       <td>string</td>
       <td>Zu verwendende Konfiguration für den Port des Healthchecks</td>
@@ -3916,7 +3945,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--readinessProbe--httpGet--path">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1513">synapse_admin.readinessProbe.httpGet.path</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1516">synapse_admin.readinessProbe.httpGet.path</a></div>
       </td>
       <td>string</td>
       <td>Konfiguration des Pfads vom Bereitschaftscheck</td>
@@ -3929,7 +3958,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--readinessProbe--httpGet--port">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1515">synapse_admin.readinessProbe.httpGet.port</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1518">synapse_admin.readinessProbe.httpGet.port</a></div>
       </td>
       <td>string</td>
       <td>Konfiguration des Ports vom Bereitschaftscheck</td>
@@ -3957,7 +3986,7 @@ null
   <tbody>
     <tr>
       <td id="webclient--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1524">webclient.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1527">webclient.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Element-Webclient im Deployment aktivieren</td>
@@ -3970,7 +3999,7 @@ false
     </tr>
     <tr>
       <td id="webclient--uri">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1526">webclient.uri</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1529">webclient.uri</a></div>
       </td>
       <td>string</td>
       <td>URL für den Webclient, zwingend notwendig</td>
@@ -3983,7 +4012,7 @@ null
     </tr>
     <tr>
       <td id="webclient--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1528">webclient.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1531">webclient.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für das Image vom Element-Webclient</td>
@@ -4000,13 +4029,45 @@ null
     </tr>
     <tr>
       <td id="webclient--annotations--"nginx--ingress--kubernetes--io/configuration-snippet"">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1533">webclient.annotations."nginx.ingress.kubernetes.io/configuration-snippet"</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1536">webclient.annotations."nginx.ingress.kubernetes.io/configuration-snippet"</a></div>
       </td>
       <td>string</td>
       <td></td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 "add_header X-Frame-Options SAMEORIGIN;\nadd_header X-Content-Type-Options nosniff;\nadd_header X-XSS-Protection \"1; mode=block\";\nadd_header Content-Security-Policy \"frame-ancestors 'none'\";\n"
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="webclient--podSecurityContext">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1545">webclient.podSecurityContext</a></div>
+      </td>
+      <td>map</td>
+      <td>Informationen zum Sicherheitskontext, die der Container übernehmen soll. weitere Möglichkeiten:  fsGroup: 1001</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+{
+  "runAsGroup": 1001,
+  "runAsUser": 1001
+}
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="webclient--securityContext">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1554">webclient.securityContext</a></div>
+      </td>
+      <td>map</td>
+      <td>Konfiguration für die Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+{
+  "readOnlyRootFilesystem": true,
+  "runAsNonRoot": true
+}
 </pre>
 </div>
       </td>
