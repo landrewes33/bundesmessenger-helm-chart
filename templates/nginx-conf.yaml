@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 data:
   nginx.conf: |
-    user www-data;
+    user nginx;
     error_log  /dev/stderr;
     pid /tmp/nginx.pid;
     events {}
