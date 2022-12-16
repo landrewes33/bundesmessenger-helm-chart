@@ -20,10 +20,14 @@ spec:
     spec:
       serviceAccountName: {{ .Release.Name }}
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
+      securityContext:
+        {{- toYaml .Values.webclient.podSecurityContext | nindent 8 }}
       containers:
       - name: element
         image: "{{ $.Values.webclient.image.repository }}:{{  $.Values.webclient.image.tag }}"
         imagePullPolicy: {{ $.Values.webclient.image.pullPolicy }}
+        securityContext:
+          {{- toYaml .Values.webclient.securityContext | nindent 12 }}
         volumeMounts:
         - name: files
           mountPath: /app/config.json
@@ -34,6 +38,8 @@ spec:
         - name: nginx-conf
           mountPath: /etc/nginx/nginx.conf
           subPath: nginx.conf
+        - name: tmp
+          mountPath: /tmp
         ports:
         - containerPort: 8080
           name: http
@@ -51,6 +57,9 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
       volumes:
+      - name: tmp
+        emptyDir:
+          sizeLimit: 1Gi
       - name: files
         configMap:
           name: {{ $webclientName }}
