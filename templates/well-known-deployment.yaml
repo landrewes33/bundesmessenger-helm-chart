@@ -81,8 +81,8 @@ spec:
               name: files
               subPath: {{ $key }}.json
 {{- end }}
-            - mountPath: /run
-              name: run
+            - mountPath: /tmp
+              name: tmp
           resources:
             {{- toYaml .Values.wellknown.resources | nindent 12 }}
       volumes:
@@ -98,7 +98,7 @@ spec:
             items:
             - key: bundesmessenger.conf
               path: default.conf
-        - name: run
+        - name: tmp
           emptyDir: 
             sizeLimit: 10Mi
     {{- with .Values.nodeSelector }}

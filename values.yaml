@@ -423,7 +423,7 @@ synapse:
   # -- Affinität zur Wahl von Nodes für die für den Haupt-Synapse-Container genutzt werden sollen.
   affinity: {}
 
-## Konfiguration für die Handhabung von Synapse-Arbeitern(im Folgenden weiter Worker),
+## Konfiguration für die Handhabung von Synapse-Workern (im Folgenden weiter Worker),
 ## die nützlich sind für die Handhabung von Hochlast-Einsätzen bzw. Hochverfügbarkeitseinsätzen.
 ##
 ## Weitere Informationen finden Sie unter
@@ -493,7 +493,7 @@ workers:
     # - 'patch -d/usr/local/lib/python3.7/site-packages/synapse -p2 < /synapse/patches/something.patch'
     extraCommands: []
 
-    # -- (map) Informationen zum Sicherheitskontext, die dem Arbeiter mitgeteilt werden sollen.
+    # -- (map) Informationen zum Sicherheitskontext, die den Workern mitgeteilt werden sollen.
     # DEFAULT gilt für alle Synapse-Worker-Container.
     # Beispiele:
     #   fsGroup: 2003
@@ -976,12 +976,14 @@ wellknown:
 
   # -- (map) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
   # Beispiel:
-  #    io.element.e2ee:
+  #  io.element.e2ee:
   #    secure_backup_required: true
   #    secure_backup_setup_methods: ["passphrase"]
   #    outbound_keys_pre_sharing_mode: "on_room_opening"
   #  m.homeserver:
   #    base_url: https://matrix.example.com
+  #  de.bwi:
+  #    data_privacy_url: https://messenger.bwi.de
   client: {}
 
   # -- (map) Zusätzliche Daten, die unter .well-known/matrix/<data> bereitgestellt werden
@@ -1005,25 +1007,25 @@ wellknown:
   #   - myRegistryKeySecretName
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-nginx-production
-    tag: 1.18.0-6ubuntu14.2
+    tag: v1.18.0-6ubuntu14.3-b1
     pullPolicy: IfNotPresent
 
 
-  # -- (map) Informationen zum Sicherheitskontext, die dem Arbeiter mitgeteilt werden sollen.
+  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
   # weitere Möglichkeiten:
-  #  fsGroup: 2001
-  #  runAsGroup: 2001
-  #  runAsUser: 2001
-  podSecurityContext: {}
+  #  fsGroup: 1001
+  podSecurityContext:
+    runAsGroup: 1001
+    runAsUser: 1001
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
   # weitere Möglichkeiten:
   #  capabilities:
   #    drop:
   #    - ALL
-  securityContext: {}
-  #  readOnlyRootFilesystem: true
-  #  runAsNonRoot: true
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
 
   ## Ressource Konfiguration für well-known server.
   resources:
@@ -1440,7 +1442,7 @@ synapse_admin:
   # -- (map) Konfiguration des Image vom Modul
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-admin-production
-    tag: 0.8.5
+    tag: v0.8.5-b1
     pullPolicy: IfNotPresent
 
   ## Ressourcen Konfiguration für Synapse-Admin Server.
@@ -1464,13 +1466,16 @@ synapse_admin:
     sysctls:
       - name: net.ipv4.ip_unprivileged_port_start
         value: "80"
-  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
+    runAsGroup: 1001
+    runAsUser: 1001
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des Containers
   # weitere Beispiele:
   #    runAsNonRoot: true
   #    readOnlyRootFilesystem: true
   #    runAsUser: 2010
-  securityContext: {}
-
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
 
   ## Configuration for mounting additional volumes into the application container.
   ## AKTUELL in Prüfung:
@@ -1533,3 +1538,19 @@ webclient:
       add_header X-Content-Type-Options nosniff;
       add_header X-XSS-Protection "1; mode=block";
       add_header Content-Security-Policy "frame-ancestors 'none'";
+
+  # -- (map) Informationen zum Sicherheitskontext, die der Container übernehmen soll.
+  # weitere Möglichkeiten:
+  #  fsGroup: 1001
+  podSecurityContext:
+    runAsGroup: 1001
+    runAsUser: 1001
+
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  # weitere Möglichkeiten:
+  #  capabilities:
+  #    drop:
+  #    - ALL
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
