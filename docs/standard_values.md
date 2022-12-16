@@ -4020,8 +4020,8 @@ null
         <div style="max-width: 300px;"><pre lang="json">
 {
   "pullPolicy": "IfNotPresent",
-  "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-bundesmessenger-web",
-  "tag": "2.0.1"
+  "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-bundesmessenger-web-production",
+  "tag": "v2.1.0-b1"
 }
 </pre>
 </div>
