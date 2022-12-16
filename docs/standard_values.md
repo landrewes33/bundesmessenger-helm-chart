@@ -3325,7 +3325,7 @@ false
         <div style="max-width: 300px;"><pre lang="json">
 {
   "pullPolicy": "IfNotPresent",
-  "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-clamav",
+  "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-clamav-production",
   "tag": "0.103.6_dfsg-0ubuntu0.22.04.1"
 }
 </pre>
@@ -3342,7 +3342,7 @@ false
         <div style="max-width: 300px;"><pre lang="json">
 {
   "pullPolicy": "IfNotPresent",
-  "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-icap",
+  "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-icap-production",
   "tag": "1_0.5.6-2build1"
 }
 </pre>
