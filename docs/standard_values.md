@@ -2367,7 +2367,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L945">sygnal.apns</a></div>
       </td>
       <td>map</td>
-      <td>APN-Konfigurationsteil Beispiel: apns:    de.opencode.dvs.ios:      type: apns      keyfile: /etc/matrix/sygnal/</td>
+      <td>APN-Konfigurationsteil Beispiel: apns:    de.opencode.dvs.ios:      type: apns      keyfile: /de.opencode.dvs.ios.p8</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 {}
