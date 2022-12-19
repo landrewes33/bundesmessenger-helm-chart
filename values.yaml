@@ -941,7 +941,7 @@ sygnal:
   # apns:
   #    de.opencode.dvs.ios:
   #      type: apns
-  #      keyfile: /etc/matrix/sygnal/
+  #      keyfile: /de.opencode.dvs.ios.p8
   apns: {}
 
   ios_push:
