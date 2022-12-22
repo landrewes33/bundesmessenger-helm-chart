@@ -18,4 +18,4 @@ spec:
   - port: metrics
     path: /_synapse/metrics
     interval: 15s
-{{- end }} 
+{{- end }}

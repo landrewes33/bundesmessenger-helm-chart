@@ -4,11 +4,11 @@ kind: Service
 metadata:
   name: {{ include "matrix-synapse.fullname" . }}
   annotations:
-    {{- include "matrix-synapse.annotations" . | nindent 4 }} 
+    {{- include "matrix-synapse.annotations" . | nindent 4 }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 spec:
-  type: ClusterIP
+  type: {{ .Values.service.type | default "ClusterIP" }}
   ports:
     - port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.targetPort | default "http" }}
@@ -53,7 +53,7 @@ kind: Service
 metadata:
   name: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}
   annotations:
-    {{- include "matrix-synapse.annotations" . | nindent 4 }} 
+    {{- include "matrix-synapse.annotations" . | nindent 4 }}
   labels:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
 spec:

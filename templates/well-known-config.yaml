@@ -30,7 +30,7 @@ data:
       #  }
       #}
       #{{- end }}
-      #livenessProbe auf /status mal selbst gemacht 
+      #livenessProbe auf /status mal selbst gemacht
       location /status {
         return 200;
       }
@@ -95,7 +95,7 @@ data:
               "warn_before": "1.19.0"
           }
       }
-    }  
+    }
 {{-   range $key, $value := .Values.wellknown.extraData }}
   {{ $key }}.json: |-
 {{-     if $value | kindIs "string" -}}

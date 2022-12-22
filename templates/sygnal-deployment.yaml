@@ -58,10 +58,9 @@ spec:
           secret:
             secretName: matrix-sygnal
         - name: ioskey
-          secret: 
+          secret:
             secretName: ioskey
         - name: sygnal-tmp
-          emptyDir: 
+          emptyDir:
             sizeLimit: 10Mi
 {{ end }}
-

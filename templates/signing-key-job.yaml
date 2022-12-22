@@ -120,7 +120,7 @@ spec:
             name: {{ include "matrix-synapse.fullname" . }}-scripts
             defaultMode: 0755
         - name: matrix-synapse-keys
-          emptyDir: 
+          emptyDir:
             sizeLimit: 1Mi
   parallelism: 1
   completions: 1

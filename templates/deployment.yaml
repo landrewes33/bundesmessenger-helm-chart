@@ -1,8 +1,8 @@
 {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (or .Values.persistence.enabled .Values.persistence.existingClaim) (not .Values.workers.media_repository.enabled ) }}
-{{- if (and .Values.postgresql.enabled (and (not .Values.postgresql.postgresqlPassword) (not .Values.postgresql.existingSecret))) -}}
+{{- if (and .Values.postgresql.enabled (and (not .Values.postgresql.auth.password) (not .Values.postgresql.auth.existingSecret))) -}}
 {{-  fail "You must specify a static postgres password or existing secret if using the included postgres chart" -}}
 {{- end -}}
-{{- if (and .Values.redis.enabled (and .Values.redis.usePassword (and (not .Values.redis.password) (not .Values.redis.existingSecret)))) -}}
+{{- if (and .Values.redis.enabled (and .Values.redis.usePassword (and (not .Values.redis.auth.password) (not .Values.redis.auth.existingSecret)))) -}}
 {{-  fail "You must specify a static redis password or existing secret if using the included redis chart" -}}
 {{- end -}}
 
@@ -95,8 +95,8 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{- if .Values.postgresql.enabled }}
-                  name: {{ .Values.postgresql.existingSecret | default (include "matrix-synapse.postgresql.fullname" .) }}
-                  key:  {{ .Values.postgresql.existingSecretPasswordKey }}
+                  name: {{ .Values.postgresql.auth.existingSecret | default (include "matrix-synapse.postgresql.fullname" .) }}
+                  key:  {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "password" }}
                   {{- else }}
                   name: {{ .Values.externalPostgresql.existingSecret }}
                   key: {{ .Values.externalPostgresql.existingSecretPasswordKey }}
@@ -106,13 +106,10 @@ spec:
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  {{- if .Values.redis.enabled }} 
-#um das Passwort in einem festen Secret zu setzen, was Namespace gebunden ist und nicht values.yaml-gebunden, wird hier hart auf den Namen umgebogen
-                  name: {{ .Values.redis.existingSecret | default (include "matrix-synapse.redis.fullname" .) }}
-#                  name: redis-secret
-                  key: redis-password
+                  {{- if .Values.redis.enabled }}
+                  name: {{ .Values.redis.auth.existingSecret | default (include "matrix-synapse.redis.fullname" .) }}
+                  key:  {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
                   {{- else }}
-#ALT:  
                   name: {{ .Values.externalRedis.existingSecret }}
                   key: {{ .Values.externalRedis.existingSecretPasswordKey }}
                   {{- end -}}
@@ -182,7 +179,7 @@ spec:
               - key: {{ .Values.signingkey.existingSecretKey | default "signing.key" | quote }}
                 path: signing.key
         - name: tmpconf
-          emptyDir: 
+          emptyDir:
             sizeLimit: 10Mi
         - name: media
         {{- $mediaworker := false }}
@@ -195,7 +192,7 @@ spec:
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim | default (include "matrix-synapse.fullname" .) }}
         {{- else }}
-          emptyDir: 
+          emptyDir:
             sizeLimit: 1Gi
         {{- end }}
         {{- with .Values.synapse.extraVolumes }}
