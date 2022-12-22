@@ -2065,7 +2065,7 @@ true
       <td>das Tag für das zu nutzende Image zur Rechtebereinigung Hinweis: noch kein finaler Tag, build version 10 als Alternative zu latest</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-"b2"
+"b4"
 </pre>
 </div>
       </td>
