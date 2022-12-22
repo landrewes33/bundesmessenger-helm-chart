@@ -1331,7 +1331,7 @@ schadcodescanner:
   # -- (map) Konfiguration des ClamAV-Image/Repository
   imageclamav:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-clamav-production
-    tag: 0.103.6_dfsg-0ubuntu0.22.04.1
+    tag: v0.103.6_dfsg-0ubuntu0.22.04.1-b4
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
   imagecicap:
@@ -1351,9 +1351,12 @@ schadcodescanner:
     accessMode: ReadWriteOnce
     # -- (string) Größe des zu nutzenden Volumes
     size: 10Gi
+
   service:
-  # -- (int) service.port -- The port to be used by the clamav service
-    port: 3310
+  # -- (int) der Port des ClamAV Pods, wird im Service übertragen
+  # @default: 1344 der Port vom c-icap-Server
+    port: 1344
+
   freshclam:
     # -- (string) clamav.freshclam.mirrors -- A list of clamav mirrors to be used by the clamav service
     mirrors: database.clamav.net
