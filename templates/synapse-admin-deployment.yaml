@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/component: {{ $adminName }}
 spec:
   replicas: 1
-  strategy: 
+  strategy:
     type: RollingUpdate
   selector:
     matchLabels:

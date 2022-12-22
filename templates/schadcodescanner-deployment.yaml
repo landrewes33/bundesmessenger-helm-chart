@@ -54,7 +54,7 @@ spec:
             mountPath: /clamav/config/
       volumes:
       - name: clamsocket
-        emptyDir: 
+        emptyDir:
           sizeLimit: 50Mi
       - name: config-volume
         projected:
@@ -66,7 +66,7 @@ spec:
       {{- if .Values.schadcodescanner.persistence.existingClaim }}
             claimName: {{ .Values.schadcodescanner.persistence.existingClaim }}
       {{- else }}
-            claimName: {{ template "matrix-synapse.schadcodescannername" . }} 
+            claimName: {{ template "matrix-synapse.schadcodescannername" . }}
       {{- end }}
       {{- with $config.nodeSelector }}
       nodeSelector:

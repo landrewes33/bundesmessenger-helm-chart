@@ -63,12 +63,12 @@ spec:
               mountPath: /synapse/data
     {{- end }}
         - name: update-config
-          command: 
+          command:
             - sh
             - -c
             - |
               cat /tmp/{{ $name }}.worker | sed "s/PLATZHALTER/${HOSTNAME}/" > /synapse/config/{{ $name }}.worker
-          image: "{{ $.Values.image.repository }}:{{ include "matrix-synapse.imageTag" $ }}"     
+          image: "{{ $.Values.image.repository }}:{{ include "matrix-synapse.imageTag" $ }}"
           volumeMounts:
           - mountPath: "/tmp/"
             name: temp-worker-config
@@ -112,8 +112,8 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{- if $.Values.postgresql.enabled }}
-                  name: {{ $.Values.postgresql.existingSecret | default (include "matrix-synapse.postgresql.fullname" $) }}
-                  key:  {{ $.Values.postgresql.existingSecretPasswordKey }}
+                  name: {{ $.Values.postgresql.auth.existingSecret | default (include "matrix-synapse.postgresql.fullname" $) }}
+                  key:  {{ $.Values.postgresql.auth.secretKeys.userPasswordKey | default "password" }}
                   {{- else }}
                   name: {{ $.Values.externalPostgresql.existingSecret }}
                   key: {{ $.Values.externalPostgresql.existingSecretPasswordKey }}
@@ -124,10 +124,8 @@ spec:
               valueFrom:
                 secretKeyRef:
                   {{- if $.Values.redis.enabled }}
-#um redis-secret auf Namespace zu begrenzen, damit mehrere instanzen in einem K8s laufen können.
-#alt:                  name: {{ $.Values.redis.existingSecret | default (include "matrix-synapse.redis.fullname" $) }}
-                  name: {{ $releaseName }}-redis 
-                  key: redis-password
+                  name: {{ $.Values.redis.auth.existingSecret | default (include "matrix-synapse.redis.fullname" $) }}
+                  key:  {{ $.Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
                   {{- else }}
                   name: {{ $.Values.externalRedis.existingSecret }}
                   key: {{ $.Values.externalRedis.existingSecretPasswordKey }}
@@ -205,7 +203,7 @@ spec:
           configMap:
             name: {{ include "matrix-synapse.fullname" $ }}
         - name: worker-config
-          emptyDir: 
+          emptyDir:
             sizeLimit: 10Mi
         - name: temp-worker-config
           configMap:
@@ -220,10 +218,10 @@ spec:
               - key: {{ $.Values.signingkey.existingSecretKey | default "signing.key" | quote }}
                 path: signing.key
         - name: tmpconf
-          emptyDir: 
+          emptyDir:
             sizeLimit: 10Mi
         - name: tempdir
-          emptyDir: 
+          emptyDir:
             sizeLimit: 10Mi
       {{- if regexMatch $name "media-repository" }}
         - name: media
@@ -231,7 +229,7 @@ spec:
           persistentVolumeClaim:
             claimName: {{ $.Values.persistence.existingClaim | default (include "matrix-synapse.fullname" $) }}
         {{- else }}
-          emptyDir: 
+          emptyDir:
             sizeLimit: 1Gi
         {{- end }}
       {{- end }}

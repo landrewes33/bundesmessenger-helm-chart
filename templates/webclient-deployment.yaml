@@ -64,6 +64,6 @@ spec:
         configMap:
           name: {{ $webclientName }}
       - name: nginx-conf
-        configMap: 
+        configMap:
           name: nginx-default-conf
 {{- end }}

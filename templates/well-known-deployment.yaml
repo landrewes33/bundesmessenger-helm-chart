@@ -99,7 +99,7 @@ spec:
             - key: bundesmessenger.conf
               path: default.conf
         - name: tmp
-          emptyDir: 
+          emptyDir:
             sizeLimit: 10Mi
     {{- with .Values.nodeSelector }}
       nodeSelector:
