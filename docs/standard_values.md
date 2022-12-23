@@ -217,14 +217,53 @@ wird im Chart.yaml gesetzt
       </td>
     </tr>
     <tr>
-      <td id="signingkey--resources">
-        <div style="max-width: 150px;"><a href="../values.yaml#L94">signingkey.resources</a></div>
+      <td id="signingkey--resources--limits--cpu">
+        <div style="max-width: 150px;"><a href="../values.yaml#L96">signingkey.resources.limits.cpu</a></div>
       </td>
-      <td>object</td>
+      <td>string</td>
       <td></td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-{}
+"100m"
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="signingkey--resources--limits--memory">
+        <div style="max-width: 150px;"><a href="../values.yaml#L97">signingkey.resources.limits.memory</a></div>
+      </td>
+      <td>string</td>
+      <td></td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+"250Mi"
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="signingkey--resources--requests--cpu">
+        <div style="max-width: 150px;"><a href="../values.yaml#L99">signingkey.resources.requests.cpu</a></div>
+      </td>
+      <td>string</td>
+      <td></td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+"100m"
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="signingkey--resources--requests--memory">
+        <div style="max-width: 150px;"><a href="../values.yaml#L100">signingkey.resources.requests.memory</a></div>
+      </td>
+      <td>string</td>
+      <td></td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+"250Mi"
 </pre>
 </div>
       </td>
@@ -3614,7 +3653,7 @@ false
       <td></td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-20
+50
 </pre>
 </div>
       </td>
@@ -3692,7 +3731,7 @@ false
       <td>RAM Ressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-"3Gi"
+"4Gi"
 </pre>
 </div>
       </td>

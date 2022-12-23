@@ -91,13 +91,13 @@ signingkey:
   # existingSecretKey: signing.key
 
   ## Ressourcen für das Image der Erzeugung vom Signierschlüssel
-  resources: {}
-  #  limits:
-  #    cpu: 100m
-  #    memory: 250Mi
-  #  requests:
-  #    cpu: 100m
-  #    memory: 250Mi
+  resources:
+    limits:
+      cpu: 100m
+      memory: 250Mi
+    requests:
+      cpu: 100m
+      memory: 250Mi
 
 # -- (bool) Schaltet alle internen IP-Adressevergaben auf IPv4-only
 # Wenn `true` sind alle Listener und Anbindungspunkte `0.0.0.0`,
@@ -1393,7 +1393,7 @@ schadcodescanner:
 
   limits:
     # clamav.limits.fileSize -- The largest file size scanable by clamav, in MB
-    fileSize: 20
+    fileSize: 50
     # clamav.limits.scanSize -- The largest scan size permitted in clamav, in MB
     scanSize: 100
     # clamav.limits.connectionQueueLength -- Maximum length the queue of pending connections may grow to
@@ -1408,7 +1408,7 @@ schadcodescanner:
       # -- (string) Rechenressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.
       cpu: 1500m
       # -- (object) RAM Ressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.
-      memory: 3Gi
+      memory: 4Gi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den ClamAV-Container anzuwenden sind.
       cpu: 300m
