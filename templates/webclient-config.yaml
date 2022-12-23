@@ -4,6 +4,29 @@
 # The config.json file is to be put into Kubernetes as a config file in such a way that
 # the element web instance can read it.
 
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $webclientName }}-environment
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $webclientName }}
+data:
+  default_server_config: |
+    {
+        "m.homeserver": {
+          "base_url": "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}",
+          "server_name": {{ $displayName | quote }}
+        }
+     }
+  enable_presence_by_hs_url: |
+    {
+        "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}": false
+    }
+  permalink_prefix:  "{{- printf "https://%s/latest" (.Values.publicServerName | default .Values.serverName) }}"
+
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -13,176 +36,6 @@ metadata:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ $webclientName }}
 data:
-  config.json: |
-    {
-      "default_server_config": {
-        "m.homeserver": {
-          "base_url": "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}",
-          "server_name": {{ $displayName | quote }}
-        }
-      },
-      "enable_presence_by_hs_url": {
-        "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}": false
-      },
-      "brand": "BundesMessenger",
-      "permalink_prefix": "{{- printf "https://%s/latest" (.Values.publicServerName | default .Values.serverName) }}",
-      "show_labs_settings": false,
-      "branding": {
-        "showMatrixBrand": false,
-        "home_title": "Willkommen im BundesMessenger",
-        "home_byline": "Dein Messenger für unser Land",
-        "welcome_background_url": "bwi/img/bm_background.svg",
-        "auth_header_logo_url": "bwi/img/dlms_logo.svg",
-        "auth_footer_links": [
-          {
-            "text": "Handgemacht mit \u2764 von der BWI",
-            "url": "https://bwi.de"
-          },
-          {
-            "text": "Copyright",
-            "url": "https://messenger.bwi.de/copyright"
-          }
-        ]
-      },
-      "embedded_pages": {
-        "loginForWelcome": true
-      },
-      "content_scanner": {
-        "enabled": true
-      },
-      "desktop_builds": {
-        "available": false
-      },
-      "disable_3pid_login": true,
-      "community_support": false,
-      "faq_url": "https://messenger.bwi.de/#FAQ",
-      "bwi_themes": [
-        {
-          "name": "light",
-          "is_dark": false,
-          "default": true,
-          "colors": {
-            "accent": "#108194",
-            "quinary-content": "#EEEEEE"
-          }
-        },
-        {
-          "name": "dark",
-          "is_dark": true,
-          "default": true,
-          "colors": {
-            "accent": "#108194",
-            "primary-content": "#FFFFFF",
-            "secondary-content": "#EEEEEE",
-            "tertiary-content": "#DDDDDD"
-          }
-        }
-      ],
-      "default_theme": "bwi-light",
-      "suppressNotification": [
-        "MESSAGE_EDIT", "org.matrix.msc3381.poll.response", "m.room.redaction", "m.reaction"
-      ],
-      "enabledLanguages": ["de", "en"],
-      "terms_and_conditions_links": [
-        {
-          "text": "Copyright",
-          "url": "https://messenger.bwi.de/copyright"
-        }
-      ],
-      "feature_overview_url":"https://messenger.bwi.de/#c4783",
-      "bwi_setting_defaults": {
-        "BwiFeature.disableLoginServerLookup": true,
-        "BwiFeature.closeImageViewOnNavigate": true,
-        "BwiFeature.hideIpAdresses": true,
-        "BwiFeature.hideArchivedRooms": true,
-        "BwiFeature.hideLowPriorityRoomOption": true,
-        "BwiFeature.roomSecuritySettings": false,
-        "BwiFeature.roomAutoPublish": true,
-        "BwiFeature.hideDebug": true,
-        "BwiFeature.createRoomHideDetails": true,
-        "BwiFeature.restorePassphraseHideDeviceHint": false,
-        "BwiFeature.skipUpdateChangesDialog": true,
-        "BwiFeature.hideRoomHeaderNotifsButton": true,
-        "BwiFeature.roomSummaryHideFiles": true,
-        "BwiFeature.shareLinkToClipboard": true,
-        "BwiFeature.hideNerdyUserSettings": true,
-        "BwiFeature.disableKeyExport": true,
-        "BwiFeature.adminToolsEnabled": [
-          "KICK",
-          "BAN"
-        ],
-        "BwiFeature.disableHistorySharing": true,
-        "BwiFeature.showReadReceiptsAsDialog": true,
-        "BwiFeature.hideDmInviteLink": true,
-        "BwiFeature.userLinkPreview": true,
-        "BwiFeature.hidePersonalNotes": true,
-        "BwiFeature.enforcePassphrase": true,
-        "BwiFeature.exportChat": false,
-        "BwiFeature.celebration": true,
-        "BwiFeature.newFeatures": true,
-        "BwiFeature.registrationDetails": true,
-        "BwiFeature.hideAliasSettings": false,
-        "BwiFeature.singleParticipantDms": true,
-        "BwiFeature.hideSearchButton": true,
-        "BwiFeature.hideRoomAccessSettings": true,
-        "BwiFeature.powerLevelToggles": [
-          "m.room.avatar",
-          "m.room.name",
-          "m.room.power_levels",
-          "m.room.topic",
-          "m.room.tombstone",
-          "m.room.encryption"
-        ],
-        "BwiFeature.disableProfileAvatarDl": true,
-        "BwiFeature.disableFeedbackToast": true,
-        "BwiFeature.hideCrossSigning": false,
-        "BwiFeature.hideKeyImport": true,
-        "BwiFeature.roomLinkPreview": true,
-        "BwiFeature.showMaintenanceInfo": true,
-        "BwiFeature.jumpToRoomSummary": true,
-        "BwiFeature.passwordResetHint": true,
-        "BwiFeature.disableCustomPowerlevel": true,
-        "BwiFeature.disablePoll": false,
-        "BwiFeature.hideUserId": true,
-        "BwiFeature.hideSpaces": true,
-        "BwiFeature.composerTransformLonoSnippetToUrl": true,
-        "BwiFeature.personalStatus": false,
-        "BwiFeature.personalStatusMulti": false,
-        "BwiFeature.disableLoginServerLookup": false,
-        "BwiFeature.disableUndisclosedPolls": false,
-        "BwiFeature.hideLayoutSwitcher": true,
-        "BwiFeature.mandatoryCrossSigning": true,
-        "BwiFeature.whiteListSlashCommands": true,
-        "BwiFeature.locationShareTypesEnabled": ["Pin"],
-        "BwiFeature.disableGeolocation": true,
-        "BwiFeature.hideOSMLink": true
-      },
-      "setting_defaults": {
-        "language": "de",
-        "layout": "bubble",
-        "UIFeature.passwordReset": false,
-        "UIFeature.registration": false,
-        "UIFeature.serverConfig": false,
-        "UIFeature.languageChange": false,
-        "UIFeature.displayNameMutable": false,
-        "UIFeature.notificationToggles": false,
-        "UIFeature.userEncryption": false,
-        "UIFeature.exploreServers": false,
-        "UIFeature.roomHistorySettings": false,
-        "breadcrumbs": false,
-        "UIFeature.urlPreviews": false,
-        "UIFeature.widgets": false,
-        "UIFeature.advancedSettings": false,
-        "UIFeature.shareQrCode": false,
-        "UIFeature.shareSocial": false,
-        "UIFeature.feedback": false,
-        "UIFeature.identityServer": false,
-        "UIFeature.thirdPartyId": false,
-        "UIFeature.deactivate": false,
-        "UIFeature.advancedEncryption": false,
-        "UIFeature.voip": false
-      }
-    }
   default.conf: |
      # Default server configuration
      #
@@ -206,14 +59,14 @@ data:
              # Don't use them in a production server!
              #
              # include snippets/snakeoil.conf;
-     
+
              root /usr/share/nginx/html/;
-     
+
              # Add index.php to the list if you are using PHP
              index index.html index.htm index.nginx-debian.html;
-     
+
              server_name _;
-             #livenessProbe auf /status mal selbst gemacht 
+             #livenessProbe auf /status mal selbst gemacht
              location /status {
                return 200;
              }
@@ -228,7 +81,7 @@ data:
                      # as directory, then fall back to displaying a 404.
                      try_files $uri $uri/ =404;
              }
-     
+
              # pass PHP scripts to FastCGI server
              #
              #location ~ \.php$ {
@@ -239,7 +92,7 @@ data:
              #       # With php-cgi (or other tcp sockets):
              #       fastcgi_pass 127.0.0.1:9000;
              #}
-     
+
              # deny access to .htaccess files, if Apache's document root
              # concurs with nginx's one
              #

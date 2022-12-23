@@ -1,6 +1,5 @@
 {{- if .Values.webclient.enabled }}
 {{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -22,6 +21,23 @@ spec:
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.webclient.podSecurityContext | nindent 8 }}
+      initContainers:
+      - name: config-build
+        image: "{{ $.Values.webclient.image.repository }}:{{  $.Values.webclient.image.tag }}"
+        imagePullPolicy: {{ $.Values.webclient.image.pullPolicy }}
+        securityContext:
+          {{- toYaml .Values.webclient.securityContext | nindent 12 }}
+        envFrom:
+          - configMapRef: 
+              name: {{ $webclientName }}-environment
+        command:
+            - sh
+            - -c
+            - |
+              jq -c '.default_server_config=env.default_server_config | .enable_presence_by_hs_url=env.enable_presence_by_hs_url | .permalink_prefix=env.permalink_prefix' /app/config.sample.json > /opt/config.json
+        volumeMounts:
+          - name: config
+            mountPath: /opt/
       containers:
       - name: element
         image: "{{ $.Values.webclient.image.repository }}:{{  $.Values.webclient.image.tag }}"
@@ -29,7 +45,7 @@ spec:
         securityContext:
           {{- toYaml .Values.webclient.securityContext | nindent 12 }}
         volumeMounts:
-        - name: files
+        - name: config
           mountPath: /app/config.json
           subPath: config.json
         - name: files
@@ -57,6 +73,9 @@ spec:
             initialDelaySeconds: 10
             periodSeconds: 10
       volumes:
+      - name: config
+        emptyDir:
+          sizeLimit: 100Ki
       - name: tmp
         emptyDir:
           sizeLimit: 1Gi
@@ -64,6 +83,6 @@ spec:
         configMap:
           name: {{ $webclientName }}
       - name: nginx-conf
-        configMap: 
+        configMap:
           name: nginx-default-conf
 {{- end }}

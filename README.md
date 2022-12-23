@@ -187,7 +187,12 @@ Kubernetes.
 Im weiteren Verlauf der Anleitung wird die Installation mit dem Befehl
 `helm install bundesmessenger bundesmessenger/bundesmessenger` und der direkten
 Angabe der Parameter mit dem automatischen Download aus dem Repository
-beschrieben.
+beschrieben. Mit dem Repository kann sich mit dem folgenden Befehl verbunden
+werden:
+
+```console
+helm repo add bundesmessenger https://gitlab.opencode.de/api/v4/projects/560/packages/helm/beta
+```
 
 Alternativ kann die Installation auch durch den manuellen Download des
 Helm Charts und das Anpassen der Parameter in der `values.yaml` erfolgen.
@@ -211,8 +216,8 @@ Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
 
 ## Voraussetzungen
 
-- Bereitstellen der Basis-Images in eigener Registry, wenn die Images nicht
-  direkt aus dem Internet bezogen werden dürfen.
+- Bereitstellen der Basis-Images in eigener Registry oder Nutzung von OpenCoDE
+  - Empfehlung: Spiegelung der Basis- und Service-Images aus der OpenCoDE Registry
 - Anpassung der [`values.yaml`](./values.yaml) zur Nutzung der richtigen Images
   und Registry
   - :pushpin: Informationen zur Bereitstellung der

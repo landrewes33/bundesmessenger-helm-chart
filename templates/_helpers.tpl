@@ -91,7 +91,7 @@ Create chart name and version as used by the chart label.
 Get the correct image tag name
 */}}
 {{- define "matrix-synapse.imageTag" -}}
-{{- .Values.image.tag | default (printf "%s" .Chart.AppVersion) -}}
+{{- .Values.image.tag | default (printf "v%s" .Chart.AppVersion) -}}
 {{- end -}}
 
 {{/*
@@ -244,7 +244,10 @@ Set postgresql username
 */}}
 {{- define "matrix-synapse.postgresql.username" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- .Values.postgresql.postgresqlUsername | default "postgres" }}
+{{-  if .Values.postgresql.postgresqlUsername -}}
+{{-    fail "You need to switch to the new postgresql.auth values." -}}
+{{-  end -}}
+{{- .Values.postgresql.auth.username | default "postgres" }}
 {{- else -}}
 {{ required "A valid externalPostgresql.username is required" .Values.externalPostgresql.username }}
 {{- end -}}
@@ -255,7 +258,10 @@ Set postgresql password
 */}}
 {{- define "matrix-synapse.postgresql.password" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- .Values.postgresql.postgresqlPassword | default "" }}
+{{-  if .Values.postgresql.postgresqlPassword -}}
+{{-    fail "You need to switch to the new postgresql.auth values." -}}
+{{-  end -}}
+{{- .Values.postgresql.auth.password | default "synapse" }}
 {{- else if not (and .Values.externalPostgresql.existingSecret .Values.externalPostgresql.existingSecretPasswordKey) -}}
 {{ required "A valid externalPostgresql.password is required" .Values.externalPostgresql.password }}
 {{- end -}}
@@ -266,7 +272,10 @@ Set postgresql database
 */}}
 {{- define "matrix-synapse.postgresql.database" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- .Values.postgresql.postgresqlDatabase | default "synapse" }}
+{{-  if .Values.postgresql.postgresqlDatabase -}}
+{{-    fail "You need to switch to the new postgresql.auth values." -}}
+{{-  end -}}
+{{- .Values.postgresql.auth.database | default "synapse" }}
 {{- else -}}
 {{ required "A valid externalPostgresql.database is required" .Values.externalPostgresql.database }}
 {{- end -}}
@@ -338,7 +347,7 @@ Set redis port
 */}}
 {{- define "matrix-synapse.redis.port" -}}
 {{- if .Values.redis.enabled -}}
-{{- .Values.redis.master.service.port | default 6379 }}
+{{- .Values.redis.master.service.ports.redis | default 6379 }}
 {{- else -}}
 {{ required "A valid externalRedis.port is required" .Values.externalRedis.port }}
 {{- end -}}
@@ -367,5 +376,3 @@ Set synapse_admin uri
 {{- printf "" -}}
 {{- end -}}
 {{- end -}}
-
-

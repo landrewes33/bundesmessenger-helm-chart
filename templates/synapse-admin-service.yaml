@@ -3,16 +3,16 @@
 ---
 apiVersion: v1
 kind: Service
-metadata: 
+metadata:
   name: {{ $adminName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ $adminName }}
-spec: 
+spec:
   selector:
     {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: {{ $adminName }}
-  ports: 
+  ports:
     - name: "admin-port"
       port: 8080
       targetPort: 8080

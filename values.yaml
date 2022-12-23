@@ -9,7 +9,7 @@ image:
 
   # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
   # @default -- wird im Chart.yaml gesetzt
-  # tag: ''
+  # tag: ""
 
   # -- (map) Optional kann ein Array von imagePullSecrets angegeben werden.
   # Secrets müssen manuell im Namensraum angelegt werden.
@@ -33,12 +33,12 @@ image:
 
 # -- (string) Der Matrix-Domänenname, der für den Domänenteil in Ihren MXIDs verwendet wird.
 # @default -- Nicht gesetzt, aber Voraussetzung!
-serverName: ''
+serverName: ""
 
 # -- (string) Der öffentliche Matrix-Servername, der für alle öffentlichen URLs
 # in der Konfiguration sowie für Client-API-Links im Ingress verwendet wird.
 # @default  -- Nicht gesetzt
-publicServerName: ''
+publicServerName: ""
 
 # -- (bool) Aktivieren des Monitoringservices für Synapse-Dienste in Prometheus
 # @default -- false
@@ -74,16 +74,16 @@ signingkey:
       repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-production
       # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
       # @default -- wird im Chart.yaml gesetzt
-      # tag: ''
+      # tag: ""
       pullSecrets: []
-      #  - name: bum-gittoken
+      #  - name: myRegistryKeySecretName
       # -- (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
     # -- (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.
     # finaler Tag kann sich noch ändern
     publishImage:
       repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-kubectl-production
-      tag: 1.21.14
+      tag: v1.21.14
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
@@ -91,13 +91,13 @@ signingkey:
   # existingSecretKey: signing.key
 
   ## Ressourcen für das Image der Erzeugung vom Signierschlüssel
-  resources: {}
-  #  limits:
-  #    cpu: 100m
-  #    memory: 250Mi
-  #  requests:
-  #    cpu: 100m
-  #    memory: 250Mi
+  resources:
+    limits:
+      cpu: 100m
+      memory: 250Mi
+    requests:
+      cpu: 100m
+      memory: 250Mi
 
 # -- (bool) Schaltet alle internen IP-Adressevergaben auf IPv4-only
 # Wenn `true` sind alle Listener und Anbindungspunkte `0.0.0.0`,
@@ -127,15 +127,15 @@ config:
   ## Schützen Sie die Registrierung mit recaptcha. (optional)
   ##
   # recaptcha:
-  #   publicKey: ''
-  #   privateKey: ''
+  #   publicKey: ""
+  #   privateKey: ""
 
   # -- (list) URIs die zum Aufbau von 1:1 WebRTC Anrufe aufzubauen.
   # Beispiel:
   # turnUris: ["turn:turn.example.com:3478?transport=udp"]
   turnUris: []
   # -- (string) geheime Schlüssel für TURN-Server
-  # turnSecret: ''
+  # turnSecret: ""
 
   # -- (bool) Registrierungskonfiguration, beachten Sie, dass die Registrierung mit dem
   # containerinternen Werkzeug register_new_matrix_user immer möglich ist. Synapse-Admin kann dafür genutzt werden.
@@ -143,10 +143,10 @@ config:
   enableRegistration: false
 
   # -- (string) Hinweis: Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge gesetzt, wenn er nicht angegeben wird.
-  registrationSharedSecret: ''
+  registrationSharedSecret: ""
 
   # -- (string) Hinweis: Es wird dringend empfohlen, diesen Wert auf einen secure value (secret) zu setzen.
-  macaroonSecretKey: ''
+  macaroonSecretKey: ""
 
   # -- (map) Eine Gruppe von vertrauenswürdigen Servern, die zu kontaktieren sind, wenn ein anderer Server nicht auf eine
   # Signierschlüssel-Anfrage antwortet.
@@ -263,7 +263,7 @@ extraConfig:
 # Ref: https://github.com/matrix-org/synapse/blob/develop/docs/sample_config.yaml
 # Beispiel:
 #  password_config:
-#    pepper: ''
+#    pepper: ""
 extraSecrets: {}
 
 # -- (object) Konfiguration, die auf den Haupt-Synapse-Container anzuwenden ist.
@@ -810,9 +810,9 @@ persistence:
   enabled: true
   # -- (string) Name des VolumeClaims
   # @default -- leerer Wert lässt dynamisches Provisionieren zu
-  existingClaim: ''
+  existingClaim: ""
   # -- (string) Name der entsprechenden Storage-Klasse
-  storageClass: ''
+  storageClass: ""
   # -- (string) Zugriffsmodus
   accessMode: ReadWriteOnce
   # -- (string) Größe des zu nutzenden Volumes
@@ -835,7 +835,7 @@ volumePermissions:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-base-production
     # -- (string) das Tag für das zu nutzende Image zur Rechtebereinigung
     # Hinweis: noch kein finaler Tag, build version 10 als Alternative zu latest
-    tag: b2
+    tag: b7
     # -- (string) da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung
     pullPolicy: IfNotPresent
 
@@ -871,7 +871,7 @@ sygnal:
   # -- (map) Image/Repo-Konfiguration von Sygnal
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-sygnal-production
-    tag: 0.12.0
+    tag: v0.12.0
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
@@ -941,7 +941,7 @@ sygnal:
   # apns:
   #    de.opencode.dvs.ios:
   #      type: apns
-  #      keyfile: /etc/matrix/sygnal/
+  #      keyfile: /de.opencode.dvs.ios.p8
   apns: {}
 
   ios_push:
@@ -1007,9 +1007,8 @@ wellknown:
   #   - myRegistryKeySecretName
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-nginx-production
-    tag: v1.18.0-6ubuntu14.3-b1
+    tag: v1.18.0
     pullPolicy: IfNotPresent
-
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
   # weitere Möglichkeiten:
@@ -1063,37 +1062,44 @@ postgresql:
   # @default: false da externe DB vorausgesetzt wird
   enabled: false
 
-  # -- (map) Das postgresql Image
+  # -- (map) Das PostgreSQL Image
   # @default: WIRD NICHT EMPFOHLEN!!
-  # pullSecrets:
-  #   - myRegistryKeySecretName
   image:
     registry: registry.opencode.de
     repository: ig-bvc/demo-apps/postgresql/postgres
     tag: 14
     # pullSecrets: ["myRegistryKeySecretName"]
 
-  # -- (string) Name für PostgreSQL-DB
-  postgresqlDatabase: synapse_db
+  auth:
+    # -- (string) Name für PostgreSQL-DB
+    database: synapse_db
 
-  # -- (string) Passwort für PostgreSQL Nutzer
-  # TODO: Muss in ein Vault!
-  # Oder verwenden Sie ein bestehendes Secret mit dem Schlüssel "postgresql-password"
-  # anstelle eines statischen Passworts
-  #  existingSecret: postgres-secrets
-  #  existingSecretPasswordKey: POSTGRES_PASSWORD
-  postgresqlPassword: synapse
+    # -- (string) Name für PostgreSQL Nutzer
+    username: synapse
 
-  # -- (string) Name für PostgreSQL Nutzer
-  postgresqlUsername: synapse
+    # -- (string) Passwort für PostgreSQL Nutzer
+    password: synapse
 
-  # -- (string) Extra Argumente zur Initialisierung der Datenbank
-  postgresqlInitdbArgs: "--lc-collate=C --lc-ctype=C"
+    # -- (string) Bestehendes Secret das anstelle eines statischen Passwortes
+    # verwendet wird
+    existingSecret: ""
+    secretKeys:
+      # -- (string) Schlüssel, der das Datenbank-Passwort enthält.
+      # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
+      userPasswordKey: password
+      # -- (string) Schlüssel, der das PostgreSQL enthält.
+      # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
+      adminPasswordKey: postgres-password
 
-  # -- (map) Persistenzkonfiguration für Storage für PostgreSQL
-  persistence:
-    storageClass: ''
-    size: 16Gi
+  primary:
+    initdb:
+      # -- (string) Extra Argumente zur Initialisierung der Datenbank
+      args: "--lc-collate=C --lc-ctype=C --encoding=UTF8"
+
+    # -- (map) Persistenzkonfiguration für Storage für PostgreSQL
+    persistence:
+      storageClass: ""
+      size: 16Gi
 
   # -- (list) Zusätzliche Argumente für die Datenbankverbindung
   # ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config
@@ -1105,19 +1111,22 @@ postgresql:
 externalPostgresql:
   host: postgres-4-matrix-postgresql.postgres.svc.cluster.local
   port: 5432
+  # -- (string) Name für PostgreSQL-DB auf die sich verbunden wird
+  database: synapse_db
+
+  # -- (string) Name für PostgreSQL Nutzer
   username: synapse
+
+  # -- (string) Passwort für PostgreSQL Nutzer
   password: synapse
 
   # -- (string) Der Name eines bestehenden Secrets mit Postgresql-Anmeldedaten
-  existingSecret: postgres-secrets
+  existingSecret: ""
 
   # -- (string) Passwortschlüssel, der aus dem bestehenden Secret abgerufen wird
-  existingSecretPasswordKey: POSTGRES_PASSWORD
+  existingSecretPasswordKey: password
 
-  # -- (string) Name der Datenbank auf die sich verbunden wird
-  database: synapse_db
-
-    # sslmode: prefer
+  # sslmode: prefer
 
   # -- (list) Zusätzliche Argumente für die Datenbankverbindung
   # ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config
@@ -1135,7 +1144,7 @@ redis:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/jammy-redis-production
-    tag: 5_6.0.16-1ubuntu1
+    tag: v6.0.16
     # pullSecrets: ["myRegistryKeySecretName"]
   # -- (bool) Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
   # Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
@@ -1144,40 +1153,40 @@ redis:
   # -- (map) Konfiguration für Authentifikation gegen Redis
   # Oder verwenden Sie ein bestehendes Geheimnis mit "redis-password"-Schlüssel
   # anstelle eines statischen Passworts.
-  # Der Platzhalter wird später hart ignoriert, muss aber gesetzt und nicht leer sein dafür.
-  # Nur für mehr als 1 Instanz je K8s interessant
-  # existingSecret: synapse-redis <- Was hab ich damit gemeint und was geändert
   auth:
     enabled: true
     password: synapse
+    existingSecret: ""
+    existingSecretPasswordKey: redis-password
 
   # -- (string) Form der Architektur des Deployments
   architecture: standalone
   master:
+    kind: StatefulSet
     persistence:
-    # -- (bool) Persistenzkonfiration des Redis
-    # Beachten Sie, dass Synapse redis nur als Synchronisierungsdienstprogramm verwendet, so dass keine
-    # Daten jemals persistiert werden müssen.
+      # -- (bool) Persistenzkonfiration des Redis
+      # Beachten Sie, dass Synapse redis nur als Synchronisierungsdienstprogramm verwendet, so dass keine
+      # Daten jemals persistiert werden müssen.
       enabled: false
     service:
-      # -- (int) Serviceport
-      port: 6379
-    statefulset:
-      # -- (string) Wie soll bei Update mit dem Container verfahren werden
-      # https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/#update-strategies
-      updateStrategy: RollingUpdate
+      ports:
+        # -- (int) Serviceport
+        redis: 6379
 
 # -- (map) Ein extern konfigurierter Redis-Server, der für Worker/Sharding verwendet wird
 # Wird erst ausgewertet, wenn `redis.enabled=false` ist.
 # Alternativ zum statischen Passwort:
 # Der Name eines bestehenden Secret mit Redis-Anmeldeinformationen
 # existingSecret: redis-secrets
-# Passwortschlüssel, der aus dem bestehenden Secret abgerufen wirdq
+# Passwortschlüssel, der aus dem bestehenden Secret abgerufen wird
 # existingSecretPasswordKey: redis-password
 externalRedis:
   host: redis
   port: 6379
   password: synapse
+
+  existingSecret: ""
+  existingSecretPasswordKey: redis-password
 
 
 ######################################################################################
@@ -1296,7 +1305,7 @@ contentscanner:
   # -- (map) Konfiguration des Image/Repository
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-content-scanner-production
-    tag: 1.0.3
+    tag: v1.0.3
     pullPolicy: IfNotPresent
 
   replicaCount: 1
@@ -1322,12 +1331,12 @@ schadcodescanner:
   # -- (map) Konfiguration des ClamAV-Image/Repository
   imageclamav:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-clamav-production
-    tag: 0.103.6_dfsg-0ubuntu0.22.04.1
+    tag: v0.103.6
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
   imagecicap:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-icap-production
-    tag: 1_0.5.6-2build1
+    tag: v0.5.6
     pullPolicy: IfNotPresent
     # -- (map) Konfiguration des persistenten Speichers für ClamAV
     # empfohlen: ExistingClaim mit ReadWriteMany-Volume anzugeben, so dass mehrere Pods die ClamAV-DB nutzen können. (TBD: freshclam darf dann nur einmal laufen: Abfrage PID)
@@ -1335,16 +1344,29 @@ schadcodescanner:
     enabled: true
     # -- (string) Name des VolumeClaims
     # @default -- leer, damit dynamische Volumes genutzt werden können (dennoch persistent)
-    existingClaim: ''
+    existingClaim: ""
     # -- (string) Name der entsprechenden Storage-Klasse, - (damit wird default genutzt, ansonsten storageClass direkt benennen)
-    storageClass: ''
+    storageClass: ""
     # -- (string) Zugriffsmodus, ReadWriteOnce (wird für jedes HPA-skalierte neu angelegt)
     accessMode: ReadWriteOnce
     # -- (string) Größe des zu nutzenden Volumes
     size: 10Gi
+
+  # -- (map) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+  # Beispiel:
+  #   - name: NO_PROXY
+  #     value: "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"
+  #   - name: HTTPS_PROXY
+  #     value: "https://proxyuser@proxyserver:proxyport"
+  #   - name: HTTP_PROXY
+  #     value: "http://proxyuser@proxyserver:proxyport"
+  extraEnv: []
+
   service:
-  # -- (int) service.port -- The port to be used by the clamav service
-    port: 3310
+    # -- (int) der Port des ClamAV Pods, wird im Service übertragen
+    # @default: 1344 der Port vom c-icap-Server
+    port: 1344
+
   freshclam:
     # -- (string) clamav.freshclam.mirrors -- A list of clamav mirrors to be used by the clamav service
     mirrors: database.clamav.net
@@ -1371,7 +1393,7 @@ schadcodescanner:
 
   limits:
     # clamav.limits.fileSize -- The largest file size scanable by clamav, in MB
-    fileSize: 20
+    fileSize: 50
     # clamav.limits.scanSize -- The largest scan size permitted in clamav, in MB
     scanSize: 100
     # clamav.limits.connectionQueueLength -- Maximum length the queue of pending connections may grow to
@@ -1386,7 +1408,7 @@ schadcodescanner:
       # -- (string) Rechenressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.
       cpu: 1500m
       # -- (object) RAM Ressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.
-      memory: 3Gi
+      memory: 4Gi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den ClamAV-Container anzuwenden sind.
       cpu: 300m
@@ -1442,7 +1464,7 @@ synapse_admin:
   # -- (map) Konfiguration des Image vom Modul
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-admin-production
-    tag: v0.8.5-b1
+    tag: v0.8.5
     pullPolicy: IfNotPresent
 
   ## Ressourcen Konfiguration für Synapse-Admin Server.
@@ -1530,7 +1552,7 @@ webclient:
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-bundesmessenger-web-production
-    tag: v2.1.0-b1
+    tag: v2.1.0
     pullPolicy: IfNotPresent
   annotations:
     nginx.ingress.kubernetes.io/configuration-snippet: |

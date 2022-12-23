@@ -43,7 +43,7 @@ data:
     icap_access allow all PERMIT_REQUESTS
     ServerLog /dev/stdout
     AccessLog /dev/stdout
-    Service echo srv_echo.so    
+    Service echo srv_echo.so
     Include /clamav/config/virus_scan.conf
 
   virus_scan.conf: |
