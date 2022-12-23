@@ -216,8 +216,8 @@ Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
 
 ## Voraussetzungen
 
-- Bereitstellen der Basis-Images in eigener Registry, wenn die Images nicht
-  direkt aus dem Internet bezogen werden dürfen.
+- Bereitstellen der Basis-Images in eigener Registry oder Nutzung von OpenCoDE
+  - Empfehlung: Spiegelung der Basis- und Service-Images aus der OpenCoDE Registry
 - Anpassung der [`values.yaml`](./values.yaml) zur Nutzung der richtigen Images
   und Registry
   - :pushpin: Informationen zur Bereitstellung der
