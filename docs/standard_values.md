@@ -210,7 +210,7 @@ wird im Chart.yaml gesetzt
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-kubectl-production",
-  "tag": "1.21.14"
+  "tag": "v1.21.14"
 }
 </pre>
 </div>
@@ -2065,7 +2065,7 @@ true
       <td>das Tag für das zu nutzende Image zur Rechtebereinigung Hinweis: noch kein finaler Tag, build version 10 als Alternative zu latest</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-"b4"
+"b7"
 </pre>
 </div>
       </td>
@@ -2174,7 +2174,7 @@ false
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-sygnal-production",
-  "tag": "0.12.0"
+  "tag": "v0.12.0"
 }
 </pre>
 </div>
@@ -2505,7 +2505,7 @@ false
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-nginx-production",
-  "tag": "v1.18.0-6ubuntu14.3-b1"
+  "tag": "v1.18.0"
 }
 </pre>
 </div>
@@ -2948,7 +2948,7 @@ false
       <td></td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-"5_6.0.16-1ubuntu1"
+"v6.0.16"
 </pre>
 </div>
       </td>
@@ -3291,7 +3291,7 @@ false
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-content-scanner-production",
-  "tag": "1.0.3"
+  "tag": "v1.0.3"
 }
 </pre>
 </div>
@@ -3401,7 +3401,7 @@ false
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-clamav-production",
-  "tag": "v0.103.6_dfsg-0ubuntu0.22.04.1-b4"
+  "tag": "v0.103.6"
 }
 </pre>
 </div>
@@ -3418,7 +3418,7 @@ false
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-icap-production",
-  "tag": "1_0.5.6-2build1"
+  "tag": "v0.5.6"
 }
 </pre>
 </div>
@@ -3868,7 +3868,7 @@ null
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-admin-production",
-  "tag": "v0.8.5-b1"
+  "tag": "v0.8.5"
 }
 </pre>
 </div>
@@ -4090,7 +4090,7 @@ null
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-bundesmessenger-web-production",
-  "tag": "v2.1.0-b1"
+  "tag": "v2.1.0"
 }
 </pre>
 </div>

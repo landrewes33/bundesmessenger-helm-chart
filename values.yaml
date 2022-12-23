@@ -83,7 +83,7 @@ signingkey:
     # finaler Tag kann sich noch ändern
     publishImage:
       repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-kubectl-production
-      tag: 1.21.14
+      tag: v1.21.14
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
@@ -835,7 +835,7 @@ volumePermissions:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-base-production
     # -- (string) das Tag für das zu nutzende Image zur Rechtebereinigung
     # Hinweis: noch kein finaler Tag, build version 10 als Alternative zu latest
-    tag: b4
+    tag: b7
     # -- (string) da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung
     pullPolicy: IfNotPresent
 
@@ -871,7 +871,7 @@ sygnal:
   # -- (map) Image/Repo-Konfiguration von Sygnal
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-sygnal-production
-    tag: 0.12.0
+    tag: v0.12.0
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
@@ -1007,7 +1007,7 @@ wellknown:
   #   - myRegistryKeySecretName
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-nginx-production
-    tag: v1.18.0-6ubuntu14.3-b1
+    tag: v1.18.0
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
@@ -1144,7 +1144,7 @@ redis:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/jammy-redis-production
-    tag: 5_6.0.16-1ubuntu1
+    tag: v6.0.16
     # pullSecrets: ["myRegistryKeySecretName"]
   # -- (bool) Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
   # Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
@@ -1305,7 +1305,7 @@ contentscanner:
   # -- (map) Konfiguration des Image/Repository
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-content-scanner-production
-    tag: 1.0.3
+    tag: v1.0.3
     pullPolicy: IfNotPresent
 
   replicaCount: 1
@@ -1331,12 +1331,12 @@ schadcodescanner:
   # -- (map) Konfiguration des ClamAV-Image/Repository
   imageclamav:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-clamav-production
-    tag: v0.103.6_dfsg-0ubuntu0.22.04.1-b4
+    tag: v0.103.6
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
   imagecicap:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-icap-production
-    tag: 1_0.5.6-2build1
+    tag: v0.5.6
     pullPolicy: IfNotPresent
     # -- (map) Konfiguration des persistenten Speichers für ClamAV
     # empfohlen: ExistingClaim mit ReadWriteMany-Volume anzugeben, so dass mehrere Pods die ClamAV-DB nutzen können. (TBD: freshclam darf dann nur einmal laufen: Abfrage PID)
@@ -1454,7 +1454,7 @@ synapse_admin:
   # -- (map) Konfiguration des Image vom Modul
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-admin-production
-    tag: v0.8.5-b1
+    tag: v0.8.5
     pullPolicy: IfNotPresent
 
   ## Ressourcen Konfiguration für Synapse-Admin Server.
@@ -1542,7 +1542,7 @@ webclient:
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-bundesmessenger-web-production
-    tag: v2.1.0-b1
+    tag: v2.1.0
     pullPolicy: IfNotPresent
   annotations:
     nginx.ingress.kubernetes.io/configuration-snippet: |
