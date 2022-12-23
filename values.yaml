@@ -1352,9 +1352,19 @@ schadcodescanner:
     # -- (string) Größe des zu nutzenden Volumes
     size: 10Gi
 
+  # -- (map) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+  # Beispiel:
+  #   - name: NO_PROXY
+  #     value: "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"
+  #   - name: HTTPS_PROXY
+  #     value: "https://proxyuser@proxyserver:proxyport"
+  #   - name: HTTP_PROXY
+  #     value: "http://proxyuser@proxyserver:proxyport"
+  extraEnv: []
+
   service:
-  # -- (int) der Port des ClamAV Pods, wird im Service übertragen
-  # @default: 1344 der Port vom c-icap-Server
+    # -- (int) der Port des ClamAV Pods, wird im Service übertragen
+    # @default: 1344 der Port vom c-icap-Server
     port: 1344
 
   freshclam:

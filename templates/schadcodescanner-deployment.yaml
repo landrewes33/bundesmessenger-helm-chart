@@ -37,9 +37,9 @@ spec:
             mountPath: /clamav/config/
       - name: clamav
         image: "{{ $config.imageclamav.repository }}:{{ $config.imageclamav.tag }}"
+        {{- if .Values.schadcodescanner.extraEnv }}
         env:
-        {{- if .Values.extraEnv }}
-          {{- with .Values.extraEnv }}
+          {{- with .Values.schadcodescanner.extraEnv }}
               {{- . | toYaml | nindent 12 }}
           {{- end }}
         {{- end }}
