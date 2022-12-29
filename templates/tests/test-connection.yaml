@@ -6,7 +6,8 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": test-success
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   containers:
     - name: wget
@@ -14,3 +15,100 @@ spec:
       command: ['wget']
       args:  ['{{ include "matrix-synapse.fullname" . }}:{{ $.Values.service.port }}/_matrix/client/versions']
   restartPolicy: Never
+
+{{- if .Values.wellknown.enabled }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") }}-server-test-connection"
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") }}:80/.well-known/matrix/server']
+  restartPolicy: Never
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") }}-client-test-connection"
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") }}:80/.well-known/matrix/client']
+  restartPolicy: Never
+{{- end }}
+
+{{- if .Values.webclient.enabled }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "matrix-synapse.externalname" (dict "global" . "external" "webclient") }}-test-connection"
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "matrix-synapse.externalname" (dict "global" . "external" "webclient") }}:8080/index.html']
+  restartPolicy: Never
+{{- end }}
+
+{{- if .Values.synapse_admin.enabled }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") }}-test-connection"
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") }}:8080/#/login']
+  restartPolicy: Never
+{{- end }}
+
+{{- if .Values.contentscanner.enabled }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "matrix-synapse.contentscannername" . }}-test-connection"
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "matrix-synapse.contentscannername" . }}:8080/_matrix/media_proxy/unstable/public_key']
+  restartPolicy: Never
+{{- end }}
