@@ -41,10 +41,9 @@ spec:
           livenessProbe:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          {{- with .Values.synapse_admin.readinessProbe }}
           readinessProbe:
-            {{- . | toYaml | nindent 12 }}
-          {{- end }}
+            tcpSocket:
+              port: http
           volumeMounts:
           - name: tmp
             mountPath: /tmp

@@ -1531,14 +1531,6 @@ synapse_admin:
       # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks
       port: http
 
-  # Bereitschaftscheck
-  readinessProbe:
-    httpGet:
-      # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
-      path: /
-      # -- (string) Konfiguration des Ports vom Bereitschaftscheck
-      port: http
-
 
 ######################################################################################
 ##          Konfiguration für Element-WebClient
