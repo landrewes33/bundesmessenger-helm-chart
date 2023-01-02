@@ -4,11 +4,15 @@
 
 BWI Matrix BundesMessenger
 
+**Homepage:** <https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/>
+
 ## Maintainers
 
 | Name | Email | Url |
 | ---- | ------ | --- |
+| BWI GmbH | <bundesmessenger@bwi.de> | <https://messenger.bwi.de/> |
 | Christian Steinke | <christian.steinke@bwi.de> |  |
+| Dirk Klimpel | <dirk.klimpel@bwi.de> |  |
 
 ## Requirements
 
