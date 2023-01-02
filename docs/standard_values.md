@@ -4068,32 +4068,6 @@ null
 </div>
       </td>
     </tr>
-    <tr>
-      <td id="synapse_admin--readinessProbe--httpGet--path">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1538">synapse_admin.readinessProbe.httpGet.path</a></div>
-      </td>
-      <td>string</td>
-      <td>Konfiguration des Pfads vom Bereitschaftscheck</td>
-      <td>
-        <div style="max-width: 300px;"><pre lang="json">
-"/"
-</pre>
-</div>
-      </td>
-    </tr>
-    <tr>
-      <td id="synapse_admin--readinessProbe--httpGet--port">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1540">synapse_admin.readinessProbe.httpGet.port</a></div>
-      </td>
-      <td>string</td>
-      <td>Konfiguration des Ports vom Bereitschaftscheck</td>
-      <td>
-        <div style="max-width: 300px;"><pre lang="json">
-"http"
-</pre>
-</div>
-      </td>
-    </tr>
   </tbody>
 </table>
 
@@ -4111,7 +4085,7 @@ null
   <tbody>
     <tr>
       <td id="webclient--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1549">webclient.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1541">webclient.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Element-Webclient im Deployment aktivieren</td>
@@ -4124,7 +4098,7 @@ false
     </tr>
     <tr>
       <td id="webclient--uri">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1551">webclient.uri</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1543">webclient.uri</a></div>
       </td>
       <td>string</td>
       <td>URL für den Webclient, zwingend notwendig</td>
@@ -4137,7 +4111,7 @@ null
     </tr>
     <tr>
       <td id="webclient--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1553">webclient.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1545">webclient.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für das Image vom Element-Webclient</td>
@@ -4154,7 +4128,7 @@ null
     </tr>
     <tr>
       <td id="webclient--annotations--"nginx--ingress--kubernetes--io/configuration-snippet"">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1558">webclient.annotations."nginx.ingress.kubernetes.io/configuration-snippet"</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1550">webclient.annotations."nginx.ingress.kubernetes.io/configuration-snippet"</a></div>
       </td>
       <td>string</td>
       <td></td>
@@ -4167,7 +4141,7 @@ null
     </tr>
     <tr>
       <td id="webclient--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1567">webclient.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1559">webclient.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die der Container übernehmen soll. weitere Möglichkeiten:  fsGroup: 1001</td>
@@ -4183,7 +4157,7 @@ null
     </tr>
     <tr>
       <td id="webclient--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1576">webclient.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1568">webclient.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
