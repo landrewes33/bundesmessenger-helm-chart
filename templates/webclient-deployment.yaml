@@ -61,17 +61,14 @@ spec:
           name: http
           protocol: TCP
         readinessProbe:
-            httpGet:
-                path: /
-                port: http
-            initialDelaySeconds: 2
-            periodSeconds: 3
+          tcpSocket:
+            port: http
         livenessProbe:
-            httpGet:
-                path: /status
-                port: http
-            initialDelaySeconds: 10
-            periodSeconds: 10
+          httpGet:
+            path: /status
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
       volumes:
       - name: config
         emptyDir:

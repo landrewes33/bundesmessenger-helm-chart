@@ -30,9 +30,10 @@ data:
       #  }
       #}
       #{{- end }}
-      #livenessProbe auf /status mal selbst gemacht
+      #livenessProbe auf /status mal selbst gemacht, logging aus
       location /status {
         return 200;
+        access_log off;
       }
       location /_matrix/cmaintenance {
         add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization";
