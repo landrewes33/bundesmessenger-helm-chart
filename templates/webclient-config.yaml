@@ -66,9 +66,10 @@ data:
              index index.html index.htm index.nginx-debian.html;
 
              server_name _;
-             #livenessProbe auf /status mal selbst gemacht
+             #livenessProbe auf /status mal selbst gemacht, logging aus
              location /status {
                return 200;
+               access_log off;
              }
              location ~ /config.{{ .Values.webclient.uri }}.json {
                 rewrite /config.{{ .Values.webclient.uri }}.json /config.json break;
