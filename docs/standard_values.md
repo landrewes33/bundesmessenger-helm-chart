@@ -4050,7 +4050,7 @@ null
       <td>Zu verwendende Konfiguration für den Pfad des Healthchecks</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-"/"
+"/status"
 </pre>
 </div>
       </td>

@@ -1527,7 +1527,7 @@ synapse_admin:
   livenessProbe:
     httpGet:
       # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
-      path: /
+      path: /status
       # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks
       port: http
 
