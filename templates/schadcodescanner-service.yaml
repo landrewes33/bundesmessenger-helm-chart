@@ -1,12 +1,15 @@
 {{- if .Values.schadcodescanner.enabled }}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "schadcodescanner") -}}
+{{- $component := "schadcodescanner" -}}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "matrix-synapse.schadcodescannername" . }}
+  name: {{ $name }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
 spec:
   ports:
   - port: {{ .Values.schadcodescanner.service.port }}
@@ -14,5 +17,6 @@ spec:
     protocol: TCP
     name: clamav
   selector:
-    {{- include "matrix-synapse.schadcodescannerselectorLabels" . | nindent 4 }}
+    {{- include "matrix-synapse.selectorLabels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
 {{- end }}

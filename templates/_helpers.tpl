@@ -41,38 +41,6 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
-Create a default sygnal name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "matrix-synapse.sygnalname" -}}
-{{- printf "%s-%s" .global.Release.Name .sygnal | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create a default synapse-admin name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-{{- define "matrix-synapse.synapse-adminname" -}}
-{{- printf "%s-%s" .global.Release.Name .synapse_admin | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-*/}}
-
-{{/*
-Create a default contentscanner name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "matrix-synapse.contentscannername" -}}
-{{- printf "%s-%s" .Release.Name "matrix-content-scanner" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create a default schadcodescanner name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "matrix-synapse.schadcodescannername" -}}
-{{- printf "%s-%s"  .Release.Name  "schadcodescanner" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
 Create a default external component name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
@@ -116,7 +84,6 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 
 
 
-
 {{/*
 Common annotations
 */}}
@@ -131,22 +98,6 @@ Selector labels
 */}}
 {{- define "matrix-synapse.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "matrix-synapse.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end -}}
-
-{{/*
-Selector labels contentscanner
-*/}}
-{{- define "matrix-synapse.contentscannerselectorLabels" -}}
-app.kubernetes.io/name: {{ include "matrix-synapse.name" . }}-matrix-content-scanner
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end -}}
-
-{{/*
-Selector labels ClamAV
-*/}}
-{{- define "matrix-synapse.schadcodescannerselectorLabels" -}}
-app.kubernetes.io/name: {{ include "matrix-synapse.name" . }}-schadcodescanner
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 

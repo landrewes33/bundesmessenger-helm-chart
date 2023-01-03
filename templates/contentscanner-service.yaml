@@ -1,12 +1,15 @@
 {{- if .Values.contentscanner.enabled }}
+{{- $component := "matrix-content-scanner" -}}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-content-scanner") -}}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "matrix-synapse.contentscannername" . }}
+  name: {{ $name }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
 spec:
   ports:
   - port: 8080
@@ -14,5 +17,6 @@ spec:
     protocol: TCP
     name: contentscanner
   selector:
-    {{- include "matrix-synapse.contentscannerselectorLabels" . | nindent 4 }}
+    {{- include "matrix-synapse.selectorLabels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
 {{- end }}

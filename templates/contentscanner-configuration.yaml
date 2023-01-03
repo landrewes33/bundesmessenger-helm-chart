@@ -1,4 +1,5 @@
 {{- if .Values.contentscanner.enabled }}
+{{- $scannername := include "matrix-synapse.externalname" (dict "global" . "external" "schadcodescanner") -}}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -119,7 +120,7 @@ data:
     # - ${1} will be the path to the file to scan.
     # - The exit code should be 0 for files that are deemed safe/clean.
     # - Anything sent to stdout will be included in the `info` section of the response.
-    return=$(c-icap-client -i  {{ include "matrix-synapse.schadcodescannername" . }} -p 1344 -f ${1} -s virus_scan);
+    return=$(c-icap-client -i  {{ $scannername }} -p 1344 -f ${1} -s virus_scan);
     returncode=$?;
     result=$(echo $return | grep -c "VIRUS FOUND" )
     echo "Return of Scan ${1}:  $result - $return";
