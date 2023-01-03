@@ -1,24 +1,28 @@
 {{- if and .Values.contentscanner.enabled .Values.schadcodescanner.enabled }}
 {{  $config := .Values.schadcodescanner }}
+{{- $component := "schadcodescanner" -}}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "schadcodescanner") -}}
 
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "matrix-synapse.schadcodescannername" . }}
+  name: {{ $name }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
-    app.kubernetes.io/component:  {{ include "matrix-synapse.schadcodescannername" . }}
+    app.kubernetes.io/component: {{ $component }}
 spec:
   replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      {{- include "matrix-synapse.schadcodescannerselectorLabels" . | nindent 6 }}
-  serviceName: {{ include "matrix-synapse.schadcodescannername" . }}
+      {{- include "matrix-synapse.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $component }}
+  serviceName: {{ $name }}
   template:
     metadata:
       labels:
-        {{- include "matrix-synapse.schadcodescannerselectorLabels" . | nindent 8 }}
+        {{- include "matrix-synapse.labels" $ | nindent 8 }}
+        app.kubernetes.io/component: {{ $component }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/schadcodescanner-configuration.yaml") . | sha256sum }}
     spec:
@@ -60,13 +64,13 @@ spec:
         projected:
           sources:
           - configMap:
-              name: {{ include "matrix-synapse.schadcodescannername" . }}
+              name: {{ $name }}
       - name: signatures
         persistentVolumeClaim:
       {{- if .Values.schadcodescanner.persistence.existingClaim }}
             claimName: {{ .Values.schadcodescanner.persistence.existingClaim }}
       {{- else }}
-            claimName: {{ template "matrix-synapse.schadcodescannername" . }}
+            claimName: {{ $name }}
       {{- end }}
       {{- with $config.nodeSelector }}
       nodeSelector:
@@ -87,14 +91,14 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name:  hpa-{{ include "matrix-synapse.schadcodescannername" . }}
+  name:  hpa-{{ $name }}
   labels:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v2
     kind: StatefulSet
-    name: {{ include "matrix-synapse.schadcodescannername" . }}
+    name: {{ $name }}
   minReplicas: {{ $config.autoscaling.minReplicas }}
   maxReplicas: {{ $config.autoscaling.maxReplicas }}
   metrics:

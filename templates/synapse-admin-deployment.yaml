@@ -1,5 +1,6 @@
 {{- if .Values.synapse_admin.enabled }}
 {{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
+{{- $component := "synapse-admin" -}}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -7,7 +8,7 @@ metadata:
   name: {{ $adminName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    app.kubernetes.io/component: {{ $adminName }}
+    app.kubernetes.io/component: {{ $component }}
 spec:
   replicas: 1
   strategy:
@@ -15,12 +16,12 @@ spec:
   selector:
     matchLabels:
       {{- include "matrix-synapse.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: {{ $adminName }}
+      app.kubernetes.io/component: {{ $component }}
   template:
     metadata:
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: {{ $adminName }}
+        app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ .Release.Name }}
       securityContext:

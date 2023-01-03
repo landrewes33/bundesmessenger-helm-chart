@@ -98,7 +98,7 @@ spec:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "{{ include "matrix-synapse.contentscannername" . }}-test-connection"
+  name: "{{ include "matrix-synapse.externalname" (dict "global" . "external" "matrix-content-scanner") }}-test-connection"
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
@@ -109,6 +109,6 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "matrix-synapse.contentscannername" . }}:8080/_matrix/media_proxy/unstable/public_key']
+      args: ['{{ include "matrix-synapse.externalname" (dict "global" . "external" "matrix-content-scanner") }}:8080/_matrix/media_proxy/unstable/public_key']
   restartPolicy: Never
 {{- end }}

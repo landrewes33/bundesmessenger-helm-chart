@@ -1,5 +1,6 @@
 {{- if .Values.wellknown.enabled }}
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") -}}
+{{- $component := "wellknown-nginx" -}}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -7,7 +8,7 @@ metadata:
   name: {{ $wkName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    component: well-known
+    component: {{ $component }}
 data:
   bundesmessenger.conf: |
     server {

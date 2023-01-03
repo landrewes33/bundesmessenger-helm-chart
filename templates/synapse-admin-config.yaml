@@ -1,6 +1,6 @@
 {{- if .Values.synapse_admin.enabled }}
 {{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
-
+{{- $component := "synapse-admin" -}}
 # The config.json file is to be put into Kubernetes as a config file in such a way that
 # the element web instance can read it.
 
@@ -11,7 +11,7 @@ metadata:
   name: {{ $adminName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    app.kubernetes.io/component: {{ $adminName }}
+    app.kubernetes.io/component: {{ $component }}
 data:
   sadm.conf: |
      # Default server configuration

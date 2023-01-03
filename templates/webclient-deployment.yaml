@@ -1,5 +1,6 @@
 {{- if .Values.webclient.enabled }}
 {{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
+{{- $component := "webclient" -}}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -7,15 +8,17 @@ metadata:
   name: {{ $webclientName }}
   labels:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
-    app.kubernetes.io/component: {{ $webclientName }}
+    app.kubernetes.io/component: {{ $component }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/component: {{ $webclientName }}
+      {{- include "matrix-synapse.labels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $component }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: {{ $webclientName }}
+        {{- include "matrix-synapse.labels" $ | nindent 8 }}
+        app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ .Release.Name }}
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}

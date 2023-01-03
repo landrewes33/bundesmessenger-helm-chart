@@ -1,11 +1,14 @@
 {{- if .Values.schadcodescanner.enabled }}
+{{- $component := "schadcodescanner" -}}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "schadcodescanner") -}}
 ---
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: {{ include "matrix-synapse.schadcodescannername" . }}
+  name: {{ $name }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
 data:
   c-icap.conf: |
     PidFile /run/clamav/c-icap.pid
@@ -20,7 +23,7 @@ data:
     ThreadsPerChild     10
     MaxRequestsPerChild  0
     Port 1344
-    ServerName {{ include "matrix-synapse.schadcodescannername" . }}
+    ServerName {{ $name }}
     TmpDir /var/tmp
     MaxMemObject 131072
     DebugLevel 1
@@ -106,16 +109,4 @@ data:
     ReceiveTimeout 35
     DatabaseDirectory /clamav/database
 
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: clamav-restapi-config
-  labels:
-    {{- include "matrix-synapse.labels" . | nindent 4 }}
-data:
-  node-env: 'test'
-  clamd-ip: {{ include "matrix-synapse.schadcodescannername" . }}
-  app-form-key: 'FILES'
-  app-max-file-size: '10485760'
 {{- end }}
