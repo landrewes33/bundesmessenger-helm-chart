@@ -10,17 +10,11 @@ data:
     version: 1
     formatters:
       precise:
-       format: '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(request)s- %(message)s'
-    filters:
-      context:
-        (): synapse.util.logcontext.LoggingContextFilter
-        request: ""
+       format: '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(request)s - %(message)s'
     handlers:
       console:
         class: logging.StreamHandler
         formatter: precise
-        filters: [context]
-        level: {{ .Values.config.logLevel | default "INFO" }}
     loggers:
         synapse:
             level: {{ .Values.config.logLevel | default "INFO" }}
@@ -165,22 +159,22 @@ data:
     {{- end }}
     {{- if .Values.coturn.enabled }}
     ## TURN ##
-    
+
     # The shared secret used to compute passwords for the TURN server
     #
     #turn_shared_secret: "YOUR_SHARED_SECRET"
     turn_shared_secret: "j8dOQy5TgYv0x7r9LL3so08jZReoZ9JgbpjdFO73toyqloQuCZywGihhbqYU7jZL"
-    
+
     # The Username and password if the TURN server needs them and
     # does not use a token
     #
     #turn_username: "TURNSERVER_USERNAME"
     #turn_password: "TURNSERVER_PASSWORD"
-    
+
     # How long generated TURN credentials last
     #
     turn_user_lifetime: 1h
-    
+
     # Whether guests should be allowed to use the TURN server.
     # This defaults to True, otherwise VoIP will be unreliable for guests.
     # However, it does introduce a slight security risk as it allows users to
@@ -188,5 +182,5 @@ data:
     # valid account (e.g. by passing a CAPTCHA).
     #
     turn_allow_guests: False
-     
+
     {{- end }}
