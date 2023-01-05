@@ -1614,7 +1614,7 @@ true
         <div style="max-width: 150px;"><a href="../values.yaml#L607">workers.generic_worker.csPaths</a></div>
       </td>
       <td>path</td>
-      <td>Client-Side(cs) Pfad für die Ingress-Konfiguration des Workers</td>
+      <td>Pfade für die Ingress-Konfiguration des Workers, mit 'publicServerName' Domain gesetzt</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
 werden in der values.yaml gesetzt und können dort eingesehen werden
@@ -1627,7 +1627,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
         <div style="max-width: 150px;"><a href="../values.yaml#L677">workers.generic_worker.paths</a></div>
       </td>
       <td>path</td>
-      <td>Server-Side (externer Zugriff) Pfade für die Ingress-Konfiguration des Workers</td>
+      <td>Pfade für die Ingress-Konfiguration des Workers, mit 'serverName' Domain gesetzt</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
 werden in der values.yaml gesetzt und können dort eingesehen werden
@@ -1759,7 +1759,7 @@ true
         <div style="max-width: 150px;"><a href="../values.yaml#L734">workers.federation_reader.paths</a></div>
       </td>
       <td>path</td>
-      <td>Server-Side Pfade für die Ingress-Konfiguration des Förderations-Workers</td>
+      <td>Pfade für die Ingress-Konfiguration des Förderations-Workers, mit 'serverName' Domain gesetzt</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
 werden in der values.yaml gesetzt und können dort eingesehen werden
@@ -1856,7 +1856,7 @@ true
         <div style="max-width: 150px;"><a href="../values.yaml#L771">workers.media_repository.csPaths</a></div>
       </td>
       <td>path</td>
-      <td>Client-Side(cs) Pfade für die Ingress-Konfiguration des Media-Workers</td>
+      <td>Pfade für die Ingress-Konfiguration des Media-Workers, mit 'publicServerName' Domain gesetzt</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
 werden in der values.yaml gesetzt und können dort eingesehen werden
@@ -1869,7 +1869,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
         <div style="max-width: 150px;"><a href="../values.yaml#L780">workers.media_repository.paths</a></div>
       </td>
       <td>path</td>
-      <td>Server-Side(externe) Pfade für die Ingress-Konfiguration des Media-Workers</td>
+      <td>Pfade für die Ingress-Konfiguration des Media-Workers, mit 'serverName' Domain gesetzt</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
 werden in der values.yaml gesetzt und können dort eingesehen werden
@@ -1988,7 +1988,7 @@ true
         <div style="max-width: 150px;"><a href="../values.yaml#L809">workers.user_dir.csPaths</a></div>
       </td>
       <td>path</td>
-      <td>Client-Side(cs) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers</td>
+      <td>Pfade für die Ingress-Konfiguration des Nutzersuch-Workers, mit 'publicServerName' Domain gesetzt</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
 werden in der values.yaml gesetzt und können dort eingesehen werden
