@@ -18,6 +18,10 @@ data:
     loggers:
         synapse:
             level: {{ .Values.config.logLevel | default "INFO" }}
+        synapse.storage.SQL:
+            # beware: increasing this to DEBUG will make synapse log sensitive
+            # information such as access tokens.
+            level: {{ .Values.config.logLevelSQL | default "INFO" }}
     root:
         level: {{ .Values.config.logLevel | default "INFO" }}
         handlers: [console]
