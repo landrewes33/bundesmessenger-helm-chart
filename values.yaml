@@ -37,7 +37,7 @@ serverName: ""
 
 # -- (string) Der öffentliche Matrix-Servername, der für alle öffentlichen URLs
 # in der Konfiguration sowie für Client-API-Links im Ingress verwendet wird.
-# @default  -- Nicht gesetzt
+# @default -- Nicht gesetzt
 publicServerName: ""
 
 # -- (bool) Aktivieren des Monitoringservices für Synapse-Dienste in Prometheus
@@ -118,8 +118,15 @@ config:
   # Beispiel:
   # publicBaseurl: 'https://matrix.example.com'
 
-  # -- (string) Das Loglevel  für Synapse und alle Module.
+  # -- (string) Das Loglevel für Synapse und alle `loggers` Module.
+  # Mit Ausnahme von `synapse.storage.SQL`, welches aus Sicherheitsgründen zusätzlich geändert werden muss.
+  # Dokumentation: https://matrix-org.github.io/synapse/latest/structured_logging.html
   logLevel: INFO
+
+  # -- (string) Das Loglevel für `synapse.storage.SQL`.
+  # Achtung: Wenn dieser Wert auf `DEBUG` erhöht wird, werden alle SQL-Abfragen protokolliert.
+  # Diese enthalten sensible Informationen wie z.B. Zugriffstoken.
+  logLevelSQL: INFO
 
   # -- (bool) Nutzungsstatistiken (siehe extraConfig.reportStats)
   reportStats: false
