@@ -595,7 +595,7 @@ workers:
       runAsUser: 2003
     # -- (list) entsprechende Endpunkte für den generischen Worker
     listeners: [client, federation]
-    # -- (path) Client-Side(cs) Pfad für die Ingress-Konfiguration des Workers
+    # -- (path) Pfade für die Ingress-Konfiguration des Workers, mit 'publicServerName' Domain gesetzt
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     csPaths:
       ## Sync requests
@@ -665,7 +665,7 @@ workers:
       ## The presence event stream
       - "/_matrix/client/(api/v1|r0|v3|unstable)/presence/"
 
-    # -- (path) Server-Side (externer Zugriff) Pfade für die Ingress-Konfiguration des Workers
+    # -- (path) Pfade für die Ingress-Konfiguration des Workers, mit 'serverName' Domain gesetzt
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     paths:
           ## Federation requests
@@ -722,7 +722,7 @@ workers:
     generic: true
     # -- (list) Zusätzliche Listener für Förderationsworker
     listeners: [federation]
-    # -- (path) Server-Side Pfade für die Ingress-Konfiguration des Förderations-Workers
+    # -- (path) Pfade für die Ingress-Konfiguration des Förderations-Workers, mit 'serverName' Domain gesetzt
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     paths:
       - "/_matrix/federation/v1/send/"
@@ -759,7 +759,7 @@ workers:
       runAsUser: 2666
     # -- (list) Zusätzliche Listener für Media-Worker
     listeners: [media]
-    # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des Media-Workers
+    # -- (path) Pfade für die Ingress-Konfiguration des Media-Workers, mit 'publicServerName' Domain gesetzt
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     csPaths:
       - "/_synapse/admin/v1/purge_media_cache$"
@@ -768,7 +768,7 @@ workers:
       - "/_synapse/admin/v1/media/"
       - "/_synapse/admin/v1/quarantine_media/"
       - "/_synapse/admin/v1/users/.*/media$"
-    # -- (path) Server-Side(externe) Pfade für die Ingress-Konfiguration des Media-Workers
+    # -- (path) Pfade für die Ingress-Konfiguration des Media-Workers, mit 'serverName' Domain gesetzt
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     paths:
       - "/_matrix/media/"
@@ -797,7 +797,7 @@ workers:
     generic: true
     # -- (list) Zusätzliche Listener für NutzerSuch-Worker
     listeners: [client]
-    # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers
+    # -- (path) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers, mit 'publicServerName' Domain gesetzt
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     csPaths:
       - "/_matrix/client/(r0|v3|unstable)/user_directory/search$"
