@@ -2238,10 +2238,10 @@ false
     </tr>
     <tr>
       <td id="sygnal--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L891">sygnal.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L894">sygnal.podSecurityContext</a></div>
       </td>
       <td>map</td>
-      <td>Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen. Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein weitere Beispiele:  runAsNonRoot: true  fsGroup: 27  runAsGroup: 2000  runAsUser: 2000</td>
+      <td>Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen. Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein weitere Beispiele:  runAsNonRoot: true  fsGroup: 27  runAsGroup: 2000  runAsUser: 2000  sysctls:    - name: net.ipv4.ip_unprivileged_port_start      value: "80"</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 {}
@@ -3996,29 +3996,11 @@ null
       </td>
     </tr>
     <tr>
-      <td id="synapse_admin--podSecurityContext--sysctls">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1495">synapse_admin.podSecurityContext.sysctls</a></div>
+      <td id="synapse_admin--podSecurityContext--runAsGroup">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1495">synapse_admin.podSecurityContext.runAsGroup</a></div>
       </td>
       <td>map</td>
-      <td>Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen. Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein weitere Beispiele:    runAsNonRoot: true</td>
-      <td>
-        <div style="max-width: 300px;"><pre lang="json">
-[
-  {
-    "name": "net.ipv4.ip_unprivileged_port_start",
-    "value": "80"
-  }
-]
-</pre>
-</div>
-      </td>
-    </tr>
-    <tr>
-      <td id="synapse_admin--podSecurityContext--runAsGroup">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1498">synapse_admin.podSecurityContext.runAsGroup</a></div>
-      </td>
-      <td>int</td>
-      <td></td>
+      <td>Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen. Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein weitere Beispiele:  runAsNonRoot: true</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 1001
@@ -4028,7 +4010,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--podSecurityContext--runAsUser">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1499">synapse_admin.podSecurityContext.runAsUser</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1496">synapse_admin.podSecurityContext.runAsUser</a></div>
       </td>
       <td>int</td>
       <td></td>
@@ -4041,7 +4023,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1505">synapse_admin.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1502">synapse_admin.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie des Containers weitere Beispiele:    runAsNonRoot: true    readOnlyRootFilesystem: true    runAsUser: 2010</td>
@@ -4057,7 +4039,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--livenessProbe--httpGet--path">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1537">synapse_admin.livenessProbe.httpGet.path</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1534">synapse_admin.livenessProbe.httpGet.path</a></div>
       </td>
       <td>string</td>
       <td>Zu verwendende Konfiguration für den Pfad des Healthchecks</td>
@@ -4070,7 +4052,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--livenessProbe--httpGet--port">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1539">synapse_admin.livenessProbe.httpGet.port</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1536">synapse_admin.livenessProbe.httpGet.port</a></div>
       </td>
       <td>string</td>
       <td>Zu verwendende Konfiguration für den Port des Healthchecks</td>
@@ -4098,7 +4080,7 @@ null
   <tbody>
     <tr>
       <td id="webclient--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1548">webclient.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1545">webclient.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Element-Webclient im Deployment aktivieren</td>
@@ -4111,7 +4093,7 @@ false
     </tr>
     <tr>
       <td id="webclient--uri">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1550">webclient.uri</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1547">webclient.uri</a></div>
       </td>
       <td>string</td>
       <td>URL für den Webclient, zwingend notwendig</td>
@@ -4124,7 +4106,7 @@ null
     </tr>
     <tr>
       <td id="webclient--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1552">webclient.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1549">webclient.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für das Image vom Element-Webclient</td>
@@ -4141,7 +4123,7 @@ null
     </tr>
     <tr>
       <td id="webclient--annotations--"nginx--ingress--kubernetes--io/configuration-snippet"">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1557">webclient.annotations."nginx.ingress.kubernetes.io/configuration-snippet"</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1554">webclient.annotations."nginx.ingress.kubernetes.io/configuration-snippet"</a></div>
       </td>
       <td>string</td>
       <td></td>
@@ -4154,7 +4136,7 @@ null
     </tr>
     <tr>
       <td id="webclient--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1566">webclient.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1563">webclient.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die der Container übernehmen soll. weitere Möglichkeiten:  fsGroup: 1001</td>
@@ -4170,7 +4152,7 @@ null
     </tr>
     <tr>
       <td id="webclient--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1575">webclient.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1572">webclient.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>

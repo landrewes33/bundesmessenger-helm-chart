@@ -888,10 +888,10 @@ sygnal:
   #  fsGroup: 27
   #  runAsGroup: 2000
   #  runAsUser: 2000
+  #  sysctls:
+  #    - name: net.ipv4.ip_unprivileged_port_start
+  #      value: "80"
   podSecurityContext: {}
-    #    sysctls:
-    #      - name: net.ipv4.ip_unprivileged_port_start
-    #        value: "80"
   # -- (string) Proxy, falls benötigt um die Push-Services zu erreichen. Auskommentieren oder leer für Deaktivierung
   proxy: {}
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
@@ -1491,10 +1491,7 @@ synapse_admin:
   # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
   # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
   # weitere Beispiele:
-  #    runAsNonRoot: true
-    sysctls:
-      - name: net.ipv4.ip_unprivileged_port_start
-        value: "80"
+  #  runAsNonRoot: true
     runAsGroup: 1001
     runAsUser: 1001
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des Containers
