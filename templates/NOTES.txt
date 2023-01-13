@@ -27,9 +27,9 @@ Sie können sich nun an Ihrer BundesMessenger Installation mit jedem kompatiblen
 Matrix-Client verbinden - und einen Account erstellen - sobald die Installation 
 final fertig ist.
 
-Sie können auch einen Administrator Account mit den folgendem Kommando erstellen:
+Sie können auch einen initialen administrativen Administrator und weitere Accounts mit den folgenden Kommandos erstellen:
 {{- else }}
-Sie können einen Account für den installierten BundesMessenger mit dem folgenden Kommando anlegen: 
+Sie können einen initialen administrativen und weitere Accounts für den installierten BundesMessenger mit den folgenden Kommandos anlegen: 
 {{- end }}
 (Ersetzen Sie die Platzhalter NUTZER und PASSWORT mit gewünschten Inhalt)
 
