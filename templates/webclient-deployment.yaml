@@ -30,17 +30,17 @@ spec:
         imagePullPolicy: {{ $.Values.webclient.image.pullPolicy }}
         securityContext:
           {{- toYaml .Values.webclient.securityContext | nindent 12 }}
-        envFrom:
-          - configMapRef: 
-              name: {{ $webclientName }}-environment
         command:
             - sh
             - -c
             - |
-              jq -c '.default_server_config=env.default_server_config | .enable_presence_by_hs_url=env.enable_presence_by_hs_url | .permalink_prefix=env.permalink_prefix' /app/config.sample.json > /opt/config.json
+              jq -s '.[0] * .[1]' /app/config.sample.json /tmp/temp.json > /opt/config.json
         volumeMounts:
           - name: config
             mountPath: /opt/
+          - name: temp
+            mountPath: /tmp/temp.json
+            subPath: temp.json
       containers:
       - name: element
         image: "{{ $.Values.webclient.image.repository }}:{{  $.Values.webclient.image.tag }}"
@@ -73,6 +73,12 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 10
       volumes:
+      - name: temp
+        configMap:
+          name: {{ $webclientName }}-tempconf
+          items:
+          - key: temp.json
+            path: temp.json
       - name: config
         emptyDir:
           sizeLimit: 100Ki
