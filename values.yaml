@@ -1166,6 +1166,30 @@ redis:
     existingSecret: ""
     existingSecretPasswordKey: redis-password
 
+  # -- (map) Konfiguration zur Härtung des Redis-Images
+  # (https://docs.bitnami.com/kubernetes/infrastructure/redis/administration/configure-kernel-settings/)
+  sysctl:
+    enabled: true
+    image:
+      registry: registry.opencode.de
+      repository: bwi/bundesmessenger/backend/container-images/jammy-base-production
+      tag: b4
+      pullPolicy: IfNotPresent
+      # pullSecrets: ["myRegistryKeySecretName"]
+    mountHostSys: true
+    resources:
+      requests:
+        memory: 128Mi
+        cpu: 100m
+      limits:
+        memory: 256Mi
+        cpu: 200m
+    command:
+      - /bin/sh
+      - -c
+      - |-
+        echo never > /host-sys/kernel/mm/transparent_hugepage/enabled
+
   # -- (string) Form der Architektur des Deployments
   architecture: standalone
   master:
