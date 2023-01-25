@@ -1,0 +1,1 @@
+Konfiguration zur Härtung des Redis-Images gemäß [Bitnami-Empfehlungen](https://docs.bitnami.com/kubernetes/infrastructure/redis/administration/configure-kernel-settings/).
