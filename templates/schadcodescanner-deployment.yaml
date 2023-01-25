@@ -27,9 +27,29 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/schadcodescanner-configuration.yaml") . | sha256sum }}
     spec:
     {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
+      serviceAccountName: {{ .Release.Name }}
+      securityContext:
+         {{- $config.podSecurityContext | toYaml | nindent 8 }}
+      initContainers:
+      - name: clamav-permissions
+        image: "{{ $.Values.volumePermissions.image.repository }}:{{ $.Values.volumePermissions.image.tag }}"
+        volumeMounts:
+          - name: signatures
+            mountPath: /clamav/database
+        command:
+          - sh
+          - -c
+          - |
+            chown {{ $config.clamavSecurityContext.runAsUser | default "1111" }}:{{ $config.clamavSecurityContext.runAsGroup | default "1111" }}  -R /clamav/database;
+        securityContext:
+          runAsNonRoot: false
+          runAsUser: 0
+        resources: {{ $.Values.volumePermissions.resources | toYaml | nindent 12 }}
       containers:
       - name: c-icap-server
         image: "{{ $config.imagecicap.repository }}:{{ $config.imagecicap.tag }}"
+        securityContext:
+         {{- $config.icapSecurityContext | default "" | toYaml | nindent 10 }}
         ports:
           - name: c-icap-clamav
             containerPort: {{ $config.service.port }}
@@ -39,9 +59,13 @@ spec:
             mountPath: /run/clamav/
           - name: config-volume
             mountPath: /clamav/config/
+          - name: icap-volume
+            mountPath: /run/cicap/
       - name: clamav
         image: "{{ $config.imageclamav.repository }}:{{ $config.imageclamav.tag }}"
         {{- if .Values.schadcodescanner.extraEnv }}
+        securityContext:
+         {{- $config.clamavSecurityContext | default "" | toYaml | nindent 10 }}
         env:
           {{- with .Values.schadcodescanner.extraEnv }}
               {{- . | toYaml | nindent 12 }}
@@ -60,6 +84,9 @@ spec:
       - name: clamsocket
         emptyDir:
           sizeLimit: 50Mi
+      - name: icap-volume
+        emptyDir:
+          sizeLimit: 5Mi
       - name: config-volume
         projected:
           sources:

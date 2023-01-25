@@ -1446,6 +1446,30 @@ schadcodescanner:
       # -- (string) Anforderungen an RAM Ressourcen, die auf den ClamAV-Container anzuwenden sind.
       memory: 2Gi
 
+  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # weitere Möglichkeiten:
+  #  fsGroup: 1001
+  podSecurityContext:
+    runAsNonRoot: true
+
+  # -- (map) Konfiguration für die ClamAv-Container-Sicherheitsrichtlinie
+  # weitere Möglichkeiten:
+  #  capabilities:
+  #    drop:
+  #    - ALL
+  clamavSecurityContext:
+    runAsUser: 1111
+    runAsGroup: 1111
+
+  # -- (map) Konfiguration für die C-ICAP-Container-Sicherheitsrichtlinie
+  # weitere Möglichkeiten:
+  #  capabilities:
+  #    drop:
+  #    - ALL
+  icapSecurityContext:
+    runAsUser: 1112
+    runAsGroup: 1112
+
 ######################################################################################
 ##          Konfiguration für CoTurn
 ######################################################################################
