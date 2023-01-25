@@ -11,8 +11,9 @@ metadata:
     app.kubernetes.io/component: {{ $component }}
 data:
   c-icap.conf: |
-    PidFile /run/clamav/c-icap.pid
-    CommandsSocket /run/clamav/c-icap.ctl
+    PidFile /run/c-icap/c-icap.pid
+    CommandsSocket /run/c-icap/c-icap.ctl
+    User cicap
     Timeout 300
     MaxKeepAliveRequests 100
     KeepAliveTimeout 600
