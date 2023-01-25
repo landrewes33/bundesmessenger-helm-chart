@@ -3816,6 +3816,53 @@ false
 </div>
       </td>
     </tr>
+    <tr>
+      <td id="schadcodescanner--podSecurityContext">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1452">schadcodescanner.podSecurityContext</a></div>
+      </td>
+      <td>map</td>
+      <td>Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen. weitere Möglichkeiten:  fsGroup: 1001</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+{
+  "runAsNonRoot": true
+}
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="schadcodescanner--clamavSecurityContext">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1460">schadcodescanner.clamavSecurityContext</a></div>
+      </td>
+      <td>map</td>
+      <td>Konfiguration für die ClamAv-Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+{
+  "runAsGroup": 1111,
+  "runAsUser": 1111
+}
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="schadcodescanner--icapSecurityContext">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1469">schadcodescanner.icapSecurityContext</a></div>
+      </td>
+      <td>map</td>
+      <td>Konfiguration für die C-ICAP-Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+{
+  "runAsGroup": 1112,
+  "runAsUser": 1112
+}
+</pre>
+</div>
+      </td>
+    </tr>
   </tbody>
 </table>
 
@@ -3833,7 +3880,7 @@ false
   <tbody>
     <tr>
       <td id="coturn--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1461">coturn.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1485">coturn.enabled</a></div>
       </td>
       <td>bool</td>
       <td>CoTurn als Deployment aktivieren Hinweis: Nicht empfohlen!</td>
@@ -3846,7 +3893,7 @@ false
     </tr>
     <tr>
       <td id="coturn--turnUris">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1464">coturn.turnUris</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1488">coturn.turnUris</a></div>
       </td>
       <td>map</td>
       <td>TurnUris zusammenbauen lassen, aktuell deaktiviert, Als Liste unter `config.turnUris` konfigurieren</td>
@@ -3863,7 +3910,7 @@ false
     </tr>
     <tr>
       <td id="coturn--existingcoturn--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1470">coturn.existingcoturn.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1494">coturn.existingcoturn.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Schalter um bereits existenten CoTurn im K8s-Cluster zu nutzen</td>
@@ -3876,7 +3923,7 @@ false
     </tr>
     <tr>
       <td id="coturn--default_ns">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1472">coturn.default_ns</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1496">coturn.default_ns</a></div>
       </td>
       <td>string</td>
       <td>Namespace für den CoTurn-Dienst</td>
@@ -3889,7 +3936,7 @@ false
     </tr>
     <tr>
       <td id="coturn--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1474">coturn.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1498">coturn.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für das Image vom CoTurn</td>
@@ -3906,7 +3953,7 @@ false
     </tr>
     <tr>
       <td id="coturn--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1479">coturn.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1503">coturn.securityContext</a></div>
       </td>
       <td>map</td>
       <td>SecurityContext für den Container</td>
@@ -3939,7 +3986,7 @@ false
   <tbody>
     <tr>
       <td id="synapse_admin--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1492">synapse_admin.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1516">synapse_admin.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Aktivieren des Synapse-Admin-Moduls</td>
@@ -3952,7 +3999,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--uri">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1494">synapse_admin.uri</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1518">synapse_admin.uri</a></div>
       </td>
       <td>string</td>
       <td>URI für die Admin GUI, zwingend notwendig</td>
@@ -3965,7 +4012,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1496">synapse_admin.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1520">synapse_admin.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration des Image vom Modul</td>
@@ -3982,7 +4029,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1505">synapse_admin.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1529">synapse_admin.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.</td>
@@ -3995,7 +4042,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1507">synapse_admin.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1531">synapse_admin.resources.limits.memory</a></div>
       </td>
       <td>object</td>
       <td>RAM Ressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.</td>
@@ -4008,7 +4055,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1510">synapse_admin.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1534">synapse_admin.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den Synapse-Admin Server anzuwenden sind.</td>
@@ -4021,7 +4068,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1512">synapse_admin.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1536">synapse_admin.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den Synapse-Admin Server anzuwenden sind.</td>
@@ -4034,7 +4081,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--podSecurityContext--runAsGroup">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1519">synapse_admin.podSecurityContext.runAsGroup</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1543">synapse_admin.podSecurityContext.runAsGroup</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen. Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein weitere Beispiele:  runAsNonRoot: true</td>
@@ -4047,7 +4094,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--podSecurityContext--runAsUser">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1520">synapse_admin.podSecurityContext.runAsUser</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1544">synapse_admin.podSecurityContext.runAsUser</a></div>
       </td>
       <td>int</td>
       <td></td>
@@ -4060,7 +4107,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1526">synapse_admin.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1550">synapse_admin.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie des Containers weitere Beispiele:    runAsNonRoot: true    readOnlyRootFilesystem: true    runAsUser: 2010</td>
@@ -4076,7 +4123,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--livenessProbe--httpGet--path">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1558">synapse_admin.livenessProbe.httpGet.path</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1582">synapse_admin.livenessProbe.httpGet.path</a></div>
       </td>
       <td>string</td>
       <td>Zu verwendende Konfiguration für den Pfad des Healthchecks</td>
@@ -4089,7 +4136,7 @@ null
     </tr>
     <tr>
       <td id="synapse_admin--livenessProbe--httpGet--port">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1560">synapse_admin.livenessProbe.httpGet.port</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1584">synapse_admin.livenessProbe.httpGet.port</a></div>
       </td>
       <td>string</td>
       <td>Zu verwendende Konfiguration für den Port des Healthchecks</td>
@@ -4117,7 +4164,7 @@ null
   <tbody>
     <tr>
       <td id="webclient--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1569">webclient.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1593">webclient.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Element-Webclient im Deployment aktivieren</td>
@@ -4130,7 +4177,7 @@ false
     </tr>
     <tr>
       <td id="webclient--uri">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1571">webclient.uri</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1595">webclient.uri</a></div>
       </td>
       <td>string</td>
       <td>URL für den Webclient, zwingend notwendig</td>
@@ -4143,7 +4190,7 @@ null
     </tr>
     <tr>
       <td id="webclient--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1573">webclient.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1597">webclient.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für das Image vom Element-Webclient</td>
@@ -4160,7 +4207,7 @@ null
     </tr>
     <tr>
       <td id="webclient--annotations--"nginx--ingress--kubernetes--io/configuration-snippet"">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1578">webclient.annotations."nginx.ingress.kubernetes.io/configuration-snippet"</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1602">webclient.annotations."nginx.ingress.kubernetes.io/configuration-snippet"</a></div>
       </td>
       <td>string</td>
       <td></td>
@@ -4173,7 +4220,7 @@ null
     </tr>
     <tr>
       <td id="webclient--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1587">webclient.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1611">webclient.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die der Container übernehmen soll. weitere Möglichkeiten:  fsGroup: 1001</td>
@@ -4189,7 +4236,7 @@ null
     </tr>
     <tr>
       <td id="webclient--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1596">webclient.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1620">webclient.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
