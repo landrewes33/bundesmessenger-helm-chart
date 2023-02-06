@@ -893,7 +893,7 @@ sygnal:
   #      value: "80"
   podSecurityContext: {}
   # -- (string) Proxy, falls benötigt um die Push-Services zu erreichen. Auskommentieren oder leer für Deaktivierung
-  proxy: {}
+  proxy: ""
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
   # weitere Beispiele:
   #  capabilities:
@@ -961,8 +961,8 @@ sygnal:
   # Beispiel:
   #    ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus dem APN-File übereinstimmen!
   #    ioskey_keyvalue: 'HIER KÖNNTE IHR KEY IN STEHEN'
-    ioskey_filename: {}
-    ioskey_keyvalue: {}
+    ioskey_filename: ""
+    ioskey_keyvalue: ""
 
 
 ######################################################################################

@@ -39,3 +39,5 @@ helm-package/
 # Filtering
 /filter.txt
 /filter_replace.txt
+# Other
+pusher-values.yaml

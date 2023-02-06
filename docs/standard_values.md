@@ -2257,7 +2257,7 @@ false
       <td>Proxy, falls benötigt um die Push-Services zu erreichen. Auskommentieren oder leer für Deaktivierung</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-{}
+""
 </pre>
 </div>
       </td>
@@ -2452,7 +2452,7 @@ false
       <td>iOS-Key Konfiguration bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden. Weitereres siehe README.md Beispiel:    ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus dem APN-File übereinstimmen!    ioskey_keyvalue: 'HIER KÖNNTE IHR KEY IN STEHEN'</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-{}
+""
 </pre>
 </div>
       </td>
@@ -2461,11 +2461,11 @@ false
       <td id="sygnal--ios_push--ioskey_keyvalue">
         <div style="max-width: 150px;"><a href="../values.yaml#L965">sygnal.ios_push.ioskey_keyvalue</a></div>
       </td>
-      <td>object</td>
+      <td>string</td>
       <td></td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-{}
+""
 </pre>
 </div>
       </td>
