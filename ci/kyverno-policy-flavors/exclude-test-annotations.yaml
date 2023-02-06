@@ -1,0 +1,8 @@
+- op: add
+  path: /spec/rules/0/exclude
+  value:
+    resources:
+      annotations:
+        helm.sh/hook: test
+      kinds:
+      - Pod

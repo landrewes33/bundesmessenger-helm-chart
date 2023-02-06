@@ -1,0 +1,12 @@
+resources:
+- ../../rl-kyverno/policies
+
+patchesStrategicMerge:
+- disable-require-unique-uid-per-workload.yaml
+
+patches:
+- path: exclude-test-annotations.yaml
+  target:
+    version: v1
+    kind: ClusterPolicy
+    name: restrict-image-registries
