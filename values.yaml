@@ -1485,10 +1485,12 @@ coturn:
   enabled: false
   # -- (map) TurnUris zusammenbauen lassen, aktuell deaktiviert,
   # Als Liste unter `config.turnUris` konfigurieren
-  turnUris:
-    udp: 3478
-    tcp: 3478
-    realm: "turn.example.com"
+  # Beispiel:
+  #  udp: 3478
+  #  tcp: 3478
+  #  realm: "turn.example.com"
+  turnUris: []
+
   existingcoturn:
     # -- (bool) Schalter um bereits existenten CoTurn im K8s-Cluster zu nutzen
     enabled: false
