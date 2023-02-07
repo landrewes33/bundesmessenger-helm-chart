@@ -40,4 +40,5 @@ helm-package/
 /filter.txt
 /filter_replace.txt
 # Other
+/ci/
 pusher-values.yaml

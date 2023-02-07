@@ -1112,8 +1112,9 @@ postgresql:
   # ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config
   extraArgs: {}
 
-# -- (map) Ein extern konfigurierter Postgres-Server, der für die Datenbank von Synapse verwendet wird,
-# muss die Datenbank sowohl COLLATE als auch CTYPE auf "C" eingestellt haben.
+# -- (map) Ein extern konfigurierter Postgres-Server, der für die Datenbank von Synapse verwendet wird.
+# Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf "C" eingestellt sein.
+# Die "interne" Datenbank muss deaktiviert sein `postgresql.enabled: false`.
 # Beispiel für K8s internen Postgres im Namespace "postgres":
 externalPostgresql:
   host: postgres-4-matrix-postgresql.postgres.svc.cluster.local

@@ -1,0 +1,44 @@
+serverName: example.org
+publicServerName: matrix.example.org
+
+workers:
+  generic_worker:
+    replicaCount: 1
+    # Kubernetes v1.23+.
+    # autoscaling:
+    #  enabled: true
+
+synapse_admin:
+  enabled: true
+  uri: admin.example.com
+
+webclient:
+  enabled: true
+  uri: web.example.com
+
+contentscanner:
+  enabled: true
+
+schadcodescanner:
+  enabled: true
+
+sygnal:
+  enabled: true
+  apns:
+    de.opencode.dvs.gcm:
+      type: gcm
+      api_key: example-value
+
+wellknown:
+  enabled: true
+
+postgresql:
+  enabled: true
+
+# optional pullSecrets
+# image:
+#   pullSecrets:
+#     - name: bum-git
+# redis:
+#   image:
+#     pullSecrets: bum-git
