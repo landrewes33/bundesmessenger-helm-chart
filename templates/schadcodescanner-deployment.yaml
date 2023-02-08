@@ -60,12 +60,12 @@ spec:
           - name: config-volume
             mountPath: /clamav/config/
           - name: icap-volume
-            mountPath: /run/cicap/
+            mountPath: /run/c-icap/
       - name: clamav
         image: "{{ $config.imageclamav.repository }}:{{ $config.imageclamav.tag }}"
-        {{- if .Values.schadcodescanner.extraEnv }}
         securityContext:
          {{- $config.clamavSecurityContext | default "" | toYaml | nindent 10 }}
+        {{- if .Values.schadcodescanner.extraEnv }}
         env:
           {{- with .Values.schadcodescanner.extraEnv }}
               {{- . | toYaml | nindent 12 }}
