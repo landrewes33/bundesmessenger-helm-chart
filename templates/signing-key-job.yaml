@@ -65,6 +65,7 @@ spec:
         app.kubernetes.io/component: signingkey-job
     spec:
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
+      serviceAccountName: {{ $name }}
       containers:
         - command:
             - sh

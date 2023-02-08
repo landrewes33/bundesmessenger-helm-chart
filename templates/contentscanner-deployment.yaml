@@ -28,11 +28,14 @@ spec:
     spec:
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       securityContext:
-        fsGroup: 1334
+        {{- $config.podSecurityContext | toYaml | nindent 8 }}
+      serviceAccountName: {{ .Release.Name }}
       containers:
       - name: {{ $name }}
         image: "{{ $config.image.repository }}:{{ $config.image.tag }}"
         imagePullPolicy: "{{ $config.image.pullPolicy }}"
+        securityContext:
+        {{- $config.securityContext | toYaml | nindent 10 }}
         ports:
         - containerPort: 8080
           name: contentscanner
@@ -46,7 +49,12 @@ spec:
             mountPath: /crypto
           - name: scannerscript
             mountPath: /opt
+          - name: conftmp
+            mountPath: /home/contentscanner/matrix-content-scanner/config/
       volumes:
+       - name: conftmp
+         emptyDir:
+           sizeLimit: 5Mi
        - name: temp
          emptyDir:
            sizeLimit: 50Mi

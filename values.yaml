@@ -517,7 +517,9 @@ workers:
     #   capabilities:
     #     drop:
     #       - ALL
-    securityContext: {}
+    securityContext:
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
 
     resources:
       limits:
@@ -902,7 +904,8 @@ sygnal:
   #  readOnlyRootFilesystem: true
   #  runAsNonRoot: true
   #  runAsUser: 2111
-  securityContext: {}
+  securityContext:
+    readOnlyRootFilesystem: true
 
   ## Ressource konfiguration für Sygnal server.
   ##
@@ -1353,6 +1356,22 @@ contentscanner:
       # -- (string) Anforderungen an RAM Ressourcen, die auf den Contentscanner-Container anzuwenden sind.
       memory: 500Mi
 
+  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # weitere Möglichkeiten:
+  #  fsGroup: 1001
+  podSecurityContext:
+    runAsGroup: 1334
+    runAsUser: 1334
+
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  # weitere Möglichkeiten:
+  #  capabilities:
+  #    drop:
+  #    - ALL
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+
 
 ######################################################################################
 ##          Konfiguration für ClamAV
@@ -1461,6 +1480,7 @@ schadcodescanner:
   clamavSecurityContext:
     runAsUser: 1111
     runAsGroup: 1111
+    readOnlyRootFilesystem: true
 
   # -- (map) Konfiguration für die C-ICAP-Container-Sicherheitsrichtlinie
   # weitere Möglichkeiten:
@@ -1470,6 +1490,7 @@ schadcodescanner:
   icapSecurityContext:
     runAsUser: 1112
     runAsGroup: 1112
+    readOnlyRootFilesystem: true
 
 ######################################################################################
 ##          Konfiguration für CoTurn
