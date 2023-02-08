@@ -1,8 +1,8 @@
+# https://kyverno.io/docs/writing-policies/autogen/
 - op: add
-  path: /spec/rules/0/exclude
+  path: /spec/rules/0/preconditions
   value:
-    resources:
-      annotations:
-        helm.sh/hook: test
-      kinds:
-      - Pod
+    all:
+    - key: "{{ request.\"object\".metadata.annotations.\"helm.sh/hook\" || '' }}"
+      operator: NotEquals
+      value: test
