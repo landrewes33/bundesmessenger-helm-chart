@@ -1,12 +1,20 @@
 resources:
 - ../../rl-kyverno/policies
 
-patchesStrategicMerge:
-- disable-require-unique-uid-per-workload.yaml
-
 patches:
+- path: disable-require-unique-uid-per-workload.yaml
+
 - path: exclude-test-annotations.yaml
   target:
     version: v1
     kind: ClusterPolicy
     name: restrict-image-registries
+
+# Ursache für redis `initContainers.name: init-sysctl`
+# bei postgresql ist es ein leeres Object `initContainers`
+# und anscheinend ein Bug in Kyverno
+- path: exclude-redis-postgresql.yaml
+  target:
+    version: v1
+    kind: ClusterPolicy
+    name: disallow-privileged-containers

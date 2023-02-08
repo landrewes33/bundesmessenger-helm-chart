@@ -1,0 +1,11 @@
+# https://kyverno.io/docs/writing-policies/autogen/
+- op: add
+  path: /spec/rules/0/preconditions
+  value:
+    all:
+    - key: "{{ request.\"object\".metadata.labels.\"app.kubernetes.io/name\" || '' }}"
+      operator: NotEquals
+      value: redis
+    - key: "{{ request.\"object\".metadata.labels.\"app.kubernetes.io/name\" || '' }}"
+      operator: NotEquals
+      value: postgresql
