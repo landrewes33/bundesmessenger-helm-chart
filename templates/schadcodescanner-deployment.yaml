@@ -121,13 +121,18 @@ spec:
             mountPath: /clamav/config/
           - name: icap-volume
             mountPath: /run/c-icap/
+          - name: icap-tmp
+            mountPath: /tmp
       volumes:
       - name: clamsocket
         emptyDir:
-          sizeLimit: 50Mi
+          sizeLimit: 50M
       - name: icap-volume
         emptyDir:
-          sizeLimit: 5Mi
+          sizeLimit: 5M
+      - name: icap-tmp
+        emptyDir:
+          sizeLimit: 5M
       - name: config-volume
         projected:
           sources:
