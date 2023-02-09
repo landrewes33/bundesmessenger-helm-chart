@@ -1,4 +1,5 @@
 # https://kyverno.io/docs/writing-policies/autogen/
+# Excludes für Labels müssen über Preconditions erfolgen
 - op: add
   path: /spec/rules/0/preconditions
   value:
@@ -6,6 +7,3 @@
     - key: "{{ request.\"object\".metadata.labels.\"app.kubernetes.io/name\" || '' }}"
       operator: NotEquals
       value: redis
-    - key: "{{ request.\"object\".metadata.labels.\"app.kubernetes.io/name\" || '' }}"
-      operator: NotEquals
-      value: postgresql
