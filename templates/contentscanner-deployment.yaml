@@ -40,6 +40,15 @@ spec:
         - containerPort: 8080
           name: contentscanner
           protocol: TCP
+        livenessProbe:
+          tcpSocket:
+            port: contentscanner
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          periodSeconds: 3
+          tcpSocket:
+            port: contentscanner
         volumeMounts:
           - name: scannerconfig
             mountPath: /config
