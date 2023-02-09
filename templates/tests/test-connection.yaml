@@ -1,3 +1,36 @@
+{{- define "test-connection-annotations" -}}
+"helm.sh/hook": test
+"helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+{{- end -}}
+
+{{- define "test-connection-image" -}}
+- name: curl
+  image: curlimages/curl:7.87.0
+  command: ['curl']
+  args:  ['-v', '-f', '--connect-timeout', '5', '{{ . }}']
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsUser: 5210
+  resources:
+    limits:
+      cpu: "250m"
+      memory: "32Mi"
+    requests:
+      cpu: "150m"
+      memory: "16Mi"
+  livenessProbe:
+    periodSeconds: 10
+    exec:
+      command:
+      - cat
+      - /tmp/healthy
+  readinessProbe:
+    periodSeconds: 3
+    exec:
+      command:
+      - cat
+      - /tmp/healthy
+{{- end -}}
 ---
 apiVersion: v1
 kind: Pod
@@ -6,15 +39,14 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": test
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- include "test-connection-annotations" . | nindent 4 }}
 spec:
   serviceAccountName: {{ .Release.Name }}
+  securityContext:
+    runAsNonRoot: true
   containers:
-    - name: wget
-      image: busybox
-      command: ['wget']
-      args:  ['{{ include "matrix-synapse.fullname" . }}:{{ $.Values.service.port }}/_matrix/client/versions']
+    {{- $url := printf "%s:%s%s" (include "matrix-synapse.fullname" .) ($.Values.service.port | toString) ("/_matrix/client/versions") -}}
+    {{- include "test-connection-image" $url | nindent 4 }}
   restartPolicy: Never
 
 {{- if .Values.wellknown.enabled }}
@@ -26,15 +58,14 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": test
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- include "test-connection-annotations" . | nindent 4 }}
 spec:
   serviceAccountName: {{ .Release.Name }}
+  securityContext:
+    runAsNonRoot: true
   containers:
-    - name: wget
-      image: busybox
-      command: ['wget']
-      args: ['{{ include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") }}:80/.well-known/matrix/server']
+    {{- $url := printf "%s:%s%s" (include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx")) (80 | toString) ("/.well-known/matrix/server") -}}
+    {{- include "test-connection-image" $url | nindent 4 }}
   restartPolicy: Never
 ---
 apiVersion: v1
@@ -48,11 +79,11 @@ metadata:
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   serviceAccountName: {{ .Release.Name }}
+  securityContext:
+    runAsNonRoot: true
   containers:
-    - name: wget
-      image: busybox
-      command: ['wget']
-      args: ['{{ include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") }}:80/.well-known/matrix/client']
+    {{- $url := printf "%s:%s%s" (include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx")) (80 | toString) ("/.well-known/matrix/client") -}}
+    {{- include "test-connection-image" $url | nindent 4 }}
   restartPolicy: Never
 {{- end }}
 
@@ -65,15 +96,14 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": test
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- include "test-connection-annotations" . | nindent 4 }}
 spec:
   serviceAccountName: {{ .Release.Name }}
+  securityContext:
+    runAsNonRoot: true
   containers:
-    - name: wget
-      image: busybox
-      command: ['wget']
-      args: ['{{ include "matrix-synapse.externalname" (dict "global" . "external" "webclient") }}:8080/index.html']
+    {{- $url := printf "%s:%s%s" (include "matrix-synapse.externalname" (dict "global" . "external" "webclient")) (8080 | toString) ("/index.html") -}}
+    {{- include "test-connection-image" $url | nindent 4 }}
   restartPolicy: Never
 {{- end }}
 
@@ -86,15 +116,14 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": test
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- include "test-connection-annotations" . | nindent 4 }}
 spec:
   serviceAccountName: {{ .Release.Name }}
+  securityContext:
+    runAsNonRoot: true
   containers:
-    - name: wget
-      image: busybox
-      command: ['wget']
-      args: ['{{ include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") }}:8080/#/login']
+    {{- $url := printf "%s:%s%s" (include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin")) (8080 | toString) ("/#/login") -}}
+    {{- include "test-connection-image" $url | nindent 4 }}
   restartPolicy: Never
 {{- end }}
 
@@ -107,14 +136,13 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": test
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- include "test-connection-annotations" . | nindent 4 }}
 spec:
   serviceAccountName: {{ .Release.Name }}
+  securityContext:
+    runAsNonRoot: true
   containers:
-    - name: wget
-      image: busybox
-      command: ['wget']
-      args: ['{{ include "matrix-synapse.externalname" (dict "global" . "external" "matrix-content-scanner") }}:8080/_matrix/media_proxy/unstable/public_key']
+    {{- $url := printf "%s:%s%s" (include "matrix-synapse.externalname" (dict "global" . "external" "matrix-content-scanner")) (8080 | toString) ("/_matrix/media_proxy/unstable/public_key") -}}
+    {{- include "test-connection-image" $url | nindent 4 }}
   restartPolicy: Never
 {{- end }}
