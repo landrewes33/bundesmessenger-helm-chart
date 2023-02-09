@@ -38,11 +38,14 @@ spec:
               containerPort: 8080
           resources:
             {{- toYaml .Values.synapse_admin.resources | nindent 12 }}
-          {{- with .Values.synapse_admin.livenessProbe }}
           livenessProbe:
-            {{- . | toYaml | nindent 12 }}
-          {{- end }}
+            httpGet:
+              path: /status
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
           readinessProbe:
+            periodSeconds: 3
             tcpSocket:
               port: http
           volumeMounts:

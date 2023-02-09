@@ -46,21 +46,6 @@ spec:
           runAsUser: 0
         resources: {{ $.Values.volumePermissions.resources | toYaml | nindent 12 }}
       containers:
-      - name: c-icap-server
-        image: "{{ $config.imagecicap.repository }}:{{ $config.imagecicap.tag }}"
-        securityContext:
-         {{- $config.icapSecurityContext | default "" | toYaml | nindent 10 }}
-        ports:
-          - name: c-icap-clamav
-            containerPort: {{ $config.service.port }}
-            protocol: TCP
-        volumeMounts:
-          - name: clamsocket
-            mountPath: /run/clamav/
-          - name: config-volume
-            mountPath: /clamav/config/
-          - name: icap-volume
-            mountPath: /run/c-icap/
       - name: clamav
         image: "{{ $config.imageclamav.repository }}:{{ $config.imageclamav.tag }}"
         securityContext:
@@ -80,6 +65,62 @@ spec:
             mountPath: /clamav/database
           - name: config-volume
             mountPath: /clamav/config/
+        startupProbe:
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          exec:
+            command:
+              - /usr/bin/clamdscan
+              - '-p 1'
+              - '--quiet'
+              - '-c'
+              - /clamav/config/clamdcheck.conf
+        livenessProbe:
+          periodSeconds: 10
+          exec:
+            command:
+              - /usr/bin/clamdscan
+              - '-p 1'
+              - '--quiet'
+              - '-c'
+              - /clamav/config/clamdcheck.conf
+        readinessProbe:
+          periodSeconds: 3
+          exec:
+            command:
+              - /usr/bin/clamdscan
+              - '-p 1'
+              - '--quiet'
+              - '-c'
+              - /clamav/config/clamdcheck.conf
+      - name: c-icap-server
+        image: "{{ $config.imagecicap.repository }}:{{ $config.imagecicap.tag }}"
+        securityContext:
+         {{- $config.icapSecurityContext | default "" | toYaml | nindent 10 }}
+        ports:
+          - name: c-icap-clamav
+            containerPort: {{ $config.service.port }}
+            protocol: TCP
+        startupProbe:
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          tcpSocket:
+              port: {{ $config.service.port }}
+        livenessProbe:
+          periodSeconds: 10
+          tcpSocket:
+              port: {{ $config.service.port }}
+        readinessProbe:
+          periodSeconds: 10
+          tcpSocket:
+              port: {{ $config.service.port }}
+        volumeMounts:
+          - name: clamsocket
+            mountPath: /run/clamav/
+          - name: config-volume
+            mountPath: /clamav/config/
+          - name: icap-volume
+            mountPath: /run/c-icap/
       volumes:
       - name: clamsocket
         emptyDir:

@@ -370,6 +370,7 @@ synapse:
 
   # Healthcheck
   livenessProbe:
+    periodSeconds: 10
     httpGet:
       # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
       path: /health
@@ -378,6 +379,7 @@ synapse:
 
   # Bereitschaftscheck
   readinessProbe:
+    periodSeconds: 3
     httpGet:
       # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
       path: /health
@@ -543,6 +545,7 @@ workers:
 
     # Healthcheck
     livenessProbe:
+      periodSeconds: 10
       httpGet:
         # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
         # DEFAULT gilt für alle Synapse-Worker-Container.
@@ -553,6 +556,7 @@ workers:
 
     # Bereitschaftscheck
     readinessProbe:
+      periodSeconds: 3
       httpGet:
         # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
         # DEFAULT gilt für alle Synapse-Worker-Container.
@@ -1422,7 +1426,7 @@ schadcodescanner:
     # -- (string) clamav.freshclam.mirrors -- A list of clamav mirrors to be used by the clamav service
     mirrors: database.clamav.net
 
-  # -- (int) Anzahl der Worker-Container
+  # -- (int) Anzahl der ClamAV-Pods
   # Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas
   # oder wenn nicht gesetzt, dann wird autoscaling.minReplicas übernommen
   replicaCount: 1
@@ -1598,14 +1602,6 @@ synapse_admin:
   #      mountPath: /var/run/
   #    - name: tmpnginx
   #      mountPath: /var/cache/nginx/
-
-  # Healthcheck
-  livenessProbe:
-    httpGet:
-      # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
-      path: /status
-      # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks
-      port: http
 
 
 ######################################################################################
