@@ -1,4 +1,4 @@
-# This repository adheres to the publiccode.yml standard by including this 
+# This repository adheres to the publiccode.yml standard by including this
 # metadata file that makes public software easily discoverable.
 # More info at https://github.com/italia/publiccode.yml
 
@@ -56,7 +56,7 @@ releaseDate: '2022-12-15'
 softwareType: standalone/backend
 url: 'https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart'
 logo: |-
-  https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/raw/main/docs/images/bum_logo.svg
+  https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/raw/main/docs/images/bum_core_sw.svg
 dependsOn:
   open:
     - name: Kubernetes
