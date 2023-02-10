@@ -1,1 +1,1 @@
-Beispieladresse des TURN-Servers (`turnUris`) aus der Standard-Konfiguration (`values.yaml`) entfernt.
+Deaktivierung von nicht relevanten DVS Kyverno Regeln mit Hife von `kustomize` und Integration des Reports in [Gitlab SAST](https://docs.gitlab.com/ee/user/application_security/sast/).
