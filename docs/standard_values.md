@@ -3964,7 +3964,7 @@ false
       <td>TurnUris zusammenbauen lassen, aktuell deaktiviert, Als Liste unter `config.turnUris` konfigurieren Beispiel:  udp: 3478  tcp: 3478  realm: "turn.example.com"</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-[]
+{}
 </pre>
 </div>
       </td>
