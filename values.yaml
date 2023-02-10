@@ -1515,7 +1515,7 @@ coturn:
   #  udp: 3478
   #  tcp: 3478
   #  realm: "turn.example.com"
-  turnUris: []
+  turnUris: {}
 
   existingcoturn:
     # -- (bool) Schalter um bereits existenten CoTurn im K8s-Cluster zu nutzen
