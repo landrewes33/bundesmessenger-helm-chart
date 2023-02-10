@@ -5,6 +5,9 @@
 # - $1: Path to input file / Kyverno Report
 # - $2: Path to output file / JSON Gitlab SAST Report
 
+export time=$(date -u +'%FT%T')
+export kyverno_version=$(kyverno version | yq '.Version')
+
 # get attributes/annotations/labels from policies
 # because this information are not part of the kyverno report
 # export them to environment var to use them later
@@ -39,10 +42,7 @@ query='.results |
     map(
     .description = .message |
     .message = .resources[0].kind + "/" + .resources[0].name + " -> " + .policy |
-    . +
-        {"scanner":{
-            "id":"kyverno", "name":"Kyverno"
-        },
+    . + {
         "identifiers":[
             {"type":"kyverno_policy_id","name":.policy,"value":.policy},
             {"type":"kyverno_rule_id","name":.rule,"value":.rule}
@@ -51,11 +51,9 @@ query='.results |
             "file":.resources[0].kind + "/" + .resources[0].name + ".dummy",
             "class":.resources[0].kind + "/" + .resources[0].name
         },
-        "category":"sast",
         "id":.rule + "-" + .policy + "-" + .resources[0].kind + "-" + .resources[0].name,
-        "cve":.rule + "-" + .policy + "-" + .resources[0].kind + "-" + .resources[0].name,
-        "severity":"${severity_" + .policy + "}" | sub("-","_") | envsubst,
-        "confidence":"High"} |
+        "severity":"${severity_" + .policy + "}" | sub("-","_") | envsubst
+    } |
     del(.resources) |
     del(.timestamp) |
     del(.source) |
@@ -63,6 +61,29 @@ query='.results |
     del(.result) |
     del(.policy) |
     del(.rule)
-    ) | {"version":"14.1.3", "vulnerabilities":.}
+    ) | {
+        "version":"15.0.4",
+        "scan":{
+            "analyzer":{
+                "id":"bwi_script",
+                "name":"BWI Script",
+                "version":"1.0.0",
+                "vendor":{"name":"BWI"},
+                "url":"https://www.bwi.de/"
+            },
+           "scanner":{
+                "id":"kyverno",
+                "name":"Kyverno",
+                "version":env(kyverno_version),
+                "vendor":{"name":"Kyverno"},
+                "url":"https://kyverno.io/"
+            },
+            "start_time":env(time),
+            "end_time":env(time),
+            "status":"success",
+            "type":"sast"
+        },
+        "vulnerabilities":.
+    }
 '
 yq "${query}" $1 -o=json > $2
