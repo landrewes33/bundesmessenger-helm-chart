@@ -4,7 +4,7 @@ name: bundesmessenger
 version: 1.1.0
 description: BWI Matrix BundesMessenger
 home: https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/
-icon: https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/raw/main/docs/images/bum_logo.svg
+icon: https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/raw/main/docs/images/bum_core_sw.svg
 
 type: application
 appVersion: 1.64.0
