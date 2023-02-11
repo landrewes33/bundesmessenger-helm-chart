@@ -30,6 +30,10 @@ spec:
         imagePullPolicy: {{ $.Values.webclient.image.pullPolicy }}
         securityContext:
           {{- toYaml .Values.webclient.securityContext | nindent 12 }}
+        resources:  
+          requests:
+            memory: 45Mi
+            cpu: 50m
         command:
             - sh
             - -c
@@ -47,6 +51,8 @@ spec:
         imagePullPolicy: {{ $.Values.webclient.image.pullPolicy }}
         securityContext:
           {{- toYaml .Values.webclient.securityContext | nindent 12 }}
+        resources:
+          {{- toYaml .Values.webclient.resources | nindent 12 }}
         volumeMounts:
         - name: config
           mountPath: /app/config.json

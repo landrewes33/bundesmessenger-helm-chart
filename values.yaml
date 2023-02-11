@@ -1640,3 +1640,16 @@ webclient:
   securityContext:
     readOnlyRootFilesystem: true
     runAsNonRoot: true
+
+  ## Ressource Konfiguration für webclient-server.
+  resources:
+    limits:
+      # -- (string) Rechenressourcengrenzen, die auf den webclient-server anzuwenden sind.
+      cpu: 100m
+      # -- (object) RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind.
+      memory: 90Mi
+    requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf den webclient-server anzuwenden sind.
+      cpu: 50m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den webclient-server anzuwenden sind.
+      memory: 45Mi
