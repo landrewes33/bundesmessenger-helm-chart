@@ -4285,6 +4285,58 @@ null
 </div>
       </td>
     </tr>
+    <tr>
+      <td id="webclient--resources--limits--cpu">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1648">webclient.resources.limits.cpu</a></div>
+      </td>
+      <td>string</td>
+      <td>Rechenressourcengrenzen, die auf den webclient-server anzuwenden sind.</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+"100m"
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="webclient--resources--limits--memory">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1650">webclient.resources.limits.memory</a></div>
+      </td>
+      <td>object</td>
+      <td>RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind.</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+"90Mi"
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="webclient--resources--requests--cpu">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1653">webclient.resources.requests.cpu</a></div>
+      </td>
+      <td>string</td>
+      <td>Anforderungen an Rechenressourcen, die auf den webclient-server anzuwenden sind.</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+"50m"
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="webclient--resources--requests--memory">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1655">webclient.resources.requests.memory</a></div>
+      </td>
+      <td>string</td>
+      <td>Anforderungen an RAM Ressourcen, die auf den webclient-server anzuwenden sind.</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+"45Mi"
+</pre>
+</div>
+      </td>
+    </tr>
   </tbody>
 </table>
 
