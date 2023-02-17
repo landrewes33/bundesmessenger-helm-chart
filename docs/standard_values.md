@@ -51,7 +51,7 @@ BWI Matrix BundesMessenger
       <td id="image--pullSecrets">
         <div style="max-width: 150px;"><a href="../values.yaml#L21">image.pullSecrets</a></div>
       </td>
-      <td>map</td>
+      <td>list</td>
       <td>Optional kann ein Array von imagePullSecrets angegeben werden. Secrets müssen manuell im Namensraum angelegt werden. ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/ Beispiel: pullSecrets:   - name: myRegistryKeySecretName</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
@@ -545,7 +545,7 @@ true
         <div style="max-width: 150px;"><a href="../values.yaml#L198">extraConfig.user_directory.enabled</a></div>
       </td>
       <td>bool</td>
-      <td>Nutzerverzeichnis erstellen, eingeschaltet (Vraussetzung für Nutzersuche)</td>
+      <td>Nutzerverzeichnis erstellen, eingeschaltet (Voraussetzung für Nutzersuche)</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 true
@@ -973,7 +973,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td id="synapse--extraEnv">
         <div style="max-width: 150px;"><a href="../values.yaml#L303">synapse.extraEnv</a></div>
       </td>
-      <td>map</td>
+      <td>list</td>
       <td>Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind Beispiel:  - name: LD_PRELOAD    value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2  - name: SYNAPSE_CACHE_FACTOR    value: "2"</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -986,7 +986,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td id="synapse--extraVolumes">
         <div style="max-width: 150px;"><a href="../values.yaml#L314">synapse.extraVolumes</a></div>
       </td>
-      <td>object</td>
+      <td>list</td>
       <td>Zusätzliche in Synapse zu mountende Datenträger (Volumes) Beispiel:  - name: spamcheck    flexVolume:      driver: dvs/git-live      options:        repo: https://gitlab.opencode.de/bwi/bundesmessenger/synapse-module        interval: 1d      readOnly: true</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -999,7 +999,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td id="synapse--extraVolumeMounts">
         <div style="max-width: 150px;"><a href="../values.yaml#L320">synapse.extraVolumeMounts</a></div>
       </td>
-      <td>object</td>
+      <td>list</td>
       <td>Zusätzliche in Synapse zu mountende Datenträgerpfade (Volumes) Beispiel:  - name: spamcheck    mountPath: /usr/local/lib/python3.7/site-packages/company</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -1073,7 +1073,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td id="synapse--resources--limits--memory">
         <div style="max-width: 150px;"><a href="../values.yaml#L364">synapse.resources.limits.memory</a></div>
       </td>
-      <td>object</td>
+      <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -1203,7 +1203,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td id="synapse--nodeSelector">
         <div style="max-width: 150px;"><a href="../values.yaml#L403">synapse.nodeSelector</a></div>
       </td>
-      <td>list</td>
+      <td>object</td>
       <td>Node Selektoren, die für den Haupt-Synapse-Container festgelegt werden.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -1294,7 +1294,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td id="workers--default--extraEnv">
         <div style="max-width: 150px;"><a href="../values.yaml#L486">workers.default.extraEnv</a></div>
       </td>
-      <td>object</td>
+      <td>list</td>
       <td>DEFAULT Zusätzliche Umgebungsvariablen, die auf alle Synapse-Worker-Container anzuwenden sind Beispiel:  - name: LD_PRELOAD    value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2  - name: SYNAPSE_CACHE_FACTOR    value: "1.0"</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -1307,7 +1307,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td id="workers--default--volumes">
         <div style="max-width: 150px;"><a href="../values.yaml#L492">workers.default.volumes</a></div>
       </td>
-      <td>map</td>
+      <td>list</td>
       <td>Zusätzliche Volumes, die dem Worker hinzugefügt werden sollen. DEFAULT gilt für alle Synapse-Worker-Container. Nützlich für das Medien-Repo oder zum Hinzufügen von Python-Modulen. Daher besser im entsprechenden Konfigurationsteil der spez. Worker</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -1320,7 +1320,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td id="workers--default--volumeMounts">
         <div style="max-width: 150px;"><a href="../values.yaml#L496">workers.default.volumeMounts</a></div>
       </td>
-      <td>map</td>
+      <td>list</td>
       <td>Zusätzliche zu mountende Datenträgerpfade (siehe volumes) DEFAULT gilt für alle Synapse-Worker-Container.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -1388,7 +1388,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td id="workers--default--resources--limits--memory">
         <div style="max-width: 150px;"><a href="../values.yaml#L535">workers.default.resources.limits.memory</a></div>
       </td>
-      <td>object</td>
+      <td>string</td>
       <td>RAM Ressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind. DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen gesondert zu verwalten</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -1544,7 +1544,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td id="workers--default--nodeSelector">
         <div style="max-width: 150px;"><a href="../values.yaml#L582">workers.default.nodeSelector</a></div>
       </td>
-      <td>list</td>
+      <td>object</td>
       <td>Node Selektor Konfiguration, die auf alle Synapse-Worker-Container anzuwenden sind. DEFAULT gilt für alle Synapse-Worker-Container.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -1570,7 +1570,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td id="workers--default--affinity">
         <div style="max-width: 150px;"><a href="../values.yaml#L590">workers.default.affinity</a></div>
       </td>
-      <td>list</td>
+      <td>object</td>
       <td>Affinitäts-Konfiguration, die auf alle Synapse-Worker-Container anzuwenden sind. DEFAULT gilt für alle Synapse-Worker-Container.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -1642,7 +1642,7 @@ true
       <td id="workers--generic_worker--csPaths">
         <div style="max-width: 150px;"><a href="../values.yaml#L613">workers.generic_worker.csPaths</a></div>
       </td>
-      <td>path</td>
+      <td>list</td>
       <td>Pfade für die Ingress-Konfiguration des Workers, mit 'publicServerName' Domain gesetzt</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
@@ -1655,7 +1655,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
       <td id="workers--generic_worker--paths">
         <div style="max-width: 150px;"><a href="../values.yaml#L683">workers.generic_worker.paths</a></div>
       </td>
-      <td>path</td>
+      <td>list</td>
       <td>Pfade für die Ingress-Konfiguration des Workers, mit 'serverName' Domain gesetzt</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
@@ -1787,7 +1787,7 @@ true
       <td id="workers--federation_reader--paths">
         <div style="max-width: 150px;"><a href="../values.yaml#L740">workers.federation_reader.paths</a></div>
       </td>
-      <td>path</td>
+      <td>list</td>
       <td>Pfade für die Ingress-Konfiguration des Förderations-Workers, mit 'serverName' Domain gesetzt</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
@@ -1884,7 +1884,7 @@ true
       <td id="workers--media_repository--csPaths">
         <div style="max-width: 150px;"><a href="../values.yaml#L777">workers.media_repository.csPaths</a></div>
       </td>
-      <td>path</td>
+      <td>list</td>
       <td>Pfade für die Ingress-Konfiguration des Media-Workers, mit 'publicServerName' Domain gesetzt</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
@@ -1897,7 +1897,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
       <td id="workers--media_repository--paths">
         <div style="max-width: 150px;"><a href="../values.yaml#L786">workers.media_repository.paths</a></div>
       </td>
-      <td>path</td>
+      <td>list</td>
       <td>Pfade für die Ingress-Konfiguration des Media-Workers, mit 'serverName' Domain gesetzt</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
@@ -1923,7 +1923,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
       <td id="workers--media_repository--resources--limits--memory">
         <div style="max-width: 150px;"><a href="../values.yaml#L793">workers.media_repository.resources.limits.memory</a></div>
       </td>
-      <td>object</td>
+      <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den media_repository-Container anzuwenden sind.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -2016,7 +2016,7 @@ true
       <td id="workers--user_dir--csPaths">
         <div style="max-width: 150px;"><a href="../values.yaml#L815">workers.user_dir.csPaths</a></div>
       </td>
-      <td>path</td>
+      <td>list</td>
       <td>Pfade für die Ingress-Konfiguration des Nutzersuch-Workers, mit 'publicServerName' Domain gesetzt</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
@@ -2252,7 +2252,7 @@ false
       <td id="sygnal--image">
         <div style="max-width: 150px;"><a href="../values.yaml#L885">sygnal.image</a></div>
       </td>
-      <td>map</td>
+      <td>maps</td>
       <td>Image/Repo-Konfiguration von Sygnal</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -2323,7 +2323,7 @@ false
       <td id="sygnal--resources--limits--memory">
         <div style="max-width: 150px;"><a href="../values.yaml#L921">sygnal.resources.limits.memory</a></div>
       </td>
-      <td>object</td>
+      <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -2414,7 +2414,7 @@ false
       <td id="sygnal--nodeSelector">
         <div style="max-width: 150px;"><a href="../values.yaml#L945">sygnal.nodeSelector</a></div>
       </td>
-      <td>list</td>
+      <td>object</td>
       <td>Node Selektor Konfiguration für Sygnal-Container.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -2440,7 +2440,7 @@ false
       <td id="sygnal--affinity">
         <div style="max-width: 150px;"><a href="../values.yaml#L951">sygnal.affinity</a></div>
       </td>
-      <td>list</td>
+      <td>object</td>
       <td>Affinitäts-Konfiguration für Sygnal-Container.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -2453,7 +2453,7 @@ false
       <td id="sygnal--apns">
         <div style="max-width: 150px;"><a href="../values.yaml#L959">sygnal.apns</a></div>
       </td>
-      <td>map</td>
+      <td>object</td>
       <td>APN-Konfigurationsteil Beispiel: apns:    de.opencode.dvs.ios:      type: apns      keyfile: /de.opencode.dvs.ios.p8</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -2467,7 +2467,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L964">sygnal.ios_push.enabled</a></div>
       </td>
       <td>bool</td>
-      <td>IOS-Push Schalter Wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden, sonst schlägt das Modul fehl</td>
+      <td>iOS-Push Schalter Wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden, sonst schlägt das Modul fehl</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 false
@@ -2480,7 +2480,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L971">sygnal.ios_push.ioskey_filename</a></div>
       </td>
       <td>map</td>
-      <td>iOS-Key Konfiguration bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden. Weitereres siehe README.md Beispiel:    ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus dem APN-File übereinstimmen!    ioskey_keyvalue: 'HIER KÖNNTE IHR KEY IN STEHEN'</td>
+      <td>iOS-Key Konfiguration bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden. Weitereres siehe README.md Beispiel:  ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus dem APN-File übereinstimmen!  ioskey_keyvalue: 'HIER KÖNNTE IHR KEY IN STEHEN'</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 ""
@@ -2533,7 +2533,7 @@ false
       <td id="wellknown--server">
         <div style="max-width: 150px;"><a href="../values.yaml#L989">wellknown.server</a></div>
       </td>
-      <td>map</td>
+      <td>object</td>
       <td>Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist. Beispiel:  m.server: matrix.example.com:443</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -2546,7 +2546,7 @@ false
       <td id="wellknown--client">
         <div style="max-width: 150px;"><a href="../values.yaml#L1001">wellknown.client</a></div>
       </td>
-      <td>map</td>
+      <td>object</td>
       <td>Daten, die auf .well-known/matrix/client bereitgestellt werden sollen Beispiel:  io.element.e2ee:    secure_backup_required: true    secure_backup_setup_methods: ["passphrase"]    outbound_keys_pre_sharing_mode: "on_room_opening"  m.homeserver:    base_url: https://matrix.example.com  de.bwi:    data_privacy_url: https://messenger.bwi.de</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -2647,7 +2647,7 @@ false
       <td id="wellknown--resources--limits--memory">
         <div style="max-width: 150px;"><a href="../values.yaml#L1049">wellknown.resources.limits.memory</a></div>
       </td>
-      <td>object</td>
+      <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den well-known server anzuwenden sind.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -2686,7 +2686,7 @@ false
       <td id="wellknown--nodeSelector">
         <div style="max-width: 150px;"><a href="../values.yaml#L1057">wellknown.nodeSelector</a></div>
       </td>
-      <td>list</td>
+      <td>object</td>
       <td>Node Selektor Konfiguration für well-known server.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -2712,7 +2712,7 @@ false
       <td id="wellknown--affinity">
         <div style="max-width: 150px;"><a href="../values.yaml#L1063">wellknown.affinity</a></div>
       </td>
-      <td>list</td>
+      <td>object</td>
       <td>Affinitäts-Konfiguration für well-known server.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -2760,7 +2760,7 @@ false
 {
   "registry": "registry.opencode.de",
   "repository": "ig-bvc/demo-apps/postgresql/postgres",
-  "tag": 14
+  "tag": "14"
 }
 </pre>
 </div>
@@ -3302,7 +3302,7 @@ false
       <td id="ingress--paths">
         <div style="max-width: 150px;"><a href="../values.yaml#L1294">ingress.paths</a></div>
       </td>
-      <td>path</td>
+      <td>list</td>
       <td>Zusätzliche Pfade, die zu den Server-zu-Server-Eingangsblöcken hinzugefügt werden sollen Werden vor dem `/_matrix` Catch-all-Pfad eingefügt. Beispiele:  # K8s 1.19+  - path: /_matrix/media    pathType: Prefix    backend:      service:        name: matrix-media-repo        port: 8000  # K8s <1.19  - path: /_matrix/media    backend:      serviceName: matrix-media-repo      servicePort: 8000</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -3315,7 +3315,7 @@ false
       <td id="ingress--csPaths">
         <div style="max-width: 150px;"><a href="../values.yaml#L1311">ingress.csPaths</a></div>
       </td>
-      <td>path</td>
+      <td>list</td>
       <td>Zusätzliche Pfade, die zu den Client-zu-Server Blöcken hinzugefügt werden sollen Werden vor dem `/_matrix` und `/_synapse` Catch-all-Pfade eingefügt. Beispiele:  # K8s 1.19+  - path: /_matrix/media    pathType: Prefix    backend:      service:        name: matrix-media-repo        port: 8000  # K8s <1.19  - path: /_matrix/media    backend:      serviceName: matrix-media-repo      servicePort: 8000</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -3354,7 +3354,7 @@ true
       <td id="ingress--tls">
         <div style="max-width: 150px;"><a href="../values.yaml#L1330">ingress.tls</a></div>
       </td>
-      <td>map</td>
+      <td>list</td>
       <td>TLS-Konfiguration für Ingress Konfiguration Enthält für alle benötigten Domains die notwendigen Secrets bzw. TLS-Zertifikate Beispiel:  - secretName: chart-example-tls    hosts:      - example.com      - matrix.example.com  - secretName: admin-example-tls    hosts:      - admin.example.com</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -3451,7 +3451,7 @@ false
       <td id="contentscanner--resources--limits--memory">
         <div style="max-width: 150px;"><a href="../values.yaml#L1356">contentscanner.resources.limits.memory</a></div>
       </td>
-      <td>object</td>
+      <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den Contentscanner-Container anzuwenden sind.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -3649,7 +3649,7 @@ leer, damit dynamische Volumes genutzt werden können (dennoch persistent)
       <td id="schadcodescanner--extraEnv">
         <div style="max-width: 150px;"><a href="../values.yaml#L1418">schadcodescanner.extraEnv</a></div>
       </td>
-      <td>map</td>
+      <td>list</td>
       <td>Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind Beispiel:   - name: NO_PROXY     value: "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"   - name: HTTPS_PROXY     value: "https://proxyuser@proxyserver:proxyport"   - name: HTTP_PROXY     value: "http://proxyuser@proxyserver:proxyport"</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -3844,7 +3844,7 @@ false
       <td id="schadcodescanner--resources--limits--memory">
         <div style="max-width: 150px;"><a href="../values.yaml#L1466">schadcodescanner.resources.limits.memory</a></div>
       </td>
-      <td>object</td>
+      <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -4105,7 +4105,7 @@ null
       <td id="synapse_admin--resources--limits--memory">
         <div style="max-width: 150px;"><a href="../values.yaml#L1559">synapse_admin.resources.limits.memory</a></div>
       </td>
-      <td>object</td>
+      <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
@@ -4141,27 +4141,17 @@ null
       </td>
     </tr>
     <tr>
-      <td id="synapse_admin--podSecurityContext--runAsGroup">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1571">synapse_admin.podSecurityContext.runAsGroup</a></div>
+      <td id="synapse_admin--podSecurityContext">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1570">synapse_admin.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen. Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein weitere Beispiele:  runAsNonRoot: true</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-1001
-</pre>
-</div>
-      </td>
-    </tr>
-    <tr>
-      <td id="synapse_admin--podSecurityContext--runAsUser">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1572">synapse_admin.podSecurityContext.runAsUser</a></div>
-      </td>
-      <td>int</td>
-      <td></td>
-      <td>
-        <div style="max-width: 300px;"><pre lang="json">
-1001
+{
+  "runAsGroup": 1001,
+  "runAsUser": 1001
+}
 </pre>
 </div>
       </td>
@@ -4171,7 +4161,7 @@ null
         <div style="max-width: 150px;"><a href="../values.yaml#L1578">synapse_admin.securityContext</a></div>
       </td>
       <td>map</td>
-      <td>Konfiguration für die Container-Sicherheitsrichtlinie des Containers weitere Beispiele:    runAsNonRoot: true    readOnlyRootFilesystem: true    runAsUser: 2010</td>
+      <td>Konfiguration für die Container-Sicherheitsrichtlinie des Containers weitere Beispiele:   runAsNonRoot: true   readOnlyRootFilesystem: true   runAsUser: 2010</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 {
@@ -4302,7 +4292,7 @@ null
       <td id="webclient--resources--limits--memory">
         <div style="max-width: 150px;"><a href="../values.yaml#L1650">webclient.resources.limits.memory</a></div>
       </td>
-      <td>object</td>
+      <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
