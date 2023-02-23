@@ -831,7 +831,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L248">extraConfig.encryption_enabled_by_default_for_room_type</a></div>
       </td>
       <td>string</td>
-      <td>Verschlüsselung der Räume (default Einstellung, eingeschaltet</td>
+      <td>Verschlüsselung für neue Räume; default für alle Räume aktiviert</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 "all"
