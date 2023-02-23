@@ -244,7 +244,7 @@ extraConfig:
   push:
     # -- (bool) Push Modul verschickt Inhalt der Nachricht über Google-/Apple-Push-Services, abgeschaltet
     include_content: false
-  # -- (string) Verschlüsselung der Räume (default Einstellung, eingeschaltet
+  # -- (string) Verschlüsselung für neue Räume; default für alle Räume aktiviert
   encryption_enabled_by_default_for_room_type: all
   stats:
     # -- (bool) Schalte Nutzerstatistiken ein, eingeschaltet
