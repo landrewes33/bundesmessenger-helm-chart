@@ -63,13 +63,6 @@ Get the correct image tag name
 {{- end -}}
 
 {{/*
-Get the correct image tag (sygnal)
-*/}}
-{{- define "matrix-synapse.sygnal.imageTag" -}}
-{{- .Values.sygnal.image.tag | default ("v0.12.0") -}}
-{{- end -}}
-
-{{/*
 Common labels
 */}}
 {{- define "matrix-synapse.labels" -}}
