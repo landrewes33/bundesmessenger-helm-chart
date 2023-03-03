@@ -1,0 +1,13 @@
+{
+  "_comment": "https://github.com/tcort/markdown-link-check/tree/master",
+  "ignorePatterns": [
+    {
+      "_comment": "Has a blocker against bots.",
+      "pattern": "^https://www.clamav.net/"
+    },
+    {
+      "_comment": "It is a repo. Returns always 403.",
+      "pattern": "^https://charts.bitnami.com/"
+    }
+  ]
+}
