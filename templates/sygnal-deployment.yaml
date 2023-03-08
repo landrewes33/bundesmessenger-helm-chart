@@ -29,7 +29,7 @@ spec:
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
        - name: matrix-sygnal
-         image:  "{{ $.Values.sygnal.image.repository }}:{{ include "matrix-synapse.sygnal.imageTag" $ }}"
+         image:  "{{ $.Values.sygnal.image.repository }}:{{ $.Values.sygnal.image.tag }}"
          imagePullPolicy: {{ $.Values.sygnal.image.pullPolicy }}
          env:
           - name: SYGNAL_CONF
