@@ -1090,7 +1090,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td>Anforderungen an Rechenressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-"1000m"
+"500m"
 </pre>
 </div>
       </td>
@@ -1103,7 +1103,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td>Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-"2500Mi"
+"1000Mi"
 </pre>
 </div>
       </td>
@@ -1379,7 +1379,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td>Rechenressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind. DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen gesondert zu verwalten</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-"100m"
+"500m"
 </pre>
 </div>
       </td>
@@ -1392,7 +1392,7 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td>RAM Ressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind. DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen gesondert zu verwalten</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-"128Mi"
+"200Mi"
 </pre>
 </div>
       </td>
