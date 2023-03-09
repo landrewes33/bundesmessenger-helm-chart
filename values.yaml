@@ -364,9 +364,9 @@ synapse:
       memory: 2500Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
-      cpu: 1000m
+      cpu: 500m
       # -- (string) Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
-      memory: 2500Mi
+      memory: 1000Mi
 
   # Healthcheck
   livenessProbe:
@@ -528,11 +528,11 @@ workers:
         # -- (string) Rechenressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
         # Empfohlen gesondert zu verwalten
-        cpu: 100m
+        cpu: 500m
         # -- (string) RAM Ressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
         # Empfohlen gesondert zu verwalten
-        memory: 128Mi
+        memory: 200Mi
       requests:
         # -- (string) Anforderungen an Rechenressourcen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
@@ -1187,12 +1187,12 @@ redis:
       # pullSecrets: ["myRegistryKeySecretName"]
     mountHostSys: true
     resources:
-      requests:
-        memory: 128Mi
-        cpu: 100m
       limits:
-        memory: 256Mi
         cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
     command:
       - /bin/sh
       - -c
