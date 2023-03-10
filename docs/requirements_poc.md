@@ -23,10 +23,10 @@ Sobald diese Bereiche abgedeckt sind, können Sie eine PoC-Umgebung installieren
 
 | Größe | Module | Typ |
 | ------ | ------ | ------ |
-| Default | Synapse-Main, generische Worker Nodes (2), Media Repository (1), Redis Server, Ingress | Default minimum |
-| Minimum PoC| Synapse-Main, Redis Server, Ingress | Minimum für PoC / Demo |
-| Full PoC | Synapse-Main, generische Worker Nodes (2), Media Repository (1), Redis Server, Ingress, Webclient, Contentscanner, ClamAV, Wellknown-Server, Synapse-Admin, Anbindung an Monitoring | vollwertiges PoC Deployment |
-| Full-Stack Deployment| Synapse-Main, generische Worker Nodes (2), Media Repository (1), Redis Server, Ingress, Webclient, Contentscanner, ClamAV, Wellknown-Server, Synapse-Admin, PostgreSQL, spezifische Worker für Userdirectory (Nutzerverzeichnis) usw., Anbindung an Monitoring | Deployment aller möglichen und benötigten Module aus dem HelmChart. |
+| Default | Synapse-Main, generische Worker Nodes (2), Media Repository (1), Redis Server, Ingress-Ressourcen | Default minimum |
+| Minimum PoC| Synapse-Main, Redis Server, Ingress-Ressourcen | Minimum für PoC / Demo |
+| Full PoC | Synapse-Main, generische Worker Nodes (2), Media Repository (1), Redis Server, Ingress-Ressourcen, Webclient, Contentscanner, ClamAV, Wellknown-Server, Synapse-Admin, Anbindung an Monitoring | vollwertiges PoC Deployment |
+| Full-Stack Deployment| Synapse-Main, generische Worker Nodes (2), Media Repository (1), Redis Server, Ingress-Ressourcen, Webclient, Contentscanner, ClamAV, Wellknown-Server, Synapse-Admin, PostgreSQL, spezifische Worker für Userdirectory (Nutzerverzeichnis) usw., Anbindung an Monitoring | Deployment aller möglichen und benötigten Module aus dem HelmChart. |
 
 ## Maschinengröße
 
@@ -157,7 +157,7 @@ nicht in den Client importiert und nicht vertraut, eine Kommunikation ist
 damit nicht möglich!
 
 Die Bereitstellung (Ausstellung bzw. Generierung) der TLS-Zertifikate ist nicht
-Bestandteil dieses Helm Charts. Vorhandene Zertifikate können dem Ingress
+Bestandteil dieses Helm Charts. Vorhandene Zertifikate können den Ingress-Ressourcen
 mit Hilfe von Secrets über den Parameter `ingress.tls` übergeben werden.
 
 Beispiel:
