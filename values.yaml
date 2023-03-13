@@ -1116,6 +1116,18 @@ postgresql:
       storageClass: ""
       size: 16Gi
 
+    resources:
+      limits:
+        # -- (string) Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
+        cpu: 500m
+        # -- (string) RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
+        memory: 1024Mi
+      requests:
+        # -- (string) Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind.
+        cpu: 250m
+        # -- (string) Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind.
+        memory: 256Mi
+
   # -- (list) Zusätzliche Argumente für die Datenbankverbindung
   # ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config
   extraArgs: {}
@@ -1212,6 +1224,18 @@ redis:
       ports:
         # -- (int) Serviceport
         redis: 6379
+
+    resources:
+      limits:
+        # -- (string) Rechenressourcengrenzen, die auf den Redis-Container anzuwenden sind.
+        cpu: 500m
+        # -- (string) RAM Ressourcengrenzen, die auf den Redis-Container anzuwenden sind.
+        memory: 512Mi
+      requests:
+        # -- (string) Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind.
+        cpu: 300m
+        # -- (string) Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind.
+        memory: 256Mi
 
 # -- (map) Ein extern konfigurierter Redis-Server, der für Worker/Sharding verwendet wird
 # Wird erst ausgewertet, wenn `redis.enabled=false` ist.
@@ -1351,15 +1375,16 @@ contentscanner:
   replicaCount: 1
   resources:
     limits:
-      # -- (string) Rechenressourcengrenzen, die auf den Contentscanner-Container anzuwenden sind.
+      # -- (string) Rechenressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
       cpu: 500m
-      # -- (string) RAM Ressourcengrenzen, die auf den Contentscanner-Container anzuwenden sind.
+      # -- (string) RAM Ressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
       memory: 1Gi
     requests:
-      # -- (string) Anforderungen an Rechenressourcen, die auf den Contentscanner-Container anzuwenden sind.
+      # -- (string) Anforderungen an Rechenressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
       cpu: 300m
-      # -- (string) Anforderungen an RAM Ressourcen, die auf den Contentscanner-Container anzuwenden sind.
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
       memory: 500Mi
+
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
   # weitere Möglichkeiten:
@@ -1387,12 +1412,12 @@ schadcodescanner:
   # -- (map) Konfiguration des ClamAV-Image/Repository
   imageclamav:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-clamav-production
-    tag: v0.103.6
+    tag: 0.103.8
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
   imagecicap:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-icap-production
-    tag: v0.5.6
+    tag: 0.5.6
     pullPolicy: IfNotPresent
     # -- (map) Konfiguration des persistenten Speichers für ClamAV
     # empfohlen: ExistingClaim mit ReadWriteMany-Volume anzugeben, so dass mehrere Pods die ClamAV-DB nutzen können. (TBD: freshclam darf dann nur einmal laufen: Abfrage PID)
@@ -1459,7 +1484,7 @@ schadcodescanner:
     # clamav.sendBufTimeout -- This option specifies how long to wait (in milliseconds) if the send buffer is full, keep low to avoid clamd hanging
     sendBufTimeout: 500
 
-  resources:
+  resourcesClamav:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.
       cpu: 1500m
@@ -1470,6 +1495,18 @@ schadcodescanner:
       cpu: 300m
       # -- (string) Anforderungen an RAM Ressourcen, die auf den ClamAV-Container anzuwenden sind.
       memory: 2Gi
+
+  resourcesCicap:
+    limits:
+      # -- (string) Rechenressourcengrenzen, die auf den C-Icap-Container anzuwenden sind.
+      cpu: 500m
+      # -- (string) RAM Ressourcengrenzen, die auf den C-Icap-Container anzuwenden sind.
+      memory: 100Mi
+    requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf den C-Icap-Container anzuwenden sind.
+      cpu: 300m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den C-Icap-Container anzuwenden sind.
+      memory: 50Mi
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
   # weitere Möglichkeiten:
