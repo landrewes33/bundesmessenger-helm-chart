@@ -35,7 +35,9 @@ spec:
         image: "{{ $config.image.repository }}:{{ $config.image.tag }}"
         imagePullPolicy: "{{ $config.image.pullPolicy }}"
         securityContext:
-        {{- $config.securityContext | toYaml | nindent 10 }}
+          {{- $config.securityContext | toYaml | nindent 10 }}
+        resources:
+          {{- toYaml $config.resources | nindent 10 }}
         ports:
         - containerPort: 8080
           name: contentscanner
