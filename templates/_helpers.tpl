@@ -66,9 +66,9 @@ Get the correct image tag name
 Common labels
 */}}
 {{- define "matrix-synapse.labels" -}}
+matrix-synapse: monitoring
 helm.sh/chart: {{ include "matrix-synapse.chart" . }}
 {{ include "matrix-synapse.selectorLabels" . }}
-synapse-matrix: http
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
