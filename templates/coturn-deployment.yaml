@@ -5,7 +5,7 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  namespace:  {{ $config.default_ns }}
+  namespace: {{ $config.default_ns }}
   name: coturn
   labels:
     name: coturn

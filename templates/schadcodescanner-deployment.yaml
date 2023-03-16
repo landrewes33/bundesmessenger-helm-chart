@@ -1,5 +1,5 @@
 {{- if and .Values.contentscanner.enabled .Values.schadcodescanner.enabled }}
-{{  $config := .Values.schadcodescanner }}
+{{- $config := .Values.schadcodescanner }}
 {{- $component := "schadcodescanner" -}}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "schadcodescanner") -}}
 

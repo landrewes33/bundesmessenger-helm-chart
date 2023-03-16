@@ -63,20 +63,20 @@ spec:
           - name: conftmp
             mountPath: /home/contentscanner/matrix-content-scanner/config/
       volumes:
-       - name: conftmp
-         emptyDir:
-           sizeLimit: 5Mi
-       - name: temp
-         emptyDir:
-           sizeLimit: 50Mi
-       - name: crypto
-         emptyDir:
-           sizeLimit: 1Mi
-       - name: scannerscript
-         configMap:
-           name: scanner
-           defaultMode: 0755
-       - name: scannerconfig
-         configMap:
-           name: contentscannerconfig
+        - name: conftmp
+          emptyDir:
+            sizeLimit: 5Mi
+        - name: temp
+          emptyDir:
+            sizeLimit: 50Mi
+        - name: crypto
+          emptyDir:
+            sizeLimit: 1Mi
+        - name: scannerscript
+          configMap:
+            name: scanner
+            defaultMode: 0755
+        - name: scannerconfig
+          configMap:
+            name: contentscannerconfig
 {{- end }}

@@ -15,11 +15,11 @@ spec:
     requests:
       storage: {{ .Values.schadcodescanner.persistence.size | quote }}
         {{- if .Values.schadcodescanner.persistence.storageClass }}
-                {{- if (eq "-" .Values.schadcodescanner.persistence.storageClass) }}
+          {{- if (eq "-" .Values.schadcodescanner.persistence.storageClass) }}
   storageClassName: ""
-                {{- else }}
+          {{- else }}
   storageClassName: "{{ .Values.schadcodescanner.persistence.storageClass }}"
-                {{- end }}
+          {{- end }}
         {{- end }}
 {{- end -}}
 {{- end -}}

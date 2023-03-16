@@ -1,4 +1,4 @@
-{{- $needsVolumePermissions := and .Values.volumePermissions.enabled (or .Values.persistence.enabled .Values.persistence.existingClaim)  }}
+{{- $needsVolumePermissions := and .Values.volumePermissions.enabled (or .Values.persistence.enabled .Values.persistence.existingClaim) }}
 {{- $default := .Values.workers.default }}
 {{- $releaseName := .Release.Name }}
 {{- range $worker, $config := .Values.workers }}
