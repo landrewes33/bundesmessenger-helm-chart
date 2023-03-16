@@ -72,8 +72,8 @@ spec:
             {{- $service := include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}
             {{- if has $host $csHosts }}
               {{- range $config.csPaths }}
-#if 2 hosts and one the actual one is NOT synapse-admin-host and path doesnt include "/_synapse/admin"
-#OR single url and no synapse-admin is disabled
+# if 2 hosts and one the actual one is NOT synapse-admin-host and path doesnt include "/_synapse/admin"
+# OR single url and no synapse-admin is disabled
                 {{- if or (not $inPublicServerName) (and ( not (contains "/_synapse/admin" .)) $inPublicServerName $isSynapseAdmin) (and $inPublicServerName (not $isSynapseAdmin)) }}
                   {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}

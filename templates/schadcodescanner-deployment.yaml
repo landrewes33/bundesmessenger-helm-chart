@@ -107,15 +107,15 @@ spec:
           initialDelaySeconds: 60
           periodSeconds: 10
           tcpSocket:
-              port: {{ $config.service.port }}
+            port: {{ $config.service.port }}
         livenessProbe:
           periodSeconds: 10
           tcpSocket:
-              port: {{ $config.service.port }}
+            port: {{ $config.service.port }}
         readinessProbe:
           periodSeconds: 10
           tcpSocket:
-              port: {{ $config.service.port }}
+            port: {{ $config.service.port }}
         volumeMounts:
           - name: clamsocket
             mountPath: /run/clamav/
@@ -166,7 +166,7 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name:  hpa-{{ $name }}
+  name: hpa-{{ $name }}
   labels:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
 spec:

@@ -30,15 +30,15 @@ spec:
         imagePullPolicy: {{ $.Values.webclient.image.pullPolicy }}
         securityContext:
           {{- toYaml .Values.webclient.securityContext | nindent 12 }}
-        resources:  
+        resources:
           requests:
             memory: 45Mi
             cpu: 50m
         command:
-            - sh
-            - -c
-            - |
-              jq -s '.[0] * .[1]' /app/config.sample.json /tmp/temp.json > /opt/config.json
+          - sh
+          - -c
+          - |
+            jq -s '.[0] * .[1]' /app/config.sample.json /tmp/temp.json > /opt/config.json
         volumeMounts:
           - name: config
             mountPath: /opt/
@@ -50,25 +50,25 @@ spec:
         image: "{{ $.Values.webclient.image.repository }}:{{  $.Values.webclient.image.tag }}"
         imagePullPolicy: {{ $.Values.webclient.image.pullPolicy }}
         securityContext:
-          {{- toYaml .Values.webclient.securityContext | nindent 12 }}
+          {{- toYaml .Values.webclient.securityContext | nindent 10 }}
         resources:
-          {{- toYaml .Values.webclient.resources | nindent 12 }}
+          {{- toYaml .Values.webclient.resources | nindent 10 }}
         volumeMounts:
-        - name: config
-          mountPath: /app/config.json
-          subPath: config.json
-        - name: files
-          mountPath: /etc/nginx/sites-enabled/default.conf
-          subPath: default.conf
-        - name: nginx-conf
-          mountPath: /etc/nginx/nginx.conf
-          subPath: nginx.conf
-        - name: tmp
-          mountPath: /tmp
+          - name: config
+            mountPath: /app/config.json
+            subPath: config.json
+          - name: files
+            mountPath: /etc/nginx/sites-enabled/default.conf
+            subPath: default.conf
+          - name: nginx-conf
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+          - name: tmp
+            mountPath: /tmp
         ports:
-        - containerPort: 8080
-          name: http
-          protocol: TCP
+          - containerPort: 8080
+            name: http
+            protocol: TCP
         readinessProbe:
           tcpSocket:
             port: http
@@ -79,22 +79,22 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 10
       volumes:
-      - name: temp
-        configMap:
-          name: {{ $webclientName }}-tempconf
-          items:
-          - key: temp.json
-            path: temp.json
-      - name: config
-        emptyDir:
-          sizeLimit: 100Ki
-      - name: tmp
-        emptyDir:
-          sizeLimit: 1Gi
-      - name: files
-        configMap:
-          name: {{ $webclientName }}
-      - name: nginx-conf
-        configMap:
-          name: nginx-default-conf
+        - name: temp
+          configMap:
+            name: {{ $webclientName }}-tempconf
+            items:
+            - key: temp.json
+              path: temp.json
+        - name: config
+          emptyDir:
+            sizeLimit: 100Ki
+        - name: tmp
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: files
+          configMap:
+            name: {{ $webclientName }}
+        - name: nginx-conf
+          configMap:
+            name: nginx-default-conf
 {{- end }}

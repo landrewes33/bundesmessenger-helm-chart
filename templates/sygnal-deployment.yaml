@@ -28,31 +28,31 @@ spec:
         {{- $.Values.sygnal.podSecurityContext | toYaml | nindent 8 }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
-       - name: matrix-sygnal
-         image:  "{{ $.Values.sygnal.image.repository }}:{{ $.Values.sygnal.image.tag }}"
-         imagePullPolicy: {{ $.Values.sygnal.image.pullPolicy }}
-         env:
-          - name: SYGNAL_CONF
-            value: sygnal.yaml
-         ports:
-          - containerPort: 5000
-            name: sygnal-port
-            protocol: TCP
-         resources:
-           {{- $.Values.sygnal.resources | toYaml | nindent 12 }}
-         securityContext:
-           {{- $.Values.sygnal.securityContext | toYaml | nindent 12 }}
-         volumeMounts:
-           - name: config
-             mountPath: /sygnal.yaml
-             subPath: sygnal.yaml
-           {{- if .Values.sygnal.ios_push.enabled }}
-           - name: ioskey
-             mountPath: /{{ $.Values.sygnal.ios_push.ioskey_filename }}
-             subPath: {{ $.Values.sygnal.ios_push.ioskey_filename }}
-           {{ end }}
-           - mountPath: /tmp
-             name: sygnal-tmp
+        - name: matrix-sygnal
+          image: "{{ $.Values.sygnal.image.repository }}:{{ $.Values.sygnal.image.tag }}"
+          imagePullPolicy: {{ $.Values.sygnal.image.pullPolicy }}
+          env:
+            - name: SYGNAL_CONF
+              value: sygnal.yaml
+          ports:
+            - containerPort: 5000
+              name: sygnal-port
+              protocol: TCP
+          resources:
+            {{- $.Values.sygnal.resources | toYaml | nindent 12 }}
+          securityContext:
+            {{- $.Values.sygnal.securityContext | toYaml | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /sygnal.yaml
+              subPath: sygnal.yaml
+            {{- if .Values.sygnal.ios_push.enabled }}
+            - name: ioskey
+              mountPath: /{{ $.Values.sygnal.ios_push.ioskey_filename }}
+              subPath: {{ $.Values.sygnal.ios_push.ioskey_filename }}
+            {{ end }}
+            - mountPath: /tmp
+              name: sygnal-tmp
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:

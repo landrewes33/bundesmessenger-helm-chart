@@ -110,7 +110,7 @@ stringData:
     #
     ##proxy:
     {{- if $.Values.sygnal.proxy }}
-    proxy:  {{ $.Values.sygnal.proxy | quote }}
+    proxy: {{ $.Values.sygnal.proxy | quote }}
     {{- end }}
     ## Metrics #
     #

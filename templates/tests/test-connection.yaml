@@ -7,7 +7,7 @@
 - name: curl
   image: curlimages/curl:7.87.0
   command: ['curl']
-  args:  ['-v', '-f', '--connect-timeout', '5', '{{ . }}']
+  args: ['-v', '-f', '--connect-timeout', '5', '{{ . }}']
   securityContext:
     readOnlyRootFilesystem: true
     runAsUser: 5210

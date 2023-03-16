@@ -29,7 +29,7 @@ spec:
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
         - name: {{ $adminName }}
-          image:  "{{ $.Values.synapse_admin.image.repository }}:{{ $.Values.synapse_admin.image.tag }}"
+          image: "{{ $.Values.synapse_admin.image.repository }}:{{ $.Values.synapse_admin.image.tag }}"
           imagePullPolicy: {{ $.Values.synapse_admin.image.pullPolicy }}
           securityContext:
             {{- $.Values.synapse_admin.securityContext | toYaml | nindent 12 }}
