@@ -29,7 +29,7 @@ spec:
         image: "{{ $.Values.webclient.image.repository }}:{{  $.Values.webclient.image.tag }}"
         imagePullPolicy: {{ $.Values.webclient.image.pullPolicy }}
         securityContext:
-          {{- toYaml .Values.webclient.securityContext | nindent 12 }}
+          {{- toYaml .Values.webclient.securityContext | nindent 10 }}
         resources:
           requests:
             memory: 45Mi
