@@ -4235,7 +4235,7 @@ false
       <td>URI für die Admin GUI, zwingend notwendig</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-null
+""
 </pre>
 </div>
       </td>
@@ -4377,7 +4377,7 @@ false
       <td>URL für den Webclient, zwingend notwendig</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-null
+""
 </pre>
 </div>
       </td>

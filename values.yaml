@@ -1594,7 +1594,7 @@ synapse_admin:
   # -- (bool) Aktivieren des Synapse-Admin-Moduls
   enabled: false
   # -- (string) URI für die Admin GUI, zwingend notwendig
-  uri:
+  uri: ""
   # -- (map) Konfiguration des Image vom Modul
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-admin-production
@@ -1663,7 +1663,7 @@ webclient:
   # -- (bool) Element-Webclient im Deployment aktivieren
   enabled: false
   # -- (string) URL für den Webclient, zwingend notwendig
-  uri:
+  uri: ""
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-bundesmessenger-web-production

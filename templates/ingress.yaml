@@ -141,7 +141,7 @@ spec:
         {{- end }}
 
         {{- if $schadcodescan }}
-          - path: /_matrix/media_proxy/unstable/ # wenn runtergeladen dann über den media proxy
+          - path: /_matrix/media_proxy/unstable/  # wenn runtergeladen dann über den media proxy
             backend:
           {{- if $v1Ingress }}
               service:
