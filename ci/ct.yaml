@@ -3,7 +3,7 @@ target-branch: main
 charts: .
 chart-dirs:
   - .
-lint-conf: ci/lintconf.yaml
+lint-conf: ci/yamllintconf.yaml
 chart-repos:
   - bitnami=https://charts.bitnami.com/bitnami
 helm-extra-args: ""
