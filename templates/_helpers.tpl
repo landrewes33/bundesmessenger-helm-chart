@@ -314,9 +314,11 @@ Set redis password
 Set synapse_admin uri
 */}}
 {{- define "synapse-admin.host" -}}
-{{- if .Values.synapse_admin.enabled -}}
-{{- required "A valid URI for the synapse Admin webGUI ist required." .Values.synapse_admin.uri -}}
-{{- else -}}
-{{- printf "" -}}
-{{- end -}}
+  {{- if .Values.synapse_admin.enabled -}}
+    {{- if .Values.synapse_admin.uri -}}
+{{- .Values.synapse_admin.uri -}}
+    {{- else }}
+{{- required "A valid URI for the synapse Admin webGUI (synapse_admin.uri) is required." .Values.synapse_admin.uri -}}
+    {{- end -}}
+  {{- end -}}
 {{- end -}}

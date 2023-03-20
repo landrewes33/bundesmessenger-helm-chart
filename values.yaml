@@ -40,6 +40,14 @@ serverName: ""
 # @default -- Nicht gesetzt
 publicServerName: ""
 
+# -- (string) Der Servername für die Admin-API  "/_synapse/admin" und alle anderen
+# APIs, die für alle administrativen Konfigurationen im Ingress verwendet werden.
+# Wenn synapse_admin.enable ist und synapse_admin.uri unterschiedlich von adminAPIServerName,
+# dann wird dort nur der Synapse_admin erreichbar sein.
+# Schnittstellen zum konfigurieren, werden nur über adminAPIServerName zur Verfügung gestellt.
+# @default  -- Nicht gesetzt, aber Voraussetzung!
+adminAPIServerName: ""
+
 # -- (bool) Aktivieren des Monitoringservices für Synapse-Dienste in Prometheus
 # @default -- false
 monitoringService: false

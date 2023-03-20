@@ -1,5 +1,6 @@
 serverName: example.org
 publicServerName: matrix.example.org
+adminAPIServerName: admin-api.example.org
 
 workers:
   generic_worker:
@@ -10,11 +11,11 @@ workers:
 
 synapse_admin:
   enabled: true
-  uri: admin.example.com
+  uri: admin-client.example.org
 
 webclient:
   enabled: true
-  uri: web.example.com
+  uri: web.example.org
 
 contentscanner:
   enabled: true
