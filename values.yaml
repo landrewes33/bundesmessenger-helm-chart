@@ -1449,8 +1449,13 @@ schadcodescanner:
     port: 1344
 
   freshclam:
-    # -- (string) clamav.freshclam.mirrors -- A list of clamav mirrors to be used by the clamav service
-    mirrors: database.clamav.net
+    # -- (list) Eine Liste von clamav-Spiegeln, die vom freshclam-Dienst verwendet werden sollen.
+    # Erzeugt eine Liste von "PrivateMirror" in der freshclam.conf
+    # https://docs.clamav.net/appendix/CvdPrivateMirror.html#use-freshclam-to-serve-only-whole-database-files-from-a-private-mirror
+    # Der Standard-Updateserver ("DatabaseMirror") ist "database.clamav.net" und wird
+    # durch das Konfigurieren eines privaten Mirros automatisch überschrieben.
+    mirrors: []
+      # - clamav-private-mirror:8000
 
   # -- (int) Anzahl der ClamAV-Pods
   # Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas

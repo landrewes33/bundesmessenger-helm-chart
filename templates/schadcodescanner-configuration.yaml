@@ -106,8 +106,11 @@ data:
     Checks 24
     LogSyslog no
     DatabaseOwner root
-    DatabaseMirror {{ .Values.schadcodescanner.freshclam.mirrors }}
-    ReceiveTimeout 35
+    DatabaseMirror database.clamav.net
+    {{- range $mirror := .Values.schadcodescanner.freshclam.mirrors }}
+    PrivateMirror {{ $mirror }}
+    {{- end }}
+    # ReceiveTimeout 60
     DatabaseDirectory /clamav/database
 
 {{- end }}
