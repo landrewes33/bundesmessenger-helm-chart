@@ -10,6 +10,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
     app.kubernetes.io/component: {{ $name }}
