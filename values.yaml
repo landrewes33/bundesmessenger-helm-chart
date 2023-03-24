@@ -1704,3 +1704,40 @@ webclient:
       cpu: 50m
       # -- (string) Anforderungen an RAM Ressourcen, die auf den webclient-server anzuwenden sind.
       memory: 45Mi
+
+
+######################################################################################
+##          Konfiguration für Helm-Tests
+######################################################################################
+
+tests:
+  # -- (map) Konfiguration für das Image der Tests
+  image:
+    repository: curlimages/curl
+    tag: 7.87.0
+    pullPolicy: IfNotPresent
+  # -- (map) Annotations, die zusätzlich auf die Tests anzuwenden sind.
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+
+  # -- (map) Informationen zum Sicherheitskontext, die der Container übernehmen soll.
+  podSecurityContext:
+    runAsNonRoot: true
+
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsUser: 5210
+
+  ## Ressource Konfiguration für Tests.
+  resources:
+    limits:
+      # -- (string) Rechenressourcengrenzen, die für Tests anzuwenden sind.
+      cpu: 100m
+      # -- (string) RAM Ressourcengrenzen, die für Tests anzuwenden sind.
+      memory: 32Mi
+    requests:
+      # -- (string) Anforderungen an Rechenressourcen, die für Tests anzuwenden sind.
+      cpu: 50m
+      # -- (string) Anforderungen an RAM Ressourcen, die für Tests anzuwenden sind.
+      memory: 16Mi
