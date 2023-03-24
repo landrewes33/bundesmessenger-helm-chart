@@ -629,11 +629,12 @@ workers:
       - "/_matrix/client/(api/v1|r0|v3|unstable)/createRoom$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/publicRooms$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/joined_members$"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/context/"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/context/.*"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/members$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/state$"
       - "/_matrix/client/v1/rooms/.*/hierarchy$"
-      - "/_matrix/client/unstable/org.matrix.msc2716/rooms/.*/batch_send$"
+      - "/_matrix/client/(v1|unstable)/rooms/.*/relations/"
+      - "/_matrix/client/v1/rooms/.*/threads$"
       - "/_matrix/client/unstable/im.nheko.summary/rooms/.*/summary$"
       - "/_matrix/client/(r0|v3|unstable)/account/3pid$"
       - "/_matrix/client/(r0|v3|unstable)/account/whoami$"
@@ -642,16 +643,21 @@ workers:
       - "/_matrix/client/(api/v1|r0|v3|unstable)/voip/turnServer$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/event/"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/joined_rooms$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable/.*)/rooms/.*/aliases"
+      - "/_matrix/client/v1/rooms/.*/timestamp_to_event$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/search$"
 
       ## Encryption requests
       - "/_matrix/client/(r0|v3|unstable)/keys/query$"
       - "/_matrix/client/(r0|v3|unstable)/keys/changes$"
       - "/_matrix/client/(r0|v3|unstable)/keys/claim$"
-      - "/_matrix/client/(r0|v3|unstable)/room_keys/"
+      - "/_matrix/client/(r0|v3|unstable)/room_keys(/.*)?(/.*)?$"
+      - "/_matrix/client/(r0|v3|unstable)/keys/upload(/.*)?$"
+      - "/_matrix/client/(r0|v3|unstable)/user/.*/filter(/|$)"
 
       ## Registration/login requests
       - "/_matrix/client/(api/v1|r0|v3|unstable)/login$"
+      - "/_matrix/client/(r0|v3|unstable)/refresh$"
       - "/_matrix/client/(r0|v3|unstable)/register$"
       - "/_matrix/client/v1/register/m.login.registration_token/validity$"
 
@@ -661,9 +667,10 @@ workers:
       - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/(join|invite|leave|ban|unban|kick)$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/join/"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/profile/"
+      - "/_matrix/client/(v1|unstable/org.matrix.msc2716)/rooms/.*/batch_send"
 
       ## User directory search requests
-      - "/_matrix/client/(r0|v3|unstable)/user_directory/search"
+      - "/_matrix/client/(r0|v3|unstable)/user_directory/search$"
 
       ## Worker event streams, deaktiviert!
       ## See https://matrix-org.github.io/synapse/latest/workers.html#stream-writers
@@ -690,26 +697,28 @@ workers:
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     paths:
       ## Federation requests
-      - "/_matrix/federation/v1/event/"
-      - "/_matrix/federation/v1/state/"
-      - "/_matrix/federation/v1/state_ids/"
-      - "/_matrix/federation/v1/backfill/"
-      - "/_matrix/federation/v1/get_missing_events/"
-      - "/_matrix/federation/v1/publicRooms"
-      - "/_matrix/federation/v1/query/"
-      - "/_matrix/federation/v1/make_join/"
-      - "/_matrix/federation/v1/make_leave/"
+      - "/_matrix/federation/(v1|v2)/event/"
+      - "/_matrix/federation/(v1|v2)/state/"
+      - "/_matrix/federation/(v1|v2)/state_ids/"
+      - "/_matrix/federation/(v1|v2)/backfill/"
+      - "/_matrix/federation/(v1|v2)/get_missing_events/"
+      - "/_matrix/federation/(v1|v2)/publicRooms"
+      - "/_matrix/federation/(v1|v2)/query/"
+      - "/_matrix/federation/(v1|v2)/make_join/"
+      - "/_matrix/federation/(v1|v2)/make_leave/"
       - "/_matrix/federation/(v1|v2)/send_join/"
       - "/_matrix/federation/(v1|v2)/send_leave/"
       - "/_matrix/federation/(v1|v2)/invite/"
-      - "/_matrix/federation/v1/event_auth/"
-      - "/_matrix/federation/v1/exchange_third_party_invite/"
-      - "/_matrix/federation/v1/user/devices/"
+      - "/_matrix/federation/(v1|v2)/query_auth/"
+      - "/_matrix/federation/(v1|v2)/event_auth/"
+      - "/_matrix/federation/v1/timestamp_to_event/"
+      - "/_matrix/federation/(v1|v2)/exchange_third_party_invite/"
+      - "/_matrix/federation/(v1|v2)/user/devices/"
       - "/_matrix/key/v2/query"
       - "/_matrix/federation/v1/hierarchy/"
 
       ## Inbound federation transaction request
-      - "/_matrix/federation/v1/send/"
+      - "/_matrix/federation/(v1|v2)/send/"
 
     # -- (int) Anzahl der Worker-Container
     # Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas
@@ -738,15 +747,38 @@ workers:
 
   federation_reader:
     # -- (bool) Aktiviere spez. Worker für Förderationsanfragen
+    # Wenn dieser Worker genutzt wird, können die URLs aus dem
+    # generic_worker entfernt werden.
     enabled: false
     # -- (bool) Wird aus dem generischen Worker abgeleitet
     generic: true
     # -- (list) Zusätzliche Listener für Förderationsworker
     listeners: [federation]
-    # -- (list) Pfade für die Ingress-Konfiguration des Förderations-Workers, mit 'serverName' Domain gesetzt
+    # -- (path) Server-Side Pfade für die Ingress-Konfiguration des Förderations-Workers
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     paths:
-      - "/_matrix/federation/v1/send/"
+      - "/_matrix/federation/(v1|v2)/event/"
+      - "/_matrix/federation/(v1|v2)/state/"
+      - "/_matrix/federation/(v1|v2)/state_ids/"
+      - "/_matrix/federation/(v1|v2)/backfill/"
+      - "/_matrix/federation/(v1|v2)/get_missing_events/"
+      - "/_matrix/federation/(v1|v2)/publicRooms"
+      - "/_matrix/federation/(v1|v2)/query/"
+      - "/_matrix/federation/(v1|v2)/make_join/"
+      - "/_matrix/federation/(v1|v2)/make_leave/"
+      - "/_matrix/federation/(v1|v2)/send_join/"
+      - "/_matrix/federation/(v1|v2)/send_leave/"
+      - "/_matrix/federation/(v1|v2)/invite/"
+      - "/_matrix/federation/(v1|v2)/query_auth/"
+      - "/_matrix/federation/(v1|v2)/event_auth/"
+      - "/_matrix/federation/v1/timestamp_to_event/"
+      - "/_matrix/federation/(v1|v2)/exchange_third_party_invite/"
+      - "/_matrix/federation/(v1|v2)/user/devices/"
+      - "/_matrix/key/v2/query"
+      - "/_matrix/federation/v1/hierarchy/"
+
+      ## Inbound federation transaction request
+      - "/_matrix/federation/(v1|v2)/send/"
 
   pusher:
     # -- (bool) Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen.
@@ -754,18 +786,22 @@ workers:
     # Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden
     # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
     enabled: false
+    # -- (bool) Wird aus dem generischen Worker abgeleitet
+    generic: true
 
   appservice:
     # -- (bool) Dieser Worker sorgt für das Senden von Daten an registrierte Anwendungsdienste.
-    # Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden.
+    # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
+    # -- (bool) Wird aus dem generischen Worker abgeleitet
+    generic: true
 
-  ## This worker handles sending federation traffic to other Synapse servers.
-  ##
   federation_sender:
-    # -- (bool) Dieser Worker kümmert sich um den Versand des
-    # Verbundverkehrs(Förderation Traffik) an andere Synapse-Server.
+    # -- (bool) Dieser Worker sendet Verbundverkehrs (federation traffic)
+    # an andere Matrix-Server.
     enabled: false
+    # -- (bool) Wird aus dem generischen Worker abgeleitet
+    generic: true
 
   media_repository:
     # -- (bool) Aktivieren des Media-Worker
@@ -811,10 +847,9 @@ workers:
   ## Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der Worker optional.
   user_dir:
     # -- (bool) Aktivieren des Nutzersuch-Workers
-    # Hinweis: Damit kann die Last vom generischen bzw. Haupt-Worker genommen werden
+    # Hinweis: Damit kann Last vom generischen bzw. Haupt-Worker genommen werden
+    # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
-    # -- (string) Eindeutiger Name des Workers
-    name: user_directory_worker
     # -- (bool) Wird aus dem generischen Worker abgeleitet
     generic: true
     # -- (list) Zusätzliche Listener für NutzerSuch-Worker
@@ -823,6 +858,13 @@ workers:
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     csPaths:
       - "/_matrix/client/(r0|v3|unstable)/user_directory/search$"
+
+  background_worker:
+    # -- (bool) Aktivieren des Background-Workers
+    # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+    enabled: false
+    # -- (bool) Wird aus dem generischen Worker abgeleitet
+    generic: true
 
 persistence:
   # -- (bool) Aktivieren der Persistenz-Konfiguration für die Medien-Repository-Funktion.
@@ -1118,6 +1160,12 @@ postgresql:
     initdb:
       # -- (string) Extra Argumente zur Initialisierung der Datenbank
       args: "--lc-collate=C --lc-ctype=C --encoding=UTF8"
+
+    # -- (string) Extra Konfiguration der Datenbank
+    # die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder Synapse-
+    # Prozess seine Verbindungen zur Datenbank hält
+    extendedConfiguration: |
+      max_connections = 1024
 
     # -- (map) Persistenzkonfiguration für Storage für PostgreSQL
     persistence:
