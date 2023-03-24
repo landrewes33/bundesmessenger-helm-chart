@@ -132,18 +132,25 @@ data:
     {{- $default := .Values.workers.default }}
     {{- range $worker, $config := .Values.workers }}
       {{- if $config.enabled }}
+        {{- $name := $worker | replace "_" "-" }}
 
         {{- if or (eq $worker "pusher") (eq ($config.app | default "") "pusher") }}
     # For pusher worker
-    start_pushers: false
+    pusher_instances:
+      {{- range $i, $e := until ($config.replicaCount | default $default.replicaCount | int) }}
+      - {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-{{ $i }}
+      {{- end }}
 
         {{- else if or (eq $worker "appservice") (eq ($config.app | default "") "appservice") }}
     # For appservice worker
-    notify_appservices: false
+    notify_appservices_from_worker: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-0
 
         {{- else if or (eq $worker "federation_sender") (eq ($config.app | default "") "federation_sender") }}
     # For federation_sender worker
-    send_federation: false
+    federation_sender_instances:
+      {{- range $i, $e := until ($config.replicaCount | default $default.replicaCount | int) }}
+      - {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-{{ $i }}
+      {{- end }}
 
         {{- else if or (eq $worker "media_repository") (eq ($config.app | default "") "media_repository") }}
     # For media_repository worker
@@ -151,7 +158,11 @@ data:
 
         {{- else if or (eq $worker "user_dir") (eq ($config.app | default "") "user_dir") }}
     # For user_dir worker
-    update_user_directory_from_worker: {{ required "You need to specify a workers.user_dir.name" $config.name }}
+    update_user_directory_from_worker: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-0
+
+        {{- else if or (eq $worker "background_worker") (eq ($config.app | default "") "background_worker") }}
+    # For background worker
+    run_background_tasks_on: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-0
 
         {{- end }}
       {{- end }}

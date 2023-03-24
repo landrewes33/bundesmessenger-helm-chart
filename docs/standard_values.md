@@ -1,6 +1,6 @@
 # bundesmessenger
 
-![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.64.0](https://img.shields.io/badge/AppVersion-1.64.0-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.78.0](https://img.shields.io/badge/AppVersion-1.78.0-informational?style=flat-square)
 
 BWI Matrix BundesMessenger
 
@@ -1666,7 +1666,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
     </tr>
     <tr>
       <td id="workers--generic_worker--paths">
-        <div style="max-width: 150px;"><a href="../values.yaml#L691">workers.generic_worker.paths</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L698">workers.generic_worker.paths</a></div>
       </td>
       <td>list</td>
       <td>Pfade für die Ingress-Konfiguration des Workers, mit 'serverName' Domain gesetzt</td>
@@ -1679,7 +1679,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
     </tr>
     <tr>
       <td id="workers--generic_worker--replicaCount">
-        <div style="max-width: 150px;"><a href="../values.yaml#L717">workers.generic_worker.replicaCount</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L726">workers.generic_worker.replicaCount</a></div>
       </td>
       <td>int</td>
       <td>Anzahl der Worker-Container Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas oder wenn nicht gesetzt, dann wird autoscaling.minReplicas übernommen</td>
@@ -1692,7 +1692,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
     </tr>
     <tr>
       <td id="workers--generic_worker--autoscaling--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L724">workers.generic_worker.autoscaling.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L733">workers.generic_worker.autoscaling.enabled</a></div>
       </td>
       <td>bool</td>
       <td>schalte das HPA für die Container ein Hinweis: Kann für alle spezifischen Worker benutzt werden Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden</td>
@@ -1705,7 +1705,7 @@ false
     </tr>
     <tr>
       <td id="workers--generic_worker--autoscaling--minReplicas">
-        <div style="max-width: 150px;"><a href="../values.yaml#L726">workers.generic_worker.autoscaling.minReplicas</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L735">workers.generic_worker.autoscaling.minReplicas</a></div>
       </td>
       <td>int</td>
       <td>minimale Anzahl der Worker-Container</td>
@@ -1718,7 +1718,7 @@ false
     </tr>
     <tr>
       <td id="workers--generic_worker--autoscaling--maxReplicas">
-        <div style="max-width: 150px;"><a href="../values.yaml#L728">workers.generic_worker.autoscaling.maxReplicas</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L737">workers.generic_worker.autoscaling.maxReplicas</a></div>
       </td>
       <td>int</td>
       <td>maximale Anzahl der Worker-Container</td>
@@ -1731,7 +1731,7 @@ false
     </tr>
     <tr>
       <td id="workers--generic_worker--autoscaling--targetCPUUtilizationPercentage">
-        <div style="max-width: 150px;"><a href="../values.yaml#L730">workers.generic_worker.autoscaling.targetCPUUtilizationPercentage</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L739">workers.generic_worker.autoscaling.targetCPUUtilizationPercentage</a></div>
       </td>
       <td>int</td>
       <td>Prozentsatz für CPU-Auslastung um Scaling zu triggern</td>
@@ -1744,7 +1744,7 @@ false
     </tr>
     <tr>
       <td id="workers--generic_worker--autoscaling--targetMemoryUtilizationPercentage">
-        <div style="max-width: 150px;"><a href="../values.yaml#L732">workers.generic_worker.autoscaling.targetMemoryUtilizationPercentage</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L741">workers.generic_worker.autoscaling.targetMemoryUtilizationPercentage</a></div>
       </td>
       <td>int</td>
       <td>Prozentsatz für RAM-Auslastung um Scaling zu triggern</td>
@@ -1757,10 +1757,10 @@ false
     </tr>
     <tr>
       <td id="workers--federation_reader--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L741">workers.federation_reader.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L752">workers.federation_reader.enabled</a></div>
       </td>
       <td>bool</td>
-      <td>Aktiviere spez. Worker für Förderationsanfragen</td>
+      <td>Aktiviere spez. Worker für Förderationsanfragen Wenn dieser Worker genutzt wird, können die URLs aus dem generic_worker entfernt werden.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 false
@@ -1770,7 +1770,7 @@ false
     </tr>
     <tr>
       <td id="workers--federation_reader--generic">
-        <div style="max-width: 150px;"><a href="../values.yaml#L743">workers.federation_reader.generic</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L754">workers.federation_reader.generic</a></div>
       </td>
       <td>bool</td>
       <td>Wird aus dem generischen Worker abgeleitet</td>
@@ -1783,7 +1783,7 @@ true
     </tr>
     <tr>
       <td id="workers--federation_reader--listeners">
-        <div style="max-width: 150px;"><a href="../values.yaml#L745">workers.federation_reader.listeners</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L756">workers.federation_reader.listeners</a></div>
       </td>
       <td>list</td>
       <td>Zusätzliche Listener für Förderationsworker</td>
@@ -1798,10 +1798,10 @@ true
     </tr>
     <tr>
       <td id="workers--federation_reader--paths">
-        <div style="max-width: 150px;"><a href="../values.yaml#L748">workers.federation_reader.paths</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L759">workers.federation_reader.paths</a></div>
       </td>
-      <td>list</td>
-      <td>Pfade für die Ingress-Konfiguration des Förderations-Workers, mit 'serverName' Domain gesetzt</td>
+      <td>path</td>
+      <td>Server-Side Pfade für die Ingress-Konfiguration des Förderations-Workers</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
 werden in der values.yaml gesetzt und können dort eingesehen werden
@@ -1811,7 +1811,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
     </tr>
     <tr>
       <td id="workers--pusher--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L756">workers.pusher.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L788">workers.pusher.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen. (pusher-worker -> Sygnal -> Push-Provider (Apple od. Google)) Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.</td>
@@ -1823,24 +1823,50 @@ false
       </td>
     </tr>
     <tr>
-      <td id="workers--appservice--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L761">workers.appservice.enabled</a></div>
+      <td id="workers--pusher--generic">
+        <div style="max-width: 150px;"><a href="../values.yaml#L790">workers.pusher.generic</a></div>
       </td>
       <td>bool</td>
-      <td>Dieser Worker sorgt für das Senden von Daten an registrierte Anwendungsdienste. Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden.</td>
+      <td>Wird aus dem generischen Worker abgeleitet</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+true
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="workers--appservice--enabled">
+        <div style="max-width: 150px;"><a href="../values.yaml#L795">workers.appservice.enabled</a></div>
+      </td>
+      <td>bool</td>
+      <td>Dieser Worker sorgt für das Senden von Daten an registrierte Anwendungsdienste. Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 false
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="workers--appservice--generic">
+        <div style="max-width: 150px;"><a href="../values.yaml#L797">workers.appservice.generic</a></div>
+      </td>
+      <td>bool</td>
+      <td>Wird aus dem generischen Worker abgeleitet</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+true
 </pre>
 </div>
       </td>
     </tr>
     <tr>
       <td id="workers--federation_sender--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L768">workers.federation_sender.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L802">workers.federation_sender.enabled</a></div>
       </td>
       <td>bool</td>
-      <td>Dieser Worker kümmert sich um den Versand des Verbundverkehrs(Förderation Traffik) an andere Synapse-Server.</td>
+      <td>Dieser Worker sendet Verbundverkehrs (federation traffic) an andere Matrix-Server.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 false
@@ -1849,8 +1875,21 @@ false
       </td>
     </tr>
     <tr>
+      <td id="workers--federation_sender--generic">
+        <div style="max-width: 150px;"><a href="../values.yaml#L804">workers.federation_sender.generic</a></div>
+      </td>
+      <td>bool</td>
+      <td>Wird aus dem generischen Worker abgeleitet</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+true
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
       <td id="workers--media_repository--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L774">workers.media_repository.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L810">workers.media_repository.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Aktivieren des Media-Worker Dieser Worker kümmert sich um die Bereitstellung und Speicherung von Medien. Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit Hintergrundaufgaben.</td>
@@ -1863,7 +1902,7 @@ true
     </tr>
     <tr>
       <td id="workers--media_repository--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L777">workers.media_repository.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L813">workers.media_repository.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers Überschreibt die Konfiguration von Default und generischen Worker</td>
@@ -1880,7 +1919,7 @@ true
     </tr>
     <tr>
       <td id="workers--media_repository--listeners">
-        <div style="max-width: 150px;"><a href="../values.yaml#L782">workers.media_repository.listeners</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L818">workers.media_repository.listeners</a></div>
       </td>
       <td>list</td>
       <td>Zusätzliche Listener für Media-Worker</td>
@@ -1895,7 +1934,7 @@ true
     </tr>
     <tr>
       <td id="workers--media_repository--csPaths">
-        <div style="max-width: 150px;"><a href="../values.yaml#L785">workers.media_repository.csPaths</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L821">workers.media_repository.csPaths</a></div>
       </td>
       <td>list</td>
       <td>Pfade für die Ingress-Konfiguration des Media-Workers, mit 'publicServerName' Domain gesetzt</td>
@@ -1908,7 +1947,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
     </tr>
     <tr>
       <td id="workers--media_repository--paths">
-        <div style="max-width: 150px;"><a href="../values.yaml#L795">workers.media_repository.paths</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L831">workers.media_repository.paths</a></div>
       </td>
       <td>list</td>
       <td>Pfade für die Ingress-Konfiguration des Media-Workers, mit 'serverName' Domain gesetzt</td>
@@ -1921,7 +1960,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
     </tr>
     <tr>
       <td id="workers--media_repository--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L800">workers.media_repository.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L836">workers.media_repository.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den media_repository-Container anzuwenden sind.</td>
@@ -1934,7 +1973,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
     </tr>
     <tr>
       <td id="workers--media_repository--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L802">workers.media_repository.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L838">workers.media_repository.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den media_repository-Container anzuwenden sind.</td>
@@ -1947,7 +1986,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
     </tr>
     <tr>
       <td id="workers--media_repository--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L805">workers.media_repository.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L841">workers.media_repository.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den media_repository-Container anzuwenden sind.</td>
@@ -1960,7 +1999,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
     </tr>
     <tr>
       <td id="workers--media_repository--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L807">workers.media_repository.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L843">workers.media_repository.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den media_repository-Container anzuwenden sind.</td>
@@ -1973,10 +2012,10 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
     </tr>
     <tr>
       <td id="workers--user_dir--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L815">workers.user_dir.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L852">workers.user_dir.enabled</a></div>
       </td>
       <td>bool</td>
-      <td>Aktivieren des Nutzersuch-Workers Hinweis: Damit kann die Last vom generischen bzw. Haupt-Worker genommen werden</td>
+      <td>Aktivieren des Nutzersuch-Workers Hinweis: Damit kann Last vom generischen bzw. Haupt-Worker genommen werden Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 false
@@ -1985,21 +2024,8 @@ false
       </td>
     </tr>
     <tr>
-      <td id="workers--user_dir--name">
-        <div style="max-width: 150px;"><a href="../values.yaml#L817">workers.user_dir.name</a></div>
-      </td>
-      <td>string</td>
-      <td>Eindeutiger Name des Workers</td>
-      <td>
-        <div style="max-width: 300px;"><pre lang="json">
-"user_directory_worker"
-</pre>
-</div>
-      </td>
-    </tr>
-    <tr>
       <td id="workers--user_dir--generic">
-        <div style="max-width: 150px;"><a href="../values.yaml#L819">workers.user_dir.generic</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L854">workers.user_dir.generic</a></div>
       </td>
       <td>bool</td>
       <td>Wird aus dem generischen Worker abgeleitet</td>
@@ -2012,7 +2038,7 @@ true
     </tr>
     <tr>
       <td id="workers--user_dir--listeners">
-        <div style="max-width: 150px;"><a href="../values.yaml#L821">workers.user_dir.listeners</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L856">workers.user_dir.listeners</a></div>
       </td>
       <td>list</td>
       <td>Zusätzliche Listener für NutzerSuch-Worker</td>
@@ -2027,7 +2053,7 @@ true
     </tr>
     <tr>
       <td id="workers--user_dir--csPaths">
-        <div style="max-width: 150px;"><a href="../values.yaml#L824">workers.user_dir.csPaths</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L859">workers.user_dir.csPaths</a></div>
       </td>
       <td>list</td>
       <td>Pfade für die Ingress-Konfiguration des Nutzersuch-Workers, mit 'publicServerName' Domain gesetzt</td>
@@ -2039,8 +2065,34 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
       </td>
     </tr>
     <tr>
+      <td id="workers--background_worker--enabled">
+        <div style="max-width: 150px;"><a href="../values.yaml#L865">workers.background_worker.enabled</a></div>
+      </td>
+      <td>bool</td>
+      <td>Aktivieren des Background-Workers Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+false
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="workers--background_worker--generic">
+        <div style="max-width: 150px;"><a href="../values.yaml#L867">workers.background_worker.generic</a></div>
+      </td>
+      <td>bool</td>
+      <td>Wird aus dem generischen Worker abgeleitet</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+true
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
       <td id="persistence--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L832">persistence.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L874">persistence.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Aktivieren der Persistenz-Konfiguration für die Medien-Repository-Funktion. Diese PVC wird entweder in Synapse oder einem media_repo-Worker eingehängt. Hinweis: Wenn Sie in der Lage sein wollen, dies zu skalieren, müssen Sie den accessMode auf RWX/ReadWriteMany setzen.</td>
@@ -2053,7 +2105,7 @@ true
     </tr>
     <tr>
       <td id="persistence--existingClaim">
-        <div style="max-width: 150px;"><a href="../values.yaml#L835">persistence.existingClaim</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L877">persistence.existingClaim</a></div>
       </td>
       <td>string</td>
       <td>Name des VolumeClaims</td>
@@ -2066,7 +2118,7 @@ leerer Wert lässt dynamisches Provisionieren zu
     </tr>
     <tr>
       <td id="persistence--storageClass">
-        <div style="max-width: 150px;"><a href="../values.yaml#L837">persistence.storageClass</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L879">persistence.storageClass</a></div>
       </td>
       <td>string</td>
       <td>Name der entsprechenden Storage-Klasse</td>
@@ -2079,7 +2131,7 @@ leerer Wert lässt dynamisches Provisionieren zu
     </tr>
     <tr>
       <td id="persistence--accessMode">
-        <div style="max-width: 150px;"><a href="../values.yaml#L839">persistence.accessMode</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L881">persistence.accessMode</a></div>
       </td>
       <td>string</td>
       <td>Zugriffsmodus</td>
@@ -2092,7 +2144,7 @@ leerer Wert lässt dynamisches Provisionieren zu
     </tr>
     <tr>
       <td id="persistence--size">
-        <div style="max-width: 150px;"><a href="../values.yaml#L841">persistence.size</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L883">persistence.size</a></div>
       </td>
       <td>string</td>
       <td>Größe des zu nutzenden Volumes</td>
@@ -2105,7 +2157,7 @@ leerer Wert lässt dynamisches Provisionieren zu
     </tr>
     <tr>
       <td id="volumePermissions--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L847">volumePermissions.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L889">volumePermissions.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Aktivieren des Init-Containers zur Rechtekorrektur, um die Rechte auf dem Volume für Media anzupassen Notwendig für policy 'require-uid-greater-2000'</td>
@@ -2118,7 +2170,7 @@ true
     </tr>
     <tr>
       <td id="volumePermissions--uid">
-        <div style="max-width: 150px;"><a href="../values.yaml#L850">volumePermissions.uid</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L892">volumePermissions.uid</a></div>
       </td>
       <td>int</td>
       <td>Nutzer-ID Notwendig für policy 'require-uid-greater-2000'</td>
@@ -2131,7 +2183,7 @@ true
     </tr>
     <tr>
       <td id="volumePermissions--gid">
-        <div style="max-width: 150px;"><a href="../values.yaml#L853">volumePermissions.gid</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L895">volumePermissions.gid</a></div>
       </td>
       <td>int</td>
       <td>Nutzer-ID Notwendig für policy 'require-uid-greater-2000'</td>
@@ -2144,7 +2196,7 @@ true
     </tr>
     <tr>
       <td id="volumePermissions--image--repository">
-        <div style="max-width: 150px;"><a href="../values.yaml#L857">volumePermissions.image.repository</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L899">volumePermissions.image.repository</a></div>
       </td>
       <td>string</td>
       <td>das Repository für das zu nutzende Image zur Rechtebereinigung</td>
@@ -2157,7 +2209,7 @@ true
     </tr>
     <tr>
       <td id="volumePermissions--image--tag">
-        <div style="max-width: 150px;"><a href="../values.yaml#L860">volumePermissions.image.tag</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L902">volumePermissions.image.tag</a></div>
       </td>
       <td>string</td>
       <td>das Tag für das zu nutzende Image zur Rechtebereinigung Hinweis: noch kein finaler Tag, build version 10 als Alternative zu latest</td>
@@ -2170,7 +2222,7 @@ true
     </tr>
     <tr>
       <td id="volumePermissions--image--pullPolicy">
-        <div style="max-width: 150px;"><a href="../values.yaml#L862">volumePermissions.image.pullPolicy</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L904">volumePermissions.image.pullPolicy</a></div>
       </td>
       <td>string</td>
       <td>da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung</td>
@@ -2183,7 +2235,7 @@ true
     </tr>
     <tr>
       <td id="volumePermissions--resources">
-        <div style="max-width: 150px;"><a href="../values.yaml#L871">volumePermissions.resources</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L913">volumePermissions.resources</a></div>
       </td>
       <td>map</td>
       <td>Ressourcen des Init-Containers zur Rechtekorrektur Hier keine gesetzt, da kurzlebig und von Hause aus klein Beispiel: resources:   requests:     memory: 128Mi     cpu: 100m</td>
@@ -2196,7 +2248,7 @@ true
     </tr>
     <tr>
       <td id="service--type">
-        <div style="max-width: 150px;"><a href="../values.yaml#L879">service.type</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L921">service.type</a></div>
       </td>
       <td>string</td>
       <td>Typ des Auszuliefernden Endpunktes für den Hauptdienst von Synapse</td>
@@ -2209,7 +2261,7 @@ true
     </tr>
     <tr>
       <td id="service--port">
-        <div style="max-width: 150px;"><a href="../values.yaml#L881">service.port</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L923">service.port</a></div>
       </td>
       <td>int</td>
       <td>interner Port des Auszuliefernden Endpunktes für den Hauptdienst von Synapse</td>
@@ -2222,7 +2274,7 @@ true
     </tr>
     <tr>
       <td id="service--targetPort">
-        <div style="max-width: 150px;"><a href="../values.yaml#L883">service.targetPort</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L925">service.targetPort</a></div>
       </td>
       <td>int</td>
       <td>externer Port des Auszuliefernden Endpunktes für den Hauptdienst von Synapse</td>
@@ -2250,7 +2302,7 @@ true
   <tbody>
     <tr>
       <td id="sygnal--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L892">sygnal.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L934">sygnal.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Aktivieren des Sygnal-Container</td>
@@ -2263,7 +2315,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L894">sygnal.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L936">sygnal.image</a></div>
       </td>
       <td>maps</td>
       <td>Image/Repo-Konfiguration von Sygnal</td>
@@ -2280,7 +2332,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L909">sygnal.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L951">sygnal.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen. Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein weitere Beispiele:  runAsNonRoot: true  fsGroup: 27  runAsGroup: 2000  runAsUser: 2000  sysctls:    - name: net.ipv4.ip_unprivileged_port_start      value: "80"</td>
@@ -2293,7 +2345,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--proxy">
-        <div style="max-width: 150px;"><a href="../values.yaml#L911">sygnal.proxy</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L953">sygnal.proxy</a></div>
       </td>
       <td>string</td>
       <td>Proxy, falls benötigt um die Push-Services zu erreichen. Auskommentieren oder leer für Deaktivierung</td>
@@ -2306,7 +2358,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L920">sygnal.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L962">sygnal.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers weitere Beispiele:  capabilities:    drop:    - ALL  readOnlyRootFilesystem: true  runAsNonRoot: true  runAsUser: 2111</td>
@@ -2321,7 +2373,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L928">sygnal.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L970">sygnal.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.</td>
@@ -2334,7 +2386,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L930">sygnal.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L972">sygnal.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.</td>
@@ -2347,7 +2399,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L933">sygnal.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L975">sygnal.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den Sygnal-Container anzuwenden sind.</td>
@@ -2360,7 +2412,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L935">sygnal.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L977">sygnal.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den Sygnal-Container anzuwenden sind.</td>
@@ -2373,7 +2425,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--livenessProbe--httpGet--path">
-        <div style="max-width: 150px;"><a href="../values.yaml#L941">sygnal.livenessProbe.httpGet.path</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L983">sygnal.livenessProbe.httpGet.path</a></div>
       </td>
       <td>string</td>
       <td>Zu verwendende Konfiguration für den Pfad des Healthchecks</td>
@@ -2386,7 +2438,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--livenessProbe--httpGet--port">
-        <div style="max-width: 150px;"><a href="../values.yaml#L943">sygnal.livenessProbe.httpGet.port</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L985">sygnal.livenessProbe.httpGet.port</a></div>
       </td>
       <td>string</td>
       <td>Zu verwendende Konfiguration für den Port des Healthchecks</td>
@@ -2399,7 +2451,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--readinessProbe--httpGet--path">
-        <div style="max-width: 150px;"><a href="../values.yaml#L949">sygnal.readinessProbe.httpGet.path</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L991">sygnal.readinessProbe.httpGet.path</a></div>
       </td>
       <td>string</td>
       <td>Konfiguration des Pfads vom Bereitschaftscheck</td>
@@ -2412,7 +2464,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--readinessProbe--httpGet--port">
-        <div style="max-width: 150px;"><a href="../values.yaml#L951">sygnal.readinessProbe.httpGet.port</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L993">sygnal.readinessProbe.httpGet.port</a></div>
       </td>
       <td>string</td>
       <td>Konfiguration des Ports vom Bereitschaftscheck</td>
@@ -2425,7 +2477,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--nodeSelector">
-        <div style="max-width: 150px;"><a href="../values.yaml#L954">sygnal.nodeSelector</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L996">sygnal.nodeSelector</a></div>
       </td>
       <td>object</td>
       <td>Node Selektor Konfiguration für Sygnal-Container.</td>
@@ -2438,7 +2490,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--tolerations">
-        <div style="max-width: 150px;"><a href="../values.yaml#L957">sygnal.tolerations</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L999">sygnal.tolerations</a></div>
       </td>
       <td>list</td>
       <td>Tolerations/Tains Konfiguration für Sygnal-Container.</td>
@@ -2451,7 +2503,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--affinity">
-        <div style="max-width: 150px;"><a href="../values.yaml#L960">sygnal.affinity</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1002">sygnal.affinity</a></div>
       </td>
       <td>object</td>
       <td>Affinitäts-Konfiguration für Sygnal-Container.</td>
@@ -2464,7 +2516,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--apns">
-        <div style="max-width: 150px;"><a href="../values.yaml#L968">sygnal.apns</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1010">sygnal.apns</a></div>
       </td>
       <td>object</td>
       <td>APN-Konfigurationsteil Beispiel: apns:    de.opencode.dvs.ios:      type: apns      keyfile: /de.opencode.dvs.ios.p8</td>
@@ -2477,7 +2529,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--ios_push--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L973">sygnal.ios_push.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1015">sygnal.ios_push.enabled</a></div>
       </td>
       <td>bool</td>
       <td>iOS-Push Schalter Wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden, sonst schlägt das Modul fehl</td>
@@ -2490,7 +2542,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--ios_push--ioskey_filename">
-        <div style="max-width: 150px;"><a href="../values.yaml#L980">sygnal.ios_push.ioskey_filename</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1022">sygnal.ios_push.ioskey_filename</a></div>
       </td>
       <td>map</td>
       <td>iOS-Key Konfiguration bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden. Weitereres siehe README.md Beispiel:  ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus dem APN-File übereinstimmen!  ioskey_keyvalue: 'HIER KÖNNTE IHR KEY IN STEHEN'</td>
@@ -2503,7 +2555,7 @@ false
     </tr>
     <tr>
       <td id="sygnal--ios_push--ioskey_keyvalue">
-        <div style="max-width: 150px;"><a href="../values.yaml#L981">sygnal.ios_push.ioskey_keyvalue</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1023">sygnal.ios_push.ioskey_keyvalue</a></div>
       </td>
       <td>string</td>
       <td></td>
@@ -2531,7 +2583,7 @@ false
   <tbody>
     <tr>
       <td id="wellknown--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L993">wellknown.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1035">wellknown.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Aktivierung des Wellknown-Container</td>
@@ -2544,7 +2596,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--server">
-        <div style="max-width: 150px;"><a href="../values.yaml#L998">wellknown.server</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1040">wellknown.server</a></div>
       </td>
       <td>object</td>
       <td>Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist. Beispiel:  m.server: matrix.example.com:443</td>
@@ -2557,7 +2609,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--client">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1010">wellknown.client</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1052">wellknown.client</a></div>
       </td>
       <td>object</td>
       <td>Daten, die auf .well-known/matrix/client bereitgestellt werden sollen Beispiel:  io.element.e2ee:    secure_backup_required: true    secure_backup_setup_methods: ["passphrase"]    outbound_keys_pre_sharing_mode: "on_room_opening"  m.homeserver:    base_url: https://matrix.example.com  de.bwi:    data_privacy_url: https://messenger.bwi.de</td>
@@ -2570,7 +2622,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--extraData">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1021">wellknown.extraData</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1063">wellknown.extraData</a></div>
       </td>
       <td>map</td>
       <td>Zusätzliche Daten, die unter .well-known/matrix/<data> bereitgestellt werden Dictionaries werden in JSON umgewandelt, einfache Strings werden direkt ausgeliefert MSC1929 Beispiel: support:   admins:     - matrix_id: '@admin:example.com'       email_address: 'admin@example.com'       role: 'admin'   support_page: 'https://example.com/support'</td>
@@ -2583,7 +2635,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--htdocsPath">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1025">wellknown.htdocsPath</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1067">wellknown.htdocsPath</a></div>
       </td>
       <td>path</td>
       <td>Ein benutzerdefinierter htdocs-Pfad, der nützlich ist, wenn ein anderes Image ausgeführt wird. @default /usr/share/nginx/html (nginx)</td>
@@ -2596,7 +2648,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1031">wellknown.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1073">wellknown.image</a></div>
       </td>
       <td>map</td>
       <td>Das Webserver Image optional: pullSecrets:   - myRegistryKeySecretName</td>
@@ -2613,7 +2665,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1039">wellknown.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1081">wellknown.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen. weitere Möglichkeiten:  fsGroup: 1001</td>
@@ -2629,7 +2681,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1048">wellknown.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1090">wellknown.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
@@ -2645,7 +2697,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1056">wellknown.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1098">wellknown.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den well-known server anzuwenden sind.</td>
@@ -2658,7 +2710,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1058">wellknown.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1100">wellknown.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den well-known server anzuwenden sind.</td>
@@ -2671,7 +2723,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1061">wellknown.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1103">wellknown.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den well-known server anzuwenden sind.</td>
@@ -2684,7 +2736,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1063">wellknown.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1105">wellknown.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den well-known server anzuwenden sind.</td>
@@ -2697,7 +2749,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--nodeSelector">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1066">wellknown.nodeSelector</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1108">wellknown.nodeSelector</a></div>
       </td>
       <td>object</td>
       <td>Node Selektor Konfiguration für well-known server.</td>
@@ -2710,7 +2762,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--tolerations">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1069">wellknown.tolerations</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1111">wellknown.tolerations</a></div>
       </td>
       <td>list</td>
       <td>Tolerations/Tains Konfiguration für well-known server.</td>
@@ -2723,7 +2775,7 @@ false
     </tr>
     <tr>
       <td id="wellknown--affinity">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1072">wellknown.affinity</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1114">wellknown.affinity</a></div>
       </td>
       <td>object</td>
       <td>Affinitäts-Konfiguration für well-known server.</td>
@@ -2751,7 +2803,7 @@ false
   <tbody>
     <tr>
       <td id="postgresql--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1086">postgresql.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1128">postgresql.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht, Wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie enabled auf false setzen und den externalPostgresql-Block konfigurieren. @default: false da externe DB vorausgesetzt wird</td>
@@ -2764,7 +2816,7 @@ false
     </tr>
     <tr>
       <td id="postgresql--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1090">postgresql.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1132">postgresql.image</a></div>
       </td>
       <td>map</td>
       <td>Das PostgreSQL Image @default: WIRD NICHT EMPFOHLEN!!</td>
@@ -2781,7 +2833,7 @@ false
     </tr>
     <tr>
       <td id="postgresql--auth--database">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1098">postgresql.auth.database</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1140">postgresql.auth.database</a></div>
       </td>
       <td>string</td>
       <td>Name für PostgreSQL-DB</td>
@@ -2794,7 +2846,7 @@ false
     </tr>
     <tr>
       <td id="postgresql--auth--username">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1101">postgresql.auth.username</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1143">postgresql.auth.username</a></div>
       </td>
       <td>string</td>
       <td>Name für PostgreSQL Nutzer</td>
@@ -2807,7 +2859,7 @@ false
     </tr>
     <tr>
       <td id="postgresql--auth--password">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1104">postgresql.auth.password</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1146">postgresql.auth.password</a></div>
       </td>
       <td>string</td>
       <td>Passwort für PostgreSQL Nutzer</td>
@@ -2820,7 +2872,7 @@ false
     </tr>
     <tr>
       <td id="postgresql--auth--existingSecret">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1108">postgresql.auth.existingSecret</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1150">postgresql.auth.existingSecret</a></div>
       </td>
       <td>string</td>
       <td>Bestehendes Secret das anstelle eines statischen Passwortes verwendet wird</td>
@@ -2833,7 +2885,7 @@ false
     </tr>
     <tr>
       <td id="postgresql--auth--secretKeys--userPasswordKey">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1112">postgresql.auth.secretKeys.userPasswordKey</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1154">postgresql.auth.secretKeys.userPasswordKey</a></div>
       </td>
       <td>string</td>
       <td>Schlüssel, der das Datenbank-Passwort enthält. Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.</td>
@@ -2846,7 +2898,7 @@ false
     </tr>
     <tr>
       <td id="postgresql--auth--secretKeys--adminPasswordKey">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1115">postgresql.auth.secretKeys.adminPasswordKey</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1157">postgresql.auth.secretKeys.adminPasswordKey</a></div>
       </td>
       <td>string</td>
       <td>Schlüssel, der das PostgreSQL enthält. Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.</td>
@@ -2859,7 +2911,7 @@ false
     </tr>
     <tr>
       <td id="postgresql--primary--initdb--args">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1120">postgresql.primary.initdb.args</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1162">postgresql.primary.initdb.args</a></div>
       </td>
       <td>string</td>
       <td>Extra Argumente zur Initialisierung der Datenbank</td>
@@ -2871,8 +2923,21 @@ false
       </td>
     </tr>
     <tr>
+      <td id="postgresql--primary--extendedConfiguration">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1167">postgresql.primary.extendedConfiguration</a></div>
+      </td>
+      <td>string</td>
+      <td>Extra Konfiguration der Datenbank die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder Synapse- Prozess seine Verbindungen zur Datenbank hält</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+"max_connections = 1024\n"
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
       <td id="postgresql--primary--persistence">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1123">postgresql.primary.persistence</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1171">postgresql.primary.persistence</a></div>
       </td>
       <td>map</td>
       <td>Persistenzkonfiguration für Storage für PostgreSQL</td>
@@ -2888,7 +2953,7 @@ false
     </tr>
     <tr>
       <td id="postgresql--primary--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1130">postgresql.primary.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1178">postgresql.primary.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.</td>
@@ -2901,7 +2966,7 @@ false
     </tr>
     <tr>
       <td id="postgresql--primary--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1132">postgresql.primary.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1180">postgresql.primary.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.</td>
@@ -2914,7 +2979,7 @@ false
     </tr>
     <tr>
       <td id="postgresql--primary--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1135">postgresql.primary.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1183">postgresql.primary.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind.</td>
@@ -2927,7 +2992,7 @@ false
     </tr>
     <tr>
       <td id="postgresql--primary--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1137">postgresql.primary.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1185">postgresql.primary.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind.</td>
@@ -2940,7 +3005,7 @@ false
     </tr>
     <tr>
       <td id="postgresql--extraArgs">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1141">postgresql.extraArgs</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1189">postgresql.extraArgs</a></div>
       </td>
       <td>list</td>
       <td>Zusätzliche Argumente für die Datenbankverbindung ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config</td>
@@ -2953,7 +3018,7 @@ false
     </tr>
     <tr>
       <td id="externalPostgresql">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1147">externalPostgresql</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1195">externalPostgresql</a></div>
       </td>
       <td>map</td>
       <td>Ein extern konfigurierter Postgres-Server, der für die Datenbank von Synapse verwendet wird. Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf "C" eingestellt sein. Die "interne" Datenbank muss deaktiviert sein `postgresql.enabled: false`. Beispiel für K8s internen Postgres im Namespace "postgres":</td>
@@ -2975,7 +3040,7 @@ false
     </tr>
     <tr>
       <td id="externalPostgresql--database">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1151">externalPostgresql.database</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1199">externalPostgresql.database</a></div>
       </td>
       <td>string</td>
       <td>Name für PostgreSQL-DB auf die sich verbunden wird</td>
@@ -2988,7 +3053,7 @@ false
     </tr>
     <tr>
       <td id="externalPostgresql--username">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1154">externalPostgresql.username</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1202">externalPostgresql.username</a></div>
       </td>
       <td>string</td>
       <td>Name für PostgreSQL Nutzer</td>
@@ -3001,7 +3066,7 @@ false
     </tr>
     <tr>
       <td id="externalPostgresql--password">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1157">externalPostgresql.password</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1205">externalPostgresql.password</a></div>
       </td>
       <td>string</td>
       <td>Passwort für PostgreSQL Nutzer</td>
@@ -3014,7 +3079,7 @@ false
     </tr>
     <tr>
       <td id="externalPostgresql--existingSecret">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1160">externalPostgresql.existingSecret</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1208">externalPostgresql.existingSecret</a></div>
       </td>
       <td>string</td>
       <td>Der Name eines bestehenden Secrets mit Postgresql-Anmeldedaten</td>
@@ -3027,7 +3092,7 @@ false
     </tr>
     <tr>
       <td id="externalPostgresql--existingSecretPasswordKey">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1163">externalPostgresql.existingSecretPasswordKey</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1211">externalPostgresql.existingSecretPasswordKey</a></div>
       </td>
       <td>string</td>
       <td>Passwortschlüssel, der aus dem bestehenden Secret abgerufen wird</td>
@@ -3040,7 +3105,7 @@ false
     </tr>
     <tr>
       <td id="externalPostgresql--extraArgs">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1169">externalPostgresql.extraArgs</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1217">externalPostgresql.extraArgs</a></div>
       </td>
       <td>list</td>
       <td>Zusätzliche Argumente für die Datenbankverbindung ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config</td>
@@ -3068,7 +3133,7 @@ false
   <tbody>
     <tr>
       <td id="redis--image--registry">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1181">redis.image.registry</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1229">redis.image.registry</a></div>
       </td>
       <td>string</td>
       <td></td>
@@ -3081,7 +3146,7 @@ false
     </tr>
     <tr>
       <td id="redis--image--repository">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1182">redis.image.repository</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1230">redis.image.repository</a></div>
       </td>
       <td>string</td>
       <td></td>
@@ -3094,7 +3159,7 @@ false
     </tr>
     <tr>
       <td id="redis--image--tag">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1183">redis.image.tag</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1231">redis.image.tag</a></div>
       </td>
       <td>string</td>
       <td></td>
@@ -3107,7 +3172,7 @@ false
     </tr>
     <tr>
       <td id="redis--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1188">redis.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1236">redis.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Diese Konfiguration ist für den internen Redis, der für die Verwendung mit Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf false setzen und den externalRedis-Block konfigurieren.</td>
@@ -3120,7 +3185,7 @@ true
     </tr>
     <tr>
       <td id="redis--auth">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1192">redis.auth</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1240">redis.auth</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für Authentifikation gegen Redis Oder verwenden Sie ein bestehendes Geheimnis mit "redis-password"-Schlüssel anstelle eines statischen Passworts.</td>
@@ -3138,7 +3203,7 @@ true
     </tr>
     <tr>
       <td id="redis--sysctl">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1200">redis.sysctl</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1248">redis.sysctl</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration zur Härtung des Redis-Images (https://docs.bitnami.com/kubernetes/infrastructure/redis/administration/configure-kernel-settings/)</td>
@@ -3175,7 +3240,7 @@ true
     </tr>
     <tr>
       <td id="redis--architecture">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1223">redis.architecture</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1271">redis.architecture</a></div>
       </td>
       <td>string</td>
       <td>Form der Architektur des Deployments</td>
@@ -3188,7 +3253,7 @@ true
     </tr>
     <tr>
       <td id="redis--master--kind">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1225">redis.master.kind</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1273">redis.master.kind</a></div>
       </td>
       <td>string</td>
       <td></td>
@@ -3201,7 +3266,7 @@ true
     </tr>
     <tr>
       <td id="redis--master--persistence--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1230">redis.master.persistence.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1278">redis.master.persistence.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Persistenzkonfiration des Redis Beachten Sie, dass Synapse redis nur als Synchronisierungsdienstprogramm verwendet, so dass keine Daten jemals persistiert werden müssen.</td>
@@ -3214,7 +3279,7 @@ false
     </tr>
     <tr>
       <td id="redis--master--service--ports--redis">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1234">redis.master.service.ports.redis</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1282">redis.master.service.ports.redis</a></div>
       </td>
       <td>int</td>
       <td>Serviceport</td>
@@ -3227,7 +3292,7 @@ false
     </tr>
     <tr>
       <td id="redis--master--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1239">redis.master.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1287">redis.master.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den Redis-Container anzuwenden sind.</td>
@@ -3240,7 +3305,7 @@ false
     </tr>
     <tr>
       <td id="redis--master--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1241">redis.master.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1289">redis.master.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den Redis-Container anzuwenden sind.</td>
@@ -3253,7 +3318,7 @@ false
     </tr>
     <tr>
       <td id="redis--master--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1244">redis.master.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1292">redis.master.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind.</td>
@@ -3266,7 +3331,7 @@ false
     </tr>
     <tr>
       <td id="redis--master--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1246">redis.master.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1294">redis.master.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind.</td>
@@ -3279,7 +3344,7 @@ false
     </tr>
     <tr>
       <td id="externalRedis">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1255">externalRedis</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1303">externalRedis</a></div>
       </td>
       <td>map</td>
       <td>Ein extern konfigurierter Redis-Server, der für Worker/Sharding verwendet wird Wird erst ausgewertet, wenn `redis.enabled=false` ist. Alternativ zum statischen Passwort: Der Name eines bestehenden Secret mit Redis-Anmeldeinformationen existingSecret: redis-secrets Passwortschlüssel, der aus dem bestehenden Secret abgerufen wird existingSecretPasswordKey: redis-password</td>
@@ -3313,7 +3378,7 @@ false
   <tbody>
     <tr>
       <td id="ingress--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1274">ingress.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1322">ingress.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Aktiviert Ingress-Konfiguration</td>
@@ -3326,7 +3391,7 @@ true
     </tr>
     <tr>
       <td id="ingress--traefikPaths">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1278">ingress.traefikPaths</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1326">ingress.traefikPaths</a></div>
       </td>
       <td>bool</td>
       <td>Generierung von Traefik-kompatiblen Regex-Pfaden anstelle von Nginx-kompatiblen Pfaden. UNGETESTET!</td>
@@ -3339,7 +3404,7 @@ false
     </tr>
     <tr>
       <td id="ingress--annotations--"nginx--ingress--kubernetes--io/use-regex"">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1284">ingress.annotations."nginx.ingress.kubernetes.io/use-regex"</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1332">ingress.annotations."nginx.ingress.kubernetes.io/use-regex"</a></div>
       </td>
       <td>bool</td>
       <td>Annotiation um Regex-Regeln nutzen zu können</td>
@@ -3352,7 +3417,7 @@ false
     </tr>
     <tr>
       <td id="ingress--annotations--"nginx--ingress--kubernetes--io/proxy-body-size"">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1286">ingress.annotations."nginx.ingress.kubernetes.io/proxy-body-size"</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1334">ingress.annotations."nginx.ingress.kubernetes.io/proxy-body-size"</a></div>
       </td>
       <td>string</td>
       <td>Annotiation, um Body-size zu vergößern (Default Limit 1 oder 10MB)</td>
@@ -3365,7 +3430,7 @@ false
     </tr>
     <tr>
       <td id="ingress--annotations--"nginx--ingress--kubernetes--io/enable-owasp-core-rules"">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1287">ingress.annotations."nginx.ingress.kubernetes.io/enable-owasp-core-rules"</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1335">ingress.annotations."nginx.ingress.kubernetes.io/enable-owasp-core-rules"</a></div>
       </td>
       <td>string</td>
       <td></td>
@@ -3378,7 +3443,7 @@ false
     </tr>
     <tr>
       <td id="ingress--csHosts">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1296">ingress.csHosts</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1344">ingress.csHosts</a></div>
       </td>
       <td>list</td>
       <td>Hosts, die der Ingress-Konfiguration für die Verarbeitung von Client-to-Server-API-Anfragepfade hinzugefügt werden sollen. Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default) Beispiel:  - matrix.example.com</td>
@@ -3391,7 +3456,7 @@ false
     </tr>
     <tr>
       <td id="ingress--hosts">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1303">ingress.hosts</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1351">ingress.hosts</a></div>
       </td>
       <td>list</td>
       <td>Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung von Server-zu-Server-API-Anfragen hinzugefügt werden sollen. Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default) Beispiel:  - example.com</td>
@@ -3404,7 +3469,7 @@ false
     </tr>
     <tr>
       <td id="ingress--wkHosts">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1310">ingress.wkHosts</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1358">ingress.wkHosts</a></div>
       </td>
       <td>list</td>
       <td>Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung von wellknown-Anfragen hinzugefügt werden sollen. Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default) Beispiel:  - example.com</td>
@@ -3417,7 +3482,7 @@ false
     </tr>
     <tr>
       <td id="ingress--paths">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1327">ingress.paths</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1375">ingress.paths</a></div>
       </td>
       <td>list</td>
       <td>Zusätzliche Pfade, die zu den Server-zu-Server-Eingangsblöcken hinzugefügt werden sollen Werden vor dem `/_matrix` Catch-all-Pfad eingefügt. Beispiele:  # K8s 1.19+  - path: /_matrix/media    pathType: Prefix    backend:      service:        name: matrix-media-repo        port: 8000  # K8s <1.19  - path: /_matrix/media    backend:      serviceName: matrix-media-repo      servicePort: 8000</td>
@@ -3430,7 +3495,7 @@ false
     </tr>
     <tr>
       <td id="ingress--csPaths">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1344">ingress.csPaths</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1392">ingress.csPaths</a></div>
       </td>
       <td>list</td>
       <td>Zusätzliche Pfade, die zu den Client-zu-Server Blöcken hinzugefügt werden sollen Werden vor dem `/_matrix` und `/_synapse` Catch-all-Pfade eingefügt. Beispiele:  # K8s 1.19+  - path: /_matrix/media    pathType: Prefix    backend:      service:        name: matrix-media-repo        port: 8000  # K8s <1.19  - path: /_matrix/media    backend:      serviceName: matrix-media-repo      servicePort: 8000</td>
@@ -3443,7 +3508,7 @@ false
     </tr>
     <tr>
       <td id="ingress--includeUnderscoreSynapse">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1347">ingress.includeUnderscoreSynapse</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1395">ingress.includeUnderscoreSynapse</a></div>
       </td>
       <td>bool</td>
       <td>Soll der `/_synapse`-Pfad im Ingress enthalten sein, werden die Client-APIs unter diesem Pfad bereitgestellt.</td>
@@ -3456,7 +3521,7 @@ true
     </tr>
     <tr>
       <td id="ingress--includeServerName">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1351">ingress.includeServerName</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1399">ingress.includeServerName</a></div>
       </td>
       <td>bool</td>
       <td>Sollte `config.serverName` in die Liste der Eingangspfade aufgenommen werden, kann auf `false` gesetzt werden, wenn die Hauptdomäne auf irgendeine externe Weise verwaltet wird</td>
@@ -3469,7 +3534,7 @@ true
     </tr>
     <tr>
       <td id="ingress--tls">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1363">ingress.tls</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1411">ingress.tls</a></div>
       </td>
       <td>list</td>
       <td>TLS-Konfiguration für Ingress Konfiguration Enthält für alle benötigten Domains die notwendigen Secrets bzw. TLS-Zertifikate Beispiel:  - secretName: chart-example-tls    hosts:      - example.com      - matrix.example.com  - secretName: admin-example-tls    hosts:      - admin.example.com</td>
@@ -3482,7 +3547,7 @@ true
     </tr>
     <tr>
       <td id="ingress--className">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1368">ingress.className</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1416">ingress.className</a></div>
       </td>
       <td>string</td>
       <td>Legen Sie den Namen der IngressClass-Cluster-Ressource fest (optional) https://kubernetes.io/docs/reference/kubernetes-api/service-resources/ingress-v1/#IngressSpec HINWEIS: Wir setzen dem Nginx voraus, da wir auch die entsprechenden Annotiations setzen</td>
@@ -3510,7 +3575,7 @@ true
   <tbody>
     <tr>
       <td id="contentscanner--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1376">contentscanner.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1424">contentscanner.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Aktivieren des Matrix-Content-Scanner Mittelsmann zwischen AV und Matrix-Synapse</td>
@@ -3523,7 +3588,7 @@ false
     </tr>
     <tr>
       <td id="contentscanner--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1378">contentscanner.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1426">contentscanner.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration des Image/Repository</td>
@@ -3540,7 +3605,7 @@ false
     </tr>
     <tr>
       <td id="contentscanner--replicaCount">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1383">contentscanner.replicaCount</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1431">contentscanner.replicaCount</a></div>
       </td>
       <td>int</td>
       <td></td>
@@ -3553,7 +3618,7 @@ false
     </tr>
     <tr>
       <td id="contentscanner--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1387">contentscanner.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1435">contentscanner.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.</td>
@@ -3566,7 +3631,7 @@ false
     </tr>
     <tr>
       <td id="contentscanner--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1389">contentscanner.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1437">contentscanner.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.</td>
@@ -3579,7 +3644,7 @@ false
     </tr>
     <tr>
       <td id="contentscanner--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1392">contentscanner.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1440">contentscanner.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.</td>
@@ -3592,7 +3657,7 @@ false
     </tr>
     <tr>
       <td id="contentscanner--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1394">contentscanner.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1442">contentscanner.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.</td>
@@ -3605,7 +3670,7 @@ false
     </tr>
     <tr>
       <td id="contentscanner--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1400">contentscanner.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1448">contentscanner.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen. weitere Möglichkeiten:  fsGroup: 1001</td>
@@ -3621,7 +3686,7 @@ false
     </tr>
     <tr>
       <td id="contentscanner--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1409">contentscanner.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1457">contentscanner.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
@@ -3652,7 +3717,7 @@ false
   <tbody>
     <tr>
       <td id="schadcodescanner--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1419">schadcodescanner.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1467">schadcodescanner.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Aktivieren des ClamAV-Container</td>
@@ -3665,7 +3730,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--imageclamav">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1421">schadcodescanner.imageclamav</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1469">schadcodescanner.imageclamav</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration des ClamAV-Image/Repository</td>
@@ -3682,7 +3747,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--imagecicap">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1426">schadcodescanner.imagecicap</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1474">schadcodescanner.imagecicap</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration des C-ICAP-Server-Image/Repository</td>
@@ -3699,7 +3764,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--persistence--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1433">schadcodescanner.persistence.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1481">schadcodescanner.persistence.enabled</a></div>
       </td>
       <td>bool</td>
       <td></td>
@@ -3712,7 +3777,7 @@ true
     </tr>
     <tr>
       <td id="schadcodescanner--persistence--existingClaim">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1436">schadcodescanner.persistence.existingClaim</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1484">schadcodescanner.persistence.existingClaim</a></div>
       </td>
       <td>string</td>
       <td>Name des VolumeClaims</td>
@@ -3725,7 +3790,7 @@ leer, damit dynamische Volumes genutzt werden können (dennoch persistent)
     </tr>
     <tr>
       <td id="schadcodescanner--persistence--storageClass">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1438">schadcodescanner.persistence.storageClass</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1486">schadcodescanner.persistence.storageClass</a></div>
       </td>
       <td>string</td>
       <td>Name der entsprechenden Storage-Klasse, - (damit wird default genutzt, ansonsten storageClass direkt benennen)</td>
@@ -3738,7 +3803,7 @@ leer, damit dynamische Volumes genutzt werden können (dennoch persistent)
     </tr>
     <tr>
       <td id="schadcodescanner--persistence--accessMode">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1440">schadcodescanner.persistence.accessMode</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1488">schadcodescanner.persistence.accessMode</a></div>
       </td>
       <td>string</td>
       <td>Zugriffsmodus, ReadWriteOnce (wird für jedes HPA-skalierte neu angelegt)</td>
@@ -3751,7 +3816,7 @@ leer, damit dynamische Volumes genutzt werden können (dennoch persistent)
     </tr>
     <tr>
       <td id="schadcodescanner--persistence--size">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1442">schadcodescanner.persistence.size</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1490">schadcodescanner.persistence.size</a></div>
       </td>
       <td>string</td>
       <td>Größe des zu nutzenden Volumes</td>
@@ -3764,7 +3829,7 @@ leer, damit dynamische Volumes genutzt werden können (dennoch persistent)
     </tr>
     <tr>
       <td id="schadcodescanner--extraEnv">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1452">schadcodescanner.extraEnv</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1500">schadcodescanner.extraEnv</a></div>
       </td>
       <td>list</td>
       <td>Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind Beispiel:   - name: NO_PROXY     value: "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"   - name: HTTPS_PROXY     value: "https://proxyuser@proxyserver:proxyport"   - name: HTTP_PROXY     value: "http://proxyuser@proxyserver:proxyport"</td>
@@ -3777,7 +3842,7 @@ leer, damit dynamische Volumes genutzt werden können (dennoch persistent)
     </tr>
     <tr>
       <td id="schadcodescanner--service--port">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1457">schadcodescanner.service.port</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1505">schadcodescanner.service.port</a></div>
       </td>
       <td>int</td>
       <td>der Port des ClamAV Pods, wird im Service übertragen @default: 1344 der Port vom c-icap-Server</td>
@@ -3790,7 +3855,7 @@ leer, damit dynamische Volumes genutzt werden können (dennoch persistent)
     </tr>
     <tr>
       <td id="schadcodescanner--freshclam--mirrors">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1465">schadcodescanner.freshclam.mirrors</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1513">schadcodescanner.freshclam.mirrors</a></div>
       </td>
       <td>list</td>
       <td>Eine Liste von clamav-Spiegeln, die vom freshclam-Dienst verwendet werden sollen. Erzeugt eine Liste von "PrivateMirror" in der freshclam.conf https://docs.clamav.net/appendix/CvdPrivateMirror.html#use-freshclam-to-serve-only-whole-database-files-from-a-private-mirror Der Standard-Updateserver ("DatabaseMirror") ist "database.clamav.net" und wird durch das Konfigurieren eines privaten Mirros automatisch überschrieben.</td>
@@ -3803,7 +3868,7 @@ leer, damit dynamische Volumes genutzt werden können (dennoch persistent)
     </tr>
     <tr>
       <td id="schadcodescanner--replicaCount">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1471">schadcodescanner.replicaCount</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1519">schadcodescanner.replicaCount</a></div>
       </td>
       <td>int</td>
       <td>Anzahl der ClamAV-Pods Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas oder wenn nicht gesetzt, dann wird autoscaling.minReplicas übernommen</td>
@@ -3816,7 +3881,7 @@ leer, damit dynamische Volumes genutzt werden können (dennoch persistent)
     </tr>
     <tr>
       <td id="schadcodescanner--autoscaling--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1478">schadcodescanner.autoscaling.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1526">schadcodescanner.autoscaling.enabled</a></div>
       </td>
       <td>bool</td>
       <td>schalte das HPA für die Container ein Hinweis: Kann für alle spezifischen Worker benutzt werden Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden</td>
@@ -3829,7 +3894,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--autoscaling--minReplicas">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1480">schadcodescanner.autoscaling.minReplicas</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1528">schadcodescanner.autoscaling.minReplicas</a></div>
       </td>
       <td>int</td>
       <td>minimale Anzahl der Worker-Container</td>
@@ -3842,7 +3907,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--autoscaling--maxReplicas">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1482">schadcodescanner.autoscaling.maxReplicas</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1530">schadcodescanner.autoscaling.maxReplicas</a></div>
       </td>
       <td>int</td>
       <td>maximale Anzahl der Worker-Container</td>
@@ -3855,7 +3920,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--autoscaling--targetCPUUtilizationPercentage">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1484">schadcodescanner.autoscaling.targetCPUUtilizationPercentage</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1532">schadcodescanner.autoscaling.targetCPUUtilizationPercentage</a></div>
       </td>
       <td>int</td>
       <td>Prozentsatz für CPU-Auslastung um Scaling zu triggern</td>
@@ -3868,7 +3933,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--autoscaling--targetMemoryUtilizationPercentage">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1486">schadcodescanner.autoscaling.targetMemoryUtilizationPercentage</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1534">schadcodescanner.autoscaling.targetMemoryUtilizationPercentage</a></div>
       </td>
       <td>int</td>
       <td>Prozentsatz für RAM-Auslastung um Scaling zu triggern</td>
@@ -3881,7 +3946,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--limits--fileSize">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1490">schadcodescanner.limits.fileSize</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1538">schadcodescanner.limits.fileSize</a></div>
       </td>
       <td>int</td>
       <td></td>
@@ -3894,7 +3959,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--limits--scanSize">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1492">schadcodescanner.limits.scanSize</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1540">schadcodescanner.limits.scanSize</a></div>
       </td>
       <td>int</td>
       <td></td>
@@ -3907,7 +3972,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--limits--connectionQueueLength">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1494">schadcodescanner.limits.connectionQueueLength</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1542">schadcodescanner.limits.connectionQueueLength</a></div>
       </td>
       <td>int</td>
       <td></td>
@@ -3920,7 +3985,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--limits--maxThreads">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1496">schadcodescanner.limits.maxThreads</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1544">schadcodescanner.limits.maxThreads</a></div>
       </td>
       <td>int</td>
       <td></td>
@@ -3933,7 +3998,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--limits--sendBufTimeout">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1498">schadcodescanner.limits.sendBufTimeout</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1546">schadcodescanner.limits.sendBufTimeout</a></div>
       </td>
       <td>int</td>
       <td></td>
@@ -3946,7 +4011,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesClamav--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1503">schadcodescanner.resourcesClamav.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1551">schadcodescanner.resourcesClamav.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.</td>
@@ -3959,7 +4024,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesClamav--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1505">schadcodescanner.resourcesClamav.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1553">schadcodescanner.resourcesClamav.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.</td>
@@ -3972,7 +4037,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesClamav--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1508">schadcodescanner.resourcesClamav.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1556">schadcodescanner.resourcesClamav.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den ClamAV-Container anzuwenden sind.</td>
@@ -3985,7 +4050,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesClamav--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1510">schadcodescanner.resourcesClamav.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1558">schadcodescanner.resourcesClamav.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den ClamAV-Container anzuwenden sind.</td>
@@ -3998,7 +4063,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesCicap--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1515">schadcodescanner.resourcesCicap.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1563">schadcodescanner.resourcesCicap.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den C-Icap-Container anzuwenden sind.</td>
@@ -4011,7 +4076,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesCicap--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1517">schadcodescanner.resourcesCicap.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1565">schadcodescanner.resourcesCicap.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den C-Icap-Container anzuwenden sind.</td>
@@ -4024,7 +4089,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesCicap--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1520">schadcodescanner.resourcesCicap.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1568">schadcodescanner.resourcesCicap.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den C-Icap-Container anzuwenden sind.</td>
@@ -4037,7 +4102,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesCicap--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1522">schadcodescanner.resourcesCicap.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1570">schadcodescanner.resourcesCicap.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den C-Icap-Container anzuwenden sind.</td>
@@ -4050,7 +4115,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1527">schadcodescanner.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1575">schadcodescanner.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen. weitere Möglichkeiten:  fsGroup: 1001</td>
@@ -4065,7 +4130,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--clamavSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1535">schadcodescanner.clamavSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1583">schadcodescanner.clamavSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die ClamAv-Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
@@ -4082,7 +4147,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--icapSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1545">schadcodescanner.icapSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1593">schadcodescanner.icapSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die C-ICAP-Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
@@ -4114,7 +4179,7 @@ false
   <tbody>
     <tr>
       <td id="coturn--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1562">coturn.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1610">coturn.enabled</a></div>
       </td>
       <td>bool</td>
       <td>CoTurn als Deployment aktivieren Hinweis: Nicht empfohlen!</td>
@@ -4127,7 +4192,7 @@ false
     </tr>
     <tr>
       <td id="coturn--turnUris">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1569">coturn.turnUris</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1617">coturn.turnUris</a></div>
       </td>
       <td>map</td>
       <td>TurnUris zusammenbauen lassen, aktuell deaktiviert, Als Liste unter `config.turnUris` konfigurieren Beispiel:  udp: 3478  tcp: 3478  realm: "turn.example.com"</td>
@@ -4140,7 +4205,7 @@ false
     </tr>
     <tr>
       <td id="coturn--existingcoturn--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1573">coturn.existingcoturn.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1621">coturn.existingcoturn.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Schalter um bereits existenten CoTurn im K8s-Cluster zu nutzen</td>
@@ -4153,7 +4218,7 @@ false
     </tr>
     <tr>
       <td id="coturn--default_ns">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1575">coturn.default_ns</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1623">coturn.default_ns</a></div>
       </td>
       <td>string</td>
       <td>Namespace für den CoTurn-Dienst</td>
@@ -4166,7 +4231,7 @@ false
     </tr>
     <tr>
       <td id="coturn--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1577">coturn.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1625">coturn.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für das Image vom CoTurn</td>
@@ -4183,7 +4248,7 @@ false
     </tr>
     <tr>
       <td id="coturn--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1582">coturn.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1630">coturn.securityContext</a></div>
       </td>
       <td>map</td>
       <td>SecurityContext für den Container</td>
@@ -4216,7 +4281,7 @@ false
   <tbody>
     <tr>
       <td id="synapse_admin--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1595">synapse_admin.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1643">synapse_admin.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Aktivieren des Synapse-Admin-Moduls</td>
@@ -4229,7 +4294,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--uri">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1597">synapse_admin.uri</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1645">synapse_admin.uri</a></div>
       </td>
       <td>string</td>
       <td>URI für die Admin GUI, zwingend notwendig</td>
@@ -4242,7 +4307,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1599">synapse_admin.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1647">synapse_admin.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration des Image vom Modul</td>
@@ -4259,7 +4324,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1608">synapse_admin.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1656">synapse_admin.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.</td>
@@ -4272,7 +4337,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1610">synapse_admin.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1658">synapse_admin.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.</td>
@@ -4285,7 +4350,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1613">synapse_admin.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1661">synapse_admin.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den Synapse-Admin Server anzuwenden sind.</td>
@@ -4298,7 +4363,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1615">synapse_admin.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1663">synapse_admin.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den Synapse-Admin Server anzuwenden sind.</td>
@@ -4311,7 +4376,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1621">synapse_admin.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1669">synapse_admin.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen. Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein weitere Beispiele:  runAsNonRoot: true</td>
@@ -4327,7 +4392,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1629">synapse_admin.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1677">synapse_admin.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie des Containers weitere Beispiele:   runAsNonRoot: true   readOnlyRootFilesystem: true   runAsUser: 2010</td>
@@ -4358,7 +4423,7 @@ false
   <tbody>
     <tr>
       <td id="webclient--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1664">webclient.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1712">webclient.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Element-Webclient im Deployment aktivieren</td>
@@ -4371,7 +4436,7 @@ false
     </tr>
     <tr>
       <td id="webclient--uri">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1666">webclient.uri</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1714">webclient.uri</a></div>
       </td>
       <td>string</td>
       <td>URL für den Webclient, zwingend notwendig</td>
@@ -4384,7 +4449,7 @@ false
     </tr>
     <tr>
       <td id="webclient--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1668">webclient.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1716">webclient.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für das Image vom Element-Webclient</td>
@@ -4401,7 +4466,7 @@ false
     </tr>
     <tr>
       <td id="webclient--annotations--"nginx--ingress--kubernetes--io/configuration-snippet"">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1673">webclient.annotations."nginx.ingress.kubernetes.io/configuration-snippet"</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1721">webclient.annotations."nginx.ingress.kubernetes.io/configuration-snippet"</a></div>
       </td>
       <td>string</td>
       <td></td>
@@ -4414,7 +4479,7 @@ false
     </tr>
     <tr>
       <td id="webclient--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1682">webclient.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1730">webclient.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die der Container übernehmen soll. weitere Möglichkeiten:  fsGroup: 1001</td>
@@ -4430,7 +4495,7 @@ false
     </tr>
     <tr>
       <td id="webclient--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1691">webclient.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1739">webclient.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
@@ -4446,7 +4511,7 @@ false
     </tr>
     <tr>
       <td id="webclient--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1699">webclient.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1747">webclient.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den webclient-server anzuwenden sind.</td>
@@ -4459,7 +4524,7 @@ false
     </tr>
     <tr>
       <td id="webclient--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1701">webclient.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1749">webclient.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind.</td>
@@ -4472,7 +4537,7 @@ false
     </tr>
     <tr>
       <td id="webclient--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1704">webclient.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1752">webclient.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den webclient-server anzuwenden sind.</td>
@@ -4485,7 +4550,7 @@ false
     </tr>
     <tr>
       <td id="webclient--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1706">webclient.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1754">webclient.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den webclient-server anzuwenden sind.</td>

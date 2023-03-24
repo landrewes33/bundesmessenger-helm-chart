@@ -1,7 +1,7 @@
 ** Hinweis: Das Chart benötigt einige Minuten, bitte haben Sie Geduld. **
 {{- if not .Values.ingress.enabled }}
 
-Synapse wurde ohne Ingress installiert. 
+Synapse wurde ohne Ingress installiert.
 Zugriffe bzw. Endpunkte müssen manuell nachgesteuert werden.
 {{- else }}
 
@@ -16,7 +16,7 @@ http://{{ . }}
   {{- end }}
 {{ if not .Values.wellknown.enabled }}
 Bitte beachten Sie, das Federation nur funktionsfähig ist, wenn entweder ein SRV Record
-oder ein konfigurierter Well-known server unter /.well-known/matrix/server . 
+oder ein konfigurierter Well-known server unter /.well-known/matrix/server .
 
 Weitere Informationen unter: https://github.com/matrix-org/synapse/blob/master/docs/federate.md
 {{- end }}
@@ -24,7 +24,7 @@ Weitere Informationen unter: https://github.com/matrix-org/synapse/blob/master/d
 
 {{- if .Values.config.enableRegistration }}
 Sie können sich nun an Ihrer BundesMessenger Installation mit jedem kompatiblen
-Matrix-Client verbinden - und einen Account erstellen - sobald die Installation 
+Matrix-Client verbinden - und einen Account erstellen - sobald die Installation
 final fertig ist.
 
 Sie können auch einen initialen administrativen Administrator und weitere Accounts mit den folgenden Kommandos erstellen:

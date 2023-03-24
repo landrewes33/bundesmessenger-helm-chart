@@ -6,6 +6,7 @@
 {{- end }}
 
 {{- if $any }}
+{{- $uniqueApps := list "appservice" "user_dir" "background_worker" -}}
 {{- $wkName := include "matrix-synapse.workername" (dict "global" . "worker" "workers") -}}
 ---
 apiVersion: v1
@@ -21,19 +22,16 @@ data:
     {{- $name := $worker | replace "_" "-" }}
     {{- $app := $config.app | default $worker }}
 
+    # check that workers do not have replicaCount > 1
+    {{- if and (gt ($config.replicaCount | default $default.replicaCount | int) 1) (has $app $uniqueApps) -}}
+    {{-   fail (printf "Replica count must be 1 for worker %s." $app) -}}
+    {{- end }}
+
   {{ $name }}.worker: |
     worker_app: "synapse.app.{{ (not (not $config.generic)) | ternary "generic_worker" $app }}"
 
-{{- if $config.name -}}
-{{-   if (gt ($config.replicaCount | int) 1) -}}
-{{-     fail "Replica count must be 1 if a worker has a unique name." -}}
-{{-   end }}
-    worker_name: {{ $config.name }}
-{{- else }}
-    worker_name: "PLATZHALTER"
-{{- end }}
+    worker_name: "@@HOSTNAME@@"
 
-    worker_main_http_uri: http://{{ include "matrix-synapse.fullname" $ }}:{{ $.Values.service.port }}
     worker_replication_host: {{ include "matrix-synapse.replicationname" $ | quote }}
     worker_replication_http_port: 9093
 

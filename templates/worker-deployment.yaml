@@ -5,6 +5,13 @@
 {{- if $config.enabled }}
 {{- $name := $worker | replace "_" "-" }}
 {{- $app := $config.app | default $worker }}
+{{- $replicaSize := $config.replicaCount | default $default.replicaCount }}
+{{- if hasKey $config "autoscaling" }}
+  {{- if and $config.autoscaling.enabled (lt ($config.replicaCount | default $default.replicaCount) $config.autoscaling.minReplicas) }}
+  {{- $replicaSize :=  $config.autoscaling.minReplicas }}
+  {{- end }}
+{{- end }}
+  
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -15,13 +22,7 @@ metadata:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
     app.kubernetes.io/component: {{ $name }}
 spec:
-{{- if hasKey $config "autoscaling" }}
-  {{- if and $config.autoscaling.enabled (lt ($config.replicaCount | default $default.replicaCount) $config.autoscaling.minReplicas) }}
-  replicas: {{ $config.autoscaling.minReplicas }}
-  {{ else }}
-  replicas: {{ $config.replicaCount | default $default.replicaCount }}
-  {{- end }}
-{{- end }}
+  replicas: {{ $replicaSize }}
   updateStrategy:
     type: RollingUpdate
   serviceName: "matrix-synapse"
@@ -68,7 +69,7 @@ spec:
             - sh
             - -c
             - |
-              cat /tmp/{{ $name }}.worker | sed "s/PLATZHALTER/${HOSTNAME}/" > /synapse/config/{{ $name }}.worker
+              cat /tmp/{{ $name }}.worker | sed "s/@@HOSTNAME@@/${HOSTNAME}/" > /synapse/config/{{ $name }}.worker
           image: "{{ $.Values.image.repository }}:{{ include "matrix-synapse.imageTag" $ }}"
           volumeMounts:
           - mountPath: "/tmp/"
