@@ -5,8 +5,8 @@ yaml-files:
   - '*.yml'
   - '.yamllint'
 
-ignore: |
-  templates/
+ignore:
+  - templates/
 
 rules:
   braces:
@@ -29,9 +29,9 @@ rules:
   comments:
     require-starting-space: true
     min-spaces-from-content: 2
-    ignore: |
-      .gitlab-ci.yml
-      ci/kind-config.yaml
+    ignore:
+      - .gitlab-ci.yml
+      - ci/kind-config.yaml
   comments-indentation: disable
   document-end: disable
   document-start: disable           # No --- to start a file
