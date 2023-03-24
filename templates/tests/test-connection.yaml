@@ -1,23 +1,13 @@
-{{- define "test-connection-annotations" -}}
-"helm.sh/hook": test
-"helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-{{- end -}}
-
 {{- define "test-connection-image" -}}
-- name: curl
-  image: curlimages/curl:7.87.0
+- name: test-connection
+  image: "{{ .global.Values.tests.image.repository }}:{{ .global.Values.tests.image.tag }}"
+  imagePullPolicy: {{ .global.Values.tests.image.pullPolicy }}
   command: ['curl']
-  args: ['-v', '-f', '--connect-timeout', '5', '{{ . }}']
+  args: ['-v', '-f', '--connect-timeout', '5', '{{ .url }}']
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsUser: 5210
+    {{- toYaml .global.Values.tests.securityContext | nindent 4 }}
   resources:
-    limits:
-      cpu: "250m"
-      memory: "32Mi"
-    requests:
-      cpu: "150m"
-      memory: "16Mi"
+    {{- toYaml .global.Values.tests.resources | nindent 4 }}
   livenessProbe:
     periodSeconds: 10
     exec:
@@ -31,6 +21,7 @@
       - cat
       - /tmp/healthy
 {{- end -}}
+
 ---
 apiVersion: v1
 kind: Pod
@@ -39,14 +30,18 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
-    {{- include "test-connection-annotations" . | nindent 4 }}
+    helm.sh/hook: test
+    {{- with .Values.tests.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   serviceAccountName: {{ .Release.Name }}
+  {{- include "matrix-synapse.imagePullSecrets" . | nindent 2 }}
   securityContext:
-    runAsNonRoot: true
+    {{- toYaml .Values.tests.podSecurityContext | nindent 4 }}
   containers:
     {{- $url := printf "%s:%s%s" (include "matrix-synapse.fullname" .) ($.Values.service.port | toString) ("/_matrix/client/versions") -}}
-    {{- include "test-connection-image" $url | nindent 4 }}
+    {{- include "test-connection-image" (dict "global" . "url" $url) | nindent 2 }}
   restartPolicy: Never
 
 {{- if .Values.wellknown.enabled }}
@@ -58,14 +53,18 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
-    {{- include "test-connection-annotations" . | nindent 4 }}
+    helm.sh/hook: test
+    {{- with .Values.tests.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   serviceAccountName: {{ .Release.Name }}
+  {{- include "matrix-synapse.imagePullSecrets" . | nindent 2 }}
   securityContext:
-    runAsNonRoot: true
+    {{- toYaml .Values.tests.podSecurityContext | nindent 4 }}
   containers:
     {{- $url := printf "%s:%s%s" (include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx")) (80 | toString) ("/.well-known/matrix/server") -}}
-    {{- include "test-connection-image" $url | nindent 4 }}
+    {{- include "test-connection-image" (dict "global" . "url" $url) | nindent 2 }}
   restartPolicy: Never
 ---
 apiVersion: v1
@@ -75,15 +74,18 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
-    "helm.sh/hook": test
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    helm.sh/hook: test
+    {{- with .Values.tests.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   serviceAccountName: {{ .Release.Name }}
+  {{- include "matrix-synapse.imagePullSecrets" . | nindent 2 }}
   securityContext:
-    runAsNonRoot: true
+    {{- toYaml .Values.tests.podSecurityContext | nindent 4 }}
   containers:
     {{- $url := printf "%s:%s%s" (include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx")) (80 | toString) ("/.well-known/matrix/client") -}}
-    {{- include "test-connection-image" $url | nindent 4 }}
+    {{- include "test-connection-image" (dict "global" . "url" $url) | nindent 2 }}
   restartPolicy: Never
 {{- end }}
 
@@ -96,14 +98,18 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
-    {{- include "test-connection-annotations" . | nindent 4 }}
+    helm.sh/hook: test
+    {{- with .Values.tests.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   serviceAccountName: {{ .Release.Name }}
+  {{- include "matrix-synapse.imagePullSecrets" . | nindent 2 }}
   securityContext:
-    runAsNonRoot: true
+    {{- toYaml .Values.tests.podSecurityContext | nindent 4 }}
   containers:
     {{- $url := printf "%s:%s%s" (include "matrix-synapse.externalname" (dict "global" . "external" "webclient")) (8080 | toString) ("/index.html") -}}
-    {{- include "test-connection-image" $url | nindent 4 }}
+    {{- include "test-connection-image" (dict "global" . "url" $url) | nindent 2 }}
   restartPolicy: Never
 {{- end }}
 
@@ -116,14 +122,18 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
-    {{- include "test-connection-annotations" . | nindent 4 }}
+    helm.sh/hook: test
+    {{- with .Values.tests.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   serviceAccountName: {{ .Release.Name }}
+  {{- include "matrix-synapse.imagePullSecrets" . | nindent 2 }}
   securityContext:
-    runAsNonRoot: true
+    {{- toYaml .Values.tests.podSecurityContext | nindent 4 }}
   containers:
     {{- $url := printf "%s:%s%s" (include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin")) (8080 | toString) ("/#/login") -}}
-    {{- include "test-connection-image" $url | nindent 4 }}
+    {{- include "test-connection-image" (dict "global" . "url" $url) | nindent 2 }}
   restartPolicy: Never
 {{- end }}
 
@@ -136,13 +146,17 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
-    {{- include "test-connection-annotations" . | nindent 4 }}
+    helm.sh/hook: test
+    {{- with .Values.tests.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   serviceAccountName: {{ .Release.Name }}
+  {{- include "matrix-synapse.imagePullSecrets" . | nindent 2 }}
   securityContext:
-    runAsNonRoot: true
+    {{- toYaml .Values.tests.podSecurityContext | nindent 4 }}
   containers:
     {{- $url := printf "%s:%s%s" (include "matrix-synapse.externalname" (dict "global" . "external" "matrix-content-scanner")) (8080 | toString) ("/_matrix/media_proxy/unstable/public_key") -}}
-    {{- include "test-connection-image" $url | nindent 4 }}
+   {{- include "test-connection-image" (dict "global" . "url" $url) | nindent 2 }}
   restartPolicy: Never
 {{- end }}
