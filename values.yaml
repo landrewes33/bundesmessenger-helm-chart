@@ -91,7 +91,7 @@ signingkey:
     # finaler Tag kann sich noch ändern
     publishImage:
       repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl
-      tag: 1.21.14-jammy-production
+      tag: 1.25.4-jammy-production
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
@@ -899,7 +899,7 @@ volumePermissions:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/ubuntu
     # -- (string) das Tag für das zu nutzende Image zur Rechtebereinigung
     # Hinweis: noch kein finaler Tag, build version 10 als Alternative zu latest
-    tag: jammy-production-b1
+    tag: latest-jammy-production
     # -- (string) da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung
     pullPolicy: IfNotPresent
 
@@ -1072,7 +1072,7 @@ wellknown:
   #   - myRegistryKeySecretName
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx
-    tag: 1.18.0
+    tag: 1.18.0-6ubuntu14.3-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
@@ -1228,7 +1228,7 @@ redis:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/redis
-    tag: 6.0.16
+    tag: 5_6.0.16-1ubuntu1-jammy-production
     # pullSecrets: ["myRegistryKeySecretName"]
   # -- (bool) Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
   # Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
@@ -1468,12 +1468,12 @@ schadcodescanner:
   # -- (map) Konfiguration des ClamAV-Image/Repository
   imageclamav:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/clamav
-    tag: 0.103.8
+    tag: 0.103.8_dfsg-0ubuntu0.22.04.1-jammy-production
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
   imagecicap:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/icap
-    tag: 0.5.6
+    tag: 1_0.5.6-2build1-jammy-production
     pullPolicy: IfNotPresent
     # -- (map) Konfiguration des persistenten Speichers für ClamAV
     # empfohlen: ExistingClaim mit ReadWriteMany-Volume anzugeben, so dass mehrere Pods die ClamAV-DB nutzen können. (TBD: freshclam darf dann nur einmal laufen: Abfrage PID)
@@ -1511,8 +1511,7 @@ schadcodescanner:
     # Der Standard-Updateserver ("DatabaseMirror") ist "database.clamav.net" und wird
     # durch das Konfigurieren eines privaten Mirros automatisch überschrieben.
     mirrors: []
-      # - clamav-private-mirror:8000
-
+    # - clamav-private-mirror:8000
   # -- (int) Anzahl der ClamAV-Pods
   # Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas
   # oder wenn nicht gesetzt, dann wird autoscaling.minReplicas übernommen
@@ -1761,8 +1760,8 @@ webclient:
 tests:
   # -- (map) Konfiguration für das Image der Tests
   image:
-    repository: curlimages/curl
-    tag: 7.87.0
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/wget
+    tag: 1.21.2-jammy-production
     pullPolicy: IfNotPresent
   # -- (map) Annotations, die zusätzlich auf die Tests anzuwenden sind.
   annotations:
