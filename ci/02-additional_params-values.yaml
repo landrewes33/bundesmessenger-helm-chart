@@ -30,7 +30,7 @@ schadcodescanner:
 
 sygnal:
   enabled: true
-  apns:
+  apps:
     de.opencode.dvs.gcm:
       type: gcm
       api_key: example-value

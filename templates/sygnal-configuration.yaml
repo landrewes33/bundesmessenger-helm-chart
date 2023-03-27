@@ -173,9 +173,9 @@ stringData:
     ############################# Apps - Config ###########################
     #######################################################################
     apps:
-    {{- $apns := $.Values.sygnal.apns | required "Es müssen Daten für die Push-Notifications hinterlegt werden!" -}}
-    {{- with $apns }}
-    ## APNs aus value ##
+    {{- $apps := $.Values.sygnal.apps | required "Es müssen Daten für die Push-Notifications hinterlegt werden!" -}}
+    {{- with $apps }}
+    ## APPs aus value ##
       {{ . | toYaml | nindent 6 }}
     {{- end }}
 

@@ -945,6 +945,9 @@ sygnal:
     tag: 0.12.0-jammy-production
     pullPolicy: IfNotPresent
 
+  # -- (string) Proxy, falls benötigt um die Push-Services zu erreichen. Auskommentieren oder leer für Deaktivierung
+  proxy: ""
+
   # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
   # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
   # weitere Beispiele:
@@ -956,8 +959,6 @@ sygnal:
   #    - name: net.ipv4.ip_unprivileged_port_start
   #      value: "80"
   podSecurityContext: {}
-  # -- (string) Proxy, falls benötigt um die Push-Services zu erreichen. Auskommentieren oder leer für Deaktivierung
-  proxy: ""
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
   # weitere Beispiele:
   #  capabilities:
@@ -1008,17 +1009,18 @@ sygnal:
   # -- (object) Affinitäts-Konfiguration für Sygnal-Container.
   affinity: {}
 
-  # -- (object) APN-Konfigurationsteil
+  # -- (object) Konfiguration für Push-Dienste (APNS und FCM)
   # Beispiel:
-  # apns:
+  # apps:
   #    de.opencode.dvs.ios:
   #      type: apns
   #      keyfile: /de.opencode.dvs.ios.p8
-  apns: {}
+  apps: {}
 
   ios_push:
     # -- (bool) iOS-Push Schalter
-    # Wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden, sonst schlägt das Modul fehl
+    # Wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden, sonst schlägt das Modul fehl.
+    # Hierdurch wird der unten angegebene ioskey geladen.
     enabled: false
 
     # -- (map) iOS-Key Konfiguration
