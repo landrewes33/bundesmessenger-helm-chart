@@ -7,9 +7,9 @@
     image: bwi/bundesmessenger/backend/container-images/ubuntu
     tag: latest-jammy-production
   - name: Webclient
-    version: 2.3.0
+    version: 2.4.0
     image: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.3.0-jammy-production
+    tag: 2.4.0-jammy-production
   - name: ClamAV
     version: 0.103.8
     image: bwi/bundesmessenger/backend/container-images/clamav

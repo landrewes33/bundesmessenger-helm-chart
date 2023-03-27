@@ -4458,7 +4458,7 @@ false
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web",
-  "tag": "2.3.0-jammy-production"
+  "tag": "2.4.0-jammy-production"
 }
 </pre>
 </div>
