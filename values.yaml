@@ -1763,18 +1763,22 @@ tests:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/wget
     tag: 1.21.2-jammy-production
     pullPolicy: IfNotPresent
+
   # -- (map) Annotations, die zusätzlich auf die Tests anzuwenden sind.
   annotations:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 
   # -- (map) Informationen zum Sicherheitskontext, die der Container übernehmen soll.
   podSecurityContext:
-    runAsNonRoot: true
+    runAsUser: 1001
+    runAsGroup: 1001
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
   securityContext:
     readOnlyRootFilesystem: true
-    runAsUser: 5210
+    runAsNonRoot: true
+    runAsUser: 1001
+    runAsGroup: 1001
 
   ## Ressource Konfiguration für Tests.
   resources:

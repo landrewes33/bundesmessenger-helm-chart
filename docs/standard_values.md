@@ -4595,7 +4595,7 @@ false
     </tr>
     <tr>
       <td id="tests--annotations">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1767">tests.annotations</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1768">tests.annotations</a></div>
       </td>
       <td>map</td>
       <td>Annotations, die zusätzlich auf die Tests anzuwenden sind.</td>
@@ -4610,14 +4610,15 @@ false
     </tr>
     <tr>
       <td id="tests--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1771">tests.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1772">tests.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die der Container übernehmen soll.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 {
-  "runAsNonRoot": true
+  "runAsGroup": 1001,
+  "runAsUser": 1001
 }
 </pre>
 </div>
@@ -4625,7 +4626,7 @@ false
     </tr>
     <tr>
       <td id="tests--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1775">tests.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1777">tests.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie</td>
@@ -4633,7 +4634,9 @@ false
         <div style="max-width: 300px;"><pre lang="json">
 {
   "readOnlyRootFilesystem": true,
-  "runAsUser": 5210
+  "runAsGroup": 1001,
+  "runAsNonRoot": true,
+  "runAsUser": 1001
 }
 </pre>
 </div>
@@ -4641,7 +4644,7 @@ false
     </tr>
     <tr>
       <td id="tests--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1783">tests.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1787">tests.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die für Tests anzuwenden sind.</td>
@@ -4654,7 +4657,7 @@ false
     </tr>
     <tr>
       <td id="tests--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1785">tests.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1789">tests.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die für Tests anzuwenden sind.</td>
@@ -4667,7 +4670,7 @@ false
     </tr>
     <tr>
       <td id="tests--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1788">tests.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1792">tests.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die für Tests anzuwenden sind.</td>
@@ -4680,7 +4683,7 @@ false
     </tr>
     <tr>
       <td id="tests--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1790">tests.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1794">tests.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die für Tests anzuwenden sind.</td>
