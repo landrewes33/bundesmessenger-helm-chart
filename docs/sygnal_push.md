@@ -1,5 +1,14 @@
 # Push-Service mit Sygnal
 
+Um diesen Dienst nutzen zu können, muss der Matrix-Dienst mit der öffentlichen
+(bzw. closed network) erreichbaren URL des Matrix-Servers bei der BWI GmbH registiert
+und freigeschaltet sein.
+Dadurch erhalten Sie von uns die entsprechende Konfiguration,
+mit der Sie den Dienst aktivieren und nutzen können.
+
+Den Nutzern werden damit Benachrichtungen bei neuen ungelesenen Nachrichten
+auf den mobilen Apps angezeigt.
+
 <!-- markdownlint-disable MD036 -->
 _Quelle: https://github.com/matrix-org/sygnal_
 <!-- markdownlint-enable MD036 -->
