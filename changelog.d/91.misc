@@ -1,1 +1,1 @@
-Umsetzung von DVS Regeln in den Helm Tests und Umstieg von Tests mit `wget` auf `curl`.
+Umsetzung von DVS Regeln in den Helm Tests und Konfiguration via `values.yaml`.

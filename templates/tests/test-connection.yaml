@@ -2,8 +2,8 @@
 - name: test-connection
   image: "{{ .global.Values.tests.image.repository }}:{{ .global.Values.tests.image.tag }}"
   imagePullPolicy: {{ .global.Values.tests.image.pullPolicy }}
-  command: ['curl']
-  args: ['-v', '-f', '--connect-timeout', '5', '{{ .url }}']
+  command: ['wget']
+  args: ['--timeout=5', '-O-', '{{ .url }}']
   securityContext:
     {{- toYaml .global.Values.tests.securityContext | nindent 4 }}
   resources:
