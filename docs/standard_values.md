@@ -227,7 +227,7 @@ wird im Chart.yaml gesetzt
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl",
-  "tag": "1.21.14-jammy-production"
+  "tag": "1.25.4-jammy-production"
 }
 </pre>
 </div>
@@ -2215,7 +2215,7 @@ true
       <td>das Tag für das zu nutzende Image zur Rechtebereinigung Hinweis: noch kein finaler Tag, build version 10 als Alternative zu latest</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-"jammy-production-b1"
+"latest-jammy-production"
 </pre>
 </div>
       </td>
@@ -2657,7 +2657,7 @@ false
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx",
-  "tag": "1.18.0"
+  "tag": "1.18.0-6ubuntu14.3-jammy-production"
 }
 </pre>
 </div>
@@ -3165,7 +3165,7 @@ false
       <td></td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-"6.0.16"
+"5_6.0.16-1ubuntu1-jammy-production"
 </pre>
 </div>
       </td>
@@ -3739,7 +3739,7 @@ false
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/clamav",
-  "tag": "0.103.8"
+  "tag": "0.103.8_dfsg-0ubuntu0.22.04.1-jammy-production"
 }
 </pre>
 </div>
@@ -3756,7 +3756,7 @@ false
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/icap",
-  "tag": "0.5.6"
+  "tag": "1_0.5.6-2build1-jammy-production"
 }
 </pre>
 </div>
@@ -3868,7 +3868,7 @@ leer, damit dynamische Volumes genutzt werden können (dennoch persistent)
     </tr>
     <tr>
       <td id="schadcodescanner--replicaCount">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1519">schadcodescanner.replicaCount</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1518">schadcodescanner.replicaCount</a></div>
       </td>
       <td>int</td>
       <td>Anzahl der ClamAV-Pods Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas oder wenn nicht gesetzt, dann wird autoscaling.minReplicas übernommen</td>
@@ -3881,7 +3881,7 @@ leer, damit dynamische Volumes genutzt werden können (dennoch persistent)
     </tr>
     <tr>
       <td id="schadcodescanner--autoscaling--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1526">schadcodescanner.autoscaling.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1525">schadcodescanner.autoscaling.enabled</a></div>
       </td>
       <td>bool</td>
       <td>schalte das HPA für die Container ein Hinweis: Kann für alle spezifischen Worker benutzt werden Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden</td>
@@ -3894,7 +3894,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--autoscaling--minReplicas">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1528">schadcodescanner.autoscaling.minReplicas</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1527">schadcodescanner.autoscaling.minReplicas</a></div>
       </td>
       <td>int</td>
       <td>minimale Anzahl der Worker-Container</td>
@@ -3907,7 +3907,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--autoscaling--maxReplicas">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1530">schadcodescanner.autoscaling.maxReplicas</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1529">schadcodescanner.autoscaling.maxReplicas</a></div>
       </td>
       <td>int</td>
       <td>maximale Anzahl der Worker-Container</td>
@@ -3920,7 +3920,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--autoscaling--targetCPUUtilizationPercentage">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1532">schadcodescanner.autoscaling.targetCPUUtilizationPercentage</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1531">schadcodescanner.autoscaling.targetCPUUtilizationPercentage</a></div>
       </td>
       <td>int</td>
       <td>Prozentsatz für CPU-Auslastung um Scaling zu triggern</td>
@@ -3933,7 +3933,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--autoscaling--targetMemoryUtilizationPercentage">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1534">schadcodescanner.autoscaling.targetMemoryUtilizationPercentage</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1533">schadcodescanner.autoscaling.targetMemoryUtilizationPercentage</a></div>
       </td>
       <td>int</td>
       <td>Prozentsatz für RAM-Auslastung um Scaling zu triggern</td>
@@ -3946,7 +3946,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--limits--fileSize">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1538">schadcodescanner.limits.fileSize</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1537">schadcodescanner.limits.fileSize</a></div>
       </td>
       <td>int</td>
       <td></td>
@@ -3959,7 +3959,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--limits--scanSize">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1540">schadcodescanner.limits.scanSize</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1539">schadcodescanner.limits.scanSize</a></div>
       </td>
       <td>int</td>
       <td></td>
@@ -3972,7 +3972,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--limits--connectionQueueLength">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1542">schadcodescanner.limits.connectionQueueLength</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1541">schadcodescanner.limits.connectionQueueLength</a></div>
       </td>
       <td>int</td>
       <td></td>
@@ -3985,7 +3985,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--limits--maxThreads">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1544">schadcodescanner.limits.maxThreads</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1543">schadcodescanner.limits.maxThreads</a></div>
       </td>
       <td>int</td>
       <td></td>
@@ -3998,7 +3998,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--limits--sendBufTimeout">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1546">schadcodescanner.limits.sendBufTimeout</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1545">schadcodescanner.limits.sendBufTimeout</a></div>
       </td>
       <td>int</td>
       <td></td>
@@ -4011,7 +4011,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesClamav--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1551">schadcodescanner.resourcesClamav.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1550">schadcodescanner.resourcesClamav.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.</td>
@@ -4024,7 +4024,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesClamav--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1553">schadcodescanner.resourcesClamav.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1552">schadcodescanner.resourcesClamav.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.</td>
@@ -4037,7 +4037,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesClamav--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1556">schadcodescanner.resourcesClamav.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1555">schadcodescanner.resourcesClamav.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den ClamAV-Container anzuwenden sind.</td>
@@ -4050,7 +4050,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesClamav--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1558">schadcodescanner.resourcesClamav.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1557">schadcodescanner.resourcesClamav.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den ClamAV-Container anzuwenden sind.</td>
@@ -4063,7 +4063,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesCicap--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1563">schadcodescanner.resourcesCicap.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1562">schadcodescanner.resourcesCicap.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den C-Icap-Container anzuwenden sind.</td>
@@ -4076,7 +4076,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesCicap--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1565">schadcodescanner.resourcesCicap.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1564">schadcodescanner.resourcesCicap.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den C-Icap-Container anzuwenden sind.</td>
@@ -4089,7 +4089,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesCicap--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1568">schadcodescanner.resourcesCicap.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1567">schadcodescanner.resourcesCicap.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den C-Icap-Container anzuwenden sind.</td>
@@ -4102,7 +4102,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--resourcesCicap--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1570">schadcodescanner.resourcesCicap.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1569">schadcodescanner.resourcesCicap.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den C-Icap-Container anzuwenden sind.</td>
@@ -4115,7 +4115,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1575">schadcodescanner.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1574">schadcodescanner.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen. weitere Möglichkeiten:  fsGroup: 1001</td>
@@ -4130,7 +4130,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--clamavSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1583">schadcodescanner.clamavSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1582">schadcodescanner.clamavSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die ClamAv-Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
@@ -4147,7 +4147,7 @@ false
     </tr>
     <tr>
       <td id="schadcodescanner--icapSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1593">schadcodescanner.icapSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1592">schadcodescanner.icapSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die C-ICAP-Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
@@ -4179,7 +4179,7 @@ false
   <tbody>
     <tr>
       <td id="coturn--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1610">coturn.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1609">coturn.enabled</a></div>
       </td>
       <td>bool</td>
       <td>CoTurn als Deployment aktivieren Hinweis: Nicht empfohlen!</td>
@@ -4192,7 +4192,7 @@ false
     </tr>
     <tr>
       <td id="coturn--turnUris">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1617">coturn.turnUris</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1616">coturn.turnUris</a></div>
       </td>
       <td>map</td>
       <td>TurnUris zusammenbauen lassen, aktuell deaktiviert, Als Liste unter `config.turnUris` konfigurieren Beispiel:  udp: 3478  tcp: 3478  realm: "turn.example.com"</td>
@@ -4205,7 +4205,7 @@ false
     </tr>
     <tr>
       <td id="coturn--existingcoturn--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1621">coturn.existingcoturn.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1620">coturn.existingcoturn.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Schalter um bereits existenten CoTurn im K8s-Cluster zu nutzen</td>
@@ -4218,7 +4218,7 @@ false
     </tr>
     <tr>
       <td id="coturn--default_ns">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1623">coturn.default_ns</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1622">coturn.default_ns</a></div>
       </td>
       <td>string</td>
       <td>Namespace für den CoTurn-Dienst</td>
@@ -4231,7 +4231,7 @@ false
     </tr>
     <tr>
       <td id="coturn--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1625">coturn.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1624">coturn.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für das Image vom CoTurn</td>
@@ -4248,7 +4248,7 @@ false
     </tr>
     <tr>
       <td id="coturn--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1630">coturn.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1629">coturn.securityContext</a></div>
       </td>
       <td>map</td>
       <td>SecurityContext für den Container</td>
@@ -4281,7 +4281,7 @@ false
   <tbody>
     <tr>
       <td id="synapse_admin--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1643">synapse_admin.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1642">synapse_admin.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Aktivieren des Synapse-Admin-Moduls</td>
@@ -4294,7 +4294,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--uri">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1645">synapse_admin.uri</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1644">synapse_admin.uri</a></div>
       </td>
       <td>string</td>
       <td>URI für die Admin GUI, zwingend notwendig</td>
@@ -4307,7 +4307,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1647">synapse_admin.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1646">synapse_admin.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration des Image vom Modul</td>
@@ -4324,7 +4324,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1656">synapse_admin.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1655">synapse_admin.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.</td>
@@ -4337,7 +4337,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1658">synapse_admin.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1657">synapse_admin.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.</td>
@@ -4350,7 +4350,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1661">synapse_admin.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1660">synapse_admin.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den Synapse-Admin Server anzuwenden sind.</td>
@@ -4363,7 +4363,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1663">synapse_admin.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1662">synapse_admin.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den Synapse-Admin Server anzuwenden sind.</td>
@@ -4376,7 +4376,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1669">synapse_admin.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1668">synapse_admin.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen. Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein weitere Beispiele:  runAsNonRoot: true</td>
@@ -4392,7 +4392,7 @@ false
     </tr>
     <tr>
       <td id="synapse_admin--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1677">synapse_admin.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1676">synapse_admin.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie des Containers weitere Beispiele:   runAsNonRoot: true   readOnlyRootFilesystem: true   runAsUser: 2010</td>
@@ -4423,7 +4423,7 @@ false
   <tbody>
     <tr>
       <td id="webclient--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1712">webclient.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1711">webclient.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Element-Webclient im Deployment aktivieren</td>
@@ -4436,7 +4436,7 @@ false
     </tr>
     <tr>
       <td id="webclient--uri">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1714">webclient.uri</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1713">webclient.uri</a></div>
       </td>
       <td>string</td>
       <td>URL für den Webclient, zwingend notwendig</td>
@@ -4449,7 +4449,7 @@ false
     </tr>
     <tr>
       <td id="webclient--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1716">webclient.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1715">webclient.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für das Image vom Element-Webclient</td>
@@ -4466,7 +4466,7 @@ false
     </tr>
     <tr>
       <td id="webclient--annotations--"nginx--ingress--kubernetes--io/configuration-snippet"">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1721">webclient.annotations."nginx.ingress.kubernetes.io/configuration-snippet"</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1720">webclient.annotations."nginx.ingress.kubernetes.io/configuration-snippet"</a></div>
       </td>
       <td>string</td>
       <td></td>
@@ -4479,7 +4479,7 @@ false
     </tr>
     <tr>
       <td id="webclient--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1730">webclient.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1729">webclient.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die der Container übernehmen soll. weitere Möglichkeiten:  fsGroup: 1001</td>
@@ -4495,7 +4495,7 @@ false
     </tr>
     <tr>
       <td id="webclient--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1739">webclient.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1738">webclient.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
@@ -4511,7 +4511,7 @@ false
     </tr>
     <tr>
       <td id="webclient--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1747">webclient.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1746">webclient.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den webclient-server anzuwenden sind.</td>
@@ -4524,7 +4524,7 @@ false
     </tr>
     <tr>
       <td id="webclient--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1749">webclient.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1748">webclient.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind.</td>
@@ -4537,7 +4537,7 @@ false
     </tr>
     <tr>
       <td id="webclient--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1752">webclient.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1751">webclient.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den webclient-server anzuwenden sind.</td>
@@ -4550,7 +4550,7 @@ false
     </tr>
     <tr>
       <td id="webclient--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1754">webclient.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1753">webclient.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den webclient-server anzuwenden sind.</td>
@@ -4578,7 +4578,7 @@ false
   <tbody>
     <tr>
       <td id="tests--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1763">tests.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1762">tests.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für das Image der Tests</td>
@@ -4586,8 +4586,8 @@ false
         <div style="max-width: 300px;"><pre lang="json">
 {
   "pullPolicy": "IfNotPresent",
-  "repository": "curlimages/curl",
-  "tag": "7.87.0"
+  "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/wget",
+  "tag": "1.21.2-jammy-production"
 }
 </pre>
 </div>
@@ -4595,7 +4595,7 @@ false
     </tr>
     <tr>
       <td id="tests--annotations">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1768">tests.annotations</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1767">tests.annotations</a></div>
       </td>
       <td>map</td>
       <td>Annotations, die zusätzlich auf die Tests anzuwenden sind.</td>
@@ -4610,7 +4610,7 @@ false
     </tr>
     <tr>
       <td id="tests--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1772">tests.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1771">tests.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die der Container übernehmen soll.</td>
@@ -4625,7 +4625,7 @@ false
     </tr>
     <tr>
       <td id="tests--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1776">tests.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1775">tests.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie</td>
@@ -4641,7 +4641,7 @@ false
     </tr>
     <tr>
       <td id="tests--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1784">tests.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1783">tests.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die für Tests anzuwenden sind.</td>
@@ -4654,7 +4654,7 @@ false
     </tr>
     <tr>
       <td id="tests--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1786">tests.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1785">tests.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die für Tests anzuwenden sind.</td>
@@ -4667,7 +4667,7 @@ false
     </tr>
     <tr>
       <td id="tests--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1789">tests.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1788">tests.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die für Tests anzuwenden sind.</td>
@@ -4680,7 +4680,7 @@ false
     </tr>
     <tr>
       <td id="tests--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1791">tests.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1790">tests.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die für Tests anzuwenden sind.</td>
