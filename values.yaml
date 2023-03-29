@@ -660,7 +660,6 @@ workers:
       - "/_matrix/client/(r0|v3|unstable)/keys/claim$"
       - "/_matrix/client/(r0|v3|unstable)/room_keys(/.*)?(/.*)?$"
       - "/_matrix/client/(r0|v3|unstable)/keys/upload(/.*)?$"
-      - "/_matrix/client/(r0|v3|unstable)/user/.*/filter(/|$)"
 
       ## Registration/login requests
       - "/_matrix/client/(api/v1|r0|v3|unstable)/login$"
@@ -721,6 +720,7 @@ workers:
       - "/_matrix/federation/v1/timestamp_to_event/"
       - "/_matrix/federation/(v1|v2)/exchange_third_party_invite/"
       - "/_matrix/federation/(v1|v2)/user/devices/"
+      - "/_matrix/federation/(v1|v2)/get_groups_publicised$"
       - "/_matrix/key/v2/query"
       - "/_matrix/federation/v1/hierarchy/"
 
@@ -781,6 +781,7 @@ workers:
       - "/_matrix/federation/v1/timestamp_to_event/"
       - "/_matrix/federation/(v1|v2)/exchange_third_party_invite/"
       - "/_matrix/federation/(v1|v2)/user/devices/"
+      - "/_matrix/federation/(v1|v2)/get_groups_publicised$"
       - "/_matrix/key/v2/query"
       - "/_matrix/federation/v1/hierarchy/"
 
