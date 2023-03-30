@@ -2,7 +2,7 @@
 
 # Script to update images and tags in values.yaml
 # Parameters:
-# - $1: version number to set (file: ci/version/v"version".yaml)
+# - $1: version number to set (file: ci/versions/v"version".yaml)
 
 version=$1
 default_registry="registry.opencode.de"
@@ -11,8 +11,8 @@ scriptDir=$(dirname $(readlink -f "${BASH_SOURCE:-$0}"))
 
 chart_file=$scriptDir/../Chart.yaml
 values_file=$scriptDir/../values.yaml
-mapping_file=$scriptDir/version/mapping_versions.yaml
-version_file=$scriptDir/version/*.yaml
+mapping_file=$scriptDir/versions/mapping_versions.yaml
+version_file=$scriptDir/versions/*.yaml
 docs_output_file=$scriptDir/../docs/versions/v$version.md
 
 
