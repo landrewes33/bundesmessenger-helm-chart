@@ -1,0 +1,1 @@
+Liveness-Checks der auf Nginx-basierenden Dienste (Synapse-Admin/WellKnown/WebClient) auf `TCPSocket` umgestellt.

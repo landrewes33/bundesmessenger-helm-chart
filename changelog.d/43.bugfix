@@ -1,0 +1,1 @@
+Standardbenutzer aus der Nginx-Konfiguration entfernt. Diese ist im Container fest verankert.

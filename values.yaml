@@ -77,7 +77,7 @@ signingkey:
 
   job:
     # -- (bool) es wird ein Job zu Beginn des Deployments gestartet, der einen Signierschlüssel erzeugt.
-    # Wenn abgeschaltet, muss ein vorhandener Schlüssel eingebunden werden, ansonsten ist eine Förderation
+    # Wenn abgeschaltet, muss ein vorhandener Schlüssel eingebunden werden, ansonsten ist eine Föderation
     # als nicht vertrauenswürdig eingestuft
     enabled: true
 
@@ -197,14 +197,14 @@ extraConfig:
   include_profile_data_on_invite: true
   # -- (bool) Öffentliche Räume ohne Login/Authentifizierung, abgeschaltet!
   allow_public_rooms_without_auth: false
-  # -- (bool) öffentliche Räume über Förderation erlauben, abgeschaltet
+  # -- (bool) öffentliche Räume über Föderation erlauben, abgeschaltet
   allow_public_rooms_over_federation: false
   # -- (bool) Einladung die von unpriviligierten Nutzern stammen blocken, abgeschaltet
   block_non_admin_invites: false
-  # -- (list) IP-Whitelist für Förderation zwingend benötigt
+  # -- (list) IP-Whitelist für Föderation und Push-Services zwingend benötigt
   ip_range_whitelist: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
   presence:
-    # -- (bool) Anwesenheitstatus anzeigen, abgeschaltet (Load)
+    # -- (bool) Anwesenheitsstatus anzeigen, abgeschaltet (Load)
     enabled: false
   # -- (bool) Nutzersuche zulassen, eingeschaltet
   enable_search: true
@@ -251,7 +251,7 @@ extraConfig:
       require_symbol: true
       # -- (bool) Kleinbuchstaben muss genutzt werden
       require_lowercase: true
-      # -- (bool) Großbuchstaben muss genutz werden
+      # -- (bool) Großbuchstaben muss genutzt werden
       require_uppercase: true
   ui_auth:
     # -- (string) User-Interactive Authentication API timeout
@@ -753,15 +753,15 @@ workers:
   ## https://github.com/matrix-org/synapse/blob/develop/docs/workers.md#load-balancing
 
   federation_reader:
-    # -- (bool) Aktiviere spez. Worker für Förderationsanfragen
+    # -- (bool) Aktiviere spez. Worker für Föderationsanfragen
     # Wenn dieser Worker genutzt wird, können die URLs aus dem
     # generic_worker entfernt werden.
     enabled: false
     # -- (bool) Wird aus dem generischen Worker abgeleitet
     generic: true
-    # -- (list) Zusätzliche Listener für Förderationsworker
+    # -- (list) Zusätzliche Listener für Föderationsworker
     listeners: [federation]
-    # -- (path) Server-Side Pfade für die Ingress-Konfiguration des Förderations-Workers
+    # -- (path) Server-Side Pfade für die Ingress-Konfiguration des Föderations-Workers
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     paths:
       - "/_matrix/federation/(v1|v2)/event/"
@@ -971,7 +971,7 @@ sygnal:
   securityContext:
     readOnlyRootFilesystem: true
 
-  ## Ressource konfiguration für Sygnal server.
+  ## Ressource Konfiguration für Sygnal server.
   ##
   resources:
     limits:
@@ -1025,7 +1025,7 @@ sygnal:
     enabled: false
 
     # -- (map) iOS-Key Konfiguration
-    # bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden. Weitereres siehe README.md
+    # bei Nutzung von iOS-Pushservice, muss Key mit angeben werden. Weiteres siehe README.md
     # Beispiel:
     #  ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus dem APN-File übereinstimmen!
     #  ioskey_keyvalue: 'HIER KÖNNTE IHR KEY IN STEHEN'

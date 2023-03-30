@@ -13,7 +13,7 @@ matched=0
 for f in $(git diff --diff-filter=d --name-only origin/$CI_DEFAULT_BRANCH -- changelog.d); do
     # check that any added newsfiles on this branch end with a full stop.
     lastchar=$(tr -d '\n' < "$f" | tail -c 1)
-    if [ "$lastchar" != '.' ] && [ "$lastchar" != '!' ]; then
+    if [ "$lastchar" != '.' ] && [ "$lastchar" != '!' ] && [ "$f" != "changelog.d/README.md" ]; then
         echo -e "\e[31mERROR: newsfragment $f does not end with a '.' or '!'\e[39m" >&2
         exit 1
     fi

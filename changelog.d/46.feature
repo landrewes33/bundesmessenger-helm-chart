@@ -1,0 +1,1 @@
+Möglichkeit das Logging für das Synapse Modul `synapse.storage.SQL` separat zu konfigurieren.
