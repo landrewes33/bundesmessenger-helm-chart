@@ -1,5 +1,6 @@
 {{- if .Values.wellknown.enabled }}
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") -}}
+{{- $component := "wellknown-nginx" -}}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -7,7 +8,7 @@ metadata:
   name: {{ $wkName }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    component: well-known
+    component: {{ $component }}
 data:
   bundesmessenger.conf: |
     server {
@@ -30,9 +31,10 @@ data:
       #  }
       #}
       #{{- end }}
-      #livenessProbe auf /status mal selbst gemacht
+      #livenessProbe auf /status mal selbst gemacht, logging aus
       location /status {
         return 200;
+        access_log off;
       }
       location /_matrix/cmaintenance {
         add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization";
@@ -69,31 +71,40 @@ data:
 {{-   if .Values.wellknown.client }}
 {{ toJson .Values.wellknown.client | nindent 4 }}
 {{-   else }}
-{{ dict "m.homeserver" (dict "base_url" (printf "https://%s/" (.Values.publicServerName | default .Values.serverName))) | toJson | indent 4 }}
+    {
+      "m.homeserver": {
+        "base_url": "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}"
+      },
+      "io.element.e2ee": {
+        "secure_backup_required": "true",
+        "secure_backup_setup_methods": ["passphrase"],
+        "outbound_keys_pre_sharing_mode": "on_room_opening"
+      },
+      "de.bwi": {
+        "data_privacy_url": "{{- printf "https://%s" ( .Values.dataPrivacyUrl | required "a valid URL for data protection regulations / privacy policy (dataPrivacyUrl) is required. ") }}"
+      }
+    }
 {{-   end }}
   maintenance.json: |-
     {
       "downtime": [
-          {
-              "warning_start_time": "2022-12-14T11:00:00Z",
-              "start_time": "2022-12-23T11:00:00Z",
-              "end_time": "2022-12-24T20:00:00Z",
-              "type": "MAINTENANCE_STANDARD",
-              "description": "Weihnachtswartung 2022"
-          }
+        {
+          "warning_start_time": "2022-12-14T11:00:00Z",
+          "start_time": "2022-12-23T11:00:00Z",
+          "end_time": "2022-12-24T20:00:00Z",
+          "type": "MAINTENANCE_STANDARD",
+          "description": "Weihnachtswartung 2022"
+        }
       ],
-      "versions":
-      {
-          "ios" :
-          {
-              "update_before": "1.17.0",
-              "warn_before": "1.19.0"
-          },
-          "android" :
-          {
-              "update_before": "1.17.0",
-              "warn_before": "1.19.0"
-          }
+      "versions": {
+        "ios": {
+          "update_before": "1.17.0",
+          "warn_before": "1.19.0"
+        },
+        "android": {
+          "update_before": "1.17.0",
+          "warn_before": "1.19.0"
+        }
       }
     }
 {{-   range $key, $value := .Values.wellknown.extraData }}

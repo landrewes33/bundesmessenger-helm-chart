@@ -1,10 +1,11 @@
 {{- if .Values.schadcodescanner.enabled }}
 {{- if and .Values.schadcodescanner.persistence.enabled (not .Values.schadcodescanner.persistence.existingClaim) -}}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "schadcodescanner") -}}
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
-  name: {{ template "matrix-synapse.schadcodescannername" . }}
+  name: {{ $name }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 spec:
@@ -14,11 +15,11 @@ spec:
     requests:
       storage: {{ .Values.schadcodescanner.persistence.size | quote }}
         {{- if .Values.schadcodescanner.persistence.storageClass }}
-                {{- if (eq "-" .Values.schadcodescanner.persistence.storageClass) }}
+          {{- if (eq "-" .Values.schadcodescanner.persistence.storageClass) }}
   storageClassName: ""
-                {{- else }}
+          {{- else }}
   storageClassName: "{{ .Values.schadcodescanner.persistence.storageClass }}"
-                {{- end }}
+          {{- end }}
         {{- end }}
 {{- end -}}
 {{- end -}}

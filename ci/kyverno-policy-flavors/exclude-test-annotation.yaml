@@ -1,0 +1,9 @@
+# https://kyverno.io/docs/writing-policies/autogen/
+# Excludes für Labels müssen über Preconditions erfolgen
+- op: add
+  path: /spec/rules/0/preconditions
+  value:
+    all:
+    - key: "{{ request.\"object\".metadata.annotations.\"helm.sh/hook\" || '' }}"
+      operator: NotEquals
+      value: test

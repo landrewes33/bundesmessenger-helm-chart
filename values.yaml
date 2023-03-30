@@ -5,13 +5,13 @@
 image:
   # -- (string) Repository/Image Konfiguration, für Synapse und Workernodes.
   # ursprünglich: "repository: matrixdotorg/synapse"
-  repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-production
+  repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse
 
   # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
   # @default -- wird im Chart.yaml gesetzt
   # tag: ""
 
-  # -- (map) Optional kann ein Array von imagePullSecrets angegeben werden.
+  # -- (list) Optional kann ein Array von imagePullSecrets angegeben werden.
   # Secrets müssen manuell im Namensraum angelegt werden.
   # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   # Beispiel:
@@ -37,8 +37,23 @@ serverName: ""
 
 # -- (string) Der öffentliche Matrix-Servername, der für alle öffentlichen URLs
 # in der Konfiguration sowie für Client-API-Links im Ingress verwendet wird.
-# @default  -- Nicht gesetzt
+# @default -- Nicht gesetzt
 publicServerName: ""
+
+# -- (string) Eine URL unter der der Nutzer sich Datenschutzbestimmungen einsehen kann.
+# Diese Datenschutzbestimmungen muss jeder Anbieter selbst dem Nutzer zur Verfügung stellen.
+# Die Mobil-Apps nutzen dies, um die Datenschutzbestimmungen per Webaufruf
+# dem Nutzer anzeigen zu lassen.
+# @default -- Nicht gesetzt, aber Voraussetzung!
+dataPrivacyUrl: ""
+
+# -- (string) Der Servername für die Admin-API  "/_synapse/admin" und alle anderen
+# APIs, die für alle administrativen Konfigurationen im Ingress verwendet werden.
+# Wenn synapse_admin.enable ist und synapse_admin.uri unterschiedlich von adminAPIServerName,
+# dann wird dort nur der Synapse_admin erreichbar sein.
+# Schnittstellen zum konfigurieren, werden nur über adminAPIServerName zur Verfügung gestellt.
+# @default  -- Nicht gesetzt, aber Voraussetzung!
+adminAPIServerName: ""
 
 # -- (bool) Aktivieren des Monitoringservices für Synapse-Dienste in Prometheus
 # @default -- false
@@ -62,7 +77,7 @@ signingkey:
 
   job:
     # -- (bool) es wird ein Job zu Beginn des Deployments gestartet, der einen Signierschlüssel erzeugt.
-    # Wenn abgeschaltet, muss ein vorhandener Schlüssel eingebunden werden, ansonsten ist eine Förderation
+    # Wenn abgeschaltet, muss ein vorhandener Schlüssel eingebunden werden, ansonsten ist eine Föderation
     # als nicht vertrauenswürdig eingestuft
     enabled: true
 
@@ -71,7 +86,7 @@ signingkey:
       # empfohlen, dass die gleiche Konfiguration wie vom Synapse bzw. den Workernodes genutzt wird.
       # ursprünglich: "repository: matrixdotorg/synapse"
       # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen (empfohlen)
-      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-production
+      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse
       # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
       # @default -- wird im Chart.yaml gesetzt
       # tag: ""
@@ -82,8 +97,8 @@ signingkey:
     # -- (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.
     # finaler Tag kann sich noch ändern
     publishImage:
-      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-kubectl-production
-      tag: v1.21.14
+      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl
+      tag: 1.25.4-jammy-production
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
@@ -118,8 +133,15 @@ config:
   # Beispiel:
   # publicBaseurl: 'https://matrix.example.com'
 
-  # -- (string) Das Loglevel  für Synapse und alle Module.
+  # -- (string) Das Loglevel für Synapse und alle `loggers` Module.
+  # Mit Ausnahme von `synapse.storage.SQL`, welches aus Sicherheitsgründen zusätzlich geändert werden muss.
+  # Dokumentation: https://matrix-org.github.io/synapse/latest/structured_logging.html
   logLevel: INFO
+
+  # -- (string) Das Loglevel für `synapse.storage.SQL`.
+  # Achtung: Wenn dieser Wert auf `DEBUG` erhöht wird, werden alle SQL-Abfragen protokolliert.
+  # Diese enthalten sensible Informationen wie z.B. Zugriffstoken.
+  logLevelSQL: INFO
 
   # -- (bool) Nutzungsstatistiken (siehe extraConfig.reportStats)
   reportStats: false
@@ -165,8 +187,8 @@ config:
 # Ref: https://github.com/matrix-org/synapse/blob/develop/docs/sample_config.yaml
 # @default -- wird nachfolgend aufgeschlüsselt
 extraConfig:
-#  old_signing_keys:
-#    "ed25519:id": { key: "base64string", expired_ts: 123456789123 }
+  # old_signing_keys:
+  #   "ed25519:id": { key: "base64string", expired_ts: 123456789123 }
   # -- (bool) Authentifizierung notwendig für User-Suche
   require_auth_for_profile_requests: true
   # -- (bool) Limitiere Requests für Nutzer mit shared rooms, abgeschaltet
@@ -175,33 +197,33 @@ extraConfig:
   include_profile_data_on_invite: true
   # -- (bool) Öffentliche Räume ohne Login/Authentifizierung, abgeschaltet!
   allow_public_rooms_without_auth: false
-  # -- (bool) öffentliche Räume über Förderation erlauben, abgeschaltet
+  # -- (bool) öffentliche Räume über Föderation erlauben, abgeschaltet
   allow_public_rooms_over_federation: false
   # -- (bool) Einladung die von unpriviligierten Nutzern stammen blocken, abgeschaltet
   block_non_admin_invites: false
-  # -- (list) IP-Whitelist für Förderation zwingend benötigt
+  # -- (list) IP-Whitelist für Föderation und Push-Services zwingend benötigt
   ip_range_whitelist: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
   presence:
-  # -- (bool) Anwesenheitstatus anzeigen, abgeschaltet (Load)
+    # -- (bool) Anwesenheitsstatus anzeigen, abgeschaltet (Load)
     enabled: false
   # -- (bool) Nutzersuche zulassen, eingeschaltet
   enable_search: true
   user_directory:
-  # -- (bool) Nutzerverzeichnis erstellen, eingeschaltet (Vraussetzung für Nutzersuche)
+    # -- (bool) Nutzerverzeichnis erstellen, eingeschaltet (Voraussetzung für Nutzersuche)
     enabled: true
-  # -- (bool) Suche alle Nutzer, eingeschaltet
+    # -- (bool) Suche alle Nutzer, eingeschaltet
     search_all_users: true
   # -- (bool) Alias nur für registrierte Nutzer (sowieso, nicht authentifizierte Nutzer sind abgeschaltet)
   require_membership_for_aliases: true
   # -- (string) Maximale Speicherzeit für IPs von Nutzern (Whitelist mapping)
   user_ips_max_age: 28d
   retention:
-  # -- (bool) Nachrichtenaufbewahrungsrichtlinien einschalten (auf Raumebene)
+    # -- (bool) Nachrichtenaufbewahrungsrichtlinien einschalten (auf Raumebene)
     enabled: false
   # -- (bool) URL-Vorschau, abgeschaltet
   url_preview_enabled: false
   oembed:
-  # -- (bool) eingebettete URL-Darstellung von Drittanbietern
+    # -- (bool) eingebettete URL-Darstellung von Drittanbietern
     disable_default_providers: true
   # -- (bool) thirdParty Identifier lookup (3pid), abgeschaltet
   enable_3pid_lookup: false
@@ -214,47 +236,47 @@ extraConfig:
   # -- (object) Passwortkonfiguration
   # @default -- folgende Aufschlüsselung
   password_config:
-  # -- (bool) Passwortkonfiguration selbst definieren, eingeschaltet
+    # -- (bool) Passwortkonfiguration selbst definieren, eingeschaltet
     enabled: true
-  # -- (bool) lokale Nutzerdatenbank, eingeschaltet
+    # -- (bool) lokale Nutzerdatenbank, eingeschaltet
     localdb_enabled: true
     policy:
-  # -- (bool) Passwortpolicy nutzen, eingeschaltet
+      # -- (bool) Passwortpolicy nutzen, eingeschaltet
       enabled: true
-  # -- (int) Passwortmindestlänge in Zeichen
+      # -- (int) Passwortmindestlänge in Zeichen
       minimum_length: 8
-  # -- (bool) Zahl muss mit genutzt werden
+      # -- (bool) Zahl muss mit genutzt werden
       require_digit: true
-  # -- (bool) Sonderzeichen muss genutzt werden
+      # -- (bool) Sonderzeichen muss genutzt werden
       require_symbol: true
-  # -- (bool) Kleinbuchstaben muss genutzt werden
+      # -- (bool) Kleinbuchstaben muss genutzt werden
       require_lowercase: true
-  # -- (bool) Großbuchstaben muss genutz werden
+      # -- (bool) Großbuchstaben muss genutzt werden
       require_uppercase: true
   ui_auth:
-  # -- (string) User-Interactive Authentication API timeout
+    # -- (string) User-Interactive Authentication API timeout
     session_timeout: "15s"
   push:
-  # -- (bool) Push Modul verschickt Inhalt der Nachricht über Google-/Apple-Push-Services, abgeschaltet
+    # -- (bool) Push Modul verschickt Inhalt der Nachricht über Google-/Apple-Push-Services, abgeschaltet
     include_content: false
-  # -- (string) Verschlüsselung der Räume (default Einstellung, eingeschaltet
+  # -- (string) Verschlüsselung für neue Räume; default für alle Räume aktiviert
   encryption_enabled_by_default_for_room_type: all
   stats:
-  # -- (bool) Schalte Nutzerstatistiken ein, eingeschaltet
+    # -- (bool) Schalte Nutzerstatistiken ein, eingeschaltet
     enabled: true
   # -- (bool) Raumsuche, eingeschaltet
   enable_room_list_search: true
   opentracing:
-  # -- (bool) OpenTracing ist ein Werkzeug, das einen Einblick
-  # in den kausalen Zusammenhang der Arbeit in und zwischen Servern gibt.
-  # Die einzelnen Server verfolgen Ereignisse und melden
-  # sie an einen zentralen Server - im Fall von Synapse: Jaeger.
+    # -- (bool) OpenTracing ist ein Werkzeug, das einen Einblick
+    # in den kausalen Zusammenhang der Arbeit in und zwischen Servern gibt.
+    # Die einzelnen Server verfolgen Ereignisse und melden
+    # sie an einen zentralen Server - im Fall von Synapse: Jaeger.
     enabled: false
   # -- (list) Whitelist (Domainbased) für Föderation
   federation_domain_whitelist: []
-#    - poc1.dvs.example.com
-#    - poc2.dvs.example.com
-#    - poc3.dvs.example.com
+  #  - poc1.dvs.example.com
+  #  - poc2.dvs.example.com
+  #  - poc3.dvs.example.com
   # -- (bool) dynamisches Vorschaubild, eingeschaltet
   dynamic_thumbnails: true
 
@@ -270,11 +292,11 @@ extraSecrets: {}
 # @default -- wird nachfolgend einzeln aufgeschlüsselt
 synapse:
   strategy:
-  # -- (string) Nur wirklich anwendbar, wenn das Deployment ein RWO PV angehängt hat (z.B. wenn Media Repository
-  # für den Haupt-Synapse-Container aktiviert ist)
-  # Da Replikate = 1 sind, kann eine Aktualisierung "hängen bleiben", da der vorherige Container mit dem
-  # PV verbunden bleibt und der "neu-aufgebaute" Container nie starten kann. Das Ändern der Strategie auf "Recreate" wird
-  # den einzelnen vorherigen Container beenden, so dass der neue, ankommende Container sich mit dem PV verbinden kann
+    # -- (string) Nur wirklich anwendbar, wenn das Deployment ein RWO PV angehängt hat (z.B. wenn Media Repository
+    # für den Haupt-Synapse-Container aktiviert ist)
+    # Da Replikate = 1 sind, kann eine Aktualisierung "hängen bleiben", da der vorherige Container mit dem
+    # PV verbunden bleibt und der "neu-aufgebaute" Container nie starten kann. Das Ändern der Strategie auf "Recreate" wird
+    # den einzelnen vorherigen Container beenden, so dass der neue, ankommende Container sich mit dem PV verbinden kann
     type: RollingUpdate
 
   # -- (map) Annotations, die auf den Haupt-Synapse-Container anzuwenden sind.
@@ -287,7 +309,7 @@ synapse:
   # -- (map) Labels, die auf den Haupt-Synapse-Container anzuwenden sind.
   labels: {}
 
-  # -- (map) Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind
+  # -- (list) Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind
   # Beispiel:
   #  - name: LD_PRELOAD
   #    value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
@@ -295,7 +317,7 @@ synapse:
   #    value: "2"
   extraEnv: []
 
-  # -- (object) Zusätzliche in Synapse zu mountende Datenträger (Volumes)
+  # -- (list) Zusätzliche in Synapse zu mountende Datenträger (Volumes)
   # Beispiel:
   #  - name: spamcheck
   #    flexVolume:
@@ -306,7 +328,7 @@ synapse:
   #      readOnly: true
   extraVolumes: []
 
-  # -- (object) Zusätzliche in Synapse zu mountende Datenträgerpfade (Volumes)
+  # -- (list) Zusätzliche in Synapse zu mountende Datenträgerpfade (Volumes)
   # Beispiel:
   #  - name: spamcheck
   #    mountPath: /usr/local/lib/python3.7/site-packages/company
@@ -353,16 +375,17 @@ synapse:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
       cpu: 1000m
-      # -- (object) RAM Ressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
+      # -- (string) RAM Ressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
       memory: 2500Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
-      cpu: 1000m
+      cpu: 500m
       # -- (string) Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
-      memory: 2500Mi
+      memory: 1000Mi
 
   # Healthcheck
   livenessProbe:
+    periodSeconds: 10
     httpGet:
       # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
       path: /health
@@ -371,6 +394,7 @@ synapse:
 
   # Bereitschaftscheck
   readinessProbe:
+    periodSeconds: 3
     httpGet:
       # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
       path: /health
@@ -390,32 +414,32 @@ synapse:
       port: metrics
 
 
-  # -- (list) Node Selektoren, die für den Haupt-Synapse-Container festgelegt werden.
+  # -- (object) Node Selektoren, die für den Haupt-Synapse-Container festgelegt werden.
   nodeSelector: {}
 
-# Die folgenden Taints sind eingebaut:
-#    node.kubernetes.io/not-ready
-#       Der Knoten ist nicht bereit. Dies entspricht dem Attribut NodeCondition Ready auf "False" gesetzt.
-#    node.kubernetes.io/unreachable
-#       Der Knoten ist vom Node Controller nicht erreichbar.
-#       Dies entspricht dem Attribut NodeCondition Ready auf "Unknown" gesetzt.
-#    node.kubernetes.io/memory-pressure
-#       Der Knoten hat Speicherbesonderheiten mit hohen Lasten auf den RAM
-#    node.kubernetes.io/disk-pressure
-#       Der Knoten hat IO-Last auf die Festplatte.
-#       Im Falle einer hohen Festplattenauslastung auf den Knoten kann dies zu einer
-#       Verlangsamung der Anwendung führen, so dass es besser ist, die Container zu verlagern.
-#    node.kubernetes.io/pid-pressure
-#       Ein Knoten hat Prozess-Last(PID-Druck).
-#       Die Prozess-ID ist eine begrenzte Ressource und ihre Sättigung
-#       kann zu einer Verlangsamung der Anwendungen führen, so dass es besser ist,
-#       Container an einen anderen Ort zu verlagern.
-#    node.kubernetes.io/network-unavailable
-#       Das Netzwerk des Knotens ist nicht verfügbar. Wie oben erklärt.
-#    node.kubernetes.io/unschedulable
-#       Der Knoten ist nicht planbar.
-#       Jeder andere Grund, der dazu führt, dass der Knoten für das Hosting von Container ungeeignet ist,
-#       z. B. wenn der Cluster verkleinert und der Knoten entfernt wird.
+  # Die folgenden Taints sind eingebaut:
+  #  node.kubernetes.io/not-ready
+  #     Der Knoten ist nicht bereit. Dies entspricht dem Attribut NodeCondition Ready auf "False" gesetzt.
+  #  node.kubernetes.io/unreachable
+  #     Der Knoten ist vom Node Controller nicht erreichbar.
+  #     Dies entspricht dem Attribut NodeCondition Ready auf "Unknown" gesetzt.
+  #  node.kubernetes.io/memory-pressure
+  #     Der Knoten hat Speicherbesonderheiten mit hohen Lasten auf den RAM
+  #  node.kubernetes.io/disk-pressure
+  #     Der Knoten hat IO-Last auf die Festplatte.
+  #     Im Falle einer hohen Festplattenauslastung auf den Knoten kann dies zu einer
+  #     Verlangsamung der Anwendung führen, so dass es besser ist, die Container zu verlagern.
+  #  node.kubernetes.io/pid-pressure
+  #     Ein Knoten hat Prozess-Last(PID-Druck).
+  #     Die Prozess-ID ist eine begrenzte Ressource und ihre Sättigung
+  #     kann zu einer Verlangsamung der Anwendungen führen, so dass es besser ist,
+  #     Container an einen anderen Ort zu verlagern.
+  #  node.kubernetes.io/network-unavailable
+  #     Das Netzwerk des Knotens ist nicht verfügbar. Wie oben erklärt.
+  #  node.kubernetes.io/unschedulable
+  #     Der Knoten ist nicht planbar.
+  #     Jeder andere Grund, der dazu führt, dass der Knoten für das Hosting von Container ungeeignet ist,
+  #     z. B. wenn der Cluster verkleinert und der Knoten entfernt wird.
 
   # -- (list) Tolerations bzw. Taints die für den Haupt-Synapse-Container genutzt werden sollen.
   tolerations: []
@@ -468,7 +492,7 @@ workers:
     #  prometheus.io/port: "9090"
     annotations: {}
 
-    # -- (object) DEFAULT Zusätzliche Umgebungsvariablen, die auf alle Synapse-Worker-Container anzuwenden sind
+    # -- (list) DEFAULT Zusätzliche Umgebungsvariablen, die auf alle Synapse-Worker-Container anzuwenden sind
     # Beispiel:
     #  - name: LD_PRELOAD
     #    value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
@@ -476,13 +500,13 @@ workers:
     #    value: "1.0"
     extraEnv: []
 
-    # -- (map) Zusätzliche Volumes, die dem Worker hinzugefügt werden sollen.
+    # -- (list) Zusätzliche Volumes, die dem Worker hinzugefügt werden sollen.
     # DEFAULT gilt für alle Synapse-Worker-Container.
     # Nützlich für das Medien-Repo oder zum Hinzufügen von Python-Modulen.
     # Daher besser im entsprechenden Konfigurationsteil der spez. Worker
     volumes: []
 
-    # -- (map) Zusätzliche zu mountende Datenträgerpfade (siehe volumes)
+    # -- (list) Zusätzliche zu mountende Datenträgerpfade (siehe volumes)
     # DEFAULT gilt für alle Synapse-Worker-Container.
     volumeMounts: []
 
@@ -510,18 +534,20 @@ workers:
     #   capabilities:
     #     drop:
     #       - ALL
-    securityContext: {}
+    securityContext:
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
 
     resources:
       limits:
         # -- (string) Rechenressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
         # Empfohlen gesondert zu verwalten
-        cpu: 100m
-        # -- (object) RAM Ressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind.
+        cpu: 500m
+        # -- (string) RAM Ressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
         # Empfohlen gesondert zu verwalten
-        memory: 128Mi
+        memory: 200Mi
       requests:
         # -- (string) Anforderungen an Rechenressourcen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
@@ -534,6 +560,7 @@ workers:
 
     # Healthcheck
     livenessProbe:
+      periodSeconds: 10
       httpGet:
         # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
         # DEFAULT gilt für alle Synapse-Worker-Container.
@@ -544,6 +571,7 @@ workers:
 
     # Bereitschaftscheck
     readinessProbe:
+      periodSeconds: 3
       httpGet:
         # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
         # DEFAULT gilt für alle Synapse-Worker-Container.
@@ -564,7 +592,7 @@ workers:
         # DEFAULT gilt für alle Synapse-Worker-Container.
         port: metrics
 
-    # -- (list) Node Selektor Konfiguration, die auf alle Synapse-Worker-Container anzuwenden sind.
+    # -- (object) Node Selektor Konfiguration, die auf alle Synapse-Worker-Container anzuwenden sind.
     # DEFAULT gilt für alle Synapse-Worker-Container.
     nodeSelector: {}
 
@@ -572,7 +600,7 @@ workers:
     # DEFAULT gilt für alle Synapse-Worker-Container.
     tolerations: []
 
-    # -- (list) Affinitäts-Konfiguration, die auf alle Synapse-Worker-Container anzuwenden sind.
+    # -- (object) Affinitäts-Konfiguration, die auf alle Synapse-Worker-Container anzuwenden sind.
     # DEFAULT gilt für alle Synapse-Worker-Container.
     affinity: {}
 
@@ -595,7 +623,7 @@ workers:
       runAsUser: 2003
     # -- (list) entsprechende Endpunkte für den generischen Worker
     listeners: [client, federation]
-    # -- (path) Client-Side(cs) Pfad für die Ingress-Konfiguration des Workers
+    # -- (list) Pfade für die Ingress-Konfiguration des Workers, mit 'publicServerName' Domain gesetzt
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     csPaths:
       ## Sync requests
@@ -608,11 +636,12 @@ workers:
       - "/_matrix/client/(api/v1|r0|v3|unstable)/createRoom$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/publicRooms$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/joined_members$"
-      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/context/"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/context/.*"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/members$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/state$"
       - "/_matrix/client/v1/rooms/.*/hierarchy$"
-      - "/_matrix/client/unstable/org.matrix.msc2716/rooms/.*/batch_send$"
+      - "/_matrix/client/(v1|unstable)/rooms/.*/relations/"
+      - "/_matrix/client/v1/rooms/.*/threads$"
       - "/_matrix/client/unstable/im.nheko.summary/rooms/.*/summary$"
       - "/_matrix/client/(r0|v3|unstable)/account/3pid$"
       - "/_matrix/client/(r0|v3|unstable)/account/whoami$"
@@ -621,16 +650,20 @@ workers:
       - "/_matrix/client/(api/v1|r0|v3|unstable)/voip/turnServer$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/event/"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/joined_rooms$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable/.*)/rooms/.*/aliases"
+      - "/_matrix/client/v1/rooms/.*/timestamp_to_event$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/search$"
 
       ## Encryption requests
       - "/_matrix/client/(r0|v3|unstable)/keys/query$"
       - "/_matrix/client/(r0|v3|unstable)/keys/changes$"
       - "/_matrix/client/(r0|v3|unstable)/keys/claim$"
-      - "/_matrix/client/(r0|v3|unstable)/room_keys/"
+      - "/_matrix/client/(r0|v3|unstable)/room_keys(/.*)?(/.*)?$"
+      - "/_matrix/client/(r0|v3|unstable)/keys/upload(/.*)?$"
 
       ## Registration/login requests
       - "/_matrix/client/(api/v1|r0|v3|unstable)/login$"
+      - "/_matrix/client/(r0|v3|unstable)/refresh$"
       - "/_matrix/client/(r0|v3|unstable)/register$"
       - "/_matrix/client/v1/register/m.login.registration_token/validity$"
 
@@ -640,9 +673,10 @@ workers:
       - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/(join|invite|leave|ban|unban|kick)$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/join/"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/profile/"
+      - "/_matrix/client/(v1|unstable/org.matrix.msc2716)/rooms/.*/batch_send"
 
       ## User directory search requests
-      - "/_matrix/client/(r0|v3|unstable)/user_directory/search"
+      - "/_matrix/client/(r0|v3|unstable)/user_directory/search$"
 
       ## Worker event streams, deaktiviert!
       ## See https://matrix-org.github.io/synapse/latest/workers.html#stream-writers
@@ -665,30 +699,33 @@ workers:
       ## The presence event stream
       - "/_matrix/client/(api/v1|r0|v3|unstable)/presence/"
 
-    # -- (path) Server-Side (externer Zugriff) Pfade für die Ingress-Konfiguration des Workers
+    # -- (list) Pfade für die Ingress-Konfiguration des Workers, mit 'serverName' Domain gesetzt
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     paths:
-          ## Federation requests
-      - "/_matrix/federation/v1/event/"
-      - "/_matrix/federation/v1/state/"
-      - "/_matrix/federation/v1/state_ids/"
-      - "/_matrix/federation/v1/backfill/"
-      - "/_matrix/federation/v1/get_missing_events/"
-      - "/_matrix/federation/v1/publicRooms"
-      - "/_matrix/federation/v1/query/"
-      - "/_matrix/federation/v1/make_join/"
-      - "/_matrix/federation/v1/make_leave/"
+      ## Federation requests
+      - "/_matrix/federation/(v1|v2)/event/"
+      - "/_matrix/federation/(v1|v2)/state/"
+      - "/_matrix/federation/(v1|v2)/state_ids/"
+      - "/_matrix/federation/(v1|v2)/backfill/"
+      - "/_matrix/federation/(v1|v2)/get_missing_events/"
+      - "/_matrix/federation/(v1|v2)/publicRooms"
+      - "/_matrix/federation/(v1|v2)/query/"
+      - "/_matrix/federation/(v1|v2)/make_join/"
+      - "/_matrix/federation/(v1|v2)/make_leave/"
       - "/_matrix/federation/(v1|v2)/send_join/"
       - "/_matrix/federation/(v1|v2)/send_leave/"
       - "/_matrix/federation/(v1|v2)/invite/"
-      - "/_matrix/federation/v1/event_auth/"
-      - "/_matrix/federation/v1/exchange_third_party_invite/"
-      - "/_matrix/federation/v1/user/devices/"
+      - "/_matrix/federation/(v1|v2)/query_auth/"
+      - "/_matrix/federation/(v1|v2)/event_auth/"
+      - "/_matrix/federation/v1/timestamp_to_event/"
+      - "/_matrix/federation/(v1|v2)/exchange_third_party_invite/"
+      - "/_matrix/federation/(v1|v2)/user/devices/"
+      - "/_matrix/federation/(v1|v2)/get_groups_publicised$"
       - "/_matrix/key/v2/query"
       - "/_matrix/federation/v1/hierarchy/"
 
       ## Inbound federation transaction request
-      - "/_matrix/federation/v1/send/"
+      - "/_matrix/federation/(v1|v2)/send/"
 
     # -- (int) Anzahl der Worker-Container
     # Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas
@@ -716,35 +753,63 @@ workers:
   ## https://github.com/matrix-org/synapse/blob/develop/docs/workers.md#load-balancing
 
   federation_reader:
-    # -- (bool) Aktiviere spez. Worker für Förderationsanfragen
+    # -- (bool) Aktiviere spez. Worker für Föderationsanfragen
+    # Wenn dieser Worker genutzt wird, können die URLs aus dem
+    # generic_worker entfernt werden.
     enabled: false
     # -- (bool) Wird aus dem generischen Worker abgeleitet
     generic: true
-    # -- (list) Zusätzliche Listener für Förderationsworker
+    # -- (list) Zusätzliche Listener für Föderationsworker
     listeners: [federation]
-    # -- (path) Server-Side Pfade für die Ingress-Konfiguration des Förderations-Workers
+    # -- (path) Server-Side Pfade für die Ingress-Konfiguration des Föderations-Workers
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     paths:
-      - "/_matrix/federation/v1/send/"
+      - "/_matrix/federation/(v1|v2)/event/"
+      - "/_matrix/federation/(v1|v2)/state/"
+      - "/_matrix/federation/(v1|v2)/state_ids/"
+      - "/_matrix/federation/(v1|v2)/backfill/"
+      - "/_matrix/federation/(v1|v2)/get_missing_events/"
+      - "/_matrix/federation/(v1|v2)/publicRooms"
+      - "/_matrix/federation/(v1|v2)/query/"
+      - "/_matrix/federation/(v1|v2)/make_join/"
+      - "/_matrix/federation/(v1|v2)/make_leave/"
+      - "/_matrix/federation/(v1|v2)/send_join/"
+      - "/_matrix/federation/(v1|v2)/send_leave/"
+      - "/_matrix/federation/(v1|v2)/invite/"
+      - "/_matrix/federation/(v1|v2)/query_auth/"
+      - "/_matrix/federation/(v1|v2)/event_auth/"
+      - "/_matrix/federation/v1/timestamp_to_event/"
+      - "/_matrix/federation/(v1|v2)/exchange_third_party_invite/"
+      - "/_matrix/federation/(v1|v2)/user/devices/"
+      - "/_matrix/federation/(v1|v2)/get_groups_publicised$"
+      - "/_matrix/key/v2/query"
+      - "/_matrix/federation/v1/hierarchy/"
+
+      ## Inbound federation transaction request
+      - "/_matrix/federation/(v1|v2)/send/"
 
   pusher:
-  # -- (bool) Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen.
-  # (pusher-worker -> Sygnal -> Push-Provider (Apple od. Google))
-  # Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden
-  # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
+    # -- (bool) Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen.
+    # (pusher-worker -> Sygnal -> Push-Provider (Apple od. Google))
+    # Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden
+    # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
     enabled: false
+    # -- (bool) Wird aus dem generischen Worker abgeleitet
+    generic: true
 
   appservice:
     # -- (bool) Dieser Worker sorgt für das Senden von Daten an registrierte Anwendungsdienste.
-    # Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden.
+    # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
+    # -- (bool) Wird aus dem generischen Worker abgeleitet
+    generic: true
 
-  ## This worker handles sending federation traffic to other Synapse servers.
-  ##
   federation_sender:
-    # -- (bool) Dieser Worker kümmert sich um den Versand des
-    # Verbundverkehrs(Förderation Traffik) an andere Synapse-Server.
+    # -- (bool) Dieser Worker sendet Verbundverkehrs (federation traffic)
+    # an andere Matrix-Server.
     enabled: false
+    # -- (bool) Wird aus dem generischen Worker abgeleitet
+    generic: true
 
   media_repository:
     # -- (bool) Aktivieren des Media-Worker
@@ -759,16 +824,17 @@ workers:
       runAsUser: 2666
     # -- (list) Zusätzliche Listener für Media-Worker
     listeners: [media]
-    # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des Media-Workers
+    # -- (list) Pfade für die Ingress-Konfiguration des Media-Workers, mit 'publicServerName' Domain gesetzt
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     csPaths:
+      - "/_matrix/media/"
       - "/_synapse/admin/v1/purge_media_cache$"
       - "/_synapse/admin/v1/room/.*/media"
       - "/_synapse/admin/v1/user/.*/media"
       - "/_synapse/admin/v1/media/"
       - "/_synapse/admin/v1/quarantine_media/"
       - "/_synapse/admin/v1/users/.*/media$"
-    # -- (path) Server-Side(externe) Pfade für die Ingress-Konfiguration des Media-Workers
+    # -- (list) Pfade für die Ingress-Konfiguration des Media-Workers, mit 'serverName' Domain gesetzt
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     paths:
       - "/_matrix/media/"
@@ -776,7 +842,7 @@ workers:
       limits:
         # -- (string) Rechenressourcengrenzen, die auf den media_repository-Container anzuwenden sind.
         cpu: 2000m
-        # -- (object) RAM Ressourcengrenzen, die auf den media_repository-Container anzuwenden sind.
+        # -- (string) RAM Ressourcengrenzen, die auf den media_repository-Container anzuwenden sind.
         memory: 3500Mi
       requests:
         # -- (string) Anforderungen an Rechenressourcen, die auf den media_repository-Container anzuwenden sind.
@@ -789,18 +855,24 @@ workers:
   ## Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der Worker optional.
   user_dir:
     # -- (bool) Aktivieren des Nutzersuch-Workers
-    # Hinweis: Damit kann die Last vom generischen bzw. Haupt-Worker genommen werden
+    # Hinweis: Damit kann Last vom generischen bzw. Haupt-Worker genommen werden
+    # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
-    # -- (string) Eindeutiger Name des Workers
-    name: user_directory_worker
     # -- (bool) Wird aus dem generischen Worker abgeleitet
     generic: true
     # -- (list) Zusätzliche Listener für NutzerSuch-Worker
     listeners: [client]
-    # -- (path) Client-Side(cs) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers
+    # -- (list) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers, mit 'publicServerName' Domain gesetzt
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     csPaths:
       - "/_matrix/client/(r0|v3|unstable)/user_directory/search$"
+
+  background_worker:
+    # -- (bool) Aktivieren des Background-Workers
+    # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+    enabled: false
+    # -- (bool) Wird aus dem generischen Worker abgeleitet
+    generic: true
 
 persistence:
   # -- (bool) Aktivieren der Persistenz-Konfiguration für die Medien-Repository-Funktion.
@@ -832,10 +904,10 @@ volumePermissions:
 
   image:
     # -- (string) das Repository für das zu nutzende Image zur Rechtebereinigung
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-base-production
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/ubuntu
     # -- (string) das Tag für das zu nutzende Image zur Rechtebereinigung
     # Hinweis: noch kein finaler Tag, build version 10 als Alternative zu latest
-    tag: b7
+    tag: latest-jammy-production
     # -- (string) da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung
     pullPolicy: IfNotPresent
 
@@ -868,11 +940,14 @@ service:
 sygnal:
   # -- (bool) Aktivieren des Sygnal-Container
   enabled: false
-  # -- (map) Image/Repo-Konfiguration von Sygnal
+  # -- (maps) Image/Repo-Konfiguration von Sygnal
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-sygnal-production
-    tag: v0.12.0
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal
+    tag: 0.12.0-jammy-production
     pullPolicy: IfNotPresent
+
+  # -- (string) Proxy, falls benötigt um die Push-Services zu erreichen. Auskommentieren oder leer für Deaktivierung
+  proxy: ""
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
   # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
@@ -881,12 +956,10 @@ sygnal:
   #  fsGroup: 27
   #  runAsGroup: 2000
   #  runAsUser: 2000
+  #  sysctls:
+  #    - name: net.ipv4.ip_unprivileged_port_start
+  #      value: "80"
   podSecurityContext: {}
-    #    sysctls:
-    #      - name: net.ipv4.ip_unprivileged_port_start
-    #        value: "80"
-  # -- (string) Proxy, falls benötigt um die Push-Services zu erreichen. Auskommentieren oder leer für Deaktivierung
-  proxy: {}
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
   # weitere Beispiele:
   #  capabilities:
@@ -895,15 +968,16 @@ sygnal:
   #  readOnlyRootFilesystem: true
   #  runAsNonRoot: true
   #  runAsUser: 2111
-  securityContext: {}
+  securityContext:
+    readOnlyRootFilesystem: true
 
-  ## Ressource konfiguration für Sygnal server.
+  ## Ressource Konfiguration für Sygnal server.
   ##
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.
       cpu: 150m
-      # -- (object) RAM Ressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.
+      # -- (string) RAM Ressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.
       memory: 45Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den Sygnal-Container anzuwenden sind.
@@ -927,35 +1001,36 @@ sygnal:
       # -- (string) Konfiguration des Ports vom Bereitschaftscheck
       port: http
 
-  # -- (list) Node Selektor Konfiguration für Sygnal-Container.
+  # -- (object) Node Selektor Konfiguration für Sygnal-Container.
   nodeSelector: {}
 
   # -- (list) Tolerations/Tains Konfiguration für Sygnal-Container.
   tolerations: []
 
-  # -- (list) Affinitäts-Konfiguration für Sygnal-Container.
+  # -- (object) Affinitäts-Konfiguration für Sygnal-Container.
   affinity: {}
 
-  # -- (map) APN-Konfigurationsteil
+  # -- (object) Konfiguration für Push-Dienste (APNS und FCM)
   # Beispiel:
-  # apns:
+  # apps:
   #    de.opencode.dvs.ios:
   #      type: apns
   #      keyfile: /de.opencode.dvs.ios.p8
-  apns: {}
+  apps: {}
 
   ios_push:
-  # -- (bool) IOS-Push Schalter
-  # Wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden, sonst schlägt das Modul fehl
+    # -- (bool) iOS-Push Schalter
+    # Wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden, sonst schlägt das Modul fehl.
+    # Hierdurch wird der unten angegebene ioskey geladen.
     enabled: false
 
-  # -- (map) iOS-Key Konfiguration
-  # bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden. Weitereres siehe README.md
-  # Beispiel:
-  #    ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus dem APN-File übereinstimmen!
-  #    ioskey_keyvalue: 'HIER KÖNNTE IHR KEY IN STEHEN'
-    ioskey_filename: {}
-    ioskey_keyvalue: {}
+    # -- (map) iOS-Key Konfiguration
+    # bei Nutzung von iOS-Pushservice, muss Key mit angeben werden. Weiteres siehe README.md
+    # Beispiel:
+    #  ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus dem APN-File übereinstimmen!
+    #  ioskey_keyvalue: 'HIER KÖNNTE IHR KEY IN STEHEN'
+    ioskey_filename: ""
+    ioskey_keyvalue: ""
 
 
 ######################################################################################
@@ -967,14 +1042,16 @@ sygnal:
 
 wellknown:
   # -- (bool) Aktivierung des Wellknown-Container
-  enabled: false
+  enabled: true
 
-  # -- (map) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
+  # -- (object) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
   # Beispiel:
   #  m.server: matrix.example.com:443
   server: {}
 
-  # -- (map) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
+  # -- (object) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
+  # Die Angabe des Objektes de.bwi{data_privacy_url: https://dsgvo.example.com} ist verpflichtend,
+  # wenn keine .Values.dataPrivacyUrl angegeben wurde und auf den WellKnown-Server verzichtet wird.
   # Beispiel:
   #  io.element.e2ee:
   #    secure_backup_required: true
@@ -983,7 +1060,7 @@ wellknown:
   #  m.homeserver:
   #    base_url: https://matrix.example.com
   #  de.bwi:
-  #    data_privacy_url: https://messenger.bwi.de
+  #    data_privacy_url: https://dsgvo.example.com
   client: {}
 
   # -- (map) Zusätzliche Daten, die unter .well-known/matrix/<data> bereitgestellt werden
@@ -1006,8 +1083,8 @@ wellknown:
   # pullSecrets:
   #   - myRegistryKeySecretName
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-nginx-production
-    tag: v1.18.0
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx
+    tag: 1.18.0-6ubuntu14.3-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
@@ -1031,7 +1108,7 @@ wellknown:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den well-known server anzuwenden sind.
       cpu: 5m
-      # -- (object) RAM Ressourcengrenzen, die auf den well-known server anzuwenden sind.
+      # -- (string) RAM Ressourcengrenzen, die auf den well-known server anzuwenden sind.
       memory: 15Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den well-known server anzuwenden sind.
@@ -1039,13 +1116,13 @@ wellknown:
       # -- (string) Anforderungen an RAM Ressourcen, die auf den well-known server anzuwenden sind.
       memory: 15Mi
 
-  # -- (list) Node Selektor Konfiguration für well-known server.
+  # -- (object) Node Selektor Konfiguration für well-known server.
   nodeSelector: {}
 
   # -- (list) Tolerations/Tains Konfiguration für well-known server.
   tolerations: []
 
-  # -- (list) Affinitäts-Konfiguration für well-known server.
+  # -- (object) Affinitäts-Konfiguration für well-known server.
   affinity: {}
 
 ######################################################################################
@@ -1067,7 +1144,7 @@ postgresql:
   image:
     registry: registry.opencode.de
     repository: ig-bvc/demo-apps/postgresql/postgres
-    tag: 14
+    tag: "14"
     # pullSecrets: ["myRegistryKeySecretName"]
 
   auth:
@@ -1096,17 +1173,36 @@ postgresql:
       # -- (string) Extra Argumente zur Initialisierung der Datenbank
       args: "--lc-collate=C --lc-ctype=C --encoding=UTF8"
 
+    # -- (string) Extra Konfiguration der Datenbank
+    # die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder Synapse-
+    # Prozess seine Verbindungen zur Datenbank hält
+    extendedConfiguration: |
+      max_connections = 1024
+
     # -- (map) Persistenzkonfiguration für Storage für PostgreSQL
     persistence:
       storageClass: ""
       size: 16Gi
 
+    resources:
+      limits:
+        # -- (string) Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
+        cpu: 500m
+        # -- (string) RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
+        memory: 1024Mi
+      requests:
+        # -- (string) Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind.
+        cpu: 250m
+        # -- (string) Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind.
+        memory: 256Mi
+
   # -- (list) Zusätzliche Argumente für die Datenbankverbindung
   # ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config
   extraArgs: {}
 
-# -- (map) Ein extern konfigurierter Postgres-Server, der für die Datenbank von Synapse verwendet wird,
-# muss die Datenbank sowohl COLLATE als auch CTYPE auf "C" eingestellt haben.
+# -- (map) Ein extern konfigurierter Postgres-Server, der für die Datenbank von Synapse verwendet wird.
+# Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf "C" eingestellt sein.
+# Die "interne" Datenbank muss deaktiviert sein `postgresql.enabled: false`.
 # Beispiel für K8s internen Postgres im Namespace "postgres":
 externalPostgresql:
   host: postgres-4-matrix-postgresql.postgres.svc.cluster.local
@@ -1143,8 +1239,8 @@ externalPostgresql:
 redis:
   image:
     registry: registry.opencode.de
-    repository: bwi/bundesmessenger/backend/container-images/jammy-redis-production
-    tag: v6.0.16
+    repository: bwi/bundesmessenger/backend/container-images/redis
+    tag: 5_6.0.16-1ubuntu1-jammy-production
     # pullSecrets: ["myRegistryKeySecretName"]
   # -- (bool) Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
   # Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
@@ -1159,6 +1255,30 @@ redis:
     existingSecret: ""
     existingSecretPasswordKey: redis-password
 
+  # -- (map) Konfiguration zur Härtung des Redis-Images
+  # (https://docs.bitnami.com/kubernetes/infrastructure/redis/administration/configure-kernel-settings/)
+  sysctl:
+    enabled: true
+    image:
+      registry: registry.opencode.de
+      repository: bwi/bundesmessenger/backend/container-images/ubuntu
+      tag: latest-jammy-production
+      pullPolicy: IfNotPresent
+      # pullSecrets: ["myRegistryKeySecretName"]
+    mountHostSys: true
+    resources:
+      limits:
+        cpu: 200m
+        memory: 256Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
+    command:
+      - /bin/sh
+      - -c
+      - |-
+        echo never > /host-sys/kernel/mm/transparent_hugepage/enabled
+
   # -- (string) Form der Architektur des Deployments
   architecture: standalone
   master:
@@ -1172,6 +1292,18 @@ redis:
       ports:
         # -- (int) Serviceport
         redis: 6379
+
+    resources:
+      limits:
+        # -- (string) Rechenressourcengrenzen, die auf den Redis-Container anzuwenden sind.
+        cpu: 500m
+        # -- (string) RAM Ressourcengrenzen, die auf den Redis-Container anzuwenden sind.
+        memory: 512Mi
+      requests:
+        # -- (string) Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind.
+        cpu: 300m
+        # -- (string) Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind.
+        memory: 256Mi
 
 # -- (map) Ein extern konfigurierter Redis-Server, der für Worker/Sharding verwendet wird
 # Wird erst ausgewertet, wenn `redis.enabled=false` ist.
@@ -1237,7 +1369,7 @@ ingress:
   #  - example.com
   wkHosts: []
 
-  # -- (path) Zusätzliche Pfade, die zu den Server-zu-Server-Eingangsblöcken hinzugefügt werden sollen
+  # -- (list) Zusätzliche Pfade, die zu den Server-zu-Server-Eingangsblöcken hinzugefügt werden sollen
   # Werden vor dem `/_matrix` Catch-all-Pfad eingefügt.
   # Beispiele:
   #  # K8s 1.19+
@@ -1254,7 +1386,7 @@ ingress:
   #      servicePort: 8000
   paths: []
 
-  # -- (path) Zusätzliche Pfade, die zu den Client-zu-Server Blöcken hinzugefügt werden sollen
+  # -- (list) Zusätzliche Pfade, die zu den Client-zu-Server Blöcken hinzugefügt werden sollen
   # Werden vor dem `/_matrix` und `/_synapse` Catch-all-Pfade eingefügt.
   # Beispiele:
   #  # K8s 1.19+
@@ -1278,7 +1410,7 @@ ingress:
   # kann auf `false` gesetzt werden, wenn die Hauptdomäne auf irgendeine externe Weise verwaltet wird
   includeServerName: true
 
-  # -- (map) TLS-Konfiguration für Ingress Konfiguration
+  # -- (list) TLS-Konfiguration für Ingress Konfiguration
   # Enthält für alle benötigten Domains die notwendigen Secrets bzw. TLS-Zertifikate
   # Beispiel:
   #  - secretName: chart-example-tls
@@ -1304,22 +1436,39 @@ contentscanner:
   enabled: false
   # -- (map) Konfiguration des Image/Repository
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-content-scanner-production
-    tag: v1.0.3
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/content-scanner
+    tag: 1.0.3-jammy-production
     pullPolicy: IfNotPresent
 
   replicaCount: 1
   resources:
     limits:
-      # -- (string) Rechenressourcengrenzen, die auf den Contentscanner-Container anzuwenden sind.
+      # -- (string) Rechenressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
       cpu: 500m
-      # -- (object) RAM Ressourcengrenzen, die auf den Contentscanner-Container anzuwenden sind.
+      # -- (string) RAM Ressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
       memory: 1Gi
     requests:
-      # -- (string) Anforderungen an Rechenressourcen, die auf den Contentscanner-Container anzuwenden sind.
+      # -- (string) Anforderungen an Rechenressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
       cpu: 300m
-      # -- (string) Anforderungen an RAM Ressourcen, die auf den Contentscanner-Container anzuwenden sind.
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
       memory: 500Mi
+
+
+  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # weitere Möglichkeiten:
+  #  fsGroup: 1001
+  podSecurityContext:
+    runAsGroup: 1334
+    runAsUser: 1334
+
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  # weitere Möglichkeiten:
+  #  capabilities:
+  #    drop:
+  #    - ALL
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
 
 
 ######################################################################################
@@ -1330,13 +1479,13 @@ schadcodescanner:
   enabled: false
   # -- (map) Konfiguration des ClamAV-Image/Repository
   imageclamav:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-clamav-production
-    tag: v0.103.6
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/clamav
+    tag: 0.103.8_dfsg-0ubuntu0.22.04.1-jammy-production
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
   imagecicap:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-icap-production
-    tag: v0.5.6
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/icap
+    tag: 1_0.5.6-2build1-jammy-production
     pullPolicy: IfNotPresent
     # -- (map) Konfiguration des persistenten Speichers für ClamAV
     # empfohlen: ExistingClaim mit ReadWriteMany-Volume anzugeben, so dass mehrere Pods die ClamAV-DB nutzen können. (TBD: freshclam darf dann nur einmal laufen: Abfrage PID)
@@ -1352,7 +1501,7 @@ schadcodescanner:
     # -- (string) Größe des zu nutzenden Volumes
     size: 10Gi
 
-  # -- (map) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+  # -- (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
   # Beispiel:
   #   - name: NO_PROXY
   #     value: "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"
@@ -1368,10 +1517,14 @@ schadcodescanner:
     port: 1344
 
   freshclam:
-    # -- (string) clamav.freshclam.mirrors -- A list of clamav mirrors to be used by the clamav service
-    mirrors: database.clamav.net
-
-  # -- (int) Anzahl der Worker-Container
+    # -- (list) Eine Liste von clamav-Spiegeln, die vom freshclam-Dienst verwendet werden sollen.
+    # Erzeugt eine Liste von "PrivateMirror" in der freshclam.conf
+    # https://docs.clamav.net/appendix/CvdPrivateMirror.html#use-freshclam-to-serve-only-whole-database-files-from-a-private-mirror
+    # Der Standard-Updateserver ("DatabaseMirror") ist "database.clamav.net" und wird
+    # durch das Konfigurieren eines privaten Mirros automatisch überschrieben.
+    mirrors: []
+    # - clamav-private-mirror:8000
+  # -- (int) Anzahl der ClamAV-Pods
   # Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas
   # oder wenn nicht gesetzt, dann wird autoscaling.minReplicas übernommen
   replicaCount: 1
@@ -1403,17 +1556,55 @@ schadcodescanner:
     # clamav.sendBufTimeout -- This option specifies how long to wait (in milliseconds) if the send buffer is full, keep low to avoid clamd hanging
     sendBufTimeout: 500
 
-  resources:
+  resourcesClamav:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.
       cpu: 1500m
-      # -- (object) RAM Ressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.
+      # -- (string) RAM Ressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.
       memory: 4Gi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den ClamAV-Container anzuwenden sind.
       cpu: 300m
       # -- (string) Anforderungen an RAM Ressourcen, die auf den ClamAV-Container anzuwenden sind.
       memory: 2Gi
+
+  resourcesCicap:
+    limits:
+      # -- (string) Rechenressourcengrenzen, die auf den C-Icap-Container anzuwenden sind.
+      cpu: 500m
+      # -- (string) RAM Ressourcengrenzen, die auf den C-Icap-Container anzuwenden sind.
+      memory: 100Mi
+    requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf den C-Icap-Container anzuwenden sind.
+      cpu: 300m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den C-Icap-Container anzuwenden sind.
+      memory: 50Mi
+
+  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # weitere Möglichkeiten:
+  #  fsGroup: 1001
+  podSecurityContext:
+    runAsNonRoot: true
+
+  # -- (map) Konfiguration für die ClamAv-Container-Sicherheitsrichtlinie
+  # weitere Möglichkeiten:
+  #  capabilities:
+  #    drop:
+  #    - ALL
+  clamavSecurityContext:
+    runAsUser: 1111
+    runAsGroup: 1111
+    readOnlyRootFilesystem: true
+
+  # -- (map) Konfiguration für die C-ICAP-Container-Sicherheitsrichtlinie
+  # weitere Möglichkeiten:
+  #  capabilities:
+  #    drop:
+  #    - ALL
+  icapSecurityContext:
+    runAsUser: 1112
+    runAsGroup: 1112
+    readOnlyRootFilesystem: true
 
 ######################################################################################
 ##          Konfiguration für CoTurn
@@ -1430,10 +1621,12 @@ coturn:
   enabled: false
   # -- (map) TurnUris zusammenbauen lassen, aktuell deaktiviert,
   # Als Liste unter `config.turnUris` konfigurieren
-  turnUris:
-    udp: 3478
-    tcp: 3478
-    realm: "turn.example.com"
+  # Beispiel:
+  #  udp: 3478
+  #  tcp: 3478
+  #  realm: "turn.example.com"
+  turnUris: {}
+
   existingcoturn:
     # -- (bool) Schalter um bereits existenten CoTurn im K8s-Cluster zu nutzen
     enabled: false
@@ -1460,11 +1653,11 @@ synapse_admin:
   # -- (bool) Aktivieren des Synapse-Admin-Moduls
   enabled: false
   # -- (string) URI für die Admin GUI, zwingend notwendig
-  uri:
+  uri: ""
   # -- (map) Konfiguration des Image vom Modul
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-synapse-admin-production
-    tag: v0.8.5
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse-admin
+    tag: 0.8.7-jammy-production
     pullPolicy: IfNotPresent
 
   ## Ressourcen Konfiguration für Synapse-Admin Server.
@@ -1472,7 +1665,7 @@ synapse_admin:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.
       cpu: 5m
-      # -- (object) RAM Ressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.
+      # -- (string) RAM Ressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.
       memory: 15Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den Synapse-Admin Server anzuwenden sind.
@@ -1480,64 +1673,45 @@ synapse_admin:
       # -- (string) Anforderungen an RAM Ressourcen, die auf den Synapse-Admin Server anzuwenden sind.
       memory: 15Mi
 
-  podSecurityContext:
   # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
   # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
   # weitere Beispiele:
-  #    runAsNonRoot: true
-    sysctls:
-      - name: net.ipv4.ip_unprivileged_port_start
-        value: "80"
+  #  runAsNonRoot: true
+  podSecurityContext:
     runAsGroup: 1001
     runAsUser: 1001
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des Containers
   # weitere Beispiele:
-  #    runAsNonRoot: true
-  #    readOnlyRootFilesystem: true
-  #    runAsUser: 2010
+  #   runAsNonRoot: true
+  #   readOnlyRootFilesystem: true
+  #   runAsUser: 2010
   securityContext:
     readOnlyRootFilesystem: true
     runAsNonRoot: true
 
-  ## Configuration for mounting additional volumes into the application container.
-  ## AKTUELL in Prüfung:
-  #  extraVolumes:
-  #    - name: confnginx
-  #      emptyDir: {}
-  #    - name: lognginx
-  #      emptyDir: {}
-  #    - name: runnginx
-  #      emptyDir: {}
-  #    - name: tmpnginx
-  #      emptyDir: {}
-  #  # - name: backgrounds
-  #  #   persistentVolumeClaim:
-  #  #     claimName: element-backgrounds
-  #  extraVolumeMounts:
-  #    - name: confnginx
-  #      mountPath: /etc/nginx/conf.d/
-  #    - name: lognginx
-  #      mountPath: /var/log/nginx/
-  #    - name: runnginx
-  #      mountPath: /var/run/
-  #    - name: tmpnginx
-  #      mountPath: /var/cache/nginx/
-
-  # Healthcheck
-  livenessProbe:
-    httpGet:
-      # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
-      path: /
-      # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks
-      port: http
-
-  # Bereitschaftscheck
-  readinessProbe:
-    httpGet:
-      # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
-      path: /
-      # -- (string) Konfiguration des Ports vom Bereitschaftscheck
-      port: http
+    ## Configuration for mounting additional volumes into the application container.
+    ## AKTUELL in Prüfung:
+    # extraVolumes:
+    #   - name: confnginx
+    #     emptyDir: {}
+    #   - name: lognginx
+    #     emptyDir: {}
+    #   - name: runnginx
+    #     emptyDir: {}
+    #   - name: tmpnginx
+    #     emptyDir: {}
+    #  #- name: backgrounds
+    #  #  persistentVolumeClaim:
+    #  #    claimName: element-backgrounds
+    # extraVolumeMounts:
+    #   - name: confnginx
+    #     mountPath: /etc/nginx/conf.d/
+    #   - name: lognginx
+    #     mountPath: /var/log/nginx/
+    #   - name: runnginx
+    #     mountPath: /var/run/
+    #   - name: tmpnginx
+    #     mountPath: /var/cache/nginx/
 
 
 ######################################################################################
@@ -1548,11 +1722,11 @@ webclient:
   # -- (bool) Element-Webclient im Deployment aktivieren
   enabled: false
   # -- (string) URL für den Webclient, zwingend notwendig
-  uri:
+  uri: ""
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/jammy-bundesmessenger-web-production
-    tag: v2.1.0
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
+    tag: 2.4.0-jammy-production
     pullPolicy: IfNotPresent
   annotations:
     nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -1576,3 +1750,57 @@ webclient:
   securityContext:
     readOnlyRootFilesystem: true
     runAsNonRoot: true
+
+  ## Ressource Konfiguration für webclient-server.
+  resources:
+    limits:
+      # -- (string) Rechenressourcengrenzen, die auf den webclient-server anzuwenden sind.
+      cpu: 100m
+      # -- (string) RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind.
+      memory: 90Mi
+    requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf den webclient-server anzuwenden sind.
+      cpu: 50m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den webclient-server anzuwenden sind.
+      memory: 45Mi
+
+
+######################################################################################
+##          Konfiguration für Helm-Tests
+######################################################################################
+
+tests:
+  # -- (map) Konfiguration für das Image der Tests
+  image:
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/wget
+    tag: 1.21.2-jammy-production
+    pullPolicy: IfNotPresent
+
+  # -- (map) Annotations, die zusätzlich auf die Tests anzuwenden sind.
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+
+  # -- (map) Informationen zum Sicherheitskontext, die der Container übernehmen soll.
+  podSecurityContext:
+    runAsUser: 1001
+    runAsGroup: 1001
+
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1001
+    runAsGroup: 1001
+
+  ## Ressource Konfiguration für Tests.
+  resources:
+    limits:
+      # -- (string) Rechenressourcengrenzen, die für Tests anzuwenden sind.
+      cpu: 100m
+      # -- (string) RAM Ressourcengrenzen, die für Tests anzuwenden sind.
+      memory: 32Mi
+    requests:
+      # -- (string) Anforderungen an Rechenressourcen, die für Tests anzuwenden sind.
+      cpu: 50m
+      # -- (string) Anforderungen an RAM Ressourcen, die für Tests anzuwenden sind.
+      memory: 16Mi

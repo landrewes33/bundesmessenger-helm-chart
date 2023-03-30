@@ -1,0 +1,50 @@
+serverName: example.org
+publicServerName: matrix.example.org
+adminAPIServerName: admin-api.example.org
+dataPrivacyUrl: dsgvo.example.org
+
+workers:
+  generic_worker:
+    replicaCount: 1
+    # Kubernetes v1.23+.
+    # autoscaling:
+    #  enabled: true
+  # appservice:
+  #   enabled: true
+  pusher:
+    enabled: true
+
+synapse_admin:
+  enabled: true
+  uri: admin-client.example.org
+
+webclient:
+  enabled: true
+  uri: web.example.org
+
+contentscanner:
+  enabled: true
+
+schadcodescanner:
+  enabled: true
+
+sygnal:
+  enabled: true
+  apps:
+    de.opencode.dvs.gcm:
+      type: gcm
+      api_key: example-value
+
+wellknown:
+  enabled: true
+
+postgresql:
+  enabled: true
+
+# optional pullSecrets
+# image:
+#   pullSecrets:
+#     - name: bum-git
+# redis:
+#   image:
+#     pullSecrets: bum-git

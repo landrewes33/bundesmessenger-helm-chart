@@ -9,23 +9,25 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ $webclientName }}-environment
+  name: {{ $webclientName }}-tempconf
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ $webclientName }}
 data:
-  default_server_config: |
+  temp.json: |
     {
+      "default_server_config": {
         "m.homeserver": {
-          "base_url": "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}",
+          "base_url": "{{- printf "http://%s" (.Values.publicServerName | default .Values.serverName) }}",
           "server_name": {{ $displayName | quote }}
         }
-     }
-  enable_presence_by_hs_url: |
-    {
-        "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}": false
+      },
+      "enable_presence_by_hs_url": {
+        "{{- printf "http://%s" (.Values.publicServerName | default .Values.serverName) }}": false
+      },
+      "permalink_prefix": "{{- printf "http://%s/latest" (.Values.publicServerName | default .Values.serverName) }}"
     }
-  permalink_prefix:  "{{- printf "https://%s/latest" (.Values.publicServerName | default .Values.serverName) }}"
+
 
 ---
 apiVersion: v1
@@ -66,9 +68,10 @@ data:
              index index.html index.htm index.nginx-debian.html;
 
              server_name _;
-             #livenessProbe auf /status mal selbst gemacht
+             #livenessProbe auf /status mal selbst gemacht, logging aus
              location /status {
                return 200;
+               access_log off;
              }
              location ~ /config.{{ .Values.webclient.uri }}.json {
                 rewrite /config.{{ .Values.webclient.uri }}.json /config.json break;

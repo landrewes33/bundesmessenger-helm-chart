@@ -1,0 +1,62 @@
+- version: 1.1.0
+  tag: v1.1.0
+  date: 2022-12-23
+  images:
+  - name: Basis
+    version: 22.04
+    image: bwi/bundesmessenger/backend/container-images/jammy-base-production
+    tag: b7
+  - name: Webclient
+    version: 2.1.0
+    image: bwi/bundesmessenger/backend/container-images/jammy-bundesmessenger-web-production
+    tag: v2.1.0
+  - name: ClamAV
+    version: 0.103.6
+    image: bwi/bundesmessenger/backend/container-images/jammy-clamav-production
+    tag: v0.103.6
+  - name: cicap
+    version: 0.5.6
+    image: bwi/bundesmessenger/backend/container-images/jammy-icap-production
+    tag: v0.5.6
+  - name: Matrix-Content-Scanner
+    version: 1.0.3
+    image: bwi/bundesmessenger/backend/container-images/jammy-content-scanner-production
+    tag: v1.0.3
+  - name: Kubectl
+    version: 1.21.14
+    image: bwi/bundesmessenger/backend/container-images/jammy-kubectl-production
+    tag: v1.21.14
+  - name: Nginx
+    version: 1.18.0
+    image: bwi/bundesmessenger/backend/container-images/jammy-nginx-production
+    tag: v1.18.0
+  - name: Redis
+    version: 6.0.16
+    image: bwi/bundesmessenger/backend/container-images/jammy-redis-production
+    tag: v6.0.16
+  - name: Sygnal
+    version: 0.12.0
+    image: bwi/bundesmessenger/backend/container-images/jammy-sygnal-production
+    tag: v0.12.0
+  - name: Synapse
+    version: 1.64.0
+    image: bwi/bundesmessenger/backend/container-images/jammy-synapse-production
+    tag: v1.64.0
+  - name: Synapse-Admin
+    version: 0.8.5
+    image: bwi/bundesmessenger/backend/container-images/jammy-synapse-admin-production
+    tag: v0.8.5
+  - name: Connection-Tests
+    image: library/busybox
+    tag: latest
+    registry: registry.hub.docker.com
+  - name: internalPostgresql
+    image: ig-bvc/demo-apps/postgresql/postgres
+    tag: 14
+  helm:
+  - name: redis
+    version: ^17.3.17
+    repository: https://charts.bitnami.com/bitnami
+  - name: postgresql
+    version: ^12.1.6
+    repository: https://charts.bitnami.com/bitnami

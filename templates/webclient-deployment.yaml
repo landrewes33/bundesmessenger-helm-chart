@@ -1,21 +1,25 @@
 {{- if .Values.webclient.enabled }}
 {{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
+{{- $component := "webclient" -}}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $webclientName }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
-    app.kubernetes.io/component: {{ $webclientName }}
+    app.kubernetes.io/component: {{ $component }}
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/component: {{ $webclientName }}
+      {{- include "matrix-synapse.labels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $component }}
   template:
     metadata:
       labels:
-        app.kubernetes.io/component: {{ $webclientName }}
+        {{- include "matrix-synapse.labels" $ | nindent 8 }}
+        app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ .Release.Name }}
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
@@ -26,63 +30,72 @@ spec:
         image: "{{ $.Values.webclient.image.repository }}:{{  $.Values.webclient.image.tag }}"
         imagePullPolicy: {{ $.Values.webclient.image.pullPolicy }}
         securityContext:
-          {{- toYaml .Values.webclient.securityContext | nindent 12 }}
-        envFrom:
-          - configMapRef: 
-              name: {{ $webclientName }}-environment
+          {{- toYaml .Values.webclient.securityContext | nindent 10 }}
+        resources:
+          requests:
+            memory: 45Mi
+            cpu: 50m
         command:
-            - sh
-            - -c
-            - |
-              jq -c '.default_server_config=env.default_server_config | .enable_presence_by_hs_url=env.enable_presence_by_hs_url | .permalink_prefix=env.permalink_prefix' /app/config.sample.json > /opt/config.json
+          - sh
+          - -c
+          - |
+            jq -s '.[0] * .[1]' /app/config.sample.json /tmp/temp.json > /opt/config.json
         volumeMounts:
           - name: config
             mountPath: /opt/
+          - name: temp
+            mountPath: /tmp/temp.json
+            subPath: temp.json
       containers:
       - name: element
         image: "{{ $.Values.webclient.image.repository }}:{{  $.Values.webclient.image.tag }}"
         imagePullPolicy: {{ $.Values.webclient.image.pullPolicy }}
         securityContext:
-          {{- toYaml .Values.webclient.securityContext | nindent 12 }}
+          {{- toYaml .Values.webclient.securityContext | nindent 10 }}
+        resources:
+          {{- toYaml .Values.webclient.resources | nindent 10 }}
         volumeMounts:
-        - name: config
-          mountPath: /app/config.json
-          subPath: config.json
-        - name: files
-          mountPath: /etc/nginx/sites-enabled/default.conf
-          subPath: default.conf
-        - name: nginx-conf
-          mountPath: /etc/nginx/nginx.conf
-          subPath: nginx.conf
-        - name: tmp
-          mountPath: /tmp
+          - name: config
+            mountPath: /app/config.json
+            subPath: config.json
+          - name: files
+            mountPath: /etc/nginx/sites-enabled/default.conf
+            subPath: default.conf
+          - name: nginx-conf
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+          - name: tmp
+            mountPath: /tmp
         ports:
-        - containerPort: 8080
-          name: http
-          protocol: TCP
+          - containerPort: 8080
+            name: http
+            protocol: TCP
         readinessProbe:
-            httpGet:
-                path: /
-                port: http
-            initialDelaySeconds: 2
-            periodSeconds: 3
+          tcpSocket:
+            port: http
         livenessProbe:
-            httpGet:
-                path: /status
-                port: http
-            initialDelaySeconds: 10
-            periodSeconds: 10
+          httpGet:
+            path: /status
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
       volumes:
-      - name: config
-        emptyDir:
-          sizeLimit: 100Ki
-      - name: tmp
-        emptyDir:
-          sizeLimit: 1Gi
-      - name: files
-        configMap:
-          name: {{ $webclientName }}
-      - name: nginx-conf
-        configMap:
-          name: nginx-default-conf
+        - name: temp
+          configMap:
+            name: {{ $webclientName }}-tempconf
+            items:
+            - key: temp.json
+              path: temp.json
+        - name: config
+          emptyDir:
+            sizeLimit: 100Ki
+        - name: tmp
+          emptyDir:
+            sizeLimit: 1Gi
+        - name: files
+          configMap:
+            name: {{ $webclientName }}
+        - name: nginx-conf
+          configMap:
+            name: nginx-default-conf
 {{- end }}

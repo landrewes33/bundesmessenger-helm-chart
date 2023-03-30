@@ -1,13 +1,15 @@
 {{- if .Values.synapse_admin.enabled }}
 {{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
+{{- $component := "synapse-admin" -}}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $adminName }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    app.kubernetes.io/component: {{ $adminName }}
+    app.kubernetes.io/component: {{ $component }}
 spec:
   replicas: 1
   strategy:
@@ -15,12 +17,12 @@ spec:
   selector:
     matchLabels:
       {{- include "matrix-synapse.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: {{ $adminName }}
+      app.kubernetes.io/component: {{ $component }}
   template:
     metadata:
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: {{ $adminName }}
+        app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ .Release.Name }}
       securityContext:
@@ -28,7 +30,7 @@ spec:
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
         - name: {{ $adminName }}
-          image:  "{{ $.Values.synapse_admin.image.repository }}:{{ $.Values.synapse_admin.image.tag }}"
+          image: "{{ $.Values.synapse_admin.image.repository }}:{{ $.Values.synapse_admin.image.tag }}"
           imagePullPolicy: {{ $.Values.synapse_admin.image.pullPolicy }}
           securityContext:
             {{- $.Values.synapse_admin.securityContext | toYaml | nindent 12 }}
@@ -37,14 +39,16 @@ spec:
               containerPort: 8080
           resources:
             {{- toYaml .Values.synapse_admin.resources | nindent 12 }}
-          {{- with .Values.synapse_admin.livenessProbe }}
           livenessProbe:
-            {{- . | toYaml | nindent 12 }}
-          {{- end }}
-          {{- with .Values.synapse_admin.readinessProbe }}
+            httpGet:
+              path: /status
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
           readinessProbe:
-            {{- . | toYaml | nindent 12 }}
-          {{- end }}
+            periodSeconds: 3
+            tcpSocket:
+              port: http
           volumeMounts:
           - name: tmp
             mountPath: /tmp

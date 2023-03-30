@@ -1,0 +1,33 @@
+# source: https://github.com/openstack/openstack-helm/blob/master/yamllint-templates.conf
+---
+yaml-files:
+  - '*.yaml'
+  - '*.yml'
+  - '.yamllint'
+
+rules:
+  braces: enable
+  brackets: enable
+  colons: enable
+  commas: enable
+  comments: enable
+  comments-indentation: disable
+  document-end: disable
+  document-start: disable
+  empty-lines: disable
+  empty-values: disable
+  hyphens: enable
+  indentation:
+    spaces: 2
+    indent-sequences: whatever
+  key-duplicates: enable
+  key-ordering: disable
+  line-length: disable
+  new-line-at-end-of-file: disable
+  new-lines:
+    type: unix
+  octal-values: disable
+  quoted-strings: disable
+  trailing-spaces: disable
+  truthy:
+    level: warning

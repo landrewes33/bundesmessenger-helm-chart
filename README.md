@@ -22,7 +22,7 @@ zum BundesMessenger. Allgemeine Informationen zum Projekt befinden sich im
 
 Dieses Repository stellt ein [Helm Chart](https://helm.sh/) zur automatisierten
 Bereitstellung eines Backends bzw. Infrastruktur für die Nutzung mit dem
-BundesMessenger Client zur Verfügung. Hauptbestanteil ist der
+BundesMessenger Client zur Verfügung. Hauptbestandteil ist der
 [Synapse](https://github.com/matrix-org/synapse) Server, Dieser ist eine
 Matrix homeserver Implementierung in Python auf Basis des
 [Matrix Protokolls](https://matrix.org).
@@ -82,7 +82,7 @@ Die größten Änderungen zu dem zugrundeliegenden Chart sind:
   Administration der Instanz (empfohlen auf nur intern erreichbarer Domain)
 - Hinzufügen und Konfiguration des Sygnal-Push-Dienstes
 - Konfiguration des kompletten Dienstes für das Service-Monitoring per Prometheus
-  (wird automatisch an Clustereigenen Prometheus promoted)
+  (wird automatisch an clustereigenen Prometheus promoted)
 - **Out of scope!** mögliche Integration eines [CoTurn-Servers](https://github.com/coturn/coturn)
   zur Nutzung der VoIP-Dienste
   - *Optional: Installation und Konfiguration eines dedizierten NginX
@@ -407,7 +407,7 @@ Nach der Installation sind in der Umgebung keine Benutzer vorhanden.
 Ein Upgrade oder Anpassen von Konfigurationswerten erfolgt mit Hilfe von
 `helm upgrade`.
 
-Upgrade mit Angabe der Paramater in der Konsole:
+Upgrade mit Angabe der Parameter in der Konsole:
 
 ```console
 helm upgrade bundesmessenger bundesmessenger/bundesmessenger \
@@ -415,7 +415,7 @@ helm upgrade bundesmessenger bundesmessenger/bundesmessenger \
 --set publicServerName=matrix.example.com
 ```
 
-Upgrade mit Angabe der Paramater in der `values.yaml`:
+Upgrade mit Angabe der Parameter in der `values.yaml`:
 
 ```console
 helm upgrade bundesmessenger . -f values.yaml

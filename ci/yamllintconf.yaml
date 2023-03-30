@@ -1,5 +1,13 @@
 # source: https://redhat-cop.github.io/ci/linting-testing-helm-charts.html
 ---
+yaml-files:
+  - '*.yaml'
+  - '*.yml'
+  - '.yamllint'
+
+ignore:
+  - templates/
+
 rules:
   braces:
     min-spaces-inside: 0
@@ -21,23 +29,31 @@ rules:
   comments:
     require-starting-space: true
     min-spaces-from-content: 2
+    ignore:
+      - .gitlab-ci.yml
+      - ci/kind-config.yaml
+  comments-indentation: disable
   document-end: disable
   document-start: disable           # No --- to start a file
   empty-lines:
     max: 2
     max-start: 0
     max-end: 0
+  empty-values: enable
   hyphens:
     max-spaces-after: 1
   indentation:
-    spaces: consistent
+    spaces: 2
     indent-sequences: whatever      # - list indentation will handle both indentation and without
     check-multi-line-strings: false
   key-duplicates: enable
+  key-ordering: disable
   line-length: disable              # Lines can be any length
   new-line-at-end-of-file: disable
   new-lines:
     type: unix
+  octal-values: disable
+  quoted-strings: disable
   trailing-spaces: enable
   truthy:
     level: warning

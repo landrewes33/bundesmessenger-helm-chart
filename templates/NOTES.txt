@@ -1,7 +1,7 @@
 ** Hinweis: Das Chart benötigt einige Minuten, bitte haben Sie Geduld. **
 {{- if not .Values.ingress.enabled }}
 
-Synapse wurde ohne Ingress installiert. 
+Synapse wurde ohne Ingress installiert.
 Zugriffe bzw. Endpunkte müssen manuell nachgesteuert werden.
 {{- else }}
 
@@ -15,21 +15,24 @@ http://{{ . }}
     {{- end }}
   {{- end }}
 {{ if not .Values.wellknown.enabled }}
-Bitte beachten Sie, das Federation nur funktionsfähig ist, wenn entweder ein SRV Record
-oder ein konfigurierter Well-known server unter /.well-known/matrix/server . 
+Bitte beachten Sie, das Föderation nur funktionsfähig ist, wenn entweder ein SRV Record
+oder ein Well-Known-Server unter "/.well-known/matrix/server" konfiguriert ist.
 
-Weitere Informationen unter: https://github.com/matrix-org/synapse/blob/master/docs/federate.md
+Weitere Informationen unter: https://matrix-org.github.io/synapse/latest/federate.html
+
+Bitte beachten Sie auch die notwendige Konfiguration des Wertes '"de.bwi": { "data_privacy_url": URL }"'
+unter "/.well-known/matrix/client" für die DSGVO-konforme Nutzung der Clients.
 {{- end }}
 {{- end }}
 
 {{- if .Values.config.enableRegistration }}
 Sie können sich nun an Ihrer BundesMessenger Installation mit jedem kompatiblen
-Matrix-Client verbinden - und einen Account erstellen - sobald die Installation 
+Matrix-Client verbinden - und einen Account erstellen - sobald die Installation
 final fertig ist.
 
-Sie können auch einen Administrator Account mit den folgendem Kommando erstellen:
+Sie können auch einen initialen administrativen Administrator und weitere Accounts mit den folgenden Kommandos erstellen:
 {{- else }}
-Sie können einen Account für den installierten BundesMessenger mit dem folgenden Kommando anlegen: 
+Sie können einen initialen administrativen und weitere Accounts für den installierten BundesMessenger mit den folgenden Kommandos anlegen:
 {{- end }}
 (Ersetzen Sie die Platzhalter NUTZER und PASSWORT mit gewünschten Inhalt)
 

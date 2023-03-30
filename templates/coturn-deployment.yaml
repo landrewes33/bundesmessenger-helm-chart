@@ -5,7 +5,7 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  namespace:  {{ $config.default_ns }}
+  namespace: {{ $config.default_ns }}
   name: coturn
   labels:
     name: coturn
@@ -77,7 +77,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: coturn-tcp
-  namespace:  {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
        name: coturn
        instance: coturn
@@ -98,7 +98,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: coturn-udp
-  namespace:  {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
        name: coturn
        instance: coturn
@@ -127,7 +127,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: coturn
-  namespace:  {{ .Release.Namespace}}
+  namespace: {{ .Release.Namespace}}
 data:
   turnconfig.conf: "
 # Coturn TURN SERVER configuration file\n

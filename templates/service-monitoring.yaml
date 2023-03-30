@@ -4,12 +4,12 @@ kind: ServiceMonitor
 metadata:
   name: k8s-synapse
   labels:
-   synapse-matrix: http
+    matrix-synapse: monitoring
 spec:
-  jobLabel: k8s-synapse-matrix
+  jobLabel: k8s-matrix-synapse
   selector:
     matchExpressions:
-    - {key: synapse-matrix, operator: Exists}
+    - {key: matrix-synapse, operator: Exists}
   namespaceSelector:
     matchNames:
     - kube-system

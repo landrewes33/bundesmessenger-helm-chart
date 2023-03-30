@@ -1,0 +1,22 @@
+resources:
+- ../../rl-kyverno/policies
+
+patches:
+- path: disable-require-unique-uid-per-workload.yaml
+
+# Notwendig, wenn bei Tests Images zum Einsatz kommen,
+# die nicht aus OpenCoDE geladen werden
+#
+# - path: exclude-test-annotation.yaml
+#   target:
+#     version: v1
+#     kind: ClusterPolicy
+#     name: restrict-image-registries
+
+# Ursache für redis `initContainers.name: init-sysctl`
+# Der Befehl benötigt zur Härtung diese Rechte
+- path: exclude-redis-label.yaml
+  target:
+    version: v1
+    kind: ClusterPolicy
+    name: disallow-privileged-containers

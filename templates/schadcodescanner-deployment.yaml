@@ -1,42 +1,56 @@
 {{- if and .Values.contentscanner.enabled .Values.schadcodescanner.enabled }}
-{{  $config := .Values.schadcodescanner }}
+{{- $config := .Values.schadcodescanner }}
+{{- $component := "schadcodescanner" -}}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "schadcodescanner") -}}
 
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "matrix-synapse.schadcodescannername" . }}
+  name: {{ $name }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
-    app.kubernetes.io/component:  {{ include "matrix-synapse.schadcodescannername" . }}
+    app.kubernetes.io/component: {{ $component }}
 spec:
   replicas: {{ $config.replicaCount }}
   selector:
     matchLabels:
-      {{- include "matrix-synapse.schadcodescannerselectorLabels" . | nindent 6 }}
-  serviceName: {{ include "matrix-synapse.schadcodescannername" . }}
+      {{- include "matrix-synapse.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $component }}
+  serviceName: {{ $name }}
   template:
     metadata:
       labels:
-        {{- include "matrix-synapse.schadcodescannerselectorLabels" . | nindent 8 }}
+        {{- include "matrix-synapse.labels" $ | nindent 8 }}
+        app.kubernetes.io/component: {{ $component }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/schadcodescanner-configuration.yaml") . | sha256sum }}
     spec:
     {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
-      containers:
-      - name: c-icap-server
-        image: "{{ $config.imagecicap.repository }}:{{ $config.imagecicap.tag }}"
-        ports:
-          - name: c-icap-clamav
-            containerPort: {{ $config.service.port }}
-            protocol: TCP
+      serviceAccountName: {{ .Release.Name }}
+      securityContext:
+        {{- $config.podSecurityContext | toYaml | nindent 8 }}
+      initContainers:
+      - name: clamav-permissions
+        image: "{{ $.Values.volumePermissions.image.repository }}:{{ $.Values.volumePermissions.image.tag }}"
         volumeMounts:
-          - name: clamsocket
-            mountPath: /run/clamav/
-          - name: config-volume
-            mountPath: /clamav/config/
+          - name: signatures
+            mountPath: /clamav/database
+        command:
+          - sh
+          - -c
+          - |
+            chown {{ $config.clamavSecurityContext.runAsUser | default "1111" }}:{{ $config.clamavSecurityContext.runAsGroup | default "1111" }}  -R /clamav/database;
+        securityContext:
+          runAsNonRoot: false
+          runAsUser: 0
+        resources:
+          {{- $.Values.volumePermissions.resources | toYaml | nindent 10 }}
+      containers:
       - name: clamav
         image: "{{ $config.imageclamav.repository }}:{{ $config.imageclamav.tag }}"
+        securityContext:
+          {{- $config.clamavSecurityContext | default "" | toYaml | nindent 10 }}
         {{- if .Values.schadcodescanner.extraEnv }}
         env:
           {{- with .Values.schadcodescanner.extraEnv }}
@@ -44,7 +58,7 @@ spec:
           {{- end }}
         {{- end }}
         resources:
-          {{- toYaml $config.resources | nindent 10 }}
+          {{- toYaml $config.resourcesClamav | nindent 10 }}
         volumeMounts:
           - name: clamsocket
             mountPath: /run/clamav/
@@ -52,21 +66,87 @@ spec:
             mountPath: /clamav/database
           - name: config-volume
             mountPath: /clamav/config/
+        startupProbe:
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          exec:
+            command:
+              - /usr/bin/clamdscan
+              - '-p 1'
+              - '--quiet'
+              - '-c'
+              - /clamav/config/clamdcheck.conf
+        livenessProbe:
+          periodSeconds: 10
+          exec:
+            command:
+              - /usr/bin/clamdscan
+              - '-p 1'
+              - '--quiet'
+              - '-c'
+              - /clamav/config/clamdcheck.conf
+        readinessProbe:
+          periodSeconds: 3
+          exec:
+            command:
+              - /usr/bin/clamdscan
+              - '-p 1'
+              - '--quiet'
+              - '-c'
+              - /clamav/config/clamdcheck.conf
+      - name: c-icap-server
+        image: "{{ $config.imagecicap.repository }}:{{ $config.imagecicap.tag }}"
+        securityContext:
+          {{- $config.icapSecurityContext | default "" | toYaml | nindent 10 }}
+        resources:
+          {{- toYaml $config.resourcesCicap | nindent 10 }}
+        ports:
+          - name: c-icap-clamav
+            containerPort: {{ $config.service.port }}
+            protocol: TCP
+        startupProbe:
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          tcpSocket:
+            port: {{ $config.service.port }}
+        livenessProbe:
+          periodSeconds: 10
+          tcpSocket:
+            port: {{ $config.service.port }}
+        readinessProbe:
+          periodSeconds: 10
+          tcpSocket:
+            port: {{ $config.service.port }}
+        volumeMounts:
+          - name: clamsocket
+            mountPath: /run/clamav/
+          - name: config-volume
+            mountPath: /clamav/config/
+          - name: icap-volume
+            mountPath: /run/c-icap/
+          - name: icap-tmp
+            mountPath: /tmp
       volumes:
       - name: clamsocket
         emptyDir:
-          sizeLimit: 50Mi
+          sizeLimit: 50M
+      - name: icap-volume
+        emptyDir:
+          sizeLimit: 5M
+      - name: icap-tmp
+        emptyDir:
+          sizeLimit: 5M
       - name: config-volume
         projected:
           sources:
           - configMap:
-              name: {{ include "matrix-synapse.schadcodescannername" . }}
+              name: {{ $name }}
       - name: signatures
         persistentVolumeClaim:
       {{- if .Values.schadcodescanner.persistence.existingClaim }}
-            claimName: {{ .Values.schadcodescanner.persistence.existingClaim }}
+          claimName: {{ .Values.schadcodescanner.persistence.existingClaim }}
       {{- else }}
-            claimName: {{ template "matrix-synapse.schadcodescannername" . }}
+          claimName: {{ $name }}
       {{- end }}
       {{- with $config.nodeSelector }}
       nodeSelector:
@@ -87,14 +167,14 @@ spec:
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name:  hpa-{{ include "matrix-synapse.schadcodescannername" . }}
+  name: hpa-{{ $name }}
   labels:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v2
     kind: StatefulSet
-    name: {{ include "matrix-synapse.schadcodescannername" . }}
+    name: {{ $name }}
   minReplicas: {{ $config.autoscaling.minReplicas }}
   maxReplicas: {{ $config.autoscaling.maxReplicas }}
   metrics:

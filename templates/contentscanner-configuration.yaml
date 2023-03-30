@@ -1,4 +1,5 @@
 {{- if .Values.contentscanner.enabled }}
+{{- $scannername := include "matrix-synapse.externalname" (dict "global" . "external" "schadcodescanner") -}}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -22,20 +23,20 @@ data:
     # downloaded file as its only argument, e.g. "./example.sh /temp/foo.bar/my_file".
     # Required.
         script: '/opt/scanner.sh'
-        
+
         # The temporary directory to use
         temp_directory: '/tmp'
 
         # Command to run to remove files from disk once they have been scanned.
         # Optional, defaults to "rm".
         removal_command: "srm"
-        
+
         # List of allowed MIME types. If a file has a MIME type that's not in this list, its
         # scan is considered failed.
         # Optional, defaults to allowing all MIME types.
         #allowed_mimetypes: ["image/jpeg"]
 
-        
+
     # Optional. A command to execute when unlinking files from the file
     # system instead of using node's fs.unlink. When executed, the first
     # argument to the command will be the path of the file being
@@ -52,24 +53,24 @@ data:
         # Optional, defaults to an empty list (i.e. results are cached regardless of the
         # script's exit code).
         exit_codes_to_ignore: [1, 2]
-    
+
         # Maximum number of results that can be stored in the cache. If more files are
         # scanned before existing items reach their TTL, the least-recently accessed will be
         # evicted.
         # Optional, defaults to 1024.
         max_size: 2048
-    
+
         # The maximum amount of time an entry will stay in the cache before being evicted.
         # Optional, defaults to 1 week.
         ttl: "1d"
-    
+
         # The maximum cachable file size. If a file is bigger than this size, a copy of it
         # will be not be cached even if the scan succeeds. If the file is requested again, it
         # is downloaded again from the homeserver, but is not written to disk or scanned.
         # Optional, defaults to no maximum size.
         max_file_size: "100MB"
-    
-    
+
+
     # Configuration for downloading files.
     # When downloading files directly from their respective homeservers (which is the default
     # behaviour), the homeservers' default URLs are determined using .well-known discovery
@@ -83,16 +84,16 @@ data:
         # to use.
         # Optional, defaults to downloading files directly from their respective homeservers.
         base_homeserver_url: 'http://{{ include "matrix-synapse.workername" (dict "global" . "worker" "media-repository") | default  (include "matrix-synapse.fullname" .) }}.{{ .Release.Namespace }}.svc:8083'
-    
+
         # HTTP(S) proxy to use when sending requests.
         # Optional, defaults to no proxy.
         #proxy: "http://10.0.0.1:3128"
-    
+
         # Headers to send in outgoing requests.
         # Optional, defaults to no additional headers.
         #additional_headers:
         #    user-agent: "matrix-content-scanner"
-    
+
     # Configuration for decrypting Olm-encrypted request bodies.
     crypto:
         # The path to the Olm pickle file. This file contains the key pair to use when
@@ -100,7 +101,7 @@ data:
         # A new keypair will be created at startup if the pickle file doesn't already exist.
         # Required.
         pickle_path: "/crypto/pickle"
-    
+
         # The key to use to decode the pickle file.
         # Required.
         pickle_key: {{ randAlphaNum 24 | nospace | quote }}
@@ -115,15 +116,15 @@ metadata:
 data:
   scanner.sh: |
     #!/bin/bash
-    # This is an example script to run when a file is scanned. 
+    # This is an example script to run when a file is scanned.
     # - ${1} will be the path to the file to scan.
     # - The exit code should be 0 for files that are deemed safe/clean.
     # - Anything sent to stdout will be included in the `info` section of the response.
-    return=$(c-icap-client -i  {{ include "matrix-synapse.schadcodescannername" . }} -p 1344 -f ${1} -s virus_scan);
+    return=$(c-icap-client -i  {{ $scannername }} -p 1344 -f ${1} -s virus_scan);
     returncode=$?;
     result=$(echo $return | grep -c "VIRUS FOUND" )
     echo "Return of Scan ${1}:  $result - $return";
-    #exit 0=clean, wenn kein String VIRUS FOUND" enthalten, der returncode vom i-cap-client 0 ist und der return-string an sich leer 
+    #exit 0=clean, wenn kein String VIRUS FOUND" enthalten, der returncode vom i-cap-client 0 ist und der return-string an sich leer
     if [[ $result == 0 ]] &&  [[ $returncode == 0 ]] && [[ $(echo $return | grep -v '^[[:space:]]*$' | wc -l ) == 0 ]]; then
       exit 0
     #es stimmt was mit dem file nicht (größe oder irgendwas, so das der returncode ungleich 0 ist)

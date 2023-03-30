@@ -1,38 +1,56 @@
 {{- if .Values.contentscanner.enabled }}
 {{- $config := .Values.contentscanner -}}
+{{- $component := "matrix-content-scanner" -}}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-content-scanner") -}}
 ---
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ include "matrix-synapse.contentscannername" . }}
+  name: {{ $name }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
-    app.kubernetes.io/component:  {{ include "matrix-synapse.contentscannername" . }}
+    app.kubernetes.io/component: {{ $component }}
 spec:
   replicas: {{ .Values.contentscanner.replicaCount }}
   selector:
     matchLabels:
-      {{- include "matrix-synapse.contentscannerselectorLabels" . | nindent 6 }}
-  serviceName: {{ include "matrix-synapse.contentscannername" . }}
+      {{- include "matrix-synapse.selectorLabels" $ | nindent 6 }}
+      app.kubernetes.io/component: {{ $component }}
+  serviceName: {{ $name }}
   template:
     metadata:
       labels:
-        {{- include "matrix-synapse.contentscannerselectorLabels" . | nindent 8 }}
+        {{- include "matrix-synapse.labels" $ | nindent 8 }}
+        app.kubernetes.io/component: {{ $component }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/contentscanner-configuration.yaml") . | sha256sum }}
     spec:
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       securityContext:
-        fsGroup: 1334
+        {{- $config.podSecurityContext | toYaml | nindent 8 }}
+      serviceAccountName: {{ .Release.Name }}
       containers:
-      - name: matrix-content-scanner
+      - name: {{ $name }}
         image: "{{ $config.image.repository }}:{{ $config.image.tag }}"
         imagePullPolicy: "{{ $config.image.pullPolicy }}"
+        securityContext:
+          {{- $config.securityContext | toYaml | nindent 10 }}
+        resources:
+          {{- toYaml $config.resources | nindent 10 }}
         ports:
         - containerPort: 8080
           name: contentscanner
           protocol: TCP
+        livenessProbe:
+          tcpSocket:
+            port: contentscanner
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          periodSeconds: 3
+          tcpSocket:
+            port: contentscanner
         volumeMounts:
           - name: scannerconfig
             mountPath: /config
@@ -42,18 +60,23 @@ spec:
             mountPath: /crypto
           - name: scannerscript
             mountPath: /opt
+          - name: conftmp
+            mountPath: /home/contentscanner/matrix-content-scanner/config/
       volumes:
-       - name: temp
-         emptyDir:
-           sizeLimit: 50Mi
-       - name: crypto
-         emptyDir:
-           sizeLimit: 1Mi
-       - name: scannerscript
-         configMap:
-           name: scanner
-           defaultMode: 0755
-       - name: scannerconfig
-         configMap:
-           name: contentscannerconfig
+        - name: conftmp
+          emptyDir:
+            sizeLimit: 5Mi
+        - name: temp
+          emptyDir:
+            sizeLimit: 50Mi
+        - name: crypto
+          emptyDir:
+            sizeLimit: 1Mi
+        - name: scannerscript
+          configMap:
+            name: scanner
+            defaultMode: 0755
+        - name: scannerconfig
+          configMap:
+            name: contentscannerconfig
 {{- end }}

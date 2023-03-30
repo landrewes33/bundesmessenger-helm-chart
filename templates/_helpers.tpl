@@ -41,38 +41,6 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 
 {{/*
-Create a default sygnal name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "matrix-synapse.sygnalname" -}}
-{{- printf "%s-%s" .global.Release.Name .sygnal | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create a default synapse-admin name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-{{- define "matrix-synapse.synapse-adminname" -}}
-{{- printf "%s-%s" .global.Release.Name .synapse_admin | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-*/}}
-
-{{/*
-Create a default contentscanner name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "matrix-synapse.contentscannername" -}}
-{{- printf "%s-%s" .Release.Name "matrix-content-scanner" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
-Create a default schadcodescanner name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "matrix-synapse.schadcodescannername" -}}
-{{- printf "%s-%s"  .Release.Name  "schadcodescanner" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{/*
 Create a default external component name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
@@ -91,29 +59,21 @@ Create chart name and version as used by the chart label.
 Get the correct image tag name
 */}}
 {{- define "matrix-synapse.imageTag" -}}
-{{- .Values.image.tag | default (printf "v%s" .Chart.AppVersion) -}}
-{{- end -}}
-
-{{/*
-Get the correct image tag (sygnal)
-*/}}
-{{- define "matrix-synapse.sygnal.imageTag" -}}
-{{- .Values.sygnal.image.tag | default ("v0.12.0") -}}
+{{- .Values.image.tag | default (printf "%s-jammy-production" .Chart.AppVersion) -}}
 {{- end -}}
 
 {{/*
 Common labels
 */}}
 {{- define "matrix-synapse.labels" -}}
+matrix-synapse: monitoring
 helm.sh/chart: {{ include "matrix-synapse.chart" . }}
 {{ include "matrix-synapse.selectorLabels" . }}
-synapse-matrix: http
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
-
 
 
 
@@ -131,22 +91,6 @@ Selector labels
 */}}
 {{- define "matrix-synapse.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "matrix-synapse.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end -}}
-
-{{/*
-Selector labels contentscanner
-*/}}
-{{- define "matrix-synapse.contentscannerselectorLabels" -}}
-app.kubernetes.io/name: {{ include "matrix-synapse.name" . }}-matrix-content-scanner
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end -}}
-
-{{/*
-Selector labels ClamAV
-*/}}
-{{- define "matrix-synapse.schadcodescannerselectorLabels" -}}
-app.kubernetes.io/name: {{ include "matrix-synapse.name" . }}-schadcodescanner
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
@@ -370,9 +314,11 @@ Set redis password
 Set synapse_admin uri
 */}}
 {{- define "synapse-admin.host" -}}
-{{- if .Values.synapse_admin.enabled -}}
-{{- required "A valid URI for the synapse Admin webGUI ist required." .Values.synapse_admin.uri -}}
-{{- else -}}
-{{- printf "" -}}
-{{- end -}}
+  {{- if .Values.synapse_admin.enabled -}}
+    {{- if .Values.synapse_admin.uri -}}
+{{- .Values.synapse_admin.uri -}}
+    {{- else }}
+{{- required "A valid URI for the synapse Admin webGUI (synapse_admin.uri) is required." .Values.synapse_admin.uri -}}
+    {{- end -}}
+  {{- end -}}
 {{- end -}}

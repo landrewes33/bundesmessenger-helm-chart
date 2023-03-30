@@ -53,6 +53,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: signingkey-job
@@ -65,6 +66,7 @@ spec:
         app.kubernetes.io/component: signingkey-job
     spec:
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
+      serviceAccountName: {{ $name }}
       containers:
         - command:
             - sh
@@ -87,6 +89,7 @@ spec:
           securityContext:
             runAsNonRoot: true
             runAsUser: 2018
+            readOnlyRootFilesystem: true
         - command:
             - sh
             - -c
@@ -103,6 +106,7 @@ spec:
           securityContext:
             runAsNonRoot: true
             runAsUser: 2019
+            readOnlyRootFilesystem: true
           resources:
             {{- toYaml .Values.signingkey.resources | nindent 12 }}
           volumeMounts:

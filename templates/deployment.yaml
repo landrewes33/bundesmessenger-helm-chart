@@ -1,9 +1,9 @@
 {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (or .Values.persistence.enabled .Values.persistence.existingClaim) (not .Values.workers.media_repository.enabled ) }}
 {{- if (and .Values.postgresql.enabled (and (not .Values.postgresql.auth.password) (not .Values.postgresql.auth.existingSecret))) -}}
-{{-  fail "You must specify a static postgres password or existing secret if using the included postgres chart" -}}
+  {{- fail "You must specify a static postgres password or existing secret if using the included postgres chart" -}}
 {{- end -}}
 {{- if (and .Values.redis.enabled (and .Values.redis.usePassword (and (not .Values.redis.auth.password) (not .Values.redis.auth.existingSecret)))) -}}
-{{-  fail "You must specify a static redis password or existing secret if using the included redis chart" -}}
+  {{- fail "You must specify a static redis password or existing secret if using the included redis chart" -}}
 {{- end -}}
 
 ---
@@ -21,10 +21,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "matrix-synapse.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: synapse
-    synapse-matrix: http
 spec:
   replicas: 1
   strategy:
@@ -96,7 +96,7 @@ spec:
                 secretKeyRef:
                   {{- if .Values.postgresql.enabled }}
                   name: {{ .Values.postgresql.auth.existingSecret | default (include "matrix-synapse.postgresql.fullname" .) }}
-                  key:  {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "password" }}
+                  key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "password" }}
                   {{- else }}
                   name: {{ .Values.externalPostgresql.existingSecret }}
                   key: {{ .Values.externalPostgresql.existingSecretPasswordKey }}
@@ -108,7 +108,7 @@ spec:
                 secretKeyRef:
                   {{- if .Values.redis.enabled }}
                   name: {{ .Values.redis.auth.existingSecret | default (include "matrix-synapse.redis.fullname" .) }}
-                  key:  {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
+                  key: {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
                   {{- else }}
                   name: {{ .Values.externalRedis.existingSecret }}
                   key: {{ .Values.externalRedis.existingSecretPasswordKey }}

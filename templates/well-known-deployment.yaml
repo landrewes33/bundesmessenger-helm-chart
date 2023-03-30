@@ -1,13 +1,16 @@
 {{- if .Values.wellknown.enabled }}
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") -}}
+{{- $component := "wellknown-nginx" -}}
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $wkName }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    app.kubernetes.io/component: {{ $wkName }}
+    app.kubernetes.io/component: {{ $component }}
 spec:
   type: ClusterIP
   ports:
@@ -17,28 +20,29 @@ spec:
       name: http
   selector:
     {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
-    app.kubernetes.io/component: {{ $wkName }}
+    app.kubernetes.io/component: {{ $component }}
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $wkName }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    app.kubernetes.io/component: {{ $wkName }}
+    app.kubernetes.io/component: {{ $component }}
 spec:
   replicas: {{ .Values.wellknown.replicaCount | default 1 }}
   selector:
     matchLabels:
       {{- include "matrix-synapse.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: {{ $wkName }}
+      app.kubernetes.io/component: {{ $component }}
   template:
     metadata:
       annotations:
         checksum/config: {{ include (print .Template.BasePath "/well-known-config.yaml") . | sha256sum }}
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: {{ $wkName }}
+        app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ $.Release.Name }}
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}

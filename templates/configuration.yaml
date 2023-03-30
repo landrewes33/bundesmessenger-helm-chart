@@ -10,20 +10,18 @@ data:
     version: 1
     formatters:
       precise:
-       format: '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(request)s- %(message)s'
-    filters:
-      context:
-        (): synapse.util.logcontext.LoggingContextFilter
-        request: ""
+       format: '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(request)s - %(message)s'
     handlers:
       console:
         class: logging.StreamHandler
         formatter: precise
-        filters: [context]
-        level: {{ .Values.config.logLevel | default "INFO" }}
     loggers:
         synapse:
             level: {{ .Values.config.logLevel | default "INFO" }}
+        synapse.storage.SQL:
+            # beware: increasing this to DEBUG will make synapse log sensitive
+            # information such as access tokens.
+            level: {{ .Values.config.logLevelSQL | default "INFO" }}
     root:
         level: {{ .Values.config.logLevel | default "INFO" }}
         handlers: [console]
@@ -128,21 +126,31 @@ data:
     trusted_key_servers: {{- .Values.config.trustedKeyServers | toYaml | nindent 6 }}
 
     ## Workers ##
+    # Add a random shared secret to authenticate traffic.
+    worker_replication_secret: {{ randAlphaNum 24 | quote }}
+
     {{- $default := .Values.workers.default }}
     {{- range $worker, $config := .Values.workers }}
       {{- if $config.enabled }}
+        {{- $name := $worker | replace "_" "-" }}
 
         {{- if or (eq $worker "pusher") (eq ($config.app | default "") "pusher") }}
     # For pusher worker
-    start_pushers: false
+    pusher_instances:
+      {{- range $i, $e := until ($config.replicaCount | default $default.replicaCount | int) }}
+      - {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-{{ $i }}
+      {{- end }}
 
         {{- else if or (eq $worker "appservice") (eq ($config.app | default "") "appservice") }}
     # For appservice worker
-    notify_appservices: false
+    notify_appservices_from_worker: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-0
 
         {{- else if or (eq $worker "federation_sender") (eq ($config.app | default "") "federation_sender") }}
     # For federation_sender worker
-    send_federation: false
+    federation_sender_instances:
+      {{- range $i, $e := until ($config.replicaCount | default $default.replicaCount | int) }}
+      - {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-{{ $i }}
+      {{- end }}
 
         {{- else if or (eq $worker "media_repository") (eq ($config.app | default "") "media_repository") }}
     # For media_repository worker
@@ -150,7 +158,11 @@ data:
 
         {{- else if or (eq $worker "user_dir") (eq ($config.app | default "") "user_dir") }}
     # For user_dir worker
-    update_user_directory_from_worker: {{ required "You need to specify a workers.user_dir.name" $config.name }}
+    update_user_directory_from_worker: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-0
+
+        {{- else if or (eq $worker "background_worker") (eq ($config.app | default "") "background_worker") }}
+    # For background worker
+    run_background_tasks_on: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-0
 
         {{- end }}
       {{- end }}
@@ -162,22 +174,22 @@ data:
     {{- end }}
     {{- if .Values.coturn.enabled }}
     ## TURN ##
-    
+
     # The shared secret used to compute passwords for the TURN server
     #
     #turn_shared_secret: "YOUR_SHARED_SECRET"
     turn_shared_secret: "j8dOQy5TgYv0x7r9LL3so08jZReoZ9JgbpjdFO73toyqloQuCZywGihhbqYU7jZL"
-    
+
     # The Username and password if the TURN server needs them and
     # does not use a token
     #
     #turn_username: "TURNSERVER_USERNAME"
     #turn_password: "TURNSERVER_PASSWORD"
-    
+
     # How long generated TURN credentials last
     #
     turn_user_lifetime: 1h
-    
+
     # Whether guests should be allowed to use the TURN server.
     # This defaults to True, otherwise VoIP will be unreliable for guests.
     # However, it does introduce a slight security risk as it allows users to
@@ -185,5 +197,5 @@ data:
     # valid account (e.g. by passing a CAPTCHA).
     #
     turn_allow_guests: False
-     
+
     {{- end }}

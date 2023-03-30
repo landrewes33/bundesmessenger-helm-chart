@@ -1,12 +1,15 @@
 {{- if $.Values.sygnal.enabled }}
 {{- $sygnalName := include "matrix-synapse.externalname" (dict "global" . "external" "sygnal") -}}
+{{- $component := "matrix-sygnal" -}}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $sygnalName }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
-    app.kubernetes.io/component: matrix-sygnal
+    app.kubernetes.io/component: {{ $component }}
 spec:
   replicas: 1
   strategy:
@@ -14,43 +17,43 @@ spec:
   selector:
     matchLabels:
       {{- include "matrix-synapse.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: matrix-sygnal
+      app.kubernetes.io/component: {{ $component }}
   template:
     metadata:
       labels:
-        {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: matrix-sygnal
+        {{- include "matrix-synapse.labels" . | nindent 8 }}
+        app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ .Release.Name }}
       securityContext:
         {{- $.Values.sygnal.podSecurityContext | toYaml | nindent 8 }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
-       - name: matrix-sygnal
-         image:  "{{ $.Values.sygnal.image.repository }}:{{ include "matrix-synapse.sygnal.imageTag" $ }}"
-         imagePullPolicy: {{ $.Values.sygnal.image.pullPolicy }}
-         env:
-          - name: SYGNAL_CONF
-            value: sygnal.yaml
-         ports:
-          - containerPort: 5000
-            name: sygnal-port
-            protocol: TCP
-         resources:
-           {{- $.Values.sygnal.resources | toYaml | nindent 12 }}
-         securityContext:
-           {{- $.Values.sygnal.securityContext | toYaml | nindent 12 }}
-         volumeMounts:
-           - name: config
-             mountPath: /sygnal.yaml
-             subPath: sygnal.yaml
-           {{- if .Values.sygnal.ios_push.enabled }}
-           - name: ioskey
-             mountPath: /{{ $.Values.sygnal.ios_push.ioskey_filename }}
-             subPath: {{ $.Values.sygnal.ios_push.ioskey_filename }}
-           {{ end }}
-           - mountPath: /tmp
-             name: sygnal-tmp
+        - name: matrix-sygnal
+          image: "{{ $.Values.sygnal.image.repository }}:{{ $.Values.sygnal.image.tag }}"
+          imagePullPolicy: {{ $.Values.sygnal.image.pullPolicy }}
+          env:
+            - name: SYGNAL_CONF
+              value: sygnal.yaml
+          ports:
+            - containerPort: 5000
+              name: sygnal-port
+              protocol: TCP
+          resources:
+            {{- $.Values.sygnal.resources | toYaml | nindent 12 }}
+          securityContext:
+            {{- $.Values.sygnal.securityContext | toYaml | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /sygnal.yaml
+              subPath: sygnal.yaml
+            {{- if .Values.sygnal.ios_push.enabled }}
+            - name: ioskey
+              mountPath: /{{ $.Values.sygnal.ios_push.ioskey_filename }}
+              subPath: {{ $.Values.sygnal.ios_push.ioskey_filename }}
+            {{ end }}
+            - mountPath: /tmp
+              name: sygnal-tmp
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
       volumes:
