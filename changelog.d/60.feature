@@ -1,1 +1,0 @@
-Trennung der Ingresskonfiguration von Matrix-Service und Admin-API bzw. Synapse-Admin auf `ingress-admin.yaml`. Einführung einer neuen Variable `adminAPIServerName` als Servername für die Admin-API (verpflichtend anzugeben).
