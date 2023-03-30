@@ -57,6 +57,7 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 
 - Dokumentation der Abhängigkeiten und genutzten Images je Version des Helm
   Charts. (!106)
+- Dokumentation für die Aufteilung des Ingress-Regelwerkes. (!112)
 
 ### 📚 Dokumentation
 
