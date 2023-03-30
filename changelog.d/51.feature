@@ -1,0 +1,1 @@
+Hinzufügen und aktives konfigurieren des `worker_replication_secret` um die interne Replikation zu authentifizieren.

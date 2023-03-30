@@ -182,7 +182,7 @@ Messenger deiner Organisation
         <div style="max-width: 150px;"><a href="../values.yaml#L82">signingkey.job.enabled</a></div>
       </td>
       <td>bool</td>
-      <td>es wird ein Job zu Beginn des Deployments gestartet, der einen Signierschlüssel erzeugt. Wenn abgeschaltet, muss ein vorhandener Schlüssel eingebunden werden, ansonsten ist eine Förderation als nicht vertrauenswürdig eingestuft</td>
+      <td>es wird ein Job zu Beginn des Deployments gestartet, der einen Signierschlüssel erzeugt. Wenn abgeschaltet, muss ein vorhandener Schlüssel eingebunden werden, ansonsten ist eine Föderation als nicht vertrauenswürdig eingestuft</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 true
@@ -502,7 +502,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L201">extraConfig.allow_public_rooms_over_federation</a></div>
       </td>
       <td>bool</td>
-      <td>öffentliche Räume über Förderation erlauben, abgeschaltet</td>
+      <td>öffentliche Räume über Föderation erlauben, abgeschaltet</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 false
@@ -528,7 +528,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L205">extraConfig.ip_range_whitelist</a></div>
       </td>
       <td>list</td>
-      <td>IP-Whitelist für Förderation zwingend benötigt</td>
+      <td>IP-Whitelist für Föderation und Push-Services zwingend benötigt</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 [
@@ -545,7 +545,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L208">extraConfig.presence.enabled</a></div>
       </td>
       <td>bool</td>
-      <td>Anwesenheitstatus anzeigen, abgeschaltet (Load)</td>
+      <td>Anwesenheitsstatus anzeigen, abgeschaltet (Load)</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 false
@@ -818,7 +818,7 @@ true
         <div style="max-width: 150px;"><a href="../values.yaml#L255">extraConfig.password_config.policy.require_uppercase</a></div>
       </td>
       <td>bool</td>
-      <td>Großbuchstaben muss genutz werden</td>
+      <td>Großbuchstaben muss genutzt werden</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 true
@@ -1773,7 +1773,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L759">workers.federation_reader.enabled</a></div>
       </td>
       <td>bool</td>
-      <td>Aktiviere spez. Worker für Förderationsanfragen Wenn dieser Worker genutzt wird, können die URLs aus dem generic_worker entfernt werden.</td>
+      <td>Aktiviere spez. Worker für Föderationsanfragen Wenn dieser Worker genutzt wird, können die URLs aus dem generic_worker entfernt werden.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 false
@@ -1799,7 +1799,7 @@ true
         <div style="max-width: 150px;"><a href="../values.yaml#L763">workers.federation_reader.listeners</a></div>
       </td>
       <td>list</td>
-      <td>Zusätzliche Listener für Förderationsworker</td>
+      <td>Zusätzliche Listener für Föderationsworker</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 [
@@ -1814,7 +1814,7 @@ true
         <div style="max-width: 150px;"><a href="../values.yaml#L766">workers.federation_reader.paths</a></div>
       </td>
       <td>path</td>
-      <td>Server-Side Pfade für die Ingress-Konfiguration des Förderations-Workers</td>
+      <td>Server-Side Pfade für die Ingress-Konfiguration des Föderations-Workers</td>
       <td>
         <div style="max-width: 300px;"><pre lang="">
 werden in der values.yaml gesetzt und können dort eingesehen werden
@@ -2558,7 +2558,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L1032">sygnal.ios_push.ioskey_filename</a></div>
       </td>
       <td>map</td>
-      <td>iOS-Key Konfiguration bei Nutzung von iOS-Pushservice, muss Key mit angebeben werden. Weitereres siehe README.md Beispiel:  ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus dem APN-File übereinstimmen!  ioskey_keyvalue: 'HIER KÖNNTE IHR KEY IN STEHEN'</td>
+      <td>iOS-Key Konfiguration bei Nutzung von iOS-Pushservice, muss Key mit angeben werden. Weiteres siehe README.md Beispiel:  ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus dem APN-File übereinstimmen!  ioskey_keyvalue: 'HIER KÖNNTE IHR KEY IN STEHEN'</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 ""

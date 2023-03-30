@@ -40,5 +40,7 @@ helm-package/
 /filter.txt
 /filter_replace.txt
 # Other
+changelog.d/
+towncrier.toml
 /ci/
 pusher-values.yaml

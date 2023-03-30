@@ -41,14 +41,14 @@ Kubernetes-Cluster.
 | Ausführung | Anzahl Worker Nodes | Ressourcen Worker-Nodes | Anzahl Control-Planes (Master-Nodes) | Ressourcen Control-Plane|
 | ------ | ------ | ------ | ------ | ------ |
 | Ohne Föderation | 2 | je 2 vCPUs/CPUs und 8 GB RAM | 1 |  2 vCPUs und 4GB RAM |
-| Mit Föderation (expterimentell) | 3 | je 4 vCPUs/CPUs und 16 GB RAM | 3 | 2 vCPUs und 4GB RAM |
+| Mit Föderation (experimentell) | 3 | je 4 vCPUs/CPUs und 16 GB RAM | 3 | 2 vCPUs und 4GB RAM |
 
 ### Für die Ausbaustufe Full PoC bzw. Full-Stack Deployment
 
 | Ausführung | Anzahl Worker Nodes | Ressourcen Worker-Nodes | Anzahl Control-Planes (Master-Nodes) | Ressourcen Control-Plane|
 | ------ | ------ | ------ | ------ | ------ |
 | Ohne Föderation | 4 | je 4 vCPUs/CPUs und 8 GB RAM | 1 |  4 vCPUs und 4GB RAM |
-| Mit Föderation (expterimentell) | 5 | je 4 vCPUs/CPUs und 16 GB RAM | 3 | 2 vCPUs und 4GB RAM |
+| Mit Föderation (experimentell) | 5 | je 4 vCPUs/CPUs und 16 GB RAM | 3 | 2 vCPUs und 4GB RAM |
 
 :pushpin: **Hinweis:** Es wird empfohlen auf mehr als eine Master-Node zu
 setzen. Weiterhin ist eine zusätzliche Node (VM oder BareMetall), welche
@@ -67,12 +67,12 @@ damit ein Deployment möglich und erfolgreich ist.
 | `serverName` bzw. `publicServerName` | Eine ist verpflichtend | Öffentlich (oder teilöffentlich bzw. Nutzerkreis bekannter) präsentierter Endpunkt bzw. MXID der Nutzer. |
 | `adminAPIServerName` | verpflichtend | Zur Trennung des Admin-API Interfaces des Synapse vom öffentlichen präsentierten Kontaktpunkt. |
 | `sygnal.apns` | `sygnal.enabled: true` | Werden von der BWI GmbH für die mobilen Clients zur Verfügung gestellt und beim Deployment zusätzlich eingebunden. |
-| `externalPostgresql.host`| `postgresql.enabled: false` | Wenn kein PostgreSQL-Server im Zuge des Deployments erstellt werden soll, muss zwingend eine URL zum erreichen eines externen PsotgreSQL-Servers konfiguriert werden. (inklusive Zugangsdaten!) |
+| `externalPostgresql.host`| `postgresql.enabled: false` | Wenn kein PostgreSQL-Server im Zuge des Deployments erstellt werden soll, muss zwingend eine URL zum erreichen eines externen PostgreSQL-Servers konfiguriert werden. (inklusive Zugangsdaten!) |
 | `externalRedis.host` | `redis.enabled: false` | Wenn kein eigener Redis-Server installiert werden soll, muss zwingend die URL eines externen Redis-Server konfiguriert werden. (inklusive Zugangsdaten!) |
 | Alle Ingress-Routen und Network policies | `ingress.enabled.false` | Alle Routen und Network-Policies müssen manuell konfiguriert werden, wenn kein DVS-Standard Ingress-Controller nicht vorhanden ist und in der Konfiguration deaktiviert wurde. |
 | `schadcodescanner.freshclam.mirrors` | eigener lokaler privater Mirror, da Zugriff auf Internet nicht möglich | Hier kann und muss eine Liste von privaten Mirrors für den eingesetzten ClamAV Updater freshclam hinterlegt werden, wenn ein Zugriff auf den offiziellen Server unter database.clamav.net nicht möglich ist. |
-| `synapse_admin.uri` | `synapse_admin.enabled: true` | Wenn der Synapse-Admin genutzt werden soll, kann eine von sich von `adminAPIServerName` unterscheidene URL konfiguriert werden (empfohlen). |
-| `webclient.uri` | `webclient.enabled: true` | Wenn der Webclient genutzt werden will, muss eine entspsrechende URL für die WebGUI konfiguriert werden. |
+| `synapse_admin.uri` | `synapse_admin.enabled: true` | Wenn der Synapse-Admin genutzt werden soll, kann eine sich von `adminAPIServerName` unterscheidende URL konfiguriert werden (empfohlen). |
+| `webclient.uri` | `webclient.enabled: true` | Wenn der Webclient genutzt werden will, muss eine entsprechende URL für die WebGUI konfiguriert werden. |
 | `displayName` | `webclient.enabled: true` | Der Anzeigename des Messengers im Webclient. Default: `Messenger deiner Organisation`. |
 
 ## Hostnamen/DNS
@@ -97,7 +97,7 @@ Basis-Images im OpenCoDE zur Verfügung zu stellen.
 
 Das Veröffentlichen eigener Basis-Images stellt eine Verbreitung von
 Linux-Distribution dar. Daher werden wir zur Herstellung unserer
-Appikations-Images auf spezielle Basis-Images aufbauen.
+Applikations-Images auf spezielle Basis-Images aufbauen.
 
 Folgende Optionen werden in Betracht gezogen:
 
@@ -137,9 +137,9 @@ Sicherheitsinfrastruktur freigegeben werden:
 - Port 3478 UDP/TCP
 - Port 5349 TCP (bei TLS)
 
-## Postgresql-Datenbank
+## PostgreSQL-Datenbank
 
-Die Installation erfordert, dass Sie eine postgresql-Datenbank mit einem
+Die Installation erfordert, dass Sie eine PostgreSQL-Datenbank mit einem
 `locale` von `C` und `encoding` `UTF8` eingerichtet haben.
 Siehe [Synapse Dokumentation](https://matrix-org.github.io/synapse/latest/postgres.html#set-up-database)
 für weitere Details.
@@ -151,7 +151,7 @@ der Installation zu beginnen. (per Parameter zu übergeben oder in der
 
 Wenn Sie noch keine Datenbank haben, richten Sie sich eine Datenbank nach den
 Vorgaben im Kubernetes ein. Die Nutzung eines SubChart für die Einrichtung des
-PostgreSQL wäre über das Chart möglich. Es ist aber davon abzureten und ein
+PostgreSQL wäre über das Chart möglich. Es ist aber davon abzuraten und ein
 selbstständige Installation über HelmChart oder manuelle Installation
 umzusetzen.
 
