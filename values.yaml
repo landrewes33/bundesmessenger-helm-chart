@@ -125,7 +125,7 @@ ipv4Only: true
 ## Matrix-Konfigurationswerte, die sich auf andere Teile des Charts auswirken, für jeden
 ## Wert, der nicht von diesem Block behandelt wird, sollten Sie ihn stattdessen in
 ## extraConfig unten einstellen.
-## Ref: https://github.com/matrix-org/synapse/blob/develop/docs/sample_config.yaml
+## Ref: https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html
 ##
 config:
   # -- (string) Die öffentlich zugängliche URL für die Synapse-Instanz
@@ -186,8 +186,9 @@ config:
   #    bind_addresses: ['::']
   #    type: manhole
 
-# -- (object) Best Practise BWI GmbH:
-# Ref: https://github.com/matrix-org/synapse/blob/develop/docs/sample_config.yaml
+# -- (object) Beliebige weitere Synapse-Konfiguration
+# Vorkonfiguriert nach Best Practise BWI GmbH:
+# Ref: https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html
 # @default -- wird nachfolgend aufgeschlüsselt
 extraConfig:
   # old_signing_keys:
@@ -261,7 +262,10 @@ extraConfig:
   # -- (string) Verschlüsselung für neue Räume; default für alle Räume aktiviert
   encryption_enabled_by_default_for_room_type: all
   stats:
-    # -- (bool) Schalte Nutzerstatistiken ein, eingeschaltet
+    # -- (bool) Schalte Nutzer- und Raumstatistiken ein, eingeschaltet
+    # Beachten Sie, dass das Deaktivieren dazu führen kann, dass bestimmte Funktionen
+    # (z. B. das Raumverzeichnis) nicht korrekt funktionieren.
+    # Details: https://matrix-org.github.io/synapse/latest/room_and_user_statistics.html
     enabled: true
   # -- (bool) Raumsuche, eingeschaltet
   enable_room_list_search: true
@@ -281,7 +285,7 @@ extraConfig:
 
 # -- (map) Geben Sie hier eine beliebige - geheime - Synapse-Konfiguration an;
 # Diese Werte werden in Secrets anstelle von Configmaps gespeichert
-# Ref: https://github.com/matrix-org/synapse/blob/develop/docs/sample_config.yaml
+# Ref: https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html
 # Beispiel:
 #  password_config:
 #    pepper: ""
@@ -450,7 +454,7 @@ synapse:
 ## die nützlich sind für die Handhabung von Hochlast-Einsätzen bzw. Hochverfügbarkeitseinsätzen.
 ##
 ## Weitere Informationen finden Sie unter
-## https://github.com/matrix-org/synapse/blob/master/docs/workers.md
+## https://matrix-org.github.io/synapse/latest/workers.html
 ##
 workers:
   # -- (map) Annotations, die auf die Synapse-Worker-Container anzuwenden sind.
@@ -465,7 +469,7 @@ workers:
   default:
     # -- (int) DEFAULT Die Anzahl der Worker-Replikate.
     # Beachten Sie, dass einige Worker eine besondere Behandlung erfordern.
-    # Siehe dazu die Informations-URL https://github.com/matrix-org/synapse/blob/master/docs/workers.md
+    # Siehe dazu die Dokumentation: https://matrix-org.github.io/synapse/latest/workers.html
     replicaCount: 1
 
     strategy:
@@ -749,7 +753,7 @@ workers:
   ## Um den allgemeinen Worker in spezifische Belange aufzuteilen - zum Beispiel den Empfang von Föderationstransaktionen;
   ## Hinweis: Diese Worker sollten eingehenden Datenverkehr basierend auf der Quell-IP routen lassen, was
   ## noch als TODO offen ist.
-  ## https://github.com/matrix-org/synapse/blob/develop/docs/workers.md#load-balancing
+  ## https://matrix-org.github.io/synapse/latest/workers.html#load-balancing
 
   federation_reader:
     # -- (bool) Aktiviere spez. Worker für Föderationsanfragen
@@ -1196,7 +1200,7 @@ postgresql:
         memory: 256Mi
 
   # -- (list) Zusätzliche Argumente für die Datenbankverbindung
-  # ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config
+  # ref: https://matrix-org.github.io/synapse/latest/postgres.html#synapse-config
   extraArgs: {}
 
 # -- (map) Ein extern konfigurierter Postgres-Server, der für die Datenbank von Synapse verwendet wird.
@@ -1224,7 +1228,7 @@ externalPostgresql:
   # sslmode: prefer
 
   # -- (list) Zusätzliche Argumente für die Datenbankverbindung
-  # ref: https://github.com/matrix-org/synapse/blob/develop/docs/postgres.md#synapse-config
+  # ref: https://matrix-org.github.io/synapse/latest/postgres.html#synapse-config
   extraArgs: {}
 
 
