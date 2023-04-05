@@ -7,6 +7,26 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.2.1 (2023-04-05)
+
+### 🐛 Bugfixes
+
+- Die Release-Beschreibung wird nun automatisch von der Pipeline gesetzt.
+  (!113)
+- Entfernen der doppelten Konfiguration `extraConfig.report_stats`. Dies wird
+  durch `config.reportStats` bereits abgedeckt.
+  Migration des Schalters `extraConfig.enable_metrics` zu
+  `config.enable_metrics` und setzen des Wertes in der configuration.yaml.
+  (!115)
+- Webclient verbindet sich wieder via `https` mit dem Backend. (!117)
+
+### 📚 Dokumentation
+
+- Kleine Verbesserungen an Formulierungen in der Dokumentation und
+  Aktualisierung von Links zur Upstream Dokumentation. (!114)
+- Fehlerkorrektur des `CHANGELOG` für Version v1.1.0. (!116)
+
+
 ## BundesMessenger Helm Chart 1.2.0 (2023-03-30)
 
 ### ✨ Features
