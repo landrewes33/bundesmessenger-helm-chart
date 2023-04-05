@@ -116,7 +116,7 @@ data:
 
     ## Metrics ###
 
-    enable_metrics: true
+    enable_metrics: {{ .Values.config.enable_metrics | default true }}
 
     ## Signing Keys ##
 

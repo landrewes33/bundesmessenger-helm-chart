@@ -1,0 +1,2 @@
+Entfernen der doppelten Konfiguration `extraConfig.report_stats`. Dies wird durch `config.reportStats` bereits abgedeckt.
+Migration des Schalters `extraConfig.enable_metrics` zu `config.enable_metrics` und setzen des Wertes in der configuration.yaml.
