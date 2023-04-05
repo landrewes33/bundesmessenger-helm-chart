@@ -115,25 +115,41 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 - Aktualisierung der Dokumentation zum PoC Requirement. (!107)
 
 
-## BundesMessenger Helm Chart 1.1.0 (2022-12-22)
+## BundesMessenger Helm Chart 1.1.0 (2022-12-23)
 
 ### ✨ Features
 
-- Ergänzung des `podSecurityContext` und `securityContext` für den
-  Wellknow-Service, Webclient und Synapse-Admin. (!13)
-- Changelog zum Repository hinzugefügt. (!19)
+- Neue Tags und Versionen für die Container, siehe [Dokumentation der
+  Container](https://gitlab.opencode.de/bwi/bundesmessenger/backend/container-images/-/blob/master/README.md#versionierung-der-images).
+  (!containertags)
+- Aktualisierung der Helm Dependencies: PostgreSQL von `10.9.4` zu `12.1.6`,
+  Redis von `16.1.0` zu `17.3.17`.
+  Bei Nutzung der integrierten Datenbank verändern sich die
+  Verbindungsparameter zu `postgresql.auth`. (!22)
+- Der Webclient kann mit Version `v2.1.0-b3` und später ohne direkte
+  `config.json` arbeiten (veränderbare Daten werden per `initContainers`
+  übertragen). (!25)
+- Hinzufügen von `extraEnv` für ClamAV, damit z.B. Proxy-Settings auch auf den
+  ClamAV-Pod gesetzt werden können. (!26)
+- Genutzte Image-Tags sind Rolling-Tags in der Container-Registry.
 
 ### 🐛 Bugfixes
 
-- Aktualisierung der genutzten Anwendungs-Images. (!9, !14)
-- Kleine Korrektur des Scannerscripts vom Contentscanner, Entfernung der
-  Umleitung auf `/dev/stdout`. (!18)
+- Aktualisierung der genutzten Anwendungs-Images. (!21, !32)
+- Service-Port vom Schadcodescanner auf Port `1344` für C-ICAP als Standard
+  gesetzt. (!24)
+- Korrektur von konfigurierten Resourcen-Limits. (!35)
+- Fehlerbehebung im Image des Schadcodescanners (ClamAV).
+
+### 📚 Dokumentation
+
+- Dokumentation in der `README.md` wie das OpenCoDE Helm Repository eingebunden
+  wird. (!23)
+- Aktualisierung der Dokumentation zur Nutzung der OpenCoDE Registry. (!30)
 
 ### 📝 Weitere Änderungen
 
-- CI-Pipleine zum Testen des Helm Charts gegen die [DVS Kyverno
-  Policies](https://gitlab.opencode.de/ig-bvc/ig-bvc-poc-2/ig-bvc-poc-ii-ap-4.1-ff-policy-entwicklung/rl-kyverno).
-  (!15)
+- Genau Definition der genutzten Image-Versionen in der CI-Pipeline. (!27, !28)
 
 
 ## BundesMessenger Helm Chart 1.0.1 (2022-12-16)
