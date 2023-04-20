@@ -1,0 +1,1 @@
+Das Helm Chart wird zusätzlich zum [Helm Repository](https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/packages) auch in der [OCI Registry](https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/container_registry) veröffentlicht.
