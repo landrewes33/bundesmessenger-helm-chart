@@ -1,0 +1,1 @@
+Korrektur von `selector` Labels. Das führt dazu, dass ein **Upgrade mit `helm upgrade` nicht möglich** ist. Es muss ein `helm uninstall` und `helm install` erfolgen.
