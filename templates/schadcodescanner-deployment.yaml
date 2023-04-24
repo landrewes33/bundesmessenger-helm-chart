@@ -66,6 +66,8 @@ spec:
             mountPath: /clamav/database
           - name: config-volume
             mountPath: /clamav/config/
+          - name: clamav-tmp
+            mountPath: /tmp
         startupProbe:
           initialDelaySeconds: 60
           periodSeconds: 10
@@ -133,9 +135,12 @@ spec:
       - name: icap-volume
         emptyDir:
           sizeLimit: 5M
+      - name: clamav-tmp
+        emptyDir:
+          sizeLimit: 100M
       - name: icap-tmp
         emptyDir:
-          sizeLimit: 5M
+          sizeLimit: 100M
       - name: config-volume
         projected:
           sources:
