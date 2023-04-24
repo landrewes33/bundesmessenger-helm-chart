@@ -13,12 +13,12 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "matrix-synapse.labels" $ | nindent 6 }}
+      {{- include "matrix-synapse.selectorLabels" $ | nindent 6 }}
       app.kubernetes.io/component: {{ $component }}
   template:
     metadata:
       labels:
-        {{- include "matrix-synapse.labels" $ | nindent 8 }}
+        {{- include "matrix-synapse.selectorLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ .Release.Name }}

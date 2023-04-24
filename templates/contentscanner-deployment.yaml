@@ -21,7 +21,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "matrix-synapse.labels" $ | nindent 8 }}
+        {{- include "matrix-synapse.selectorLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/contentscanner-configuration.yaml") . | sha256sum }}
