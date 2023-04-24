@@ -25,7 +25,7 @@ data:
     MaxRequestsPerChild  0
     Port 1344
     ServerName {{ $name }}
-    TmpDir /var/tmp
+    TmpDir /tmp
     MaxMemObject 131072
     DebugLevel 1
     Pipelining on
