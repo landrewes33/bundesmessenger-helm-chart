@@ -7,6 +7,32 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.2.2 (2023-04-25)
+
+### ✨ Features
+
+- Das Helm Chart wird zusätzlich zum [Helm
+  Repository](https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/packages)
+  auch in der [OCI
+  Registry](https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/container_registry)
+  veröffentlicht. (!127)
+
+### 🐛 Bugfixes
+
+- Entfernt den Endpunkt `/refresh` von der Ingress-Zuordnung zu Workern auf
+  Grund eines offenen Bugs in Synapse. (!123)
+- Hinzufügen des Contentscanner Schalter in der Webclient-Konfiguration als
+  Standardverhalten auf eingeschaltet. (!128)
+- Behebt einen Fehler mit dem der Konfiguration des temporären Verzeichnis des
+  c-icap Scanners und ClamAV. (!130)
+- `extraConfig.presence.enabled` wird jetzt auch an den Webclient übergeben.
+  (!131)
+
+### 📝 Weitere Änderungen
+
+- CI Pipeline erzeugt ein nightly build. (!118, !119)
+
+
 ## BundesMessenger Helm Chart 1.2.1 (2023-04-05)
 
 ### 🐛 Bugfixes

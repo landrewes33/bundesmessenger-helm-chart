@@ -194,7 +194,13 @@ werden:
 helm repo add bundesmessenger https://gitlab.opencode.de/api/v4/projects/560/packages/helm/beta
 ```
 
-Alternativ kann die Installation auch durch den manuellen Download des
+Alternativ steht das Helm-Chart auch in der OCI-Registry zur Verfügung.
+
+```console
+helm show chart oci://registry.opencode.de/bwi/bundesmessenger/backend/helm-chart/bundesmessenger
+```
+
+Weiterhin kann die Installation auch durch den manuellen Download des
 Helm Charts und das Anpassen der Parameter in der `values.yaml` erfolgen.
 Eine Installation würde dann mit folgendem Beispiel-Befehl erfolgen:
 
