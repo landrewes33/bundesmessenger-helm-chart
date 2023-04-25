@@ -1,1 +1,0 @@
-Entfernt den Endpunkt `/refresh` von der Ingress-Zuordnung zu Workern auf Grund eines offenen Bugs in Synapse.
