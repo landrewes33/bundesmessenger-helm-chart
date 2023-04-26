@@ -58,11 +58,6 @@ spec:
             - containerPort: 8080
               name: http
               protocol: TCP
-          {{- if .Values.monitoringService }}
-            - containerPort: 9090
-              name: metrics
-              protocol: TCP
-          {{- end }}
           readinessProbe:
             tcpSocket:
               port: http

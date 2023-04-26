@@ -1,0 +1,118 @@
+{{- if .Values.monitoring.enabled }}
+{{- $monitoringService := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-metrics") -}}
+{{- $component := "synapse-metrics" -}}
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ $monitoringService }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    {{- include "matrix-synapse.monitoringLabels" . | nindent 4 }}
+    {{- with .Values.monitoring.labels }}
+    {{- . | toYaml | nindent 4 }}
+    {{- end }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  jobLabel: app.kubernetes.io/component
+  selector:
+    matchLabels:
+      matrix-synapse: monitoring
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  podMetricsEndpoints:
+  - port: metrics
+    path: /_synapse/metrics
+    interval: 15s
+    relabelings:
+    # create label "index" with number of worker
+    - action: replace
+      sourceLabels: [pod]
+      targetLabel: index
+      regex: .*-(\d+)$
+      replacement: ${1}
+    # remove "matrix-" from job label (for sygnal)
+    - action: replace
+      sourceLabels: [job]
+      targetLabel: job
+      regex: ^matrix-(.*)$
+      replacement: ${1}
+    # set "instance"
+    - action: replace
+      replacement: {{ .Release.Namespace }}
+      targetLabel: instance
+    # keep only needed labels ("^__.*__$" is needed by prometheus operator)
+    - action: labelkeep
+      regex: instance|job|index|^__.*__$
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: synapse-rules
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    {{- include "matrix-synapse.monitoringLabels" . | nindent 4 }}
+    {{- with .Values.monitoring.labels }}
+    {{- . | toYaml | nindent 4 }}
+    {{- end }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  # https://github.com/matrix-org/synapse/blob/develop/contrib/prometheus/synapse-v2.rules
+  groups:
+  - name: synapse
+    rules:
+    # Grafana
+    - record: synapse_storage_events_persisted_by_source_type
+      expr: sum without(type, origin_type, origin_entity) (synapse_storage_events_persisted_events_sep_total{origin_type="remote"})
+      labels:
+        type: remote
+    - record: synapse_storage_events_persisted_by_source_type
+      expr: sum without(type, origin_type, origin_entity) (synapse_storage_events_persisted_events_sep_total{origin_entity="*client*",origin_type="local"})
+      labels:
+        type: local
+    - record: synapse_storage_events_persisted_by_source_type
+      expr: sum without(type, origin_type, origin_entity) (synapse_storage_events_persisted_events_sep_total{origin_entity!="*client*",origin_type="local"})
+      labels:
+        type: bridges
+    - record: synapse_storage_events_persisted_by_event_type
+      expr: sum without(origin_entity, origin_type) (synapse_storage_events_persisted_events_sep_total)
+    - record: synapse_storage_events_persisted_by_origin
+      expr: sum without(type) (synapse_storage_events_persisted_events_sep_total)
+    # Prometheus
+    - record: 'synapse_federation_client_sent'
+      labels:
+        type: "EDU"
+      expr: 'synapse_federation_client_sent_edus_total + 0'
+    - record: 'synapse_federation_client_sent'
+      labels:
+        type: "PDU"
+      expr: 'synapse_federation_client_sent_pdu_destinations_count_total + 0'
+    - record: 'synapse_federation_client_sent'
+      labels:
+        type: "Query"
+      expr: 'sum(synapse_federation_client_sent_queries) by (job)'
+    - record: 'synapse_federation_server_received'
+      labels:
+        type: "EDU"
+      expr: 'synapse_federation_server_received_edus_total + 0'
+    - record: 'synapse_federation_server_received'
+      labels:
+        type: "PDU"
+      expr: 'synapse_federation_server_received_pdus_total + 0'
+    - record: 'synapse_federation_server_received'
+      labels:
+        type: "Query"
+      expr: 'sum(synapse_federation_server_received_queries) by (job)'
+    - record: 'synapse_federation_transaction_queue_pending'
+      labels:
+        type: "EDU"
+      expr: 'synapse_federation_transaction_queue_pending_edus + 0'
+    - record: 'synapse_federation_transaction_queue_pending'
+      labels:
+        type: "PDU"
+      expr: 'synapse_federation_transaction_queue_pending_pdus + 0'
+{{- end }}

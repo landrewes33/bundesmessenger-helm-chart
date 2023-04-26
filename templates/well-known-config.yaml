@@ -19,8 +19,8 @@ data:
       server_name _;
 
       root {{ .Values.wellknown.htdocsPath }};
-      #Noch kein LUA-Support
-      #{{- if .Values.monitoringService }}
+      {{- /* Noch kein LUA-Support */ -}}
+      {{- if .Values.monitoring.enabled }}
       #listen 9090;
       #location /metrics {
       #  content_by_lua_block {
@@ -30,8 +30,8 @@ data:
       #    prometheus:collect()
       #  }
       #}
-      #{{- end }}
-      #livenessProbe auf /status mal selbst gemacht, logging aus
+      {{- end }}
+      # livenessProbe auf /status, logging deaktiviert
       location /status {
         return 200;
         access_log off;

@@ -11,7 +11,7 @@
   {{- $replicaSize :=  $config.autoscaling.minReplicas }}
   {{- end }}
 {{- end }}
-  
+
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -37,13 +37,14 @@ spec:
         checksum/worker-config: {{ include (print $.Template.BasePath "/worker-configuration.yaml") $ | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") $ | sha256sum }}
       {{- with ($config.annotations | default $default.annotations) }}
-        {{ . | toYaml | nindent 8 }}
+        {{- . | toYaml | nindent 8 }}
       {{- end }}
       labels:
         {{- include "matrix-synapse.selectorLabels" $ | nindent 8 }}
+        {{- include "matrix-synapse.monitoringLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $name }}
       {{- with ($config.labels | default $default.labels) }}
-        {{ . | toYaml | nindent 8 }}
+        {{- . | toYaml | nindent 8 }}
       {{- end }}
     spec:
       initContainers:
