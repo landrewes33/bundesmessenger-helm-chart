@@ -3,7 +3,19 @@ publicServerName: matrix.example.org
 adminAPIServerName: admin-api.example.org
 dataPrivacyUrl: dsgvo.example.org
 
+monitoring:
+  enabled: true
+  labels:
+    release: kube-prom-stack
+
+synapse:
+  annotations:
+    test-annotation: synapse
+
 workers:
+  default:
+    annotations:
+      test-annotation: default-workers
   generic_worker:
     replicaCount: 1
     # Kubernetes v1.23+.

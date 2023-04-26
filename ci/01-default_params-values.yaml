@@ -1,3 +1,4 @@
 serverName: example.org
 publicServerName: matrix.example.org
+adminAPIServerName: admin-api.example.org
 dataPrivacyUrl: dsgvo.example.org

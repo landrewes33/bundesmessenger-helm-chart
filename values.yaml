@@ -52,12 +52,21 @@ dataPrivacyUrl: ""
 # Wenn synapse_admin.enable ist und synapse_admin.uri unterschiedlich von adminAPIServerName,
 # dann wird dort nur der Synapse_admin erreichbar sein.
 # Schnittstellen zum konfigurieren, werden nur über adminAPIServerName zur Verfügung gestellt.
-# @default  -- Nicht gesetzt, aber Voraussetzung!
+# @default -- Nicht gesetzt, aber Voraussetzung!
 adminAPIServerName: ""
 
-# -- (bool) Aktivieren des Monitoringservices für Synapse-Dienste in Prometheus
-# @default -- false
-monitoringService: false
+## Monitoring mit Prometheus
+## Grafana-Dashboards
+##   Synapse: https://github.com/matrix-org/synapse/blob/develop/contrib/grafana/synapse.json
+##   Sygnal: https://github.com/matrix-org/sygnal/blob/main/contrib/grafana/Sygnal.json
+monitoring:
+  # -- (bool) Aktivieren des Monitorings für Synapse-Dienste in Prometheus
+  # @default -- false
+  enabled: false
+  # -- (map) Labels, die Prometheus Operator als matchLabels benutzt (podMonitorSelector, ruleSelector)
+  # um den PodMonitor und die PrometheusRule zu aktivieren.
+  # `kubectl get Prometheus --all-namespaces -o jsonpath='{.items[*].spec.podMonitorSelector.matchLabels}'`
+  labels: {}
 
 # -- (string) Anzeigename des Servers in Webclients
 # @default -- Messenger deiner Organisation
@@ -303,10 +312,6 @@ synapse:
     type: RollingUpdate
 
   # -- (map) Annotations, die auf den Haupt-Synapse-Container anzuwenden sind.
-  # Beispiel: (Bundesmessenger lässt alle Services automatisch an Prometheus anbinden)
-  #  prometheus.io/scrape: "true"
-  #  prometheus.io/path: "/_synapse/metrics"
-  #  prometheus.io/port: "9090"
   annotations: {}
 
   # -- (map) Labels, die auf den Haupt-Synapse-Container anzuwenden sind.
@@ -386,7 +391,7 @@ synapse:
       # -- (string) Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
       memory: 1000Mi
 
-  # Healthcheck
+  ## Healthcheck
   livenessProbe:
     periodSeconds: 10
     httpGet:
@@ -395,7 +400,7 @@ synapse:
       # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks
       port: metrics
 
-  # Bereitschaftscheck
+  ## Bereitschaftscheck
   readinessProbe:
     periodSeconds: 3
     httpGet:
@@ -457,15 +462,9 @@ synapse:
 ## https://matrix-org.github.io/synapse/latest/workers.html
 ##
 workers:
-  # -- (map) Annotations, die auf die Synapse-Worker-Container anzuwenden sind.
+
   # Standardkonfiguration, diese wird an alle Worker vererbt und kann auch
   # für jeden Workertyp überschrieben werden.
-  # Beispiel: (Bundesmessenger lässt alle Services automatisch an Prometheus anbinden)
-  #  prometheus.io/scrape: "true"
-  #  prometheus.io/path: "/_synapse/metrics"
-  #  prometheus.io/port: "9090"
-  annotations: {}
-
   default:
     # -- (int) DEFAULT Die Anzahl der Worker-Replikate.
     # Beachten Sie, dass einige Worker eine besondere Behandlung erfordern.
@@ -489,10 +488,6 @@ workers:
     # extraConfig: {}
 
     # -- (map) DEFAULT Annotations, die auf alle Synapse-Worker-Container anzuwenden sind.
-    # Beispiel: (Bundesmessenger lässt alle Services automatisch an Prometheus anbinden)
-    #  prometheus.io/scrape: "true"
-    #  prometheus.io/path: "/_synapse/metrics"
-    #  prometheus.io/port: "9090"
     annotations: {}
 
     # -- (list) DEFAULT Zusätzliche Umgebungsvariablen, die auf alle Synapse-Worker-Container anzuwenden sind
@@ -562,7 +557,7 @@ workers:
         # Empfohlen gesondert zu verwalten
         memory: 128Mi
 
-    # Healthcheck
+    ## Healthcheck
     livenessProbe:
       periodSeconds: 10
       httpGet:
@@ -573,7 +568,7 @@ workers:
         # DEFAULT gilt für alle Synapse-Worker-Container.
         port: metrics
 
-    # Bereitschaftscheck
+    ## Bereitschaftscheck
     readinessProbe:
       periodSeconds: 3
       httpGet:
@@ -928,7 +923,8 @@ service:
 ######################################################################################
 ##          Konfiguration für Sygnal
 ######################################################################################
-# Reference: https://github.com/matrix-org/sygnal
+## Reference: https://github.com/matrix-org/sygnal
+
 sygnal:
   # -- (bool) Aktivieren des Sygnal-Container
   enabled: false
@@ -964,7 +960,6 @@ sygnal:
     readOnlyRootFilesystem: true
 
   ## Ressource Konfiguration für Sygnal server.
-  ##
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.
@@ -977,7 +972,7 @@ sygnal:
       # -- (string) Anforderungen an RAM Ressourcen, die auf den Sygnal-Container anzuwenden sind.
       memory: 45Mi
 
-  # Healthcheck
+  ## Healthcheck
   livenessProbe:
     httpGet:
       # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
@@ -985,7 +980,7 @@ sygnal:
       # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks
       port: http
 
-  # Bereitschaftscheck
+  ## Bereitschaftscheck
   readinessProbe:
     httpGet:
       # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
@@ -1067,7 +1062,7 @@ wellknown:
   extraData: {}
 
   # -- (path) Ein benutzerdefinierter htdocs-Pfad, der nützlich ist, wenn ein anderes Image ausgeführt wird.
-  # @default /usr/share/nginx/html (nginx)
+  # @default -- /usr/share/nginx/html (nginx)
   htdocsPath: /usr/share/nginx/html
 
   # -- (map) Das Webserver Image
@@ -1123,16 +1118,16 @@ wellknown:
 ## Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht,
 ## Wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie
 ## enabled auf false setzen und den externalPostgresql-Block konfigurieren.
-##
+
 postgresql:
   # -- (bool) Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht,
   # Wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie
   # enabled auf false setzen und den externalPostgresql-Block konfigurieren.
-  # @default: false da externe DB vorausgesetzt wird
+  # @default -- false da externe DB vorausgesetzt wird
   enabled: false
 
   # -- (map) Das PostgreSQL Image
-  # @default: WIRD NICHT EMPFOHLEN!!
+  # @default -- WIRD NICHT EMPFOHLEN!!
   image:
     registry: registry.opencode.de
     repository: ig-bvc/demo-apps/postgresql/postgres
@@ -1227,7 +1222,7 @@ externalPostgresql:
 ## Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
 ## Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
 ## false setzen und den externalRedis-Block konfigurieren.
-##
+
 redis:
   image:
     registry: registry.opencode.de
@@ -1320,7 +1315,7 @@ externalRedis:
 ## das gesamte Routing einzurichten, das für die Verwendung mit einer gesplitteten Synapse-Instanz erforderlich ist.
 ## Wenn Sie keinen Ingress-kompatiblen K8s-Ingress verwenden, müssen Sie
 ## stattdessen Ihr eigenes Routing einrichten.
-##
+
 ingress:
   # -- (bool) Aktiviert Ingress-Konfiguration
   enabled: true
@@ -1422,6 +1417,7 @@ ingress:
 ######################################################################################
 ##          Konfiguration für Content-Scanner
 ######################################################################################
+
 contentscanner:
   # -- (bool) Aktivieren des Matrix-Content-Scanner
   # Mittelsmann zwischen AV und Matrix-Synapse
@@ -1466,6 +1462,7 @@ contentscanner:
 ######################################################################################
 ##          Konfiguration für ClamAV
 ######################################################################################
+
 schadcodescanner:
   # -- (bool) Aktivieren des ClamAV-Container
   enabled: false
@@ -1504,8 +1501,7 @@ schadcodescanner:
   extraEnv: []
 
   service:
-    # -- (int) der Port des ClamAV Pods, wird im Service übertragen
-    # @default: 1344 der Port vom c-icap-Server
+    # -- (int) der Port des ClamAV Pods (c-icap-Server), wird im Service übertragen
     port: 1344
 
   freshclam:
@@ -1601,11 +1597,11 @@ schadcodescanner:
 ######################################################################################
 ##          Konfiguration für CoTurn
 ######################################################################################
-# Standard: wenn aktiviert, wird CoTurn unter dem Standard-Namensraum bereitgestellt,
-# um von mehr als einer Instanz als CoTurn/STUN Server verwendet zu werden
-# Wenn `coturn.enabled=true` und `coturn.existingcoturn=true` ebenfalls,
-# wird das Deployment so konfiguriert, dass er als Dienst unter dem Namespace 'coturn.default_ns'
-# deployed wird
+## Standard: wenn aktiviert, wird CoTurn unter dem Standard-Namensraum bereitgestellt,
+## um von mehr als einer Instanz als CoTurn/STUN Server verwendet zu werden
+## Wenn `coturn.enabled=true` und `coturn.existingcoturn=true` ebenfalls,
+## wird das Deployment so konfiguriert, dass er als Dienst unter dem Namespace 'coturn.default_ns'
+## deployed wird
 
 coturn:
   # -- (bool) CoTurn als Deployment aktivieren

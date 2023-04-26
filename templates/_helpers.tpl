@@ -66,7 +66,6 @@ Get the correct image tag name
 Common labels
 */}}
 {{- define "matrix-synapse.labels" -}}
-matrix-synapse: monitoring
 helm.sh/chart: {{ include "matrix-synapse.chart" . }}
 {{ include "matrix-synapse.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
@@ -76,16 +75,6 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
 
-
-{{/*
-Common annotations
-*/}}
-{{- define "matrix-synapse.annotations" -}}
-prometheus.io/scrape: "true"
-prometheus.io/path: "/_synapse/metrics"
-prometheus.io/port: "9090"
-{{- end -}}
-
 {{/*
 Selector labels
 */}}
@@ -94,6 +83,14 @@ app.kubernetes.io/name: {{ include "matrix-synapse.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
+{{/*
+Monitoring labels
+*/}}
+{{- define "matrix-synapse.monitoringLabels" -}}
+{{- if .Values.monitoring.enabled -}}
+matrix-synapse: monitoring
+{{- end -}}
+{{- end -}}
 
 
 {{/*

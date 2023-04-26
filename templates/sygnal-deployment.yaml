@@ -22,16 +22,17 @@ spec:
     metadata:
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
+        {{- include "matrix-synapse.monitoringLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ .Release.Name }}
       securityContext:
-        {{- $.Values.sygnal.podSecurityContext | toYaml | nindent 8 }}
+        {{- .Values.sygnal.podSecurityContext | toYaml | nindent 8 }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
         - name: matrix-sygnal
-          image: "{{ $.Values.sygnal.image.repository }}:{{ $.Values.sygnal.image.tag }}"
-          imagePullPolicy: {{ $.Values.sygnal.image.pullPolicy }}
+          image: "{{ .Values.sygnal.image.repository }}:{{ .Values.sygnal.image.tag }}"
+          imagePullPolicy: {{ .Values.sygnal.image.pullPolicy }}
           env:
             - name: SYGNAL_CONF
               value: sygnal.yaml
@@ -39,18 +40,21 @@ spec:
             - containerPort: 5000
               name: sygnal-port
               protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
           resources:
-            {{- $.Values.sygnal.resources | toYaml | nindent 12 }}
+            {{- .Values.sygnal.resources | toYaml | nindent 12 }}
           securityContext:
-            {{- $.Values.sygnal.securityContext | toYaml | nindent 12 }}
+            {{- .Values.sygnal.securityContext | toYaml | nindent 12 }}
           volumeMounts:
             - name: config
               mountPath: /sygnal.yaml
               subPath: sygnal.yaml
             {{- if .Values.sygnal.ios_push.enabled }}
             - name: ioskey
-              mountPath: /{{ $.Values.sygnal.ios_push.ioskey_filename }}
-              subPath: {{ $.Values.sygnal.ios_push.ioskey_filename }}
+              mountPath: /{{ .Values.sygnal.ios_push.ioskey_filename }}
+              subPath: {{ .Values.sygnal.ios_push.ioskey_filename }}
             {{ end }}
             - mountPath: /tmp
               name: sygnal-tmp

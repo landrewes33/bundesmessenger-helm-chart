@@ -38,11 +38,15 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configuration.yaml") . | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        {{- with .Values.synapse.annotations }}
+        {{- . | toYaml | nindent 8 }}
+        {{- end }}
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
+        {{- include "matrix-synapse.monitoringLabels" . | nindent 8 }}
         app.kubernetes.io/component: synapse
         {{- with .Values.synapse.labels }}
-        {{ . | toYaml | nindent 8 }}
+        {{- . | toYaml | nindent 8 }}
         {{- end }}
     spec:
       serviceAccountName: {{ $.Release.Name }}
