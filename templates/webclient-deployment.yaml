@@ -17,6 +17,8 @@ spec:
       app.kubernetes.io/component: {{ $component }}
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print .Template.BasePath "/webclient-configuration.yaml") . | sha256sum }}
       labels:
         {{- include "matrix-synapse.selectorLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
