@@ -4,7 +4,6 @@
 {{- range $worker, $config := .Values.workers }}
 {{- if $config.enabled }}
 {{- $name := $worker | replace "_" "-" }}
-{{- $app := $config.app | default $worker }}
 {{- $replicaSize := $config.replicaCount | default $default.replicaCount }}
 {{- if hasKey $config "autoscaling" }}
   {{- if and $config.autoscaling.enabled (lt ($config.replicaCount | default $default.replicaCount) $config.autoscaling.minReplicas) }}
@@ -101,7 +100,7 @@ spec:
               {{- end }}
               {{- end }}
 
-              exec python3 -B -m synapse.app.{{ (not (not $config.generic)) | ternary "generic_worker" $app }} \
+              exec python3 -B -m synapse.app.{{ $config.app | default "generic_worker" }} \
                           -c /synapse/config/homeserver.yaml \
                           -c /synapse/config/conf.d/ \
                           -c /synapse/config/{{ $name }}.worker

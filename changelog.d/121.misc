@@ -1,0 +1,1 @@
+Konfiguration `generic` für Worker entfernt. Alle Worker sind [Synapse Generic Worker](https://matrix-org.github.io/synapse/latest/workers.html#synapseappgeneric_worker).

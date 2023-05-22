@@ -488,10 +488,10 @@ workers:
     # -- (string)  Ein spezifischer Name für diesen Worker, kann nicht global gesetzt werden.
     # Beachten Sie, dass dies nur gesetzt werden kann, wenn replicaCount 1 ist.
     # (wird in den Worker überschrieben, ist hier nur aus historischen Gründen noch enthalten)
-    # name:
+    name: nil
 
-    ## Zusätzliche Konfiguration für die Worker, kann nicht global gesetzt werden.
-    # extraConfig: {}
+    # -- (object) Zusätzliche Konfiguration für die Worker.
+    extraConfig: {}
 
     # -- (map) DEFAULT Annotations, die auf alle Synapse-Worker-Container anzuwenden sind.
     annotations: {}
@@ -617,10 +617,6 @@ workers:
   generic_worker:
     # -- (bool) Aktivieren von Workern
     enabled: true
-    # -- (bool) Aktivieren des generischen Workers (kann alle Aufgaben übernehmen)
-    # spezifische Aufgaben können spezifischen Workern übergeben werden
-    # z.B. Media Repo
-    generic: true
     # -- (list) entsprechende Endpunkte für den generischen Worker
     listeners: [client, federation]
     # -- (list) Pfade für die Ingress-Konfiguration des Workers, mit 'publicServerName' Domain gesetzt
@@ -756,8 +752,6 @@ workers:
     # Wenn dieser Worker genutzt wird, können die URLs aus dem
     # generic_worker entfernt werden.
     enabled: false
-    # -- (bool) Wird aus dem generischen Worker abgeleitet
-    generic: true
     # -- (list) Zusätzliche Listener für Föderationsworker
     listeners: [federation]
     # -- (path) Server-Side Pfade für die Ingress-Konfiguration des Föderations-Workers
@@ -793,22 +787,16 @@ workers:
     # Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden
     # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
     enabled: false
-    # -- (bool) Wird aus dem generischen Worker abgeleitet
-    generic: true
 
   appservice:
     # -- (bool) Dieser Worker sorgt für das Senden von Daten an registrierte Anwendungsdienste.
     # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
-    # -- (bool) Wird aus dem generischen Worker abgeleitet
-    generic: true
 
   federation_sender:
     # -- (bool) Dieser Worker sendet Verbundverkehrs (federation traffic)
     # an andere Matrix-Server.
     enabled: false
-    # -- (bool) Wird aus dem generischen Worker abgeleitet
-    generic: true
 
   media_repository:
     # -- (bool) Aktivieren des Media-Worker
@@ -843,6 +831,9 @@ workers:
         # -- (string) Anforderungen an RAM Ressourcen, die auf den media_repository-Container anzuwenden sind.
         memory: 2500Mi
 
+    # -- (object) Zusätzliche Konfiguration für die Worker
+    extraConfig:
+      enable_media_repo: true
 
   ## Dieser Worker aktualisiert das Benutzerverzeichnis und kann auch darin suchen
   ## Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der Worker optional.
@@ -851,8 +842,6 @@ workers:
     # Hinweis: Damit kann Last vom generischen bzw. Haupt-Worker genommen werden
     # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
-    # -- (bool) Wird aus dem generischen Worker abgeleitet
-    generic: true
     # -- (list) Zusätzliche Listener für NutzerSuch-Worker
     listeners: [client]
     # -- (list) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers, mit 'publicServerName' Domain gesetzt
@@ -864,8 +853,6 @@ workers:
     # -- (bool) Aktivieren des Background-Workers
     # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
-    # -- (bool) Wird aus dem generischen Worker abgeleitet
-    generic: true
 
 persistence:
   # -- (bool) Aktivieren der Persistenz-Konfiguration für die Medien-Repository-Funktion.
