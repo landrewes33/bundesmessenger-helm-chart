@@ -22,13 +22,13 @@ data:
     {{- $name := $worker | replace "_" "-" }}
     {{- $app := $config.app | default $worker }}
 
-    # check that workers do not have replicaCount > 1
+    {{- /* check that workers do not have replicaCount > 1 */}}
     {{- if and (gt ($config.replicaCount | default $default.replicaCount | int) 1) (has $app $uniqueApps) -}}
     {{-   fail (printf "Replica count must be 1 for worker %s." $app) -}}
     {{- end }}
 
   {{ $name }}.worker: |
-    worker_app: "synapse.app.{{ (not (not $config.generic)) | ternary "generic_worker" $app }}"
+    worker_app: "synapse.app.{{ $config.app | default "generic_worker" }}"
 
     worker_name: "@@HOSTNAME@@"
 
@@ -67,10 +67,10 @@ data:
     {{- end }}
 
     worker_log_config: /synapse/config/log.yaml
-    {{- if $config.extraConfig }}
+    {{- if or $config.extraConfig $default.extraConfig }}
 
     # Extra config
-    {{ toYaml $config.extraConfig | nindent 4 }}
+    {{ toYaml ($config.extraConfig | default $default.extraConfig) | nindent 4 }}
     {{- end }}
   {{- end }}
 {{- end }}

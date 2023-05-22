@@ -155,6 +155,7 @@ data:
         {{- else if or (eq $worker "media_repository") (eq ($config.app | default "") "media_repository") }}
     # For media_repository worker
     enable_media_repo: false
+    media_instance_running_background_jobs: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-0
 
         {{- else if or (eq $worker "user_dir") (eq ($config.app | default "") "user_dir") }}
     # For user_dir worker
