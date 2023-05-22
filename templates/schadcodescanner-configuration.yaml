@@ -53,11 +53,11 @@ data:
   virus_scan.conf: |
     Service antivirus_module virus_scan.so
     ServiceAlias srv_clamav virus_scan
-    ServiceAlias  avscan virus_scan?allow204=on&sizelimit=off&mode=simple
+    ServiceAlias avscan virus_scan?allow204=on&sizelimit=off&mode=simple
     virus_scan.ScanFileTypes TEXT DATA EXECUTABLE ARCHIVE GIF JPEG MSOFFICE
     virus_scan.SendPercentData 5
     virus_scan.StartSendPercentDataAfter 2M
-    virus_scan.MaxObjectSize  5M
+    virus_scan.MaxObjectSize {{.Values.schadcodescanner.limits.fileSize}}M
     virus_scan.DefaultEngine clamd
     Include /clamav/config/clamd_mod.conf
 
