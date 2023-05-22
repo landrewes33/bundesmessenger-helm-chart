@@ -1,0 +1,1 @@
+Definition von Standardwerten für den Upload von Medien in Synapse ([`max_upload_size: 50M`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#max_upload_size) und [`max_avatar_size: 5M`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#max_avatar_size)).
