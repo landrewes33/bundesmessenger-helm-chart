@@ -202,6 +202,12 @@ config:
 extraConfig:
   # old_signing_keys:
   #   "ed25519:id": { key: "base64string", expired_ts: 123456789123 }
+  # -- (string) Maximale Dateigröße für Uploads von Medien.
+  # Zu beachten ist, dass dies auch vom Reverse Proxy erlaubt werden muss, siehe:
+  # "ingress.annotations: nginx.ingress.kubernetes.io/proxy-body-size"
+  max_upload_size: 50M
+  # -- (string) Die maximale zulässige Dateigröße für ein Benutzer-Profilbild.
+  max_avatar_size: 5M
   # -- (bool) Authentifizierung notwendig für User-Suche
   require_auth_for_profile_requests: true
   # -- (bool) Limitiere Requests für Nutzer mit shared rooms, abgeschaltet
