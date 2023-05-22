@@ -1324,14 +1324,20 @@ ingress:
   # UNGETESTET!
   traefikPaths: false
 
-  ## Annotations to apply to the created ingress resource.
-  ##
+  # -- (map) Annotations zur Konfiguration des Ingress.
   annotations:
-    # -- (bool) Annotiation um Regex-Regeln nutzen zu können
+    ## Annotiation um Regex-Regeln nutzen zu können
     nginx.ingress.kubernetes.io/use-regex: "true"
-    # -- (string) Annotiation, um Body-size zu vergößern (Default Limit 1 oder 10MB)
+    ## Annotiation, um Body-size zu vergößern (Default Limit 1 oder 10MB)
     nginx.ingress.kubernetes.io/proxy-body-size: 50m
     nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
+    ## Folgende Einträge sind für Cross-origin resource sharing wichtig
+    ## Da mehrere FQDN genutzt werden, ist die Nutzung "best practise"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    ## Folgende Einträge sind bei der Nutzung des Cert-Managers mit lets-encrypt notwendig:
   #  kubernetes.io/ingress.class: nginx
   #  kubernetes.io/tls-acme: "true"
 

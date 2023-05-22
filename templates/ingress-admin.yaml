@@ -16,7 +16,7 @@ metadata:
   name: {{ $fullName }}-admin
   namespace: {{ .Release.Namespace }}
   labels:
-  {{- include "matrix-synapse.labels" . | nindent 4 }}
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
