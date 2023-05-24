@@ -68,15 +68,21 @@ spec:
             sizeLimit: 5Mi
         - name: temp
           emptyDir:
-            sizeLimit: 50Mi
+            sizeLimit: {{ mulf .Values.schadcodescanner.limits.scanSize 5 }}M
         - name: crypto
           emptyDir:
             sizeLimit: 1Mi
         - name: scannerscript
           configMap:
-            name: scanner
+            name: {{ $name }}-scannerscript
             defaultMode: 0755
+            items:
+            - key: scanner.sh
+              path: scanner.sh
         - name: scannerconfig
           configMap:
-            name: contentscannerconfig
+            name: {{ $name }}
+            items:
+            - key: config.yaml
+              path: config.yaml
 {{- end }}
