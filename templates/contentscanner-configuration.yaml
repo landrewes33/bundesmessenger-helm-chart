@@ -1,10 +1,11 @@
 {{- if .Values.contentscanner.enabled }}
 {{- $scannername := include "matrix-synapse.externalname" (dict "global" . "external" "schadcodescanner") -}}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-content-scanner") -}}
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: contentscannerconfig
+  name: {{ $name }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 data:
@@ -12,7 +13,7 @@ data:
     # Configuration for hosting the HTTP(S) API.
     web:
         port: 8080
-        {{- if $.Values.ipv4Only }}
+        {{- if .Values.ipv4Only }}
         host: "0.0.0.0"
         {{- else }}
         host: "::"
@@ -29,7 +30,7 @@ data:
 
         # Command to run to remove files from disk once they have been scanned.
         # Optional, defaults to "rm".
-        removal_command: "srm"
+        removal_command: "shred -u"
 
         # List of allowed MIME types. If a file has a MIME type that's not in this list, its
         # scan is considered failed.
@@ -110,7 +111,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: scanner
+  name: {{ $name }}-scannerscript
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 data:
