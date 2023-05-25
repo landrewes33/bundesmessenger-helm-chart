@@ -69,6 +69,7 @@ spec:
         - name: temp
           emptyDir:
             sizeLimit: {{ mulf .Values.schadcodescanner.limits.scanSize 5 }}M
+            medium: Memory
         - name: crypto
           emptyDir:
             sizeLimit: 1Mi
