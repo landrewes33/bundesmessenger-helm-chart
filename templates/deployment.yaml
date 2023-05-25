@@ -160,6 +160,8 @@ spec:
               mountPath: /synapse/keys
             - name: media
               mountPath: /synapse/data
+            - name: tmpdir
+              mountPath: /tmp
           {{- with .Values.synapse.extraVolumeMounts }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -185,6 +187,10 @@ spec:
         - name: tmpconf
           emptyDir:
             sizeLimit: 10Mi
+        - name: tmpdir
+          emptyDir:
+            sizeLimit: 10Mi
+            medium: Memory
         - name: media
         {{- $mediaworker := false }}
         {{- range $worker, $config := .Values.workers }}
