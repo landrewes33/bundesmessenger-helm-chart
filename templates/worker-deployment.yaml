@@ -225,6 +225,7 @@ spec:
         - name: tempdir
           emptyDir:
             sizeLimit: 10Mi
+            medium: Memory
       {{- if regexMatch $name "media-repository" }}
         - name: media
         {{- if $.Values.persistence.enabled }}

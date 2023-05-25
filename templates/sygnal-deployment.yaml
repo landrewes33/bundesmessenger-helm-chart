@@ -72,4 +72,5 @@ spec:
         - name: sygnal-tmp
           emptyDir:
             sizeLimit: 10Mi
+            medium: Memory
 {{ end }}

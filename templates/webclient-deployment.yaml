@@ -93,7 +93,8 @@ spec:
             sizeLimit: 100Ki
         - name: tmp
           emptyDir:
-            sizeLimit: 1Gi
+            sizeLimit: 50M
+            medium: Memory
         - name: files
           configMap:
             name: {{ $webclientName }}
