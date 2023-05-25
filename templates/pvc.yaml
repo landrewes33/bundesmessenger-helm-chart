@@ -5,6 +5,10 @@ metadata:
   name: {{ template "matrix-synapse.fullname" . }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
+  {{- if .Values.persistence.enabled }}
+  annotations:
+    helm.sh/resource-policy: keep
+  {{- end }}
 spec:
   accessModes:
     - {{ .Values.persistence.accessMode | quote }}
