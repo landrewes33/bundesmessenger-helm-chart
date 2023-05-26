@@ -27,10 +27,10 @@ chart_content=$(yq '.' $chart_file)
 count_versions=$(yq ea -N '.[] | select(.version == "'$version'") | .version | document_index' $version_file)
 
 if [ ${#count_versions} -gt 1 ]; then
-  echo -e "\e[31mERROR: Die Version $version wird ${#count_versions} Mal definiert.\e[39m" >&2
+  printf "\033[31mERROR: Die Version $version wird ${#count_versions} Mal definiert.\033[39m\n" >&2
   exit 1
 elif [ ${#count_versions} -eq 0 ]; then
-  echo -e "\e[31mERROR: Die Version $version wird nicht definiert.\e[39m" >&2
+  printf "\033[31mERROR: Die Version $version wird nicht definiert.\033[39m\n" >&2
   exit 1
 fi
 
