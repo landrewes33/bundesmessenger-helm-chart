@@ -121,15 +121,24 @@ data:
     # - ${1} will be the path to the file to scan.
     # - The exit code should be 0 for files that are deemed safe/clean.
     # - Anything sent to stdout will be included in the `info` section of the response.
-    return=$(c-icap-client -i  {{ $scannername }} -p 1344 -f ${1} -s virus_scan);
+    c-icap-client -i  {{ $scannername }} -p 1344 -f ${1} -s virus_scan -o /tmp/tmplog;
     returncode=$?;
+    # bei keinem Virusfund, wird auch kein Log angelegt.
+    if [ -e /tmp/tmplog ]; then
+      # workaround zum 'warning: command substitution: ignored null byte in input'
+      # entsteht durch html message von c-icap-service
+      return=$(tr -d '\0' </tmp/tmplog );
+      rm /tmp/tmplog;
+    else
+      return="";
+    fi
     result=$(echo $return | grep -c "VIRUS FOUND" )
     echo "Return of Scan ${1}:  $result - $return";
-    #exit 0=clean, wenn kein String VIRUS FOUND" enthalten, der returncode vom i-cap-client 0 ist und der return-string an sich leer
+    # exit 0=clean, wenn kein String VIRUS FOUND" enthalten, der returncode vom i-cap-client 0 ist und der return-string an sich leer
     if [[ $result == 0 ]] &&  [[ $returncode == 0 ]] && [[ $(echo $return | grep -v '^[[:space:]]*$' | wc -l ) == 0 ]]; then
       exit 0
-    #es stimmt was mit dem file nicht (größe oder irgendwas, so das der returncode ungleich 0 ist)
-    #oder die Rückgabe vom ClamAV nicht leer ist (Rückgabe andere als VIRUS FOUND)
+    # es stimmt was mit dem file nicht (größe oder irgendwas, so das der returncode ungleich 0 ist)
+    # oder die Rückgabe vom ClamAV nicht leer ist (Rückgabe andere als VIRUS FOUND)
     elif [[ $returncode != 0 ]]|| [[ $(echo $return | grep -v '^[[:space:]]*$' | wc -l ) != 0 ]] ; then
       exit 1
     else
