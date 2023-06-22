@@ -61,10 +61,12 @@ spec:
           readinessProbe:
             tcpSocket:
               port: http
+            periodSeconds: 3
           livenessProbe:
             httpGet:
               path: /status
               port: http
+            periodSeconds: 10
           volumeMounts:
             - mountPath: /etc/nginx/nginx.conf
               name: nginx-conf
