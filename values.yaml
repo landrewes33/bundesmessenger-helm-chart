@@ -972,7 +972,7 @@ sygnal:
       # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
       path: /health
       # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks
-      port: http
+      port: sygnal-port
 
   ## Bereitschaftscheck
   readinessProbe:
@@ -981,7 +981,7 @@ sygnal:
       # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
       path: /health
       # -- (string) Konfiguration des Ports vom Bereitschaftscheck
-      port: http
+      port: sygnal-port
 
   # -- (object) Node Selektor Konfiguration für Sygnal-Container.
   nodeSelector: {}
