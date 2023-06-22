@@ -967,6 +967,7 @@ sygnal:
 
   ## Healthcheck
   livenessProbe:
+    periodSeconds: 10
     httpGet:
       # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
       path: /health
@@ -975,6 +976,7 @@ sygnal:
 
   ## Bereitschaftscheck
   readinessProbe:
+    periodSeconds: 3
     httpGet:
       # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
       path: /health

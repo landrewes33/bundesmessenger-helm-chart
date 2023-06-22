@@ -75,6 +75,7 @@ spec:
         readinessProbe:
           tcpSocket:
             port: http
+          periodSeconds: 3
         livenessProbe:
           httpGet:
             path: /status

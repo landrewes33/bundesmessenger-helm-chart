@@ -1,4 +1,4 @@
-{{- if $.Values.sygnal.enabled }}
+{{- if .Values.sygnal.enabled }}
 {{- $sygnalName := include "matrix-synapse.externalname" (dict "global" . "external" "sygnal") -}}
 {{- $component := "matrix-sygnal" -}}
 
@@ -49,6 +49,18 @@ spec:
             {{- .Values.sygnal.resources | toYaml | nindent 12 }}
           securityContext:
             {{- .Values.sygnal.securityContext | toYaml | nindent 12 }}
+          {{- with .Values.sygnal.readinessProbe }}
+          readinessProbe:
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.sygnal.livenessProbe }}
+          livenessProbe:
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.sygnal.startupProbe }}
+          startupProbe:
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: config
               mountPath: /sygnal.yaml
