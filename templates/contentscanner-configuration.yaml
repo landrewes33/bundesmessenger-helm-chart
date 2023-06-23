@@ -120,28 +120,54 @@ data:
     # This is an example script to run when a file is scanned.
     # - ${1} will be the path to the file to scan.
     # - The exit code should be 0 for files that are deemed safe/clean.
-    # - Anything sent to stdout will be included in the `info` section of the response.
-    c-icap-client -i  {{ $scannername }} -p 1344 -f ${1} -s virus_scan -o /tmp/tmplog;
+
+    # c-icap-client beendet immer mit 0, mit und ohne Virusfund
+    # Option "-v" for local logging
+    c-icap-client -v -i {{ $scannername }} -p 1344 -f ${1} -s virus_scan -o ${1}-log &> ${1}-response;
     returncode=$?;
-    # bei keinem Virusfund, wird auch kein Log angelegt.
-    if [ -e /tmp/tmplog ]; then
+
+    # nur bei Virusfund, wird ein Log angelegt.
+    # HTML Antwort enthält Virus-Informationen
+    if [ -e ${1}-log ]; then
       # workaround zum 'warning: command substitution: ignored null byte in input'
       # entsteht durch html message von c-icap-service
-      return=$(tr -d '\0' </tmp/tmplog );
-      rm /tmp/tmplog;
+      # remove all HTML tags and spaces
+      sed -i -e 's/<[^>]*>//g;/^\s*$/d' ${1}-log
+      # get 3rd and 4th row
+      return=$(sed -n '3,4 p' ${1}-log | tr -d '\n' );
+      rm ${1}-log;
     else
-      return="";
+     # remove all spaces, and only 2nd row
+      return=$(cat ${1}-response | sed '/^\s*$/d' | sed -n '2 p');
     fi
-    result=$(echo $return | grep -c "VIRUS FOUND" )
-    echo "Return of Scan ${1}:  $result - $return";
-    # exit 0=clean, wenn kein String VIRUS FOUND" enthalten, der returncode vom i-cap-client 0 ist und der return-string an sich leer
-    if [[ $result == 0 ]] &&  [[ $returncode == 0 ]] && [[ $(echo $return | grep -v '^[[:space:]]*$' | wc -l ) == 0 ]]; then
-      exit 0
-    # es stimmt was mit dem file nicht (größe oder irgendwas, so das der returncode ungleich 0 ist)
-    # oder die Rückgabe vom ClamAV nicht leer ist (Rückgabe andere als VIRUS FOUND)
-    elif [[ $returncode != 0 ]]|| [[ $(echo $return | grep -v '^[[:space:]]*$' | wc -l ) != 0 ]] ; then
-      exit 1
-    else
+
+    result=$(echo $return | grep -c -i "virus" )
+    echo "################# Result of Scan ${1}: $result; $return";
+
+    # Virus wurde gefunden
+    if [[ $result != 0 ]]; then
+      # delete temporary files 
+      rm ${1}-log; 
+      rm ${1}-response;
       exit 3
+
+    # exit 0=clean, wenn kein String "VIRUS" enthalten,
+    # der returncode vom i-cap-client 0 ist und der return-log ist leer
+    elif [[ $result == 0 ]] && [[ $returncode == 0 ]] ; then
+      rm ${1}-response;
+      exit 0
+
+    # es stimmt was mit der Datei nicht (Größe oder sonstiges, so dass der returncode ungleich 0 ist)
+    # oder die Rückgabe vom ClamAV ist nicht leer (Rückgabe andere als VIRUS FOUND)
+    # Ergebnis wird nicht ge-chached (exit_codes_to_ignore), da dies ein unerwarteter Zustand ist
+    elif [[ $returncode != 0 ]] ; then
+      echo "################# Error: $(cat ${1}-response)"
+      # delete temporary files
+      if [ -e ${1}-log ]; then 
+        rm ${1}-log; 
+      fi
+      rm ${1}-response;
+      exit 1
     fi
+
 {{- end }}
