@@ -523,9 +523,9 @@ workers:
     # -- (map) Informationen zum Sicherheitskontext, die den Workern mitgeteilt werden sollen.
     # DEFAULT gilt für alle Synapse-Worker-Container.
     # Beispiele:
-    #   fsGroup: 2003
-    #   runAsGroup: 2003
-    #   runAsUser: 2003
+    #   fsGroup: 2666
+    #   runAsGroup: 2666
+    #   runAsUser: 2666
     podSecurityContext: {}
 
     # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
@@ -533,13 +533,14 @@ workers:
     # Beispiele:
     #   readOnlyRootFilesystem: true
     #   runAsNonRoot: true
-    #   runAsUser: 2003
+    #   runAsUser: 2666
     #   capabilities:
     #     drop:
     #       - ALL
     securityContext:
       readOnlyRootFilesystem: true
       runAsNonRoot: true
+      runAsUser: 2666
 
     resources:
       limits:
@@ -619,11 +620,6 @@ workers:
     # spezifische Aufgaben können spezifischen Workern übergeben werden
     # z.B. Media Repo
     generic: true
-    # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
-    securityContext:
-      readOnlyRootFilesystem: true
-      runAsNonRoot: true
-      runAsUser: 2003
     # -- (list) entsprechende Endpunkte für den generischen Worker
     listeners: [client, federation]
     # -- (list) Pfade für die Ingress-Konfiguration des Workers, mit 'publicServerName' Domain gesetzt
@@ -818,12 +814,6 @@ workers:
     # Dieser Worker kümmert sich um die Bereitstellung und Speicherung von Medien.
     # Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit Hintergrundaufgaben.
     enabled: true
-    # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
-    # Überschreibt die Konfiguration von Default und generischen Worker
-    securityContext:
-      readOnlyRootFilesystem: true
-      runAsNonRoot: true
-      runAsUser: 2666
     # -- (list) Zusätzliche Listener für Media-Worker
     listeners: [media]
     # -- (list) Pfade für die Ingress-Konfiguration des Media-Workers, mit 'publicServerName' Domain gesetzt
@@ -1430,7 +1420,7 @@ ingress:
   className: nginx
 
 ######################################################################################
-##          Konfiguration für Content-Scanner
+##          Konfiguration für Matrix-Content-Scanner
 ######################################################################################
 contentscanner:
   # -- (bool) Aktivieren des Matrix-Content-Scanner
@@ -1438,7 +1428,7 @@ contentscanner:
   enabled: false
   # -- (map) Konfiguration des Image/Repository
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/content-scanner
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/matrix-content-scanner
     tag: 1.0.3-jammy-production
     pullPolicy: IfNotPresent
 

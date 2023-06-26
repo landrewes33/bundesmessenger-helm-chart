@@ -9,8 +9,8 @@ workers:
     # Kubernetes v1.23+.
     # autoscaling:
     #  enabled: true
-  # appservice:
-  #   enabled: true
+  appservice:
+    enabled: true
   pusher:
     enabled: true
 

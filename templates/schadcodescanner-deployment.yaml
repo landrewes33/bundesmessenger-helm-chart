@@ -137,10 +137,10 @@ spec:
           sizeLimit: 5M
       - name: clamav-tmp
         emptyDir:
-          sizeLimit: 100M
+          sizeLimit: {{ mulf .Values.schadcodescanner.limits.scanSize 5 }}M
       - name: icap-tmp
         emptyDir:
-          sizeLimit: 100M
+          sizeLimit: {{ mulf .Values.schadcodescanner.limits.scanSize 5 }}M
       - name: config-volume
         projected:
           sources:
