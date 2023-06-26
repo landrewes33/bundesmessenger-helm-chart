@@ -146,8 +146,8 @@ data:
 
     # Virus wurde gefunden
     if [[ $result != 0 ]]; then
-      # delete temporary files 
-      rm ${1}-log; 
+      # delete temporary files
+      rm ${1}-log;
       rm ${1}-response;
       exit 3
 
@@ -163,8 +163,8 @@ data:
     elif [[ $returncode != 0 ]] ; then
       echo "################# Error: $(cat ${1}-response)"
       # delete temporary files
-      if [ -e ${1}-log ]; then 
-        rm ${1}-log; 
+      if [ -e ${1}-log ]; then
+        rm ${1}-log;
       fi
       rm ${1}-response;
       exit 1
