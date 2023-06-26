@@ -1,1 +1,0 @@
-Behebt ein zu kleines 5 MB Limit in der Virenscanner Konfiguration (`virus_scan.MaxObjectSize`) und übernimmt die Konfiguration aus der `values.yaml`.

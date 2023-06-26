@@ -1,1 +1,0 @@
-Das Media Repository bzw. dazugehörige `PersistentVolumeClaim` wird bei aktivierter `persistence` nicht mehr durch Helm gelöscht.

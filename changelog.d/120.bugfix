@@ -1,1 +1,0 @@
-Hinzufügen von `runAsUser` zu `workers.default.securityContext` damit alle Synapse-Worker starten. Vorher kam es zum Fehler: `Error: container has runAsNonRoot and image will run as root (pod: "bum-appservice-0_bum", container: appservice)`.
