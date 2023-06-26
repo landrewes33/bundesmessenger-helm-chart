@@ -1,6 +1,6 @@
 # bundesmessenger
 
-![Version: 1.2.2](https://img.shields.io/badge/Version-1.2.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.78.0](https://img.shields.io/badge/AppVersion-1.78.0-informational?style=flat-square)
+![Version: 1.2.3](https://img.shields.io/badge/Version-1.2.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.78.0](https://img.shields.io/badge/AppVersion-1.78.0-informational?style=flat-square)
 
 BWI Matrix BundesMessenger
 
@@ -3530,7 +3530,7 @@ true
 
 
 
-### Konfiguration für Content-Scanner
+### Konfiguration für Matrix-Content-Scanner
 
 <table>
   <thead>
@@ -3563,7 +3563,7 @@ false
         <div style="max-width: 300px;"><pre lang="json">
 {
   "pullPolicy": "IfNotPresent",
-  "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/content-scanner",
+  "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/matrix-content-scanner",
   "tag": "1.0.3-jammy-production"
 }
 </pre>
