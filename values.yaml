@@ -1420,7 +1420,7 @@ ingress:
   className: nginx
 
 ######################################################################################
-##          Konfiguration für Content-Scanner
+##          Konfiguration für Matrix-Content-Scanner
 ######################################################################################
 contentscanner:
   # -- (bool) Aktivieren des Matrix-Content-Scanner
@@ -1428,7 +1428,7 @@ contentscanner:
   enabled: false
   # -- (map) Konfiguration des Image/Repository
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/content-scanner
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/matrix-content-scanner
     tag: 1.0.3-jammy-production
     pullPolicy: IfNotPresent
 
