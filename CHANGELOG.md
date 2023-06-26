@@ -7,6 +7,36 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.2.3 (2023-06-26)
+
+### 🐛 Bugfixes
+
+- Aktualisierung auf aktuelles Image für den Matrix-Content-Scanner
+  [`matrix-content-scanner`](https://gitlab.opencode.de/bwi/bundesmessenger/backend/container-images/container_registry/423).
+  (!matrix-content-scanner)
+- Hinzufügen von `runAsUser` zu `workers.default.securityContext` damit alle
+  Synapse-Worker starten. Vorher kam es zum Fehler: `Error: container has
+  runAsNonRoot and image will run as root (pod: "bum-appservice-0_bum",
+  container: appservice)`. (!120)
+- Bedingung (`helm.sh/resource-policy: keep`) für Persistenzeinstellung in
+  Schadcodescanner-PVC hinzugefügt. (!133)
+- Neustarten des Sygnal und Webclients, wenn die Konfiguration verändert wurde.
+  (!134)
+- Behebt ein zu kleines 5 MB Limit in der Virenscanner Konfiguration
+  (`virus_scan.MaxObjectSize`) und übernimmt die Konfiguration aus der
+  `values.yaml`. (!139)
+- Das Media Repository bzw. dazugehörige `PersistentVolumeClaim` wird bei
+  aktivierter `persistence` nicht mehr durch Helm gelöscht. (!145)
+- Volume für fehlendes TMP-Verzeichnis hinzugefügt. (!146)
+- Workaround zu 'warning: command substitution: ignored null byte in input'
+  durch c-icap HTML Nachricht. (!152)
+
+### 📝 Weitere Änderungen
+
+- Aktualisierung der genutzten Tools in der CI-Pipeline. (!126)
+- Lokales Helm Repo aus der CI-Pipeline entfernt. (!155)
+
+
 ## BundesMessenger Helm Chart 1.2.2 (2023-04-25)
 
 ### ✨ Features
