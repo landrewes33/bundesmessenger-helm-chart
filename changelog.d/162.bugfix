@@ -1,0 +1,1 @@
+Hinzufügen von `securityContext` zum `update-config` initContainer der Worker-Pods.

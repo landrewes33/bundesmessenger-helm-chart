@@ -65,6 +65,8 @@ spec:
               mountPath: /synapse/data
     {{- end }}
         - name: update-config
+          securityContext:
+            {{- $config.securityContext | default $default.securityContext | toYaml | nindent 12 }}
           command:
             - sh
             - -c
