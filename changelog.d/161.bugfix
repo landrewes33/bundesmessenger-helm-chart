@@ -1,0 +1,1 @@
+Behebt einen Fehler wodurch die Einstellungen für `wellknown`.`nodeSelector`, `affinity` und `tolerations` nicht funktionierten.
