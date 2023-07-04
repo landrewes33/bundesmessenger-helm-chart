@@ -60,3 +60,7 @@ postgresql:
 # redis:
 #   image:
 #     pullSecrets: bum-git
+
+# only to validate template
+demomode:
+  enabled: true

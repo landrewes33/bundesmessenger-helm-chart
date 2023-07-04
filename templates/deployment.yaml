@@ -5,6 +5,8 @@
 {{- if (and .Values.redis.enabled (and .Values.redis.usePassword (and (not .Values.redis.auth.password) (not .Values.redis.auth.existingSecret)))) -}}
   {{- fail "You must specify a static redis password or existing secret if using the included redis chart" -}}
 {{- end -}}
+{{- $userconfigname :=  printf "%s-%s" (include "matrix-synapse.fullname" .) "users" }}
+{{- $adminconfigname := printf "%s-%s" (include "matrix-synapse.fullname" .) "admins" }}
 
 ---
 apiVersion: v1
@@ -118,6 +120,18 @@ spec:
                   key: {{ .Values.externalRedis.existingSecretPasswordKey }}
                   {{- end -}}
           {{- end }}
+          {{- if .Values.demomode.enabled }}
+            - name: ADMINS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $adminconfigname }}
+                  key: admins.csv
+            - name: USERS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $userconfigname }}
+                  key: users.csv
+          {{- end }}
           {{- with .Values.synapse.extraEnv }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -162,6 +176,10 @@ spec:
               mountPath: /synapse/data
             - name: tmpdir
               mountPath: /tmp
+          {{- if .Values.demomode.enabled }}
+            - name: demoscript
+              mountPath: /script
+          {{- end }}
           {{- with .Values.synapse.extraVolumeMounts }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -207,6 +225,12 @@ spec:
         {{- end }}
         {{- with .Values.synapse.extraVolumes }}
           {{- . | toYaml | nindent 8 }}
+        {{- end }}
+        {{- if .Values.demomode.enabled }}
+        - name: demoscript
+          configMap: 
+            name: {{ include "matrix-synapse.externalname" (dict "global" . "external" "demomode") }}-script
+            defaultMode: 0755
         {{- end }}
       {{- with .Values.synapse.nodeSelector }}
       nodeSelector:
