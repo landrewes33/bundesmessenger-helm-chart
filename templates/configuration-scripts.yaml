@@ -7,3 +7,28 @@ metadata:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 data:
 {{ (.Files.Glob "scripts/*.sh").AsConfig | indent 2 }}
+
+
+{{- if and ( .Files.Get "scripts/users.csv") ( .Values.demomode.enabled | default false ) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "matrix-synapse.fullname" . }}-users
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+data: 
+{{ (.Files.Glob "scripts/users.csv").AsConfig | indent 2 }}
+{{- end }}
+
+{{- if and ( .Files.Get "scripts/admins.csv") ( .Values.demomode.enabled | default false ) }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "matrix-synapse.fullname" . }}-admins
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+data:
+{{ (.Files.Glob "scripts/admins.csv").AsConfig | indent 2 }}
+{{- end}}
