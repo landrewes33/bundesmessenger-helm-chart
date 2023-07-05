@@ -205,17 +205,21 @@ spec:
         - name: tmpconf
           emptyDir:
             sizeLimit: 10Mi
-        - name: tmpdir
-          emptyDir:
-            sizeLimit: 10Mi
-            medium: Memory
-        - name: media
         {{- $mediaworker := false }}
         {{- range $worker, $config := .Values.workers }}
           {{- if eq $worker "media_repository" }}
             {{- $mediaworker = ($config.enabled | default false) }}
           {{- end }}
         {{- end }}
+        - name: tmpdir
+          emptyDir:
+            {{- if not $mediaworker }}
+            sizeLimit: {{ mulf ( mustRegexFind "[0-9]+" .Values.extraConfig.max_upload_size ) 5 }}{{ mustRegexFind "[A-Z]+" .Values.extraConfig.max_upload_size }}
+            {{- else }}
+            sizeLimit: 10Mi
+            {{- end }}
+            medium: Memory
+        - name: media
         {{- if and .Values.persistence.enabled (not $mediaworker) }}
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim | default (include "matrix-synapse.fullname" .) }}
@@ -228,7 +232,7 @@ spec:
         {{- end }}
         {{- if .Values.demomode.enabled }}
         - name: demoscript
-          configMap: 
+          configMap:
             name: {{ include "matrix-synapse.externalname" (dict "global" . "external" "demomode") }}-script
             defaultMode: 0755
         {{- end }}
