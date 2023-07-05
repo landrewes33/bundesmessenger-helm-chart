@@ -226,7 +226,11 @@ spec:
             sizeLimit: 10Mi
         - name: tempdir
           emptyDir:
+            {{- if regexMatch $name "media-repository" }}
+            sizeLimit: {{ mulf ( mustRegexFind "[0-9]+" $.Values.extraConfig.max_upload_size ) 5 }}{{ mustRegexFind "[A-Z]+" $.Values.extraConfig.max_upload_size }}
+            {{- else }}
             sizeLimit: 10Mi
+            {{- end }}
             medium: Memory
       {{- if regexMatch $name "media-repository" }}
         - name: media
