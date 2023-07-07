@@ -1,0 +1,1 @@
+`secure_backup_required` wird als Boolean in der `/.well-known/matrix/client` ausgegeben.
