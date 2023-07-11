@@ -1,0 +1,1 @@
+Mit `config.extraLoggers` kann das Logging von Synapse granularer konfiguriert werden. Dies ersetzt den Wert `config.logLevelSQL`.
