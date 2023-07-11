@@ -1,0 +1,1 @@
+Hinzufügen der Pflichtangabe `imprintUrl` zum Angeben eines Impressums.

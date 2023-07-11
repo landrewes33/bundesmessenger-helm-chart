@@ -40,12 +40,18 @@ serverName: ""
 # @default -- Nicht gesetzt
 publicServerName: ""
 
-# -- (string) Eine URL unter der der Nutzer sich Datenschutzbestimmungen einsehen kann.
+# -- (string) Eine URL (ohne "https://") unter der der Nutzer sich Datenschutzbestimmungen einsehen kann.
 # Diese Datenschutzbestimmungen muss jeder Anbieter selbst dem Nutzer zur Verfügung stellen.
 # Die Mobil-Apps nutzen dies, um die Datenschutzbestimmungen per Webaufruf
 # dem Nutzer anzeigen zu lassen.
 # @default -- Nicht gesetzt, aber Voraussetzung!
 dataPrivacyUrl: ""
+
+# -- (string) Eine URL (ohne "https://") unter der der Nutzer das Impressum einsehen kann.
+# Dieses Impressum muss jeder Anbieter selbst dem Nutzer zur Verfügung stellen.
+# Die Mobil-Apps nutzen dies, um das Impressum dem Nutzer anzeigen zu lassen.
+# @default -- Nicht gesetzt, aber Voraussetzung!
+imprintUrl: ""
 
 # -- (string) Der Servername für die Admin-API  "/_synapse/admin" und alle anderen
 # APIs, die für alle administrativen Konfigurationen im Ingress verwendet werden.
@@ -1043,8 +1049,10 @@ wellknown:
   server: {}
 
   # -- (object) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
-  # Die Angabe des Objektes de.bwi{data_privacy_url: https://dsgvo.example.com} ist verpflichtend,
-  # wenn keine .Values.dataPrivacyUrl angegeben wurde und auf den WellKnown-Server verzichtet wird.
+  # Die Angabe des Objektes "de.bwi": {"data_privacy_url": "https://example.com/privacy",
+  # "imprintUrl": "https://example.com/imprint"} ist verpflichtend,
+  # wenn keine .Values.dataPrivacyUrl und .Values.imprintUrl angegeben wurde
+  # und auf den WellKnown-Server verzichtet wird.
   # Beispiel:
   #  io.element.e2ee:
   #    secure_backup_required: true
@@ -1053,7 +1061,8 @@ wellknown:
   #  m.homeserver:
   #    base_url: https://matrix.example.com
   #  de.bwi:
-  #    data_privacy_url: https://dsgvo.example.com
+  #    data_privacy_url: https://example.com/privacy
+  #    imprintUrl: https://example.com/imprint
   client: {}
 
   # -- (map) Zusätzliche Daten, die unter .well-known/matrix/<data> bereitgestellt werden

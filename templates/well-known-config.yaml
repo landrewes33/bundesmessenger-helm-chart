@@ -81,7 +81,8 @@ data:
         "outbound_keys_pre_sharing_mode": "on_room_opening"
       },
       "de.bwi": {
-        "data_privacy_url": "{{- printf "https://%s" ( .Values.dataPrivacyUrl | required "a valid URL for data protection regulations / privacy policy (dataPrivacyUrl) is required. ") }}"
+        "data_privacy_url": "{{- printf "https://%s" ( .Values.dataPrivacyUrl | required "a valid URL for data protection regulations / privacy policy (dataPrivacyUrl) is required. ") }}",
+        "imprint_url": "{{- printf "https://%s" ( .Values.imprintUrl | required "a valid URL for imprint (imprintUrl) is required. ") }}"
       }
     }
 {{-   end }}
