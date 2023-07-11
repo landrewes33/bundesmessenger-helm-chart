@@ -131,26 +131,29 @@ signingkey:
 # @default -- false
 ipv4Only: true
 
-## Matrix-Konfigurationswerte, die sich auf andere Teile des Charts auswirken, für jeden
-## Wert, der nicht von diesem Block behandelt wird, sollten Sie ihn stattdessen in
-## extraConfig unten einstellen.
+## Matrix-Konfigurationswerte, die sich auf andere Teile des Charts auswirken.
+## Jeden Wert, der nicht von diesem Block behandelt wird, sollten Sie stattdessen in
+## im Abschnitt `extraConfig` unten einstellen.
 ## Ref: https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html
 ##
 config:
   # -- (string) Die öffentlich zugängliche URL für die Synapse-Instanz
   # lautet standardmäßig `https://<publicServerName>`
   # Beispiel:
-  # publicBaseurl: 'https://matrix.example.com'
+  # publicBaseurl: "https://matrix.example.com"
 
   # -- (string) Das Loglevel für Synapse und alle `loggers` Module.
   # Mit Ausnahme von `synapse.storage.SQL`, welches aus Sicherheitsgründen zusätzlich geändert werden muss.
   # Dokumentation: https://matrix-org.github.io/synapse/latest/structured_logging.html
   logLevel: INFO
 
-  # -- (string) Das Loglevel für `synapse.storage.SQL`.
-  # Achtung: Wenn dieser Wert auf `DEBUG` erhöht wird, werden alle SQL-Abfragen protokolliert.
+  # -- (object) Geben Sie hier zusätzliche Logger-Konfigurationen an.
+  # Achtung: Wenn `synapse.storage.SQL`auf `level: DEBUG` erhöht wird, werden alle SQL-Abfragen protokolliert.
   # Diese enthalten sensible Informationen wie z.B. Zugriffstoken.
-  logLevelSQL: INFO
+  # Ref: https://matrix-org.github.io/synapse/latest/structured_logging.html
+  extraLoggers:
+    synapse.storage.SQL:
+      level: WARNING
 
   # -- (bool) Erfassung Nutzungsstatistiken (Hostname, Synapse-Version und -Uptime, total_users usw.) an die Entwickler melden
   reportStats: false
