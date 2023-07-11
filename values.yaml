@@ -201,7 +201,6 @@ config:
 # -- (object) Beliebige weitere Synapse-Konfiguration
 # Vorkonfiguriert nach Best Practise BWI GmbH:
 # Ref: https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html
-# @default -- wird nachfolgend aufgeschlüsselt
 extraConfig:
   # old_signing_keys:
   #   "ed25519:id": { key: "base64string", expired_ts: 123456789123 }
@@ -211,6 +210,15 @@ extraConfig:
   max_upload_size: 50M
   # -- (string) Die maximale zulässige Dateigröße für ein Benutzer-Profilbild.
   max_avatar_size: 5M
+  # -- (object) Angabe wann Medien von Repository gelöscht werden. Für die Zeitdauer gilt
+  # das Datum des letzten Zugriffs / Downloads.
+  media_retention:
+    # -- (string) Zeitdauer wie lange eigene Medien vorgehalten werden. Wenn sie gelöscht
+    # werden, sind sie für den Benutzer nicht mehr abrufbar.
+    # local_media_lifetime: 180d
+    # -- (string) Zeitdauer wie lange Medien von fremden Servern im Cache vorgehalten werden.
+    # Bei Bedarf werden diese vom remote Server erneut heruntergeladen.
+    remote_media_lifetime: 90d
   # -- (bool) Authentifizierung notwendig für User-Suche
   require_auth_for_profile_requests: true
   # -- (bool) Limitiere Requests für Nutzer mit shared rooms, abgeschaltet
