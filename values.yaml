@@ -24,11 +24,11 @@ image:
   # imagePullPolicy „Always“, wenn tag ist „latest“ (imagepullpolicy-always.yaml)
   pullPolicy: IfNotPresent
 
-  # -- (string) Überschreibt einen Teil des installierten Namens, behält aber den Releasenamen bei.
-  nameOverride: ""
+# -- (string) Überschreibt einen Teil des installierten Namens, behält aber den Releasenamen bei.
+nameOverride: ""
 
-  # -- (string) Überschreiben Sie den vollständigen Namen des installierten Charts.
-  fullnameOverride: ""
+# -- (string) Überschreiben Sie den vollständigen Namen des installierten Charts.
+fullnameOverride: ""
 
 
 # -- (string) Der Matrix-Domänenname, der für den Domänenteil in Ihren MXIDs verwendet wird.
