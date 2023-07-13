@@ -1,8 +1,16 @@
 #!/bin/sh
 
-# Script to check image availability in container registry
+# Script to check if images are available in container registry.
+# skopeo and yq are required in PATH.
+#
 # Parameters:
 # - $1: Path to input file / helm template
+
+if [ "$#" -ne 1 ]
+then
+  echo "Incorrect number of arguments"
+  exit 1
+fi
 
 images=$(yq -N '..|.image?|select(.)' $1 | sort -u)
 

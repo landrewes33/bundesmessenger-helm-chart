@@ -1,8 +1,15 @@
 #!/bin/sh
 
-# Script to update images and tags in values.yaml
+# Script to update images and tags in values.yaml.
+#
 # Parameters:
 # - $1: version number to set (file: ci/versions/v"version".yaml)
+
+if [ "$#" -ne 1 ]
+then
+  echo "Incorrect number of arguments"
+  exit 1
+fi
 
 version=$1
 default_registry="registry.opencode.de"
