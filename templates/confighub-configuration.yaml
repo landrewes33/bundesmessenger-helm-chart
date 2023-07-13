@@ -1,0 +1,89 @@
+{{- if .Values.confighub.enabled }}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "confighub-nginx") -}}
+{{- $component := "confighub-nginx" -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    component: {{ $component }}
+data:
+  confighub.conf: |
+    server {
+      listen 8080 default_server;
+      {{- if not .Values.ipv4Only }}
+      listen [::]:8080 default_server;
+      {{- end }}
+      server_name _;
+
+      root {{ .Values.wellknown.htdocsPath }};
+
+      # livenessProbe auf /status, logging deaktiviert
+      location /status {
+        return 200;
+        access_log off;
+      }
+      location /_matrix/cmaintenance {
+        add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization";
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
+        add_header Access-Control-Allow-Origin "*";
+        add_header Content-Type application/json;
+        rewrite ^/_matrix/cmaintenance /maintenance.json break;
+      }
+      location /_matrix/cconfig/style.json {
+        add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization";
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
+        add_header Access-Control-Allow-Origin "*";
+        add_header Content-Type application/json;
+        rewrite ^/_matrix/cconfig/style.json /style.json break;
+      }
+    }
+  style.json: |
+    {
+      "version": 8,
+      "name": "wms",
+      "sources": {
+        "wms_topplus": {
+          "type": "raster",
+          "tiles": [
+              "https://sgx.geodatenzentrum.de/wms_topplus_open?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&width=256&height=256&layers=web_scale&styles="
+          ],
+          "tileSize": 256,
+          "attribution": "<a href=\"https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/Datenquellen_TopPlusOpen.html\" target=\"_blank\">&copy; Bundesamt f&uuml;r Kartographie und Geod&auml;sie (2023)</a>"
+        }
+      },
+      "layers": [
+        {
+          "id": "web_layer",
+          "source": "wms_topplus",
+          "source-layer": "web",
+          "type": "raster"
+        }
+      ]
+    }
+
+  maintenance.json: |
+    {
+      "downtime": [
+        {
+          "warning_start_time": "2022-12-14T11:00:00Z",
+          "start_time": "2022-12-23T11:00:00Z",
+          "end_time": "2022-12-24T20:00:00Z",
+          "type": "MAINTENANCE_STANDARD",
+          "description": "Weihnachtswartung 2022"
+        }
+      ],
+      "versions": {
+        "ios": {
+          "update_before": "1.17.0",
+          "warn_before": "1.19.0"
+        },
+        "android": {
+          "update_before": "1.17.0",
+          "warn_before": "1.19.0"
+        }
+      }
+    }
+{{- end -}}

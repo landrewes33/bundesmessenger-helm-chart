@@ -1,12 +1,12 @@
-{{- if .Values.wellknown.enabled }}
-{{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") -}}
-{{- $component := "wellknown-nginx" -}}
+{{- if .Values.confighub.enabled }}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "confighub-nginx") -}}
+{{- $component := "confighub-nginx" -}}
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ $wkName }}
+  name: {{ $name }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
@@ -21,17 +21,18 @@ spec:
   selector:
     {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: {{ $component }}
+
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ $wkName }}
+  name: {{ $name }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ $component }}
 spec:
-  replicas: {{ .Values.wellknown.replicaCount | default 1 }}
+  replicas: {{ .Values.confighub.replicaCount | default 1 }}
   selector:
     matchLabels:
       {{- include "matrix-synapse.selectorLabels" . | nindent 6 }}
@@ -39,21 +40,21 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print .Template.BasePath "/well-known-config.yaml") . | sha256sum }}
+        checksum/config: {{ include (print .Template.BasePath "/confighub-configuration.yaml") . | sha256sum }}
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
     spec:
-      serviceAccountName: {{ $.Release.Name }}
+      serviceAccountName: {{ .Release.Name }}
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
-        {{- toYaml .Values.wellknown.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.confighub.podSecurityContext | nindent 8 }}
       containers:
         - name: nginx
-          image: "{{ .Values.wellknown.image.repository }}:{{ .Values.wellknown.image.tag }}"
-          imagePullPolicy: {{ .Values.wellknown.image.pullPolicy }}
+          image: "{{ .Values.confighub.image.repository }}:{{ .Values.confighub.image.tag }}"
+          imagePullPolicy: {{ .Values.confighub.image.pullPolicy }}
           securityContext:
-            {{- toYaml .Values.wellknown.securityContext | nindent 12 }}
+            {{- toYaml .Values.confighub.securityContext | nindent 12 }}
           ports:
             - containerPort: 8080
               name: http
@@ -61,12 +62,10 @@ spec:
           readinessProbe:
             tcpSocket:
               port: http
-            periodSeconds: 3
           livenessProbe:
             httpGet:
               path: /status
               port: http
-            periodSeconds: 10
           volumeMounts:
             - mountPath: /etc/nginx/nginx.conf
               name: nginx-conf
@@ -76,42 +75,42 @@ spec:
               name: site
               readOnly: true
               subPath: default.conf
-{{- $keys := concat (list "client" "server") (keys .Values.wellknown.extraData) }}
+{{- $keys := concat (list "style" "maintenance") (keys .Values.confighub.extraData) }}
 {{- range $key := $keys }}
-            - mountPath: {{ $.Values.wellknown.htdocsPath }}/{{ $key }}.json
+            - mountPath: {{ $.Values.confighub.htdocsPath }}/{{ $key }}.json
               name: files
               subPath: {{ $key }}.json
 {{- end }}
             - mountPath: /tmp
               name: tmp
           resources:
-            {{- toYaml .Values.wellknown.resources | nindent 12 }}
+            {{- toYaml .Values.confighub.resources | nindent 12 }}
       volumes:
         - name: nginx-conf
           configMap:
             name: nginx-default-conf
         - name: files
           configMap:
-            name: {{ $wkName }}
+            name: {{ $name }}
         - name: site
           configMap:
-            name: {{ $wkName }}
+            name: {{ $name }}
             items:
-            - key: bundesmessenger.conf
+            - key: confighub.conf
               path: default.conf
         - name: tmp
           emptyDir:
             sizeLimit: 10Mi
             medium: Memory
-    {{- with .Values.wellknown.nodeSelector }}
+    {{- with .Values.confighub.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.wellknown.affinity }}
+    {{- with .Values.confighub.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with .Values.wellknown.tolerations }}
+    {{- with .Values.confighub.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}

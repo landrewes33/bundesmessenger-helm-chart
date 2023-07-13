@@ -14,6 +14,8 @@
   app: Kubectl
 - path: wellknown.image
   app: Nginx
+- path: confighub.image
+  app: Nginx
 - path: redis.image
   app: Redis
 - path: redis.sysctl.image
