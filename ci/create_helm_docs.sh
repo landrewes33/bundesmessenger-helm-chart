@@ -2,6 +2,7 @@
 
 # Script to create `docs/standard_values.md` with helm-docs
 # Splits `values.xml` in multiple parts and merge the results.
+# helm-docs is required in PATH.
 
 INPUT_FILE=values.yaml
 NEEDLE="##[[:space:]][[:space:]][[:space:]][[:space:]][[:space:]][[:space:]][[:space:]][[:space:]][[:space:]][[:space:]]"
