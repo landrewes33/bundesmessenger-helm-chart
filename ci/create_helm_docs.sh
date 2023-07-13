@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # Script to create `docs/standard_values.md` with helm-docs
 # Splits `values.xml` in multiple parts and merge the results.

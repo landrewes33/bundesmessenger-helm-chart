@@ -1,5 +1,5 @@
-#!/bin/sh
-#
+#!/usr/bin/env sh
+
 # A script which checks that an appropriate newsfile has been added on this
 # branch.
 
