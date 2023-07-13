@@ -191,8 +191,8 @@ config:
   # -- (string) Hinweis: Es wird dringend empfohlen, diesen Wert auf einen secure value (secret) zu setzen.
   macaroonSecretKey: ""
 
-  # -- (map) Eine Gruppe von vertrauenswürdigen Servern, die zu kontaktieren sind, wenn ein anderer Server nicht auf eine
-  # Signierschlüssel-Anfrage antwortet.
+  # -- (map) Eine Gruppe von vertrauenswürdigen Servern, die zu kontaktieren sind,
+  # wenn ein anderer Server nicht auf eine Signierschlüssel-Anfrage antwortet.
   trustedKeyServers:
     - server_name: matrix.org
   #   verify_keys:
@@ -203,6 +203,12 @@ config:
   #  - port: 9000
   #    bind_addresses: ['::']
   #    type: manhole
+
+  # -- (bool) Aktivierung und Konfiguration von Standort teilen (location sharing) in den Clients
+  # Führt zur Konfiguration der /.well-known/client und /_matrix/cconfig/style.json
+  # Wenn wellknown.enable oder confighub.enable deaktiviert sind, ist die
+  # notwendige Konfiguration selbst vorzunehmen.
+  locationSharing: true
 
 # -- (object) Beliebige weitere Synapse-Konfiguration
 # Vorkonfiguriert nach Best Practise BWI GmbH:
@@ -1127,6 +1133,75 @@ wellknown:
   # -- (object) Affinitäts-Konfiguration für well-known server.
   affinity: {}
 
+
+######################################################################################
+##          Konfiguration für ConfigurationHub-Server
+######################################################################################
+## Dies wird einen NginX-Server einrichten, der notwendige
+## Dateien zur Konfiguration und Information der Clients ausliefert
+## und die nicht zum Matrix / Synapse-Server gehören
+
+confighub:
+  # -- (bool) Aktivierung des ConfigHub-Container
+  enabled: true
+
+  # -- (map) Zusätzliche Daten, die unter /_matrix/cconfig/<data> bereitgestellt werden
+  # Dictionaries werden in JSON umgewandelt, einfache Strings werden direkt ausgeliefert
+  # Beispiel siehe wellknown-Konfiguration
+  extraData: {}
+
+  # -- (path) Ein benutzerdefinierter htdocs-Pfad, der nützlich ist, wenn ein anderes Image ausgeführt wird.
+  # @default -- /usr/share/nginx/html (nginx)
+  htdocsPath: /usr/share/nginx/html
+
+  # -- (map) Das Webserver Image
+  # optional:
+  # pullSecrets:
+  #   - myRegistryKeySecretName
+  image:
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx
+    tag: 1.18.0-6ubuntu14.3-jammy-production
+    pullPolicy: IfNotPresent
+
+  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # weitere Möglichkeiten:
+  #  fsGroup: 1001
+  podSecurityContext:
+    runAsGroup: 1001
+    runAsUser: 1001
+
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  # weitere Möglichkeiten:
+  #  capabilities:
+  #    drop:
+  #    - ALL
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+
+  ## Ressource Konfiguration für confighub.
+  resources:
+    limits:
+      # -- (string) Rechenressourcengrenzen, die auf den confighub anzuwenden sind.
+      cpu: 5m
+      # -- (string) RAM Ressourcengrenzen, die auf den confighub anzuwenden sind.
+      memory: 15Mi
+    requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf den confighub anzuwenden sind.
+      cpu: 5m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den confighub anzuwenden sind.
+      memory: 15Mi
+
+  # -- (object) Node Selektor Konfiguration für confighub.
+  nodeSelector: {}
+
+  # -- (list) Tolerations/Tains Konfiguration für confighub.
+  tolerations: []
+
+  # -- (object) Affinitäts-Konfiguration für confighub.
+  affinity: {}
+
+
 ######################################################################################
 ##          Konfiguration für Postgres Server
 ######################################################################################
@@ -1435,6 +1510,7 @@ ingress:
   # HINWEIS: Wir setzen dem Nginx voraus, da wir auch die entsprechenden Annotiations setzen
   className: nginx
 
+
 ######################################################################################
 ##          Konfiguration für Matrix-Content-Scanner
 ######################################################################################
@@ -1614,6 +1690,7 @@ schadcodescanner:
     runAsUser: 1112
     runAsGroup: 1112
     readOnlyRootFilesystem: true
+
 
 ######################################################################################
 ##          Konfiguration für CoTurn

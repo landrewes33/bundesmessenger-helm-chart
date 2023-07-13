@@ -4,7 +4,6 @@
 # The config.json file is to be put into Kubernetes as a config file in such a way that
 # the element web instance can read it.
 
-
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -25,12 +24,18 @@ data:
       "enable_presence_by_hs_url": {
         "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}": {{ .Values.extraConfig.presence.enabled | default false }}
       },
-      "permalink_prefix": "{{- printf "https://%s/latest" (.Values.publicServerName | default .Values.serverName) }}", 
+      {{- if .Values.config.locationSharing }}
+      "bwi_setting_defaults": {
+        "BwiFeature.locationShareTypesEnabled": ["Pin"],
+        "BwiFeature.disableGeolocation": false,
+        "BwiFeature.hideOSMLink": true
+      },
+      {{- end }}
+      "permalink_prefix": "{{- printf "https://%s/latest" (.Values.publicServerName | default .Values.serverName) }}",
       "content_scanner": {
         "enabled": true
       }
     }
-
 
 ---
 apiVersion: v1

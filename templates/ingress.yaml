@@ -2,6 +2,7 @@
 {{- $fullName := include "matrix-synapse.fullname" . -}}
 {{- $scannerName := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-content-scanner") -}}
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") -}}
+{{- $chubName := include "matrix-synapse.externalname" (dict "global" . "external" "confighub-nginx") -}}
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 {{- $schadcodescan := $.Values.contentscanner.enabled -}}
 {{- $matrixUri := .Values.publicServerName | default .Values.serverName }}
@@ -64,7 +65,8 @@ spec:
             {{- $service := include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}
             {{- if has $host $csHosts }}
               {{- range $config.csPaths }}
-# if path does not include "/_synapse/admin"
+                {{/* do not include if path is "/_synapse/admin"
+                admin API has its own config file "ingress-admin.yaml" */}}
                 {{- if (not (contains "/_synapse/admin" .)) }}
                   {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
@@ -142,7 +144,7 @@ spec:
         {{- end }}
 
         {{- if $schadcodescan }}
-          - path: /_matrix/media_proxy/unstable/  # wenn runtergeladen dann über den media proxy
+          - path: /_matrix/media_proxy/unstable/
             backend:
           {{- if $v1Ingress }}
               service:
@@ -170,19 +172,7 @@ spec:
               serviceName: {{ $wkName }}
               servicePort: 80
             {{- end }}
-          - path: /_matrix/cmaintenance
-            backend:
-            {{- if $v1Ingress }}
-              service:
-                name: {{ $wkName }}
-                port:
-                  number: 80
-            pathType: Prefix
-            {{- else }}
-              serviceName: {{ $wkName }}
-              servicePort: 80
-            {{- end }}
-          {{-   else }}
+          {{- else }}
           - path: /.well-known/matrix
             backend:
             {{- if $v1Ingress }}
@@ -195,18 +185,33 @@ spec:
               serviceName: {{ $fullName }}
               servicePort: {{ $.Values.service.port }}
             {{- end }}
+          {{- end }}
+        {{- end }}
+
+        {{- if and (has . $csHosts) ($.Values.confighub.enabled) }}
           - path: /_matrix/cmaintenance
             backend:
-            {{- if $v1Ingress }}
+          {{- if $v1Ingress }}
               service:
-                name: {{ $fullName }}
+                name: {{ $chubName }}
                 port:
-                  number: {{ $.Values.service.port }}
+                  number: 80
             pathType: Prefix
-            {{- else }}
-              serviceName: {{ $fullName }}
-              servicePort: {{ $.Values.service.port }}
-            {{- end }}
+          {{- else }}
+              serviceName: {{ $chubName }}
+              servicePort: 80
+          {{- end }}
+          - path: /_matrix/cconfig
+            backend:
+          {{- if $v1Ingress }}
+              service:
+                name: {{ $chubName }}
+                port:
+                  number: 80
+            pathType: Prefix
+          {{- else }}
+              serviceName: {{ $chubName }}
+              servicePort: 80
           {{- end }}
         {{- end }}
 
