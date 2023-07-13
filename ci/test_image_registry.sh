@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # Script to check if images are available in container registry.
 # skopeo and yq are required in PATH.
