@@ -413,7 +413,7 @@ synapse:
       # -- (string) Rechenressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
       cpu: 1000m
       # -- (string) RAM Ressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
-      memory: 2500Mi
+      memory: 2000Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
       cpu: 500m
@@ -571,11 +571,11 @@ workers:
         # -- (string) Rechenressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
         # Empfohlen gesondert zu verwalten
-        cpu: 500m
+        cpu: 600m
         # -- (string) RAM Ressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
         # Empfohlen gesondert zu verwalten
-        memory: 200Mi
+        memory: 512Mi
       requests:
         # -- (string) Anforderungen an Rechenressourcen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
@@ -584,7 +584,7 @@ workers:
         # -- (string) Anforderungen an RAM Ressourcen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
         # Empfohlen gesondert zu verwalten
-        memory: 128Mi
+        memory: 150Mi
 
     ## Healthcheck
     livenessProbe:
@@ -847,12 +847,12 @@ workers:
         # -- (string) Rechenressourcengrenzen, die auf den media_repository-Container anzuwenden sind.
         cpu: 2000m
         # -- (string) RAM Ressourcengrenzen, die auf den media_repository-Container anzuwenden sind.
-        memory: 3500Mi
+        memory: 2500Mi
       requests:
         # -- (string) Anforderungen an Rechenressourcen, die auf den media_repository-Container anzuwenden sind.
-        cpu: 1000m
+        cpu: 500m
         # -- (string) Anforderungen an RAM Ressourcen, die auf den media_repository-Container anzuwenden sind.
-        memory: 2500Mi
+        memory: 1500Mi
 
     # -- (object) Zusätzliche Konfiguration für die Worker
     extraConfig:
@@ -975,7 +975,7 @@ sygnal:
   securityContext:
     readOnlyRootFilesystem: true
 
-  ## Ressource Konfiguration für Sygnal server.
+  ## Ressource Konfiguration für Sygnal Server.
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.
