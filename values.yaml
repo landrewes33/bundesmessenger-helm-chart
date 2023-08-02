@@ -346,13 +346,25 @@ synapse:
   # -- (map) Labels, die auf den Haupt-Synapse-Container anzuwenden sind.
   labels: {}
 
-  # -- (list) Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind
+  # -- (list) Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind.
+  # Dies ist unter anderem für die Nutzung eines ausgehenden Proxies
+  # (https://matrix-org.github.io/synapse/latest/setup/forward_proxy.html) notwendig.
+  # Achtung: U.U. sind die gleichen Einstellungen zusätzlich unter "workers.default"
+  # bzw. für den Sygnal selbst zu konfigurieren.
+  # Der Sygnal muss in der "no_proxy" Ausnahme enthalten sein, da Synapse
+  # ihn sonst versucht via Proxy zu erreichen. Für die BuM Apps ist dies "push-local".
   # Beispiel:
   #  - name: LD_PRELOAD
   #    value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
   #  - name: SYNAPSE_CACHE_FACTOR
   #    value: "2"
-  extraEnv: []
+  #  - name: http_proxy
+  #    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"
+  #  - name: https_proxy
+  #    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"
+  #  - name: no_proxy
+  #    value: "*.cluster.local,push-local"
+  # extraEnv: []
 
   # -- (list) Zusätzliche in Synapse zu mountende Datenträger (Volumes)
   # Beispiel:
