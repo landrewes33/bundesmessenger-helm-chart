@@ -1,0 +1,1 @@
+Formatierung der JSON-Ausgabe von `/.well-known/matrix/server` mit `toPrettyJson`.

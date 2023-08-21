@@ -58,7 +58,7 @@ data:
 {{-   if .Values.wellknown.server }}
 {{ toJson .Values.wellknown.server | nindent 4 }}
 {{-   else }}
-{{ dict "m.server" (printf "%s:%d" (.Values.wellknown.host | default (.Values.publicServerName | default .Values.serverName)) (.Values.wellknown.port | default 443)) | toJson | indent 4 }}
+{{ dict "m.server" (printf "%s:%d" (.Values.wellknown.host | default (.Values.publicServerName | default .Values.serverName)) (.Values.wellknown.port | default 443)) | toPrettyJson | indent 4 }}
 {{-   end }}
   client.json: |-
 {{-   if .Values.wellknown.client }}
