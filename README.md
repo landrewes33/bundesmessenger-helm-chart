@@ -175,10 +175,14 @@ Für mehr Informationen nutzen Sie die öffentlich erreichbaren Dokumentationen:
 | --- |
 
 :pushpin: Alle möglichen Konfigurationswerte bzw. Parameter für das Helm Chart
-sind in der [`values.yaml`](./values.yaml) und in der
-[Dokumentation (/docs/standard_values.md)](docs/standard_values.md)
-beschrieben. Die ausführliche Dokumentation hierfür erfolgt zu einem späteren
-Zeitpunkt.
+sind in der [`values.yaml`](./values.yaml) aufgeführt.
+Die ausführliche Dokumentation hierfür erfolgt zu einem späteren Zeitpunkt.
+
+Weiterführende Links:
+
+- [Liste alle Konfigurationswerte mit Beschreibung](docs/standard_values.md)
+- [Mindestkonfiguration von Parametern](docs/requirements_poc.md#requirements-für-die-konfiguration)
+- [Kurzanleitung zur Installation einer Testumgebung](docs/installation_testumgebung.md)
 
 :pushpin: Getestet wird das Helm Chart auf einer Kubernetes-Infrastruktur mit einem
 [4-Node-Cluster](./docs/requirements_poc.md#maschinengröße) auf Basis von vanilla
