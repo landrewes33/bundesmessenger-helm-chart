@@ -231,7 +231,7 @@ Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
   und [BundesMessenger Container Registry](https://gitlab.opencode.de/bwi/bundesmessenger/backend/container-images/)
 - Bereitstellen des Helm Charts im eigenen Repository (`helm repo add`). In den
   Beispielen `bundesmessenger`. Alternativ die Installation des Helm Charts aus
-  dem Dateisystem (z.B. `./bundesmessenger/`).
+  dem Dateisystem (z.B. `./bundesmessenger/`) oder der OpenCoDE OCI-Registry.
 - ([Sub-)Domains mit dazugehörigen TLS-Zertifikaten](./docs/requirements_poc.md#hostnamendns)
   ([Sicherheitshinweis](https://github.com/matrix-org/synapse/blob/develop/README.rst#security-note))
   - Eine (Sub-)Domain für den Applikationsserver z.B.: `matrix.example.com`
