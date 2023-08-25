@@ -9,12 +9,17 @@ data:
   log.yaml: |
     version: 1
     formatters:
+      {{- if .Values.config.useStructuredLogging }}
+      structured:
+        class: synapse.logging.TerseJsonFormatter
+      {{- else }}
       precise:
-       format: '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(request)s - %(message)s'
+        format: '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(request)s - %(message)s'
+      {{- end }}
     handlers:
       console:
         class: logging.StreamHandler
-        formatter: precise
+        formatter: {{ if .Values.config.useStructuredLogging }}structured{{ else }}precise{{ end }}
     loggers:
       synapse:
         level: {{ .Values.config.logLevel | default "INFO" }}
