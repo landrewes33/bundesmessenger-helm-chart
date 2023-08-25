@@ -153,6 +153,11 @@ config:
   # Dokumentation: https://matrix-org.github.io/synapse/latest/structured_logging.html
   logLevel: INFO
 
+  ## Logging
+  # use TerseJsonFormatter structured logging
+  # Dokumentation: https://matrix-org.github.io/synapse/latest/structured_logging.html
+  useStructuredLogging: false
+
   # -- (object) Geben Sie hier zusätzliche Logger-Konfigurationen an.
   # Achtung: Wenn `synapse.storage.SQL`auf `level: DEBUG` erhöht wird, werden alle SQL-Abfragen protokolliert.
   # Diese enthalten sensible Informationen wie z.B. Zugriffstoken.
