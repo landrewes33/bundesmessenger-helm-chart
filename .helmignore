@@ -44,3 +44,4 @@ changelog.d/
 towncrier.toml
 /ci/
 pusher-values.yaml
+/docs/images/*.vsdx

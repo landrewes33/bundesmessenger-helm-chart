@@ -295,3 +295,16 @@ Set synapse_admin uri
     {{- end -}}
   {{- end -}}
 {{- end -}}
+
+
+{{/*
+Check networkpolicy requirements TBD CHECK POSTGRES
+*/}}
+{{- if .Values.networkpolicies.enabled }}
+  {{- if not .Values.postgresql.enabled -}}
+    {{- required "A host from the external Postgres instance (externalPostgresql.host) is required." .Values.externalPostgresql.host -}}
+  {{- end }}
+  {{- if not .Values.redis.enabled -}}
+    {{- required "A host from the external redis instance (externalRedis.host) is required." .Values.externalRedis.host -}}
+  {{- end }}
+{{- end }}
