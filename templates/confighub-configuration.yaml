@@ -63,27 +63,12 @@ data:
         }
       ]
     }
-
   maintenance.json: |
-    {
-      "downtime": [
-        {
-          "warning_start_time": "2022-12-14T11:00:00Z",
-          "start_time": "2022-12-23T11:00:00Z",
-          "end_time": "2022-12-24T20:00:00Z",
-          "type": "MAINTENANCE_STANDARD",
-          "description": "Weihnachtswartung 2022"
-        }
-      ],
-      "versions": {
-        "ios": {
-          "update_before": "1.17.0",
-          "warn_before": "1.19.0"
-        },
-        "android": {
-          "update_before": "1.17.0",
-          "warn_before": "1.19.0"
-        }
-      }
-    }
+    {{- if .Values.additionalConfig.maintenance }}
+{{ toPrettyJson .Values.additionalConfig.maintenance | indent 4 }}
+    {{- else }}
+{{ printf "{}" | indent 4 }}
+    {{- end }}
+
+
 {{- end -}}
