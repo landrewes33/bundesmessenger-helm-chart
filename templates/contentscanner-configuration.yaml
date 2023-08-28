@@ -84,7 +84,11 @@ data:
         # setting is provided, .well-known discovery is not used to determine the base URL
         # to use.
         # Optional, defaults to downloading files directly from their respective homeservers.
-        base_homeserver_url: 'http://{{ include "matrix-synapse.workername" (dict "global" . "worker" "media-repository") | default  (include "matrix-synapse.fullname" .) }}.{{ .Release.Namespace }}.svc:8083'
+        {{- if .Values.workers.media_repository.enabled }}
+        base_homeserver_url: 'http://{{ include "matrix-synapse.workername" (dict "global" . "worker" "media-repository") }}.{{ .Release.Namespace }}.svc:8083'
+        {{- else }}
+        base_homeserver_url: 'http://{{ include "matrix-synapse.fullname" . }}.{{ .Release.Namespace }}.svc:8008'
+        {{- end }}
 
         # HTTP(S) proxy to use when sending requests.
         # Optional, defaults to no proxy.
