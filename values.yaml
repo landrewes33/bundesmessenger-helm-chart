@@ -1885,47 +1885,51 @@ additionalConfig:
     # Wenn wellknown.enable oder confighub.enable deaktiviert sind, ist die
     # notwendige Konfiguration selbst vorzunehmen.
     enabled: true
-    # Die Nutzer werden mit diesen Informationen auf die bevorstehende geplante Downtime,
-    # bzw. auf die aktive Downtime, hingewiesen.
-    # Weiterhin besteht die Möglichkeit, die Nutzer zum Update des Clients zu motivieren bzw. zu zwingen.
-    # Die Konfiguration wird vom confighub ausgeliefert, daher ist es notwendig, dass
-    # `confighub.enable: true` gesetzt ist.
-    #
-    # downtime[]
-    #   warning_start_time: Startzeit der Warnmeldung (ISO 8601)
-    #                       Beispiele: 2023-08-06T14:00:00Z (UTC)
-    #                                  2009-01-01T12:00:00+01:00 (MEZ)
-    #                                  2009-06-30T18:30:00+02:00 (MESZ - Sommerzeit)
-    #   start_time:         Startzeit der Downtime (ISO 8601)
-    #   end_time:           Ende der Downtime (ISO 8601)
-    #   type:
-    #     MAINTENANCE:  Default Text in Anwendung für Wartungsfenster.
-    #                   Feld `description` wird zusätzlich darunter mit 1 Zeile Abstand angezeigt,
-    #                   wenn vorhanden
-    #     ADHOC_MESSAGE: Nur der Text aus dem Feld `description` wird angezeigt.
-    #   description:  optionaler Text zusätzlich zum Standard-Wartungstext
-    #   blocking:     Bei true werden Login und Requests vom Client blockiert (auch im eingeloggten Zustand)
-    #                 Requests auf die Maintenance-Schnittstelle werden nicht blockiert.
-    #
-    # versions: ios oder android (web unterstützt die Funktion aktuell nicht)
-    #   Für die Versionsangabe sind vollständige Versionsnummern (Major.Minor.Patch) anzugeben.
-    # update_before: die letzte Version, die gedulded wird, ältere müssen updaten
-    # warn_before: die letzte Version ohne Update-Hinweis, ältere sollten updaten
-# maintenance:
-#   downtime:
-#     - warning_start_time: "2022-12-14T11:00:00Z"
-#       start_time: "2022-12-23T11:00:00Z"
-#       end_time: "2022-12-24T20:00:00Z"
-#       type: "MAINTENANCE"
-#       description: "Weihnachtswartung 2022"
-#       blocking: true
-#   versions:
-#     ios:
-#       update_before: "1.17.0"
-#       warn_before: "1.19.0"
-#     android:
-#       update_before: "1.17.0"
-#       warn_before: "1.19.0"
+
+  # -- (map) Die Nutzer werden mit diesen Informationen auf die bevorstehende geplante Downtime,
+  # bzw. auf die aktive Downtime, hingewiesen.
+  # Weiterhin besteht die Möglichkeit, die Nutzer zum Update des Clients zu motivieren bzw. zu zwingen.
+  # Die Konfiguration wird vom confighub ausgeliefert, daher ist es notwendig, dass
+  # `confighub.enable: true` gesetzt ist.
+  #
+  # downtime[]
+  #   warning_start_time: Startzeit der Warnmeldung (ISO 8601)
+  #                       Beispiele: 2023-08-06T14:00:00Z (UTC)
+  #                                  2009-01-01T12:00:00+01:00 (MEZ)
+  #                                  2009-06-30T18:30:00+02:00 (MESZ - Sommerzeit)
+  #   start_time:         Startzeit der Downtime (ISO 8601)
+  #   end_time:           Ende der Downtime (ISO 8601)
+  #   type:
+  #     MAINTENANCE:  Default Text in Anwendung für Wartungsfenster.
+  #                   Feld `description` wird zusätzlich darunter mit 1 Zeile Abstand angezeigt,
+  #                   wenn vorhanden
+  #     ADHOC_MESSAGE: Nur der Text aus dem Feld `description` wird angezeigt.
+  #   description:  optionaler Text zusätzlich zum Standard-Wartungstext
+  #   blocking:     Bei true werden Login und Requests vom Client blockiert (auch im eingeloggten Zustand)
+  #                 Requests auf die Maintenance-Schnittstelle werden nicht blockiert.
+  #
+  # versions: ios oder android (web unterstützt die Funktion aktuell nicht)
+  #   Für die Versionsangabe sind vollständige Versionsnummern (Major.Minor.Patch) anzugeben.
+  # update_before: die letzte Version, die gedulded wird, ältere müssen updaten
+  # warn_before: die letzte Version ohne Update-Hinweis, ältere sollten updaten
+  #
+  # maintenance:
+  #   downtime:
+  #     - warning_start_time: "2022-12-14T11:00:00Z"
+  #       start_time: "2022-12-23T11:00:00Z"
+  #       end_time: "2022-12-24T20:00:00Z"
+  #       type: "MAINTENANCE"
+  #       description: "Weihnachtswartung 2022"
+  #       blocking: true
+  #   versions:
+  #     ios:
+  #       update_before: "1.17.0"
+  #       warn_before: "1.19.0"
+  #     android:
+  #       update_before: "1.17.0"
+  #       warn_before: "1.19.0"
+  maintenance: {}
+
 
 ######################################################################################
 ##          Konfiguration der Network Policies
