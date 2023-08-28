@@ -12,6 +12,7 @@ default_registry="registry.opencode.de"
 scriptDir=$(dirname $(readlink -f "${BASH_SOURCE:-$0}"))
 
 docs_output_file=$scriptDir/../docs/versions/v$version.md
+version_content=$(yq '.[]' $scriptDir/versions/v$version.yaml)
 
 
 # generate docs
