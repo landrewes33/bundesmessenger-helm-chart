@@ -1,0 +1,1 @@
+Kubectl auf Version `1.28.0` aktualisiert.
