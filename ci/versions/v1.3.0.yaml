@@ -1,0 +1,62 @@
+- version: 1.3.0
+  tag: v1.3.0
+  date: "2023-08-28"
+  images:
+    - name: Basis
+      version: 22.04
+      image: bwi/bundesmessenger/backend/container-images/ubuntu
+      tag: latest-jammy-production
+    - name: Webclient
+      version: 2.8.0
+      image: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
+      tag: 2.8.0-jammy-production
+    - name: ClamAV
+      version: 0.103.9
+      image: bwi/bundesmessenger/backend/container-images/clamav
+      tag: 0.103.9_dfsg-0ubuntu0.22.04.1-jammy-production
+    - name: cicap
+      version: 0.5.6
+      image: bwi/bundesmessenger/backend/container-images/icap
+      tag: 1_0.5.6-2build1-jammy-production
+    - name: Matrix-Content-Scanner
+      version: 1.0.3
+      image: bwi/bundesmessenger/backend/container-images/matrix-content-scanner
+      tag: 1.0.3-jammy-production
+    - name: Kubectl
+      version: 1.28.0
+      image: bwi/bundesmessenger/backend/container-images/kubectl
+      tag: 1.28.0-jammy-production
+    - name: Nginx
+      version: 1.18.0
+      image: bwi/bundesmessenger/backend/container-images/nginx
+      tag: 1.18.0-6ubuntu14.4-jammy-production
+    - name: Redis
+      version: 6.0.16
+      image: bwi/bundesmessenger/backend/container-images/redis
+      tag: 5_6.0.16-1ubuntu1-jammy-production
+    - name: Sygnal
+      version: 0.12.0
+      image: bwi/bundesmessenger/backend/container-images/sygnal
+      tag: 0.12.0-jammy-production
+    - name: Synapse
+      version: 1.78.0
+      image: bwi/bundesmessenger/backend/container-images/synapse
+      tag: 1.78.0-jammy-production
+    - name: Synapse-Admin
+      version: 0.8.7
+      image: bwi/bundesmessenger/backend/container-images/synapse-admin
+      tag: 0.8.7-jammy-production
+    - name: Connection-Tests
+      version: 1.21.2
+      image: bwi/bundesmessenger/backend/container-images/wget
+      tag: 1.21.2-jammy-production
+    - name: internalPostgresql
+      image: ig-bvc/demo-apps/postgresql/postgres
+      tag: 14
+  helm:
+    - name: redis
+      version: ^17.14.6
+      repository: oci://registry-1.docker.io/bitnamicharts
+    - name: postgresql
+      version: ^12.8.0
+      repository: oci://registry-1.docker.io/bitnamicharts
