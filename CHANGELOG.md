@@ -9,6 +9,21 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- towncrier release notes start -->
 ## BundesMessenger Helm Chart 1.3.0 (2023-08-28)
 
+### Versionshinweise
+
+1. Es wurde eine Korrektur von `selector`-Labels durchgeführt.
+Das führt dazu, dass ein Upgrade mit `helm upgrade` nicht möglich ist.
+Es muss ein `helm uninstall` und `helm install` erfolgen.
+:warning: **Um eine bestehende Installation weiter nutzen zu können bzw. 
+keine Daten zu verlieren, wird dringend empfohlen vorher das Update auf
+Version 1.2.3 durchzuführen. Dort wurden die Labels zur Persistenz von
+Media-Repository und ClamAV-PVCs neu gesetzt.**
+
+2. Das Feature der Implementierung der Network Policies ist im Standard
+deaktiviert und muss manuell aktiviert werden
+(`networkpolicies.enabled: true`).
+Sie befinden sich weiterhin in Arbeit und Review.
+
 ### ✨ Features
 
 - Überarbeitung des Monitorings im Zusammenhang mit dem Prometheus Operator.
