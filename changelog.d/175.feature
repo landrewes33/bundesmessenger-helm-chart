@@ -1,2 +1,0 @@
-Aktualisierung der Bitnami Sub-Charts auf redis `17.14.6` und postgres `12.8.0`.
-Gleichzeitig Umstellung auf die [Bitnami OCI-Registry](https://blog.bitnami.com/2023/04/httpsblog.bitnami.com202304bitnami-helm-charts-now-oci.html).

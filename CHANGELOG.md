@@ -7,6 +7,111 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.3.0 (2023-08-28)
+
+### ✨ Features
+
+- Überarbeitung des Monitorings im Zusammenhang mit dem Prometheus Operator.
+  Die Konfiguration `monitoringService` wird durch `monitoring.enabled`
+  ersetzt. (!124)
+- Hinzufügen von CORS Headern als default in die Ingress-Konfiguration. (!135)
+- Definition von Standardwerten für den Upload von Medien in Synapse
+  ([`max_upload_size:
+  50M`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#max_upload_size)
+  und [`max_avatar_size:
+  5M`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#max_avatar_size)).
+  (!140)
+- Erweiterung der `ScanFileTypes` des C-ICAP-Services für PDF und weiteren
+  Media-Support. (!141)
+- Grundkonfiguration vom Matrix-Content-Scanner zur Nutzung von `shred -u`
+  anstatt `srm` auf Grund von Performanceproblemen geändert. (!143)
+- TMP-Volumes werden als RAM-Disk konfiguriert. Zugewinn von Geschwindigkeit
+  und Korrektur der bereitgestellten Volume-Größen. (!144)
+- Möglichkeit zur Aktivierung von Location Sharing in den Clients.
+  Hierfür wird ein neuer Nginx-Container (`confighub`) und dessen Konfiguration
+  hinzugefügt.
+  Der neue Container übernimmt auch das Hosting der Wartungsschnittstelle
+  (`cmaintenance`). (!151)
+- Anpassung des Scanner-Scripts zur Beschleunigung des Scannens und Speichern
+  der Ergebnisse im Cache bei Virusfund. (!154)
+- Hinzufügen eines Demo-Workflow, der aus einem Cronjob zum zurücksetzen der
+  Datenbank und dem Schalter `demomode.enabled: true` besteht.
+  Erster Demomode ist ein kompletter Reset (`complete`). Der Demo-Workflow ist
+  nur Verfügbar für Kubernetes >= v1.21.0. (!156)
+- Hinzufügen der Pflichtangabe `imprintUrl` zum Angeben eines Impressums.
+  (!164)
+- Die Möglichkeit der Konfiguration von automatischen Löschen von Medien
+  Dateien (`extraConfig.media_retention`) hinzugefügt. (!166)
+- Mit `config.extraLoggers` kann das Logging von Synapse granularer
+  konfiguriert werden. Dies ersetzt den Wert `config.logLevelSQL`. (!168)
+- Hinzufügen des Bereichs `additionalConfig` für zusätzliche Konfigurationen
+  für den BundesMessenger (z.B. locationSharing). (!171)
+- Aktualisierung der Bitnami Sub-Charts auf redis `17.14.6` und postgres
+  `12.8.0`.
+  Gleichzeitig Umstellung auf die [Bitnami
+  OCI-Registry](https://blog.bitnami.com/2023/04/httpsblog.bitnami.com202304bitnami-helm-charts-now-oci.html).
+  (!175)
+- Support für `structured logging` hinzugefügt. (!182)
+- Erstellen und anwenden von Network Policies zum sichern des Deployments.
+  (!184)
+- ClamAV auf Version `0.103.9` aktualisiert.
+- Kubectl auf Version `1.28.0` aktualisiert.
+- Nginx auf Version `1.18.0` aktualisiert.
+- Webclient auf Version `2.8.0` aktualisiert.
+
+### 🐛 Bugfixes
+
+- Korrektur von `selector` Labels. Das führt dazu, dass ein **Upgrade mit `helm
+  upgrade` nicht möglich** ist. Es muss ein `helm uninstall` und `helm install`
+  erfolgen. (!125)
+- Anpassungen und Korrekturen zur Nutzung von Readiness/Liveness-Checks. (!157,
+  !159)
+- Behebt einen Fehler wodurch die Einstellungen für `wellknown`.`nodeSelector`,
+  `affinity` und `tolerations` nicht funktionierten. (!161)
+- Hinzufügen von `securityContext` zum `update-config` initContainer der
+  Worker-Pods. (!162)
+- Erhöhen der Temp-Verzeichnisgrößen von Media-Repository und Synapse-Main,
+  abhängig von `extraConfig.max_upload_size`. (!163)
+- `secure_backup_required` wird als Boolean in der `/.well-known/matrix/client`
+  ausgegeben. (!165)
+- Korrektur falscher Einrückungen von `nameOverride` und `fullnameOverride` in
+  der `values.yaml`. (!169)
+- Behebt ein Verbindungsproblem vom Matrix-Content-Scanner zu Synapse, wenn
+  kein Media Repository genutzt wird. (!183)
+
+### 📚 Dokumentation
+
+- Anleitung zur Installation einer einfachen Testumgebung hinzugefügt. (!160)
+- Beispielkonfiguration für die Nutzung eines ausgehenden Proxy-Servers für
+  Synapse in der `values.yaml` hinterlegt. (!172)
+
+### 📝 Weitere Änderungen
+
+- Konfiguration `generic` für Worker entfernt. Alle Worker sind [Synapse
+  Generic
+  Worker](https://matrix-org.github.io/synapse/latest/workers.html#synapseappgeneric_worker).
+  (!121)
+- Hinzufügen von SonarQube zur CI-Pipeline. (!138)
+- Release Script zur Verbesserung des Release-Prozesses hinzugefügt. (!147,
+  !186, !187, !188)
+- Nutzung von `printf` anstatt `echo -e` in Scripts. (!148)
+- Anpassung des Ablaufs der CI-Pipeline. (!149)
+- Script zum automatischen Aktualisieren der verwendeten Images im Helm Chart
+  hinzugefügt. (!150)
+- Aktualisierung von `node` auf `lts-alpine` in CI-Pipeline. (!153)
+- Anpassen der Ressourcen Limits für `synapse` und `synapse.workers`. (!170,
+  !180)
+- Aufnahme von Kubernetes `v1.27` in die Tests in der CI.
+  Kubernetes `v1.19` und `v1.21` entfallen dafür.
+  Die kleinste getestete Kubernetes Version ist `v1.23.17`
+  (auf Basis von
+  [kind](https://github.com/kubernetes-sigs/kind/releases/tag/v0.20.0)
+  `v0.20.0`). (!176)
+- Formatierung der JSON-Ausgabe von `/.well-known/matrix/server` mit
+  `toPrettyJson`. (!179)
+- Nicht benötigten Code bzw. Helper entfernt. (!185)
+
+
 ## BundesMessenger Helm Chart 1.2.3 (2023-06-26)
 
 ### 🐛 Bugfixes

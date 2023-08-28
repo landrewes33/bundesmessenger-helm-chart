@@ -1,4 +1,0 @@
-Aufnahme von Kubernetes `v1.27` in die Tests in der CI.
-Kubernetes `v1.19` und `v1.21` entfallen dafür.
-Die kleinste getestete Kubernetes Version ist `v1.23.17`
-(auf Basis von [kind](https://github.com/kubernetes-sigs/kind/releases/tag/v0.20.0) `v0.20.0`).

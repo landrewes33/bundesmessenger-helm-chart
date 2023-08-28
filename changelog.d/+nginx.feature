@@ -1,1 +1,0 @@
-Nginx auf Version `1.18.0` aktualisiert.
