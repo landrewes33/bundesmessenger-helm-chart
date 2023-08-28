@@ -75,9 +75,9 @@ printf "\n"
 while true; do
     read -p "Next version level: major (1), minor (2) or patch (3)? " yn
     case $yn in
-        [1]* ) major=$((major + 1)); minor=0; patch=0; branchprefix="release";source="main"; break;;
-        [2]* ) minor=$((minor + 1)); patch=0; branchprefix="release";source="main"; break;;
-        [3]* ) patch=$((patch + 1)); branchprefix="hotfix"; source="develop"; break;;
+        [1]* ) major=$((major + 1)); minor=0; patch=0; branchprefix="release";source="develop"; break;;
+        [2]* ) minor=$((minor + 1)); patch=0; branchprefix="release";source="develop"; break;;
+        [3]* ) patch=$((patch + 1)); branchprefix="hotfix"; source="main"; break;;
         * ) echo "Please answer with \"1\", \"2\" or \"3\".";;
     esac
 done
