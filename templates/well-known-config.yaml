@@ -56,13 +56,13 @@ data:
     }
   server.json: |-
 {{-   if .Values.wellknown.server }}
-{{ toJson .Values.wellknown.server | nindent 4 }}
+{{ toPrettyJson .Values.wellknown.server | nindent 4 }}
 {{-   else }}
 {{ dict "m.server" (printf "%s:%d" (.Values.wellknown.host | default (.Values.publicServerName | default .Values.serverName)) (.Values.wellknown.port | default 443)) | toPrettyJson | indent 4 }}
 {{-   end }}
   client.json: |-
 {{-   if .Values.wellknown.client }}
-{{ toJson .Values.wellknown.client | nindent 4 }}
+{{ toPrettyJson .Values.wellknown.client | nindent 4 }}
 {{-   else }}
     {
       "m.homeserver": {
@@ -73,7 +73,7 @@ data:
         "secure_backup_setup_methods": ["passphrase"],
         "outbound_keys_pre_sharing_mode": "on_room_opening"
       },
-      {{- if .Values.config.locationSharing }}
+      {{- if .Values.additionalConfig.locationSharing.enabled }}
       "m.tile_server": {
         "map_style_url": "{{- printf "https://%s" ( .Values.publicServerName | default .Values.serverName ) }}/_matrix/cconfig/style.json"
       },
@@ -90,7 +90,7 @@ data:
 {{-     if $value | kindIs "string" -}}
     {{ $value | nindent 4 }}
 {{-     else -}}
-    {{ $value | toJson | nindent 4 }}
+    {{ $value | toPrettyJson | nindent 4 }}
 {{-     end -}}
 {{-   end -}}
 {{- end -}}
