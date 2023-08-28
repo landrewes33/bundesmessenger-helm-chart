@@ -138,10 +138,10 @@ while true; do
     read -p "Would you like update used images/tag? (ask/auto/no) " yn
     case $yn in
         ask* )
-            $scriptDir/ci/get_newest_image_tags.sh -f $nextVersion -t ask
+            $scriptDir/get_newest_image_tags.sh -f $nextVersion -t ask
             break;;
         auto* )
-            $scriptDir/ci/get_newest_image_tags.sh -f $nextVersion -t update
+            $scriptDir/get_newest_image_tags.sh -f $nextVersion -t update
             break;;
         [Nn]* ) break;;
         * ) echo "Please answer yes or no.";;
