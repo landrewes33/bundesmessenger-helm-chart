@@ -1,0 +1,53 @@
+{{- if .Values.networkpolicies.enabled }}
+{{- if .Values.sygnal.enabled }}
+{{- $component := "matrix-sygnal" -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-{{ $component }}-allow-ingress-synapse
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: {{ $component }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+          {{- if .Values.workers.pusher.enabled }}
+            app.kubernetes.io/component: pusher
+          {{- else }}
+            app.kubernetes.io/component: matrix-synapse
+          {{- end }}
+      ports:
+      - protocol: TCP
+        port: 5000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-{{ $component }}-allow-egress-push-services
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: {{ $component }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+      ports:
+      {{- if .Values.sygnal.proxy }}
+      - protocol: TCP
+        port: {{ (splitList ":" .Values.sygnal.proxy) | last }}
+      {{- else }}
+      - protocol: TCP
+        port: 443
+      - protocol: TCP
+        port: 2197
+      {{- end }}
+{{- end }}
+{{- end }}

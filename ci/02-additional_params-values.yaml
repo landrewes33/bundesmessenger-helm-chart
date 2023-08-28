@@ -54,6 +54,9 @@ wellknown:
 postgresql:
   enabled: true
 
+networkpolicies:
+  enabled: true
+
 # optional pullSecrets
 # image:
 #   pullSecrets:
