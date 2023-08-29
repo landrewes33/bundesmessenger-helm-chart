@@ -24,11 +24,11 @@ image:
   # imagePullPolicy „Always“, wenn tag ist „latest“ (imagepullpolicy-always.yaml)
   pullPolicy: IfNotPresent
 
-  # -- (string) Überschreibt einen Teil des installierten Namens, behält aber den Releasenamen bei.
-  nameOverride: ""
+# -- (string) Überschreibt einen Teil des installierten Namens, behält aber den Releasenamen bei.
+nameOverride: ""
 
-  # -- (string) Überschreiben Sie den vollständigen Namen des installierten Charts.
-  fullnameOverride: ""
+# -- (string) Überschreiben Sie den vollständigen Namen des installierten Charts.
+fullnameOverride: ""
 
 
 # -- (string) Der Matrix-Domänenname, der für den Domänenteil in Ihren MXIDs verwendet wird.
@@ -40,24 +40,39 @@ serverName: ""
 # @default -- Nicht gesetzt
 publicServerName: ""
 
-# -- (string) Eine URL unter der der Nutzer sich Datenschutzbestimmungen einsehen kann.
+# -- (string) Eine URL (ohne "https://") unter der der Nutzer sich Datenschutzbestimmungen einsehen kann.
 # Diese Datenschutzbestimmungen muss jeder Anbieter selbst dem Nutzer zur Verfügung stellen.
 # Die Mobil-Apps nutzen dies, um die Datenschutzbestimmungen per Webaufruf
 # dem Nutzer anzeigen zu lassen.
 # @default -- Nicht gesetzt, aber Voraussetzung!
 dataPrivacyUrl: ""
 
+# -- (string) Eine URL (ohne "https://") unter der der Nutzer das Impressum einsehen kann.
+# Dieses Impressum muss jeder Anbieter selbst dem Nutzer zur Verfügung stellen.
+# Die Mobil-Apps nutzen dies, um das Impressum dem Nutzer anzeigen zu lassen.
+# @default -- Nicht gesetzt, aber Voraussetzung!
+imprintUrl: ""
+
 # -- (string) Der Servername für die Admin-API  "/_synapse/admin" und alle anderen
 # APIs, die für alle administrativen Konfigurationen im Ingress verwendet werden.
 # Wenn synapse_admin.enable ist und synapse_admin.uri unterschiedlich von adminAPIServerName,
 # dann wird dort nur der Synapse_admin erreichbar sein.
 # Schnittstellen zum konfigurieren, werden nur über adminAPIServerName zur Verfügung gestellt.
-# @default  -- Nicht gesetzt, aber Voraussetzung!
+# @default -- Nicht gesetzt, aber Voraussetzung!
 adminAPIServerName: ""
 
-# -- (bool) Aktivieren des Monitoringservices für Synapse-Dienste in Prometheus
-# @default -- false
-monitoringService: false
+## Monitoring mit Prometheus
+## Grafana-Dashboards
+##   Synapse: https://github.com/matrix-org/synapse/blob/develop/contrib/grafana/synapse.json
+##   Sygnal: https://github.com/matrix-org/sygnal/blob/main/contrib/grafana/Sygnal.json
+monitoring:
+  # -- (bool) Aktivieren des Monitorings für Synapse-Dienste in Prometheus
+  # @default -- false
+  enabled: false
+  # -- (map) Labels, die Prometheus Operator als matchLabels benutzt (podMonitorSelector, ruleSelector)
+  # um den PodMonitor und die PrometheusRule zu aktivieren.
+  # `kubectl get Prometheus --all-namespaces -o jsonpath='{.items[*].spec.podMonitorSelector.matchLabels}'`
+  labels: {}
 
 # -- (string) Anzeigename des Servers in Webclients
 # @default -- Messenger deiner Organisation
@@ -98,7 +113,7 @@ signingkey:
     # finaler Tag kann sich noch ändern
     publishImage:
       repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl
-      tag: 1.25.4-jammy-production
+      tag: 1.28.0-jammy-production
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
@@ -122,26 +137,34 @@ signingkey:
 # @default -- false
 ipv4Only: true
 
-## Matrix-Konfigurationswerte, die sich auf andere Teile des Charts auswirken, für jeden
-## Wert, der nicht von diesem Block behandelt wird, sollten Sie ihn stattdessen in
-## extraConfig unten einstellen.
+## Matrix-Konfigurationswerte, die sich auf andere Teile des Charts auswirken.
+## Jeden Wert, der nicht von diesem Block behandelt wird, sollten Sie stattdessen in
+## im Abschnitt `extraConfig` unten einstellen.
 ## Ref: https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html
 ##
 config:
   # -- (string) Die öffentlich zugängliche URL für die Synapse-Instanz
   # lautet standardmäßig `https://<publicServerName>`
   # Beispiel:
-  # publicBaseurl: 'https://matrix.example.com'
+  # publicBaseurl: "https://matrix.example.com"
 
   # -- (string) Das Loglevel für Synapse und alle `loggers` Module.
   # Mit Ausnahme von `synapse.storage.SQL`, welches aus Sicherheitsgründen zusätzlich geändert werden muss.
   # Dokumentation: https://matrix-org.github.io/synapse/latest/structured_logging.html
   logLevel: INFO
 
-  # -- (string) Das Loglevel für `synapse.storage.SQL`.
-  # Achtung: Wenn dieser Wert auf `DEBUG` erhöht wird, werden alle SQL-Abfragen protokolliert.
+  ## Logging
+  # use TerseJsonFormatter structured logging
+  # Dokumentation: https://matrix-org.github.io/synapse/latest/structured_logging.html
+  useStructuredLogging: false
+
+  # -- (object) Geben Sie hier zusätzliche Logger-Konfigurationen an.
+  # Achtung: Wenn `synapse.storage.SQL`auf `level: DEBUG` erhöht wird, werden alle SQL-Abfragen protokolliert.
   # Diese enthalten sensible Informationen wie z.B. Zugriffstoken.
-  logLevelSQL: INFO
+  # Ref: https://matrix-org.github.io/synapse/latest/structured_logging.html
+  extraLoggers:
+    synapse.storage.SQL:
+      level: WARNING
 
   # -- (bool) Erfassung Nutzungsstatistiken (Hostname, Synapse-Version und -Uptime, total_users usw.) an die Entwickler melden
   reportStats: false
@@ -173,8 +196,8 @@ config:
   # -- (string) Hinweis: Es wird dringend empfohlen, diesen Wert auf einen secure value (secret) zu setzen.
   macaroonSecretKey: ""
 
-  # -- (map) Eine Gruppe von vertrauenswürdigen Servern, die zu kontaktieren sind, wenn ein anderer Server nicht auf eine
-  # Signierschlüssel-Anfrage antwortet.
+  # -- (map) Eine Gruppe von vertrauenswürdigen Servern, die zu kontaktieren sind,
+  # wenn ein anderer Server nicht auf eine Signierschlüssel-Anfrage antwortet.
   trustedKeyServers:
     - server_name: matrix.org
   #   verify_keys:
@@ -189,10 +212,24 @@ config:
 # -- (object) Beliebige weitere Synapse-Konfiguration
 # Vorkonfiguriert nach Best Practise BWI GmbH:
 # Ref: https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html
-# @default -- wird nachfolgend aufgeschlüsselt
 extraConfig:
   # old_signing_keys:
   #   "ed25519:id": { key: "base64string", expired_ts: 123456789123 }
+  # -- (string) Maximale Dateigröße für Uploads von Medien.
+  # Zu beachten ist, dass dies auch vom Reverse Proxy erlaubt werden muss, siehe:
+  # "ingress.annotations: nginx.ingress.kubernetes.io/proxy-body-size"
+  max_upload_size: 50M
+  # -- (string) Die maximale zulässige Dateigröße für ein Benutzer-Profilbild.
+  max_avatar_size: 5M
+  # -- (object) Angabe wann Medien von Repository gelöscht werden. Für die Zeitdauer gilt
+  # das Datum des letzten Zugriffs / Downloads.
+  media_retention:
+    # -- (string) Zeitdauer wie lange eigene Medien vorgehalten werden. Wenn sie gelöscht
+    # werden, sind sie für den Benutzer nicht mehr abrufbar.
+    # local_media_lifetime: 180d
+    # -- (string) Zeitdauer wie lange Medien von fremden Servern im Cache vorgehalten werden.
+    # Bei Bedarf werden diese vom remote Server erneut heruntergeladen.
+    remote_media_lifetime: 90d
   # -- (bool) Authentifizierung notwendig für User-Suche
   require_auth_for_profile_requests: true
   # -- (bool) Limitiere Requests für Nutzer mit shared rooms, abgeschaltet
@@ -303,22 +340,30 @@ synapse:
     type: RollingUpdate
 
   # -- (map) Annotations, die auf den Haupt-Synapse-Container anzuwenden sind.
-  # Beispiel: (Bundesmessenger lässt alle Services automatisch an Prometheus anbinden)
-  #  prometheus.io/scrape: "true"
-  #  prometheus.io/path: "/_synapse/metrics"
-  #  prometheus.io/port: "9090"
   annotations: {}
 
   # -- (map) Labels, die auf den Haupt-Synapse-Container anzuwenden sind.
   labels: {}
 
-  # -- (list) Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind
+  # -- (list) Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind.
+  # Dies ist unter anderem für die Nutzung eines ausgehenden Proxies
+  # (https://matrix-org.github.io/synapse/latest/setup/forward_proxy.html) notwendig.
+  # Achtung: U.U. sind die gleichen Einstellungen zusätzlich unter "workers.default"
+  # bzw. für den Sygnal selbst zu konfigurieren.
+  # Der Sygnal muss in der "no_proxy" Ausnahme enthalten sein, da Synapse
+  # ihn sonst versucht via Proxy zu erreichen. Für die BuM Apps ist dies "push-local".
   # Beispiel:
   #  - name: LD_PRELOAD
   #    value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
   #  - name: SYNAPSE_CACHE_FACTOR
   #    value: "2"
-  extraEnv: []
+  #  - name: http_proxy
+  #    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"
+  #  - name: https_proxy
+  #    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"
+  #  - name: no_proxy
+  #    value: "*.cluster.local,push-local"
+  # extraEnv: []
 
   # -- (list) Zusätzliche in Synapse zu mountende Datenträger (Volumes)
   # Beispiel:
@@ -379,14 +424,14 @@ synapse:
       # -- (string) Rechenressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
       cpu: 1000m
       # -- (string) RAM Ressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
-      memory: 2500Mi
+      memory: 2000Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
       cpu: 500m
       # -- (string) Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
       memory: 1000Mi
 
-  # Healthcheck
+  ## Healthcheck
   livenessProbe:
     periodSeconds: 10
     httpGet:
@@ -395,7 +440,7 @@ synapse:
       # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks
       port: metrics
 
-  # Bereitschaftscheck
+  ## Bereitschaftscheck
   readinessProbe:
     periodSeconds: 3
     httpGet:
@@ -457,15 +502,9 @@ synapse:
 ## https://matrix-org.github.io/synapse/latest/workers.html
 ##
 workers:
-  # -- (map) Annotations, die auf die Synapse-Worker-Container anzuwenden sind.
+
   # Standardkonfiguration, diese wird an alle Worker vererbt und kann auch
   # für jeden Workertyp überschrieben werden.
-  # Beispiel: (Bundesmessenger lässt alle Services automatisch an Prometheus anbinden)
-  #  prometheus.io/scrape: "true"
-  #  prometheus.io/path: "/_synapse/metrics"
-  #  prometheus.io/port: "9090"
-  annotations: {}
-
   default:
     # -- (int) DEFAULT Die Anzahl der Worker-Replikate.
     # Beachten Sie, dass einige Worker eine besondere Behandlung erfordern.
@@ -483,16 +522,12 @@ workers:
     # -- (string)  Ein spezifischer Name für diesen Worker, kann nicht global gesetzt werden.
     # Beachten Sie, dass dies nur gesetzt werden kann, wenn replicaCount 1 ist.
     # (wird in den Worker überschrieben, ist hier nur aus historischen Gründen noch enthalten)
-    # name:
+    name: nil
 
-    ## Zusätzliche Konfiguration für die Worker, kann nicht global gesetzt werden.
-    # extraConfig: {}
+    # -- (object) Zusätzliche Konfiguration für die Worker.
+    extraConfig: {}
 
     # -- (map) DEFAULT Annotations, die auf alle Synapse-Worker-Container anzuwenden sind.
-    # Beispiel: (Bundesmessenger lässt alle Services automatisch an Prometheus anbinden)
-    #  prometheus.io/scrape: "true"
-    #  prometheus.io/path: "/_synapse/metrics"
-    #  prometheus.io/port: "9090"
     annotations: {}
 
     # -- (list) DEFAULT Zusätzliche Umgebungsvariablen, die auf alle Synapse-Worker-Container anzuwenden sind
@@ -547,11 +582,11 @@ workers:
         # -- (string) Rechenressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
         # Empfohlen gesondert zu verwalten
-        cpu: 500m
+        cpu: 600m
         # -- (string) RAM Ressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
         # Empfohlen gesondert zu verwalten
-        memory: 200Mi
+        memory: 768Mi
       requests:
         # -- (string) Anforderungen an Rechenressourcen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
@@ -560,9 +595,9 @@ workers:
         # -- (string) Anforderungen an RAM Ressourcen, die auf alle Synapse-Worker-Container anzuwenden sind.
         # DEFAULT gilt für alle Synapse-Worker-Container.
         # Empfohlen gesondert zu verwalten
-        memory: 128Mi
+        memory: 150Mi
 
-    # Healthcheck
+    ## Healthcheck
     livenessProbe:
       periodSeconds: 10
       httpGet:
@@ -573,7 +608,7 @@ workers:
         # DEFAULT gilt für alle Synapse-Worker-Container.
         port: metrics
 
-    # Bereitschaftscheck
+    ## Bereitschaftscheck
     readinessProbe:
       periodSeconds: 3
       httpGet:
@@ -616,10 +651,6 @@ workers:
   generic_worker:
     # -- (bool) Aktivieren von Workern
     enabled: true
-    # -- (bool) Aktivieren des generischen Workers (kann alle Aufgaben übernehmen)
-    # spezifische Aufgaben können spezifischen Workern übergeben werden
-    # z.B. Media Repo
-    generic: true
     # -- (list) entsprechende Endpunkte für den generischen Worker
     listeners: [client, federation]
     # -- (list) Pfade für die Ingress-Konfiguration des Workers, mit 'publicServerName' Domain gesetzt
@@ -755,8 +786,6 @@ workers:
     # Wenn dieser Worker genutzt wird, können die URLs aus dem
     # generic_worker entfernt werden.
     enabled: false
-    # -- (bool) Wird aus dem generischen Worker abgeleitet
-    generic: true
     # -- (list) Zusätzliche Listener für Föderationsworker
     listeners: [federation]
     # -- (path) Server-Side Pfade für die Ingress-Konfiguration des Föderations-Workers
@@ -792,22 +821,16 @@ workers:
     # Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden
     # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
     enabled: false
-    # -- (bool) Wird aus dem generischen Worker abgeleitet
-    generic: true
 
   appservice:
     # -- (bool) Dieser Worker sorgt für das Senden von Daten an registrierte Anwendungsdienste.
     # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
-    # -- (bool) Wird aus dem generischen Worker abgeleitet
-    generic: true
 
   federation_sender:
     # -- (bool) Dieser Worker sendet Verbundverkehrs (federation traffic)
     # an andere Matrix-Server.
     enabled: false
-    # -- (bool) Wird aus dem generischen Worker abgeleitet
-    generic: true
 
   media_repository:
     # -- (bool) Aktivieren des Media-Worker
@@ -835,13 +858,16 @@ workers:
         # -- (string) Rechenressourcengrenzen, die auf den media_repository-Container anzuwenden sind.
         cpu: 2000m
         # -- (string) RAM Ressourcengrenzen, die auf den media_repository-Container anzuwenden sind.
-        memory: 3500Mi
+        memory: 2500Mi
       requests:
         # -- (string) Anforderungen an Rechenressourcen, die auf den media_repository-Container anzuwenden sind.
-        cpu: 1000m
+        cpu: 500m
         # -- (string) Anforderungen an RAM Ressourcen, die auf den media_repository-Container anzuwenden sind.
-        memory: 2500Mi
+        memory: 1500Mi
 
+    # -- (object) Zusätzliche Konfiguration für die Worker
+    extraConfig:
+      enable_media_repo: true
 
   ## Dieser Worker aktualisiert das Benutzerverzeichnis und kann auch darin suchen
   ## Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der Worker optional.
@@ -850,8 +876,6 @@ workers:
     # Hinweis: Damit kann Last vom generischen bzw. Haupt-Worker genommen werden
     # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
-    # -- (bool) Wird aus dem generischen Worker abgeleitet
-    generic: true
     # -- (list) Zusätzliche Listener für NutzerSuch-Worker
     listeners: [client]
     # -- (list) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers, mit 'publicServerName' Domain gesetzt
@@ -863,8 +887,6 @@ workers:
     # -- (bool) Aktivieren des Background-Workers
     # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
-    # -- (bool) Wird aus dem generischen Worker abgeleitet
-    generic: true
 
 persistence:
   # -- (bool) Aktivieren der Persistenz-Konfiguration für die Medien-Repository-Funktion.
@@ -928,7 +950,8 @@ service:
 ######################################################################################
 ##          Konfiguration für Sygnal
 ######################################################################################
-# Reference: https://github.com/matrix-org/sygnal
+## Reference: https://github.com/matrix-org/sygnal
+
 sygnal:
   # -- (bool) Aktivieren des Sygnal-Container
   enabled: false
@@ -938,7 +961,10 @@ sygnal:
     tag: 0.12.0-jammy-production
     pullPolicy: IfNotPresent
 
-  # -- (string) Proxy, falls benötigt um die Push-Services zu erreichen. Auskommentieren oder leer für Deaktivierung
+  # -- (string) Proxy, falls benötigt um die Push-Services zu erreichen.
+  # Auskommentieren oder leer lassen für die Benutzung ohne Proxy.
+  # Die Angabe des Zielports beim Proxy ist für die Generierung der
+  # Network Policies zwingend erforderlich
   proxy: ""
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
@@ -963,8 +989,7 @@ sygnal:
   securityContext:
     readOnlyRootFilesystem: true
 
-  ## Ressource Konfiguration für Sygnal server.
-  ##
+  ## Ressource Konfiguration für Sygnal Server.
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.
@@ -977,21 +1002,23 @@ sygnal:
       # -- (string) Anforderungen an RAM Ressourcen, die auf den Sygnal-Container anzuwenden sind.
       memory: 45Mi
 
-  # Healthcheck
+  ## Healthcheck
   livenessProbe:
+    periodSeconds: 10
     httpGet:
       # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
       path: /health
       # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks
-      port: http
+      port: sygnal-port
 
-  # Bereitschaftscheck
+  ## Bereitschaftscheck
   readinessProbe:
+    periodSeconds: 3
     httpGet:
       # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
       path: /health
       # -- (string) Konfiguration des Ports vom Bereitschaftscheck
-      port: http
+      port: sygnal-port
 
   # -- (object) Node Selektor Konfiguration für Sygnal-Container.
   nodeSelector: {}
@@ -1042,8 +1069,10 @@ wellknown:
   server: {}
 
   # -- (object) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
-  # Die Angabe des Objektes de.bwi{data_privacy_url: https://dsgvo.example.com} ist verpflichtend,
-  # wenn keine .Values.dataPrivacyUrl angegeben wurde und auf den WellKnown-Server verzichtet wird.
+  # Die Angabe des Objektes "de.bwi": {"data_privacy_url": "https://example.com/privacy",
+  # "imprintUrl": "https://example.com/imprint"} ist verpflichtend,
+  # wenn keine .Values.dataPrivacyUrl und .Values.imprintUrl angegeben wurde
+  # und auf den WellKnown-Server verzichtet wird.
   # Beispiel:
   #  io.element.e2ee:
   #    secure_backup_required: true
@@ -1052,7 +1081,8 @@ wellknown:
   #  m.homeserver:
   #    base_url: https://matrix.example.com
   #  de.bwi:
-  #    data_privacy_url: https://dsgvo.example.com
+  #    data_privacy_url: https://example.com/privacy
+  #    imprintUrl: https://example.com/imprint
   client: {}
 
   # -- (map) Zusätzliche Daten, die unter .well-known/matrix/<data> bereitgestellt werden
@@ -1067,7 +1097,7 @@ wellknown:
   extraData: {}
 
   # -- (path) Ein benutzerdefinierter htdocs-Pfad, der nützlich ist, wenn ein anderes Image ausgeführt wird.
-  # @default /usr/share/nginx/html (nginx)
+  # @default -- /usr/share/nginx/html (nginx)
   htdocsPath: /usr/share/nginx/html
 
   # -- (map) Das Webserver Image
@@ -1076,7 +1106,7 @@ wellknown:
   #   - myRegistryKeySecretName
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx
-    tag: 1.18.0-6ubuntu14.3-jammy-production
+    tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
@@ -1117,22 +1147,91 @@ wellknown:
   # -- (object) Affinitäts-Konfiguration für well-known server.
   affinity: {}
 
+
+######################################################################################
+##          Konfiguration für ConfigurationHub-Server
+######################################################################################
+## Dies wird einen NginX-Server einrichten, der notwendige
+## Dateien zur Konfiguration und Information der Clients ausliefert
+## und die nicht zum Matrix / Synapse-Server gehören
+
+confighub:
+  # -- (bool) Aktivierung des ConfigHub-Container
+  enabled: true
+
+  # -- (map) Zusätzliche Daten, die unter /_matrix/cconfig/<data> bereitgestellt werden
+  # Dictionaries werden in JSON umgewandelt, einfache Strings werden direkt ausgeliefert
+  # Beispiel siehe wellknown-Konfiguration
+  extraData: {}
+
+  # -- (path) Ein benutzerdefinierter htdocs-Pfad, der nützlich ist, wenn ein anderes Image ausgeführt wird.
+  # @default -- /usr/share/nginx/html (nginx)
+  htdocsPath: /usr/share/nginx/html
+
+  # -- (map) Das Webserver Image
+  # optional:
+  # pullSecrets:
+  #   - myRegistryKeySecretName
+  image:
+    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx
+    tag: 1.18.0-6ubuntu14.4-jammy-production
+    pullPolicy: IfNotPresent
+
+  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # weitere Möglichkeiten:
+  #  fsGroup: 1001
+  podSecurityContext:
+    runAsGroup: 1001
+    runAsUser: 1001
+
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  # weitere Möglichkeiten:
+  #  capabilities:
+  #    drop:
+  #    - ALL
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+
+  ## Ressource Konfiguration für confighub.
+  resources:
+    limits:
+      # -- (string) Rechenressourcengrenzen, die auf den confighub anzuwenden sind.
+      cpu: 5m
+      # -- (string) RAM Ressourcengrenzen, die auf den confighub anzuwenden sind.
+      memory: 15Mi
+    requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf den confighub anzuwenden sind.
+      cpu: 5m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den confighub anzuwenden sind.
+      memory: 15Mi
+
+  # -- (object) Node Selektor Konfiguration für confighub.
+  nodeSelector: {}
+
+  # -- (list) Tolerations/Tains Konfiguration für confighub.
+  tolerations: []
+
+  # -- (object) Affinitäts-Konfiguration für confighub.
+  affinity: {}
+
+
 ######################################################################################
 ##          Konfiguration für Postgres Server
 ######################################################################################
 ## Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht,
 ## Wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie
 ## enabled auf false setzen und den externalPostgresql-Block konfigurieren.
-##
+
 postgresql:
   # -- (bool) Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht,
   # Wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie
   # enabled auf false setzen und den externalPostgresql-Block konfigurieren.
-  # @default: false da externe DB vorausgesetzt wird
+  # @default -- false da externe DB vorausgesetzt wird
   enabled: false
 
   # -- (map) Das PostgreSQL Image
-  # @default: WIRD NICHT EMPFOHLEN!!
+  # @default -- WIRD NICHT EMPFOHLEN!!
   image:
     registry: registry.opencode.de
     repository: ig-bvc/demo-apps/postgresql/postgres
@@ -1227,7 +1326,7 @@ externalPostgresql:
 ## Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
 ## Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
 ## false setzen und den externalRedis-Block konfigurieren.
-##
+
 redis:
   image:
     registry: registry.opencode.de
@@ -1320,7 +1419,7 @@ externalRedis:
 ## das gesamte Routing einzurichten, das für die Verwendung mit einer gesplitteten Synapse-Instanz erforderlich ist.
 ## Wenn Sie keinen Ingress-kompatiblen K8s-Ingress verwenden, müssen Sie
 ## stattdessen Ihr eigenes Routing einrichten.
-##
+
 ingress:
   # -- (bool) Aktiviert Ingress-Konfiguration
   enabled: true
@@ -1329,14 +1428,20 @@ ingress:
   # UNGETESTET!
   traefikPaths: false
 
-  ## Annotations to apply to the created ingress resource.
-  ##
+  # -- (map) Annotations zur Konfiguration des Ingress.
   annotations:
-    # -- (bool) Annotiation um Regex-Regeln nutzen zu können
+    ## Annotiation um Regex-Regeln nutzen zu können
     nginx.ingress.kubernetes.io/use-regex: "true"
-    # -- (string) Annotiation, um Body-size zu vergößern (Default Limit 1 oder 10MB)
+    ## Annotiation, um Body-size zu vergößern (Default Limit 1 oder 10MB)
     nginx.ingress.kubernetes.io/proxy-body-size: 50m
     nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
+    ## Folgende Einträge sind für Cross-origin resource sharing wichtig
+    ## Da mehrere FQDN genutzt werden, ist die Nutzung "best practise"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    ## Folgende Einträge sind bei der Nutzung des Cert-Managers mit lets-encrypt notwendig:
   #  kubernetes.io/ingress.class: nginx
   #  kubernetes.io/tls-acme: "true"
 
@@ -1419,9 +1524,11 @@ ingress:
   # HINWEIS: Wir setzen dem Nginx voraus, da wir auch die entsprechenden Annotiations setzen
   className: nginx
 
+
 ######################################################################################
 ##          Konfiguration für Matrix-Content-Scanner
 ######################################################################################
+
 contentscanner:
   # -- (bool) Aktivieren des Matrix-Content-Scanner
   # Mittelsmann zwischen AV und Matrix-Synapse
@@ -1466,13 +1573,14 @@ contentscanner:
 ######################################################################################
 ##          Konfiguration für ClamAV
 ######################################################################################
+
 schadcodescanner:
   # -- (bool) Aktivieren des ClamAV-Container
   enabled: false
   # -- (map) Konfiguration des ClamAV-Image/Repository
   imageclamav:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/clamav
-    tag: 0.103.8_dfsg-0ubuntu0.22.04.1-jammy-production
+    tag: 0.103.9_dfsg-0ubuntu0.22.04.1-jammy-production
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
   imagecicap:
@@ -1504,8 +1612,7 @@ schadcodescanner:
   extraEnv: []
 
   service:
-    # -- (int) der Port des ClamAV Pods, wird im Service übertragen
-    # @default: 1344 der Port vom c-icap-Server
+    # -- (int) der Port des ClamAV Pods (c-icap-Server), wird im Service übertragen
     port: 1344
 
   freshclam:
@@ -1513,7 +1620,9 @@ schadcodescanner:
     # Erzeugt eine Liste von "PrivateMirror" in der freshclam.conf
     # https://docs.clamav.net/appendix/CvdPrivateMirror.html#use-freshclam-to-serve-only-whole-database-files-from-a-private-mirror
     # Der Standard-Updateserver ("DatabaseMirror") ist "database.clamav.net" und wird
-    # durch das Konfigurieren eines privaten Mirros automatisch überschrieben.
+    # durch das Konfigurieren eines privaten Mirrors automatisch überschrieben.
+    # Die Angabe des Zielports beim Mirror ist für die Generierung der
+    # Network Policies zwingend erforderlich
     mirrors: []
     # - clamav-private-mirror:8000
   # -- (int) Anzahl der ClamAV-Pods
@@ -1598,14 +1707,15 @@ schadcodescanner:
     runAsGroup: 1112
     readOnlyRootFilesystem: true
 
+
 ######################################################################################
 ##          Konfiguration für CoTurn
 ######################################################################################
-# Standard: wenn aktiviert, wird CoTurn unter dem Standard-Namensraum bereitgestellt,
-# um von mehr als einer Instanz als CoTurn/STUN Server verwendet zu werden
-# Wenn `coturn.enabled=true` und `coturn.existingcoturn=true` ebenfalls,
-# wird das Deployment so konfiguriert, dass er als Dienst unter dem Namespace 'coturn.default_ns'
-# deployed wird
+## Standard: wenn aktiviert, wird CoTurn unter dem Standard-Namensraum bereitgestellt,
+## um von mehr als einer Instanz als CoTurn/STUN Server verwendet zu werden
+## Wenn `coturn.enabled=true` und `coturn.existingcoturn=true` ebenfalls,
+## wird das Deployment so konfiguriert, dass er als Dienst unter dem Namespace 'coturn.default_ns'
+## deployed wird
 
 coturn:
   # -- (bool) CoTurn als Deployment aktivieren
@@ -1718,7 +1828,7 @@ webclient:
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.4.0-jammy-production
+    tag: 2.8.0-jammy-production
     pullPolicy: IfNotPresent
   annotations:
     nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -1755,6 +1865,92 @@ webclient:
       cpu: 50m
       # -- (string) Anforderungen an RAM Ressourcen, die auf den webclient-server anzuwenden sind.
       memory: 45Mi
+
+
+######################################################################################
+##          zusätzliche Konfigurationen für den BundesMessenger
+######################################################################################
+## Konfigurationen, die übergreifend sind und nicht nur eine einzelne Komponenten betreffen.
+## Die Abschnitte `config` und `extraConfig` betreffen Einstellungen, die direkt in die
+## Konfiguration von Synapse eingehen. Die Abschnitte `wellknown` oder `webclient` betreffen
+## bevorzugt diese Komponenten direkt. Die Einstellungen, die hier statt finden,
+## greifen komponentenübergreifend, z.B. alle Clients (auch die mobilen Apps)
+## und nicht nur den Webclient.
+
+additionalConfig:
+
+  locationSharing:
+    # -- (bool) Aktivierung und Konfiguration von Standort teilen (location sharing) in den Clients
+    # Führt zur Konfiguration der /.well-known/client und /_matrix/cconfig/style.json
+    # Wenn wellknown.enable oder confighub.enable deaktiviert sind, ist die
+    # notwendige Konfiguration selbst vorzunehmen.
+    enabled: true
+
+  # -- (map) Die Nutzer werden mit diesen Informationen auf die bevorstehende geplante Downtime,
+  # bzw. auf die aktive Downtime, hingewiesen.
+  # Weiterhin besteht die Möglichkeit, die Nutzer zum Update des Clients zu motivieren bzw. zu zwingen.
+  # Die Konfiguration wird vom confighub ausgeliefert, daher ist es notwendig, dass
+  # `confighub.enable: true` gesetzt ist.
+  #
+  # downtime[]
+  #   warning_start_time: Startzeit der Warnmeldung (ISO 8601)
+  #                       Beispiele: 2023-08-06T14:00:00Z (UTC)
+  #                                  2009-01-01T12:00:00+01:00 (MEZ)
+  #                                  2009-06-30T18:30:00+02:00 (MESZ - Sommerzeit)
+  #   start_time:         Startzeit der Downtime (ISO 8601)
+  #   end_time:           Ende der Downtime (ISO 8601)
+  #   type:
+  #     MAINTENANCE:  Default Text in Anwendung für Wartungsfenster.
+  #                   Feld `description` wird zusätzlich darunter mit 1 Zeile Abstand angezeigt,
+  #                   wenn vorhanden
+  #     ADHOC_MESSAGE: Nur der Text aus dem Feld `description` wird angezeigt.
+  #   description:  optionaler Text zusätzlich zum Standard-Wartungstext
+  #   blocking:     Bei true werden Login und Requests vom Client blockiert (auch im eingeloggten Zustand)
+  #                 Requests auf die Maintenance-Schnittstelle werden nicht blockiert.
+  #
+  # versions: ios oder android (web unterstützt die Funktion aktuell nicht)
+  #   Für die Versionsangabe sind vollständige Versionsnummern (Major.Minor.Patch) anzugeben.
+  # update_before: die letzte Version, die gedulded wird, ältere müssen updaten
+  # warn_before: die letzte Version ohne Update-Hinweis, ältere sollten updaten
+  #
+  # maintenance:
+  #   downtime:
+  #     - warning_start_time: "2022-12-14T11:00:00Z"
+  #       start_time: "2022-12-23T11:00:00Z"
+  #       end_time: "2022-12-24T20:00:00Z"
+  #       type: "MAINTENANCE"
+  #       description: "Weihnachtswartung 2022"
+  #       blocking: true
+  #   versions:
+  #     ios:
+  #       update_before: "1.17.0"
+  #       warn_before: "1.19.0"
+  #     android:
+  #       update_before: "1.17.0"
+  #       warn_before: "1.19.0"
+  maintenance: {}
+
+
+######################################################################################
+##          Konfiguration der Network Policies
+######################################################################################
+
+networkpolicies:
+  enabled: false
+  # -- (string) Hierbei handelt es sich um den Namespace indem ein Ingress Controller gehostet wird.
+  # Aktuell wird nur eine Architektur mit einem L7 Ingress Controller unterstützt.
+  # Absolut notwendig für die Network-Policies
+  ingressNamespace: "default"
+  # Wird gesetzt wenn sich die Postgres Instanz ausserhalb des Kubernetes Cluster befindet.
+  # Da Network Policies keine Hostnames auflösen können, wird eine IP benötigt.
+  postgres:
+    # bei dem Einsatz einer Postgres Instanz welche sich außerhalb des Kubernetes Clusters
+    # befindet muss hier eine einzelne IP Adresse angegeben werden.
+    externalPostgresIP: ""
+    # -- (string) Der labelselector wird dafür genutzt eine Postgres Instanz innerhalb des Clusters
+    # zu adressieren. Sollte das Label bei einer eigens betriebenen Instanz abweichen,
+    # kann dies hier angepasst werden.
+    labelselector: "app.kubernetes.io/name: postgresql"
 
 
 ######################################################################################
@@ -1796,3 +1992,48 @@ tests:
       cpu: 50m
       # -- (string) Anforderungen an RAM Ressourcen, die für Tests anzuwenden sind.
       memory: 16Mi
+
+
+######################################################################################
+##          Konfiguration für Demo-Modes
+######################################################################################
+
+demomode:
+  # -- (boolean) Aktivieren des Demoworkflows für Kubernetes ab v1.21.0
+  # Achtung: Der Demomodus setzt per CronJob die Datenbank regelmäßig zurück.
+  enabled: false
+
+  # -- (string) Auswahl des Demomodus
+  # Folgende Möglichkeiten:
+  #   "complete": Es wird die gesamte Datenbank gelöscht und neu erstellt.
+  #   "defined": Es wird ein Datenbank-Dump zurück gespielt.
+  #              Dieser muss als DB-Dump bereit gestellt werden. (TBD)
+  #   "federation": Wie "defined", jedoch mit der Option als Förderationspartner zu fungieren. (TBD)
+  mode: complete
+
+  # -- (string) Angabe der Laufzeit des Demomodus
+  # Nutzung der Crontab-Zeitnotation
+  # Die Crontab-Zeitnotation besteht aus fünf oder sechs Stichpunkten, die die Zeitintervalle angeben:
+  # Minute (0-59): Die Minute, zu der die Aufgabe ausgeführt werden soll.
+  # Stunde (0-23): Die Stunde, zu der die Aufgabe ausgeführt werden soll.
+  # Tag des Monats (1-31): Der Tag des Monats, an dem die Aufgabe ausgeführt werden soll.
+  # Monat (1-12): Der Monat, in dem die Aufgabe ausgeführt werden soll.
+  # Tag der Woche (0-6): Der Tag der Woche, an dem die Aufgabe ausgeführt werden soll (0 steht für Sonntag).
+  # (optional) Jahr (z. B. 2023): Das Jahr, in dem die Aufgabe ausgeführt werden soll.
+  # Die Stichpunkte können folgende Werte enthalten:
+  # Eine konkrete Zahl (z. B. 5): Die Aufgabe wird zu diesem spezifischen Wert ausgeführt.
+  # Eine Liste von Zahlen (z. B. 1,3,5): Die Aufgabe wird zu jedem der angegebenen Werte ausgeführt.
+  # Ein Bereich von Zahlen (z. B. 1-5): Die Aufgabe wird zu allen Werten im angegebenen Bereich ausgeführt.
+  # Eine Schrittgröße (z. B. */10): Die Aufgabe wird in Intervallen entsprechend der angegebenen Schrittgröße ausgeführt.
+  # Zusätzlich können spezielle Zeichen verwendet werden:
+  # Asterisk (*): Steht für "jeder Wert" und wird verwendet, um anzuzeigen, dass die Aufgabe zu jeder möglichen Zeit ausgeführt werden soll.
+  # Komma (,): Trennt mehrere Werte oder Wertebereiche voneinander.
+  # Schrägstrich (/): Wird verwendet, um eine Schrittgröße anzugeben.
+  # @default 0 0 * * 0, Dies bedeutet, dass die Aufgabe um 0:00 Uhr (Mitternacht) an jedem Sonntag (Tag der Woche = 0) ausgeführt wird
+  interval: "0 0 * * 0"
+
+  # -- (string) existingClaim für PostgreSQL-Dump
+  existingClaim: sqldump
+
+  # -- (string) Postgresql-Dump, welcher auf dem PVC vom PostgreSQL-Server liegt
+  sqldump: dump.sql

@@ -5,6 +5,8 @@
 {{- if (and .Values.redis.enabled (and .Values.redis.usePassword (and (not .Values.redis.auth.password) (not .Values.redis.auth.existingSecret)))) -}}
   {{- fail "You must specify a static redis password or existing secret if using the included redis chart" -}}
 {{- end -}}
+{{- $userconfigname :=  printf "%s-%s" (include "matrix-synapse.fullname" .) "users" }}
+{{- $adminconfigname := printf "%s-%s" (include "matrix-synapse.fullname" .) "admins" }}
 
 ---
 apiVersion: v1
@@ -38,11 +40,15 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configuration.yaml") . | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        {{- with .Values.synapse.annotations }}
+        {{- . | toYaml | nindent 8 }}
+        {{- end }}
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
+        {{- include "matrix-synapse.monitoringLabels" . | nindent 8 }}
         app.kubernetes.io/component: synapse
         {{- with .Values.synapse.labels }}
-        {{ . | toYaml | nindent 8 }}
+        {{- . | toYaml | nindent 8 }}
         {{- end }}
     spec:
       serviceAccountName: {{ $.Release.Name }}
@@ -114,6 +120,18 @@ spec:
                   key: {{ .Values.externalRedis.existingSecretPasswordKey }}
                   {{- end -}}
           {{- end }}
+          {{- if .Values.demomode.enabled }}
+            - name: ADMINS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $adminconfigname }}
+                  key: admins.csv
+            - name: USERS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ $userconfigname }}
+                  key: users.csv
+          {{- end }}
           {{- with .Values.synapse.extraEnv }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -158,6 +176,10 @@ spec:
               mountPath: /synapse/data
             - name: tmpdir
               mountPath: /tmp
+          {{- if .Values.demomode.enabled }}
+            - name: demoscript
+              mountPath: /script
+          {{- end }}
           {{- with .Values.synapse.extraVolumeMounts }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -183,17 +205,21 @@ spec:
         - name: tmpconf
           emptyDir:
             sizeLimit: 10Mi
-        - name: tmpdir
-          emptyDir:
-            sizeLimit: 10Mi
-            medium: Memory
-        - name: media
         {{- $mediaworker := false }}
         {{- range $worker, $config := .Values.workers }}
           {{- if eq $worker "media_repository" }}
             {{- $mediaworker = ($config.enabled | default false) }}
           {{- end }}
         {{- end }}
+        - name: tmpdir
+          emptyDir:
+            {{- if not $mediaworker }}
+            sizeLimit: {{ mulf ( mustRegexFind "[0-9]+" .Values.extraConfig.max_upload_size ) 5 }}{{ mustRegexFind "[A-Z]+" .Values.extraConfig.max_upload_size }}
+            {{- else }}
+            sizeLimit: 10Mi
+            {{- end }}
+            medium: Memory
+        - name: media
         {{- if and .Values.persistence.enabled (not $mediaworker) }}
           persistentVolumeClaim:
             claimName: {{ .Values.persistence.existingClaim | default (include "matrix-synapse.fullname" .) }}
@@ -203,6 +229,12 @@ spec:
         {{- end }}
         {{- with .Values.synapse.extraVolumes }}
           {{- . | toYaml | nindent 8 }}
+        {{- end }}
+        {{- if .Values.demomode.enabled }}
+        - name: demoscript
+          configMap:
+            name: {{ include "matrix-synapse.externalname" (dict "global" . "external" "demomode") }}-script
+            defaultMode: 0755
         {{- end }}
       {{- with .Values.synapse.nodeSelector }}
       nodeSelector:

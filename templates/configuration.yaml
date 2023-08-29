@@ -9,19 +9,25 @@ data:
   log.yaml: |
     version: 1
     formatters:
+      {{- if .Values.config.useStructuredLogging }}
+      structured:
+        class: synapse.logging.TerseJsonFormatter
+      {{- else }}
       precise:
-       format: '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(request)s - %(message)s'
+        format: '%(asctime)s - %(name)s - %(lineno)d - %(levelname)s - %(request)s - %(message)s'
+      {{- end }}
     handlers:
       console:
         class: logging.StreamHandler
-        formatter: precise
+        formatter: {{ if .Values.config.useStructuredLogging }}structured{{ else }}precise{{ end }}
     loggers:
-        synapse:
-            level: {{ .Values.config.logLevel | default "INFO" }}
-        synapse.storage.SQL:
-            # beware: increasing this to DEBUG will make synapse log sensitive
-            # information such as access tokens.
-            level: {{ .Values.config.logLevelSQL | default "INFO" }}
+      synapse:
+        level: {{ .Values.config.logLevel | default "INFO" }}
+
+      {{- with .Values.config.extraLoggers -}}
+        {{ . | toYaml | nindent 6 }}
+      {{- end }}
+
     root:
         level: {{ .Values.config.logLevel | default "INFO" }}
         handlers: [console]
@@ -155,6 +161,7 @@ data:
         {{- else if or (eq $worker "media_repository") (eq ($config.app | default "") "media_repository") }}
     # For media_repository worker
     enable_media_repo: false
+    media_instance_running_background_jobs: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-0
 
         {{- else if or (eq $worker "user_dir") (eq ($config.app | default "") "user_dir") }}
     # For user_dir worker

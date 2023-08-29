@@ -1,0 +1,109 @@
+{{- if .Values.networkpolicies.enabled }}
+{{- $component := "synapse" -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-{{ $component }}-allow-egress-sygnal-postgres-redis
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: {{ $component }}
+  policyTypes:
+    - Egress
+  egress:
+  {{- if .Values.postgresql.enabled }}
+    - to:
+      - podSelector:
+          matchLabels:
+            {{ .Values.networkpolicies.postgres.labelselector | default "app.kubernetes.io/name: postgresql" }}
+      ports:
+      - protocol: TCP
+        port: 5432
+   {{- else if .Values.networkpolicies.postgres.labelselector }}
+    - to:
+      - podSelector:
+          matchLabels:
+           {{ $.Values.networkpolicies.postgres.labelselector }}
+      ports:
+      - protocol: TCP
+        port: 5432
+    {{- else }}
+    - to:
+      - ipBlock:
+          cidr: "{{ .Values.networkpolicies.postgres.externalPostgresIP }}/32"
+      ports:
+      - protocol: TCP
+        port: 5432
+    {{- end }}
+    {{- if .Values.redis.enabled }}
+    - to:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/name: redis
+      ports:
+      - protocol: TCP
+        port: 6379
+    {{ else }}
+    - to:
+      - ipBlock:
+          cidr: "{{ .Values.externalRedis.host }}/32"
+      ports:
+      - protocol: TCP
+        port: 6379
+    {{- end }}
+    {{- if .Values.sygnal.enabled }}
+    - to:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: matrix-sygnal
+      ports:
+      - protocol: TCP
+        port: 5000
+    {{- end }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-{{ $component }}-allow-from-ingress-genericworker-metrics
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: {{ $component }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: {{ .Values.networkpolicies.ingressNamespace }}
+      ports:
+      - protocol: TCP
+        port: 8008
+    - from:
+    {{- range $worker, $config := .Values.workers }}
+      {{- if $config.enabled }}
+      {{- $name := $worker | replace "_" "-" }}
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: {{ $name }}
+      {{- end }}
+    {{- end }}
+      ports:
+      - protocol: TCP
+        port: 9093
+    - ports:
+      - protocol: TCP
+        port: 9090
+    {{- if not .Values.workers.media_repository.enabled }}
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: matrix-content-scanner
+      ports:
+      - protocol: TCP
+        port: 8008
+    {{- end }}
+{{- end }}

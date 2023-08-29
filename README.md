@@ -175,10 +175,14 @@ Für mehr Informationen nutzen Sie die öffentlich erreichbaren Dokumentationen:
 | --- |
 
 :pushpin: Alle möglichen Konfigurationswerte bzw. Parameter für das Helm Chart
-sind in der [`values.yaml`](./values.yaml) und in der
-[Dokumentation (/docs/standard_values.md)](docs/standard_values.md)
-beschrieben. Die ausführliche Dokumentation hierfür erfolgt zu einem späteren
-Zeitpunkt.
+sind in der [`values.yaml`](./values.yaml) aufgeführt.
+Die ausführliche Dokumentation hierfür erfolgt zu einem späteren Zeitpunkt.
+
+Weiterführende Links:
+
+- [Liste alle Konfigurationswerte mit Beschreibung](docs/standard_values.md)
+- [Mindestkonfiguration von Parametern](docs/requirements_poc.md#requirements-für-die-konfiguration)
+- [Kurzanleitung zur Installation einer Testumgebung](docs/installation_testumgebung.md)
 
 :pushpin: Getestet wird das Helm Chart auf einer Kubernetes-Infrastruktur mit einem
 [4-Node-Cluster](./docs/requirements_poc.md#maschinengröße) auf Basis von vanilla
@@ -231,7 +235,7 @@ Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
   und [BundesMessenger Container Registry](https://gitlab.opencode.de/bwi/bundesmessenger/backend/container-images/)
 - Bereitstellen des Helm Charts im eigenen Repository (`helm repo add`). In den
   Beispielen `bundesmessenger`. Alternativ die Installation des Helm Charts aus
-  dem Dateisystem (z.B. `./bundesmessenger/`).
+  dem Dateisystem (z.B. `./bundesmessenger/`) oder der OpenCoDE OCI-Registry.
 - ([Sub-)Domains mit dazugehörigen TLS-Zertifikaten](./docs/requirements_poc.md#hostnamendns)
   ([Sicherheitshinweis](https://github.com/matrix-org/synapse/blob/develop/README.rst#security-note))
   - Eine (Sub-)Domain für den Applikationsserver z.B.: `matrix.example.com`

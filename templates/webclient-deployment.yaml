@@ -13,14 +13,14 @@ metadata:
 spec:
   selector:
     matchLabels:
-      {{- include "matrix-synapse.labels" $ | nindent 6 }}
+      {{- include "matrix-synapse.selectorLabels" $ | nindent 6 }}
       app.kubernetes.io/component: {{ $component }}
   template:
     metadata:
       annotations:
         checksum/config: {{ include (print .Template.BasePath "/webclient-configuration.yaml") . | sha256sum }}
       labels:
-        {{- include "matrix-synapse.labels" $ | nindent 8 }}
+        {{- include "matrix-synapse.selectorLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ .Release.Name }}
@@ -75,6 +75,7 @@ spec:
         readinessProbe:
           tcpSocket:
             port: http
+          periodSeconds: 3
         livenessProbe:
           httpGet:
             path: /status
@@ -93,7 +94,8 @@ spec:
             sizeLimit: 100Ki
         - name: tmp
           emptyDir:
-            sizeLimit: 1Gi
+            sizeLimit: 50M
+            medium: Memory
         - name: files
           configMap:
             name: {{ $webclientName }}

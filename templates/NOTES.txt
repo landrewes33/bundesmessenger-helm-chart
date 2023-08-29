@@ -20,7 +20,8 @@ oder ein Well-Known-Server unter "/.well-known/matrix/server" konfiguriert ist.
 
 Weitere Informationen unter: https://matrix-org.github.io/synapse/latest/federate.html
 
-Bitte beachten Sie auch die notwendige Konfiguration des Wertes '"de.bwi": { "data_privacy_url": URL }"'
+Bitte beachten Sie auch die notwendige Konfiguration der Werte von
+'"de.bwi": { "data_privacy_url": URL, "imprintUrl": URL }"'
 unter "/.well-known/matrix/client" für die DSGVO-konforme Nutzung der Clients.
 {{- end }}
 {{- end }}

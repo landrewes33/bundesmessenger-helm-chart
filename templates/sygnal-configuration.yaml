@@ -120,11 +120,7 @@ stringData:
       prometheus:
         # Specify whether or not to enable Prometheus.
         #
-        {{- if .Values.monitoringService }}
         enabled: true
-        {{- else }}
-        enabled: false
-        {{- end }}
 
         # Specify an address for the Prometheus HTTP Server to listen on.
         #

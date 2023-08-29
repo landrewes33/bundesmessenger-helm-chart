@@ -66,7 +66,6 @@ Get the correct image tag name
 Common labels
 */}}
 {{- define "matrix-synapse.labels" -}}
-matrix-synapse: monitoring
 helm.sh/chart: {{ include "matrix-synapse.chart" . }}
 {{ include "matrix-synapse.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
@@ -76,16 +75,6 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
 
 
-
-{{/*
-Common annotations
-*/}}
-{{- define "matrix-synapse.annotations" -}}
-prometheus.io/scrape: "true"
-prometheus.io/path: "/_synapse/metrics"
-prometheus.io/port: "9090"
-{{- end -}}
-
 {{/*
 Selector labels
 */}}
@@ -94,6 +83,14 @@ app.kubernetes.io/name: {{ include "matrix-synapse.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 
+{{/*
+Monitoring labels
+*/}}
+{{- define "matrix-synapse.monitoringLabels" -}}
+{{- if .Values.monitoring.enabled -}}
+matrix-synapse: monitoring
+{{- end -}}
+{{- end -}}
 
 
 {{/*
@@ -121,30 +118,6 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- define "matrix-synapse.postgresql.fullname" -}}
 {{- printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
-
-{{/*
-Dependencies check
-*/}}
-{{- define "require" -}}
-    {{- $scope := index . 0 -}}
-    {{- $name := index . 1 -}}
-    {{required (print "Missing required value: " $name) (index $scope "Values" $name)}}
-{{- end}}
-{{/*
-Index a nested component
-*/}}
-{{- define "indexNested" -}}
-    {{- $message := index . 0 -}}
-    {{- $object := index . 1 -}}
-    {{- $path := (mustRegexSplit "\\." (index . 2) -1) -}}
-    {{- range $path -}}
-        {{- if not $object -}}
-            {{ fail $message }}
-        {{- end -}}
-        {{- $object = index $object . -}}
-    {{- end -}}
-    {{ required $message $object }}
-{{- end}}
 
 {{/*
 Set postgres host
@@ -322,3 +295,16 @@ Set synapse_admin uri
     {{- end -}}
   {{- end -}}
 {{- end -}}
+
+
+{{/*
+Check networkpolicy requirements TBD CHECK POSTGRES
+*/}}
+{{- if .Values.networkpolicies.enabled }}
+  {{- if not .Values.postgresql.enabled -}}
+    {{- required "A host from the external Postgres instance (externalPostgresql.host) is required." .Values.externalPostgresql.host -}}
+  {{- end }}
+  {{- if not .Values.redis.enabled -}}
+    {{- required "A host from the external redis instance (externalRedis.host) is required." .Values.externalRedis.host -}}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,33 @@
+{{- if .Values.networkpolicies.enabled }}
+{{- if .Values.redis.enabled }}
+{{- $component := "redis" -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-{{ $component }}-allow-ingress-synapse
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $component }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: synapse
+{{- range $worker, $config := .Values.workers }}
+  {{- if $config.enabled }}
+{{- $name := $worker | replace "_" "-" }}
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: {{ $name }}
+  {{- end }}
+{{- end }}
+      ports:
+      - protocol: TCP
+        port: 6379
+{{- end }}
+{{- end }}

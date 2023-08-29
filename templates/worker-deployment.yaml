@@ -4,14 +4,13 @@
 {{- range $worker, $config := .Values.workers }}
 {{- if $config.enabled }}
 {{- $name := $worker | replace "_" "-" }}
-{{- $app := $config.app | default $worker }}
 {{- $replicaSize := $config.replicaCount | default $default.replicaCount }}
 {{- if hasKey $config "autoscaling" }}
   {{- if and $config.autoscaling.enabled (lt ($config.replicaCount | default $default.replicaCount) $config.autoscaling.minReplicas) }}
   {{- $replicaSize :=  $config.autoscaling.minReplicas }}
   {{- end }}
 {{- end }}
-  
+
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -37,13 +36,14 @@ spec:
         checksum/worker-config: {{ include (print $.Template.BasePath "/worker-configuration.yaml") $ | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") $ | sha256sum }}
       {{- with ($config.annotations | default $default.annotations) }}
-        {{ . | toYaml | nindent 8 }}
+        {{- . | toYaml | nindent 8 }}
       {{- end }}
       labels:
         {{- include "matrix-synapse.selectorLabels" $ | nindent 8 }}
+        {{- include "matrix-synapse.monitoringLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $name }}
       {{- with ($config.labels | default $default.labels) }}
-        {{ . | toYaml | nindent 8 }}
+        {{- . | toYaml | nindent 8 }}
       {{- end }}
     spec:
       initContainers:
@@ -65,6 +65,8 @@ spec:
               mountPath: /synapse/data
     {{- end }}
         - name: update-config
+          securityContext:
+            {{- $config.securityContext | default $default.securityContext | toYaml | nindent 12 }}
           command:
             - sh
             - -c
@@ -100,7 +102,7 @@ spec:
               {{- end }}
               {{- end }}
 
-              exec python3 -B -m synapse.app.{{ (not (not $config.generic)) | ternary "generic_worker" $app }} \
+              exec python3 -B -m synapse.app.{{ $config.app | default "generic_worker" }} \
                           -c /synapse/config/homeserver.yaml \
                           -c /synapse/config/conf.d/ \
                           -c /synapse/config/{{ $name }}.worker
@@ -148,12 +150,12 @@ spec:
             - name: listener
               containerPort: 8083
               protocol: TCP
-            {{- if (or $config.readinessProbe $default.readinessProbe) }}
+          {{- end }}
+          {{- if (or $config.readinessProbe $default.readinessProbe) }}
           readinessProbe:
               {{- $config.readinessProbe | default $default.readinessProbe | toYaml | nindent 12 }}
-            {{- end }}
           {{- end }}
-                    {{- if (or $config.livenessProbe $default.livenessProbe) }}
+          {{- if (or $config.livenessProbe $default.livenessProbe) }}
           livenessProbe:
               {{- $config.livenessProbe | default $default.livenessProbe | toYaml | nindent 12 }}
           {{- end }}
@@ -224,7 +226,12 @@ spec:
             sizeLimit: 10Mi
         - name: tempdir
           emptyDir:
+            {{- if regexMatch $name "media-repository" }}
+            sizeLimit: {{ mulf ( mustRegexFind "[0-9]+" $.Values.extraConfig.max_upload_size ) 5 }}{{ mustRegexFind "[A-Z]+" $.Values.extraConfig.max_upload_size }}
+            {{- else }}
             sizeLimit: 10Mi
+            {{- end }}
+            medium: Memory
       {{- if regexMatch $name "media-repository" }}
         - name: media
         {{- if $.Values.persistence.enabled }}

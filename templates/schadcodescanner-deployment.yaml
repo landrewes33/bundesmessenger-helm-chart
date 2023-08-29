@@ -21,7 +21,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "matrix-synapse.labels" $ | nindent 8 }}
+        {{- include "matrix-synapse.selectorLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/schadcodescanner-configuration.yaml") . | sha256sum }}
@@ -138,9 +138,11 @@ spec:
       - name: clamav-tmp
         emptyDir:
           sizeLimit: {{ mulf .Values.schadcodescanner.limits.scanSize 5 }}M
+          medium: Memory
       - name: icap-tmp
         emptyDir:
           sizeLimit: {{ mulf .Values.schadcodescanner.limits.scanSize 5 }}M
+          medium: Memory
       - name: config-volume
         projected:
           sources:

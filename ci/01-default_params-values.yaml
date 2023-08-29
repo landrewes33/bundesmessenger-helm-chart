@@ -1,3 +1,5 @@
 serverName: example.org
 publicServerName: matrix.example.org
-dataPrivacyUrl: dsgvo.example.org
+adminAPIServerName: admin-api.example.org
+dataPrivacyUrl: example.com/privacy
+imprintUrl: example.com/imprint

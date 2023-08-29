@@ -1,5 +1,5 @@
-#!/bin/sh
-#
+#!/usr/bin/env sh
+
 # A script which checks that an appropriate newsfile has been added on this
 # branch.
 
@@ -14,7 +14,7 @@ for f in $(git diff --diff-filter=d --name-only origin/$CI_DEFAULT_BRANCH -- cha
     # check that any added newsfiles on this branch end with a full stop.
     lastchar=$(tr -d '\n' < "$f" | tail -c 1)
     if [ "$lastchar" != '.' ] && [ "$lastchar" != '!' ] && [ "$f" != "changelog.d/README.md" ]; then
-        echo -e "\e[31mERROR: newsfragment $f does not end with a '.' or '!'\e[39m" >&2
+        printf "\033[31mERROR: newsfragment $f does not end with a '.' or '!'\033[39m\n" >&2
         exit 1
     fi
 
@@ -25,6 +25,6 @@ for f in $(git diff --diff-filter=d --name-only origin/$CI_DEFAULT_BRANCH -- cha
 done
 
 if [ -n "$CI_MERGE_REQUEST_IID" ] && [ "$matched" -eq 0 ]; then
-    echo -e "\e[31mERROR: Did not find a news fragment with the right number: expected changelog.d/$CI_MERGE_REQUEST_IID.*.\e[39m" >&2
+    printf "\033[31mERROR: Did not find a news fragment with the right number: expected changelog.d/$CI_MERGE_REQUEST_IID.*.\033[39m\n" >&2
     exit 1
 fi

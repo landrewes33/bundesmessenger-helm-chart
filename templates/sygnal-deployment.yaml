@@ -1,4 +1,4 @@
-{{- if $.Values.sygnal.enabled }}
+{{- if .Values.sygnal.enabled }}
 {{- $sygnalName := include "matrix-synapse.externalname" (dict "global" . "external" "sygnal") -}}
 {{- $component := "matrix-sygnal" -}}
 
@@ -23,17 +23,18 @@ spec:
       annotations:
         checksum/config: {{ include (print .Template.BasePath "/sygnal-configuration.yaml") . | sha256sum }}
       labels:
-        {{- include "matrix-synapse.labels" . | nindent 8 }}
+        {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
+        {{- include "matrix-synapse.monitoringLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ .Release.Name }}
       securityContext:
-        {{- $.Values.sygnal.podSecurityContext | toYaml | nindent 8 }}
+        {{- .Values.sygnal.podSecurityContext | toYaml | nindent 8 }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
         - name: matrix-sygnal
-          image: "{{ $.Values.sygnal.image.repository }}:{{ $.Values.sygnal.image.tag }}"
-          imagePullPolicy: {{ $.Values.sygnal.image.pullPolicy }}
+          image: "{{ .Values.sygnal.image.repository }}:{{ .Values.sygnal.image.tag }}"
+          imagePullPolicy: {{ .Values.sygnal.image.pullPolicy }}
           env:
             - name: SYGNAL_CONF
               value: sygnal.yaml
@@ -41,18 +42,33 @@ spec:
             - containerPort: 5000
               name: sygnal-port
               protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
           resources:
-            {{- $.Values.sygnal.resources | toYaml | nindent 12 }}
+            {{- .Values.sygnal.resources | toYaml | nindent 12 }}
           securityContext:
-            {{- $.Values.sygnal.securityContext | toYaml | nindent 12 }}
+            {{- .Values.sygnal.securityContext | toYaml | nindent 12 }}
+          {{- with .Values.sygnal.readinessProbe }}
+          readinessProbe:
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.sygnal.livenessProbe }}
+          livenessProbe:
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.sygnal.startupProbe }}
+          startupProbe:
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - name: config
               mountPath: /sygnal.yaml
               subPath: sygnal.yaml
             {{- if .Values.sygnal.ios_push.enabled }}
             - name: ioskey
-              mountPath: /{{ $.Values.sygnal.ios_push.ioskey_filename }}
-              subPath: {{ $.Values.sygnal.ios_push.ioskey_filename }}
+              mountPath: /{{ .Values.sygnal.ios_push.ioskey_filename }}
+              subPath: {{ .Values.sygnal.ios_push.ioskey_filename }}
             {{ end }}
             - mountPath: /tmp
               name: sygnal-tmp
@@ -68,4 +84,5 @@ spec:
         - name: sygnal-tmp
           emptyDir:
             sizeLimit: 10Mi
+            medium: Memory
 {{ end }}

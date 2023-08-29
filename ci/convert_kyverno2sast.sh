@@ -1,6 +1,8 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
-# Script to convert kyverno report into Gitlab SAST Report
+# Script to convert kyverno report into Gitlab SAST Report.
+# yq is required in PATH.
+#
 # Parameters:
 # - $1: Path to input file / Kyverno Report
 # - $2: Path to output file / JSON Gitlab SAST Report

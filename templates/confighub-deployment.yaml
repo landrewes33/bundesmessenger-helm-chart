@@ -1,0 +1,119 @@
+{{- if .Values.confighub.enabled }}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "confighub-nginx") -}}
+{{- $component := "confighub-nginx" -}}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  replicas: {{ .Values.confighub.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "matrix-synapse.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: {{ $component }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print .Template.BasePath "/confighub-configuration.yaml") . | sha256sum }}
+      labels:
+        {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: {{ $component }}
+    spec:
+      serviceAccountName: {{ .Release.Name }}
+      {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
+      securityContext:
+        {{- toYaml .Values.confighub.podSecurityContext | nindent 8 }}
+      containers:
+        - name: nginx
+          image: "{{ .Values.confighub.image.repository }}:{{ .Values.confighub.image.tag }}"
+          imagePullPolicy: {{ .Values.confighub.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.confighub.securityContext | nindent 12 }}
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: http
+            periodSeconds: 10
+          volumeMounts:
+            - mountPath: /etc/nginx/nginx.conf
+              name: nginx-conf
+              readOnly: true
+              subPath: nginx.conf
+            - mountPath: /etc/nginx/sites-enabled/default.conf
+              name: site
+              readOnly: true
+              subPath: default.conf
+{{- $keys := concat (list "style" "maintenance") (keys .Values.confighub.extraData) }}
+{{- range $key := $keys }}
+            - mountPath: {{ $.Values.confighub.htdocsPath }}/{{ $key }}.json
+              name: files
+              subPath: {{ $key }}.json
+{{- end }}
+            - mountPath: /tmp
+              name: tmp
+          resources:
+            {{- toYaml .Values.confighub.resources | nindent 12 }}
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: nginx-default-conf
+        - name: files
+          configMap:
+            name: {{ $name }}
+        - name: site
+          configMap:
+            name: {{ $name }}
+            items:
+            - key: confighub.conf
+              path: default.conf
+        - name: tmp
+          emptyDir:
+            sizeLimit: 10Mi
+            medium: Memory
+    {{- with .Values.confighub.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.confighub.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.confighub.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+{{- end }}

@@ -64,6 +64,7 @@ damit ein Deployment möglich und erfolgreich ist.
 | Konfigurationsparameter | Bedingung | Bemerkung |
 | ------ | ------ | ------ |
 | `dataPrivacyUrl` | `wellknown.enabled: true` | DSGVO verpflichtende URL für die per Internet abrufbare Datenschutzbestimmungen. |
+| `imprintUrl` | `wellknown.enabled: true` | URL für das per Internet abrufbare Impressum des Betreibers. |
 | `serverName` bzw. `publicServerName` | Eine ist verpflichtend | Öffentlich (oder teilöffentlich bzw. Nutzerkreis bekannter) präsentierter Endpunkt bzw. MXID der Nutzer. |
 | `adminAPIServerName` | verpflichtend | Zur Trennung des Admin-API Interfaces des Synapse vom öffentlichen präsentierten Kontaktpunkt. |
 | `sygnal.apns` | `sygnal.enabled: true` | Werden von der BWI GmbH für die mobilen Clients zur Verfügung gestellt und beim Deployment zusätzlich eingebunden. |

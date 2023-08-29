@@ -1,8 +1,16 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
-# Script to update images and tags in values.yaml
+# Script to update images and tags in values.yaml.
+# yq is required in PATH.
+#
 # Parameters:
 # - $1: version number to set (file: ci/versions/v"version".yaml)
+
+if [ "$#" -ne 1 ]
+then
+  echo "Incorrect number of arguments"
+  exit 1
+fi
 
 version=$1
 default_registry="registry.opencode.de"
@@ -13,7 +21,6 @@ chart_file=$scriptDir/../Chart.yaml
 values_file=$scriptDir/../values.yaml
 mapping_file=$scriptDir/versions/mapping_versions.yaml
 version_file=$scriptDir/versions/*.yaml
-docs_output_file=$scriptDir/../docs/versions/v$version.md
 
 
 # Um nicht mehrfach den Inhalt aus der Datei zu laden, laden der wesentliche Informationen in Variablen.
@@ -27,14 +34,14 @@ chart_content=$(yq '.' $chart_file)
 count_versions=$(yq ea -N '.[] | select(.version == "'$version'") | .version | document_index' $version_file)
 
 if [ ${#count_versions} -gt 1 ]; then
-  echo -e "\e[31mERROR: Die Version $version wird ${#count_versions} Mal definiert.\e[39m" >&2
+  printf "\033[31mERROR: Die Version $version wird ${#count_versions} Mal definiert.\033[39m\n" >&2
   exit 1
 elif [ ${#count_versions} -eq 0 ]; then
-  echo -e "\e[31mERROR: Die Version $version wird nicht definiert.\e[39m" >&2
+  printf "\033[31mERROR: Die Version $version wird nicht definiert.\033[39m\n" >&2
   exit 1
 fi
 
-# Umgang mit Helm dpendencies erfolgt in einem späteren Release
+# Umgang mit Helm dependencies erfolgt in einem späteren Release
 ## update Chart.yaml
 #
 ## Synpase Tag wird über die Chart.yaml gesteuert.
@@ -86,44 +93,3 @@ for path in $loop_var ; do
   # Leere Zeilen im YAML erhalten: https://github.com/mikefarah/yq/issues/515#issuecomment-1113420114
   yq '.'$path' = env(values_content)' $values_file | diff -B $values_file - | patch $values_file -
 done
-
-
-# generate docs
-echo "Generate doc \"$docs_output_file\""
-
-echo "# Abhängigkeiten BundesMessenger Helm Chart $version ($(echo "$version_content" | yq '.date'))\n" > $docs_output_file
-
-echo "## Container Images\n" >> $docs_output_file
-echo "| Name | Version | Image | Tag |\n|---------|---------|---------|---------|" >> $docs_output_file
-echo "$version_content" | yq '
-  .images |
-  map(
-    "| " +
-    .name +
-    " | " +
-    (.version // "") +
-    " | " +
-    (.registry // "'$default_registry'") + "/" + .image +
-    " | " +
-    (.tag // "") +
-    " |"
-  ) |
-  join("\n")
-' >> $docs_output_file
-
-echo "" >> $docs_output_file
-echo "## Helm Charts\n" >> $docs_output_file
-echo "| Name | Version | Repository |\n|---------|---------|---------|" >> $docs_output_file
-echo "$version_content" | yq '
-  .helm |
-  map(
-    "| " +
-    .name +
-    " | " +
-    (.version // "") +
-    " | " +
-    .repository +
-    " |"
-  ) |
-  join("\n")
-' >> $docs_output_file
