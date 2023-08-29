@@ -7,7 +7,7 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
-## BundesMessenger Helm Chart 1.3.0 (2023-08-28)
+## BundesMessenger Helm Chart 1.3.0 (2023-08-29)
 
 ### Versionshinweise
 
