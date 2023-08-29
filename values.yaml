@@ -113,7 +113,7 @@ signingkey:
     # finaler Tag kann sich noch ändern
     publishImage:
       repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl
-      tag: 1.25.4-jammy-production
+      tag: 1.28.0-jammy-production
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
@@ -1106,7 +1106,7 @@ wellknown:
   #   - myRegistryKeySecretName
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx
-    tag: 1.18.0-6ubuntu14.3-jammy-production
+    tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
@@ -1174,7 +1174,7 @@ confighub:
   #   - myRegistryKeySecretName
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx
-    tag: 1.18.0-6ubuntu14.3-jammy-production
+    tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
@@ -1580,7 +1580,7 @@ schadcodescanner:
   # -- (map) Konfiguration des ClamAV-Image/Repository
   imageclamav:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/clamav
-    tag: 0.103.8_dfsg-0ubuntu0.22.04.1-jammy-production
+    tag: 0.103.9_dfsg-0ubuntu0.22.04.1-jammy-production
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
   imagecicap:
@@ -1828,7 +1828,7 @@ webclient:
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.4.0-jammy-production
+    tag: 2.8.0-jammy-production
     pullPolicy: IfNotPresent
   annotations:
     nginx.ingress.kubernetes.io/configuration-snippet: |
@@ -1886,7 +1886,7 @@ additionalConfig:
     # notwendige Konfiguration selbst vorzunehmen.
     enabled: true
 
-  # Die Nutzer werden mit diesen Informationen auf die bevorstehende geplante Downtime,
+  # -- (map) Die Nutzer werden mit diesen Informationen auf die bevorstehende geplante Downtime,
   # bzw. auf die aktive Downtime, hingewiesen.
   # Weiterhin besteht die Möglichkeit, die Nutzer zum Update des Clients zu motivieren bzw. zu zwingen.
   # Die Konfiguration wird vom confighub ausgeliefert, daher ist es notwendig, dass
@@ -1912,7 +1912,7 @@ additionalConfig:
   #   Für die Versionsangabe sind vollständige Versionsnummern (Major.Minor.Patch) anzugeben.
   # update_before: die letzte Version, die gedulded wird, ältere müssen updaten
   # warn_before: die letzte Version ohne Update-Hinweis, ältere sollten updaten
-
+  #
   # maintenance:
   #   downtime:
   #     - warning_start_time: "2022-12-14T11:00:00Z"
@@ -1928,6 +1928,7 @@ additionalConfig:
   #     android:
   #       update_before: "1.17.0"
   #       warn_before: "1.19.0"
+  maintenance: {}
 
 
 ######################################################################################

@@ -1,1 +1,0 @@
-Erhöhen der Temp-Verzeichnisgrößen von Media-Repository und Synapse-Main, abhängig von `extraConfig.max_upload_size`.
