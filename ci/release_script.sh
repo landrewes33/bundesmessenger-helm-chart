@@ -169,9 +169,9 @@ git commit -a -m "Setting version for the release ${nextVersion}"
 
 printf "\n================================================================================\n"
 read -p "Done, push the branch \"$branchprefix/v$nextVersion\" (yes/no) default to yes? " doPush
-doPush=${doPush:-yes}
+#doPush=${doPush:-yes}
 
-if [ ${doPush} == "yes" ]; then
+if [ ${doPush:-yes} = "yes" ]; then
   printf "Pushing branch \"$branchprefix/v$nextVersion\".\n"
   git push origin "$branchprefix/v$nextVersion"
 else
