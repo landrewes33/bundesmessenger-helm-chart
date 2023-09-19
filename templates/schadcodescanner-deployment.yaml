@@ -33,6 +33,7 @@ spec:
       initContainers:
       - name: clamav-permissions
         image: "{{ $.Values.volumePermissions.image.repository }}:{{ $.Values.volumePermissions.image.tag }}"
+        imagePullPolicy: "{{ $.Values.volumePermissions.image.pullPolicy | default  "IfNotPresent" }}"
         volumeMounts:
           - name: signatures
             mountPath: /clamav/database
@@ -49,6 +50,7 @@ spec:
       containers:
       - name: clamav
         image: "{{ $config.imageclamav.repository }}:{{ $config.imageclamav.tag }}"
+        imagePullPolicy: "{{ $config.imageclamav.pullPolicy | default  "IfNotPresent" }}"
         securityContext:
           {{- $config.clamavSecurityContext | default "" | toYaml | nindent 10 }}
         {{- if .Values.schadcodescanner.extraEnv }}
@@ -98,6 +100,7 @@ spec:
               - /clamav/config/clamdcheck.conf
       - name: c-icap-server
         image: "{{ $config.imagecicap.repository }}:{{ $config.imagecicap.tag }}"
+        imagePullPolicy: "{{ $config.imagecicap.pullPolicy | default  "IfNotPresent" }}"
         securityContext:
           {{- $config.icapSecurityContext | default "" | toYaml | nindent 10 }}
         resources:
