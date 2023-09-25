@@ -9,13 +9,16 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- towncrier release notes start -->
 ## BundesMessenger Helm Chart 1.3.1 (2023-09-25)
 
+### ✨ Features
+
+- Kubectl auf Version `1.28.1` aktualisiert.
+
 ### 🐛 Bugfixes
 
 - PostgreSQL Image (`postgresql.image`) auf `docker.io/bitnami/postgresql:14`
   aktualisiert.
   Das alte Image `registry.opencode.de/ig-bvc/demo-apps/postgresql/postgres:14`
-  ist nicht
-  mit den aktuellen [Bitnami
+  ist nicht mit den aktuellen [Bitnami
   Charts](https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
   kompatibel. (!internalpostgres)
 - Korrektur der Env-Var `SYGNAL_CONF` auf absoluten Pfad vom Sygnal-Container.
