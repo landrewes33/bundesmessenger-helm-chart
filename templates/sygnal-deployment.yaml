@@ -37,7 +37,7 @@ spec:
           imagePullPolicy: {{ .Values.sygnal.image.pullPolicy }}
           env:
             - name: SYGNAL_CONF
-              value: sygnal.yaml
+              value: /sygnal.yaml
           ports:
             - containerPort: 5000
               name: sygnal-port
