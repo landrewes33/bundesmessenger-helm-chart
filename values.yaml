@@ -1233,8 +1233,8 @@ postgresql:
   # -- (map) Das PostgreSQL Image
   # @default -- WIRD NICHT EMPFOHLEN!!
   image:
-    registry: registry.opencode.de
-    repository: ig-bvc/demo-apps/postgresql/postgres
+    registry: docker.io
+    repository: bitnami/postgresql
     tag: "14"
     # pullSecrets: ["myRegistryKeySecretName"]
 
