@@ -7,6 +7,23 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.3.1 (2023-09-25)
+
+### 🐛 Bugfixes
+
+- PostgreSQL Image (`postgresql.image`) auf `docker.io/bitnami/postgresql:14`
+  aktualisiert.
+  Das alte Image `registry.opencode.de/ig-bvc/demo-apps/postgresql/postgres:14`
+  ist nicht
+  mit den aktuellen [Bitnami
+  Charts](https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
+  kompatibel. (!internalpostgres)
+- Korrektur der Env-Var `SYGNAL_CONF` auf absoluten Pfad vom Sygnal-Container.
+  (!190)
+- Hinzufügen der konfigurierbaren `image.pullPolicy` in alle Container des
+  Schadcodescanners. (!191)
+
+
 ## BundesMessenger Helm Chart 1.3.0 (2023-08-29)
 
 ### Versionshinweise
