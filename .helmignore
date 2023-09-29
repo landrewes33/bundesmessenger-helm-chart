@@ -20,19 +20,11 @@
 .idea/
 *.tmproj
 .vscode/
-# Maven
-target/
-.mvn/
-mvnw
-mvnw.cmd
-pom.xml
-/.m2
 # Release Wrapper
-ci_settings.xml
-increase.sh
 RELEASE.md
 # Gitlab
 /.gitlab-ci*
+.gitlab/
 # Helm
 .helmignore
 helm-package/

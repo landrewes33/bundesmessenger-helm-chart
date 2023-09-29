@@ -22,6 +22,10 @@ for f in $(git diff --diff-filter=d --name-only origin/$CI_DEFAULT_BRANCH -- cha
     if [ -n "$CI_MERGE_REQUEST_IID" ] && [ "$f" = changelog.d/"$CI_MERGE_REQUEST_IID".* ]; then
         matched=1
     fi
+    # allow exceptions for renovate bot
+    if [ -n "$CI_MERGE_REQUEST_IID" ] && [ "$f" = changelog.d/+.* ]; then
+        matched=1
+    fi
 done
 
 if [ -n "$CI_MERGE_REQUEST_IID" ] && [ "$matched" -eq 0 ]; then
