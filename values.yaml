@@ -270,12 +270,12 @@ extraConfig:
   enable_3pid_lookup: false
   # -- (bool) Gastzugang, abgeschaltet
   allow_guest_access: false
-  # -- (object) Passwortkonfiguration
-  # @default -- folgende Aufschlüsselung
+  # -- (object) Konfiguration für Login mit Passwort
   password_config:
-    # -- (bool) Passwortkonfiguration selbst definieren, eingeschaltet
+    # -- (bool) Login mit Passwort erlauben, eingeschaltet
     enabled: true
     # -- (bool) lokale Nutzerdatenbank, eingeschaltet
+    # Wenn dies deaktiviert wird, müssen andere `password_providers` definiert werden.
     localdb_enabled: true
     policy:
       # -- (bool) Passwortpolicy nutzen, eingeschaltet
@@ -312,8 +312,14 @@ extraConfig:
     # Die einzelnen Server verfolgen Ereignisse und melden
     # sie an einen zentralen Server - im Fall von Synapse: Jaeger.
     enabled: false
-  # -- (list) Whitelist (Domainbased) für Föderation
+  # -- (list) Whitelist (Matrix-Server-Namen) für Föderation
   federation_domain_whitelist: []
+  #  - poc1.dvs.example.com
+  #  - poc2.dvs.example.com
+  #  - poc3.dvs.example.com
+  # -- (list) Eine Liste von Matrix-Servern, von denen die eigenen Benutzer
+  # keine Medien herunterladen dürfen.
+  prevent_media_downloads_from: []
   #  - poc1.dvs.example.com
   #  - poc2.dvs.example.com
   #  - poc3.dvs.example.com
