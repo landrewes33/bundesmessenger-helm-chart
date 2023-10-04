@@ -1,0 +1,4 @@
+Umbenennung von `schadcodescanner.imageclamav` nach `schadcodescanner.clamavImage`
+und `schadcodescanner.imagecicap` nach `schadcodescanner.icapImage` (in der `values.yaml`)
+um die Kompatibilität zu [Renovate](https://docs.renovatebot.com/modules/manager/helm-values/#additional-information)
+herzustellen.

@@ -49,8 +49,8 @@ spec:
           {{- $.Values.volumePermissions.resources | toYaml | nindent 10 }}
       containers:
       - name: clamav
-        image: "{{ $config.imageclamav.repository }}:{{ $config.imageclamav.tag }}"
-        imagePullPolicy: "{{ $config.imageclamav.pullPolicy | default  "IfNotPresent" }}"
+        image: "{{ $config.clamavImage.repository }}:{{ $config.clamavImage.tag }}"
+        imagePullPolicy: "{{ $config.clamavImage.pullPolicy | default  "IfNotPresent" }}"
         securityContext:
           {{- $config.clamavSecurityContext | default "" | toYaml | nindent 10 }}
         {{- if .Values.schadcodescanner.extraEnv }}
@@ -99,8 +99,8 @@ spec:
               - '-c'
               - /clamav/config/clamdcheck.conf
       - name: c-icap-server
-        image: "{{ $config.imagecicap.repository }}:{{ $config.imagecicap.tag }}"
-        imagePullPolicy: "{{ $config.imagecicap.pullPolicy | default  "IfNotPresent" }}"
+        image: "{{ $config.icapImage.repository }}:{{ $config.icapImage.tag }}"
+        imagePullPolicy: "{{ $config.icapImage.pullPolicy | default  "IfNotPresent" }}"
         securityContext:
           {{- $config.icapSecurityContext | default "" | toYaml | nindent 10 }}
         resources:
