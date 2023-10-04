@@ -1591,12 +1591,12 @@ schadcodescanner:
   # -- (bool) Aktivieren des ClamAV-Container
   enabled: false
   # -- (map) Konfiguration des ClamAV-Image/Repository
-  imageclamav:
+  clamavImage:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/clamav
     tag: 0.103.9_dfsg-0ubuntu0.22.04.1-jammy-production
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
-  imagecicap:
+  icapImage:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/icap
     tag: 1_0.5.6-2build1-jammy-production
     pullPolicy: IfNotPresent
