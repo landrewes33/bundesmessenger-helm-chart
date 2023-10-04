@@ -862,10 +862,21 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L275">extraConfig.password_config</a></div>
       </td>
       <td>object</td>
-      <td>Passwortkonfiguration</td>
+      <td>Konfiguration für Login mit Passwort</td>
       <td>
-        <div style="max-width: 300px;"><pre lang="">
-folgende Aufschlüsselung
+        <div style="max-width: 300px;"><pre lang="json">
+{
+  "enabled": true,
+  "localdb_enabled": true,
+  "policy": {
+    "enabled": true,
+    "minimum_length": 8,
+    "require_digit": true,
+    "require_lowercase": true,
+    "require_symbol": true,
+    "require_uppercase": true
+  }
+}
 </pre>
 </div>
       </td>
@@ -875,7 +886,7 @@ folgende Aufschlüsselung
         <div style="max-width: 150px;"><a href="../values.yaml#L277">extraConfig.password_config.enabled</a></div>
       </td>
       <td>bool</td>
-      <td>Passwortkonfiguration selbst definieren, eingeschaltet</td>
+      <td>Login mit Passwort erlauben, eingeschaltet</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 true
@@ -888,7 +899,7 @@ true
         <div style="max-width: 150px;"><a href="../values.yaml#L279">extraConfig.password_config.localdb_enabled</a></div>
       </td>
       <td>bool</td>
-      <td>lokale Nutzerdatenbank, eingeschaltet</td>
+      <td>lokale Nutzerdatenbank, eingeschaltet Wenn dies deaktiviert wird, müssen andere `password_providers` definiert werden.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 true
@@ -1057,7 +1068,20 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L316">extraConfig.federation_domain_whitelist</a></div>
       </td>
       <td>list</td>
-      <td>Whitelist (Domainbased) für Föderation</td>
+      <td>Whitelist (Matrix-Server-Namen) für Föderation</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+[]
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="extraConfig--prevent_media_downloads_from">
+        <div style="max-width: 150px;"><a href="../values.yaml#L293">extraConfig.prevent_media_downloads_from</a></div>
+      </td>
+      <td>list</td>
+      <td>Eine Liste von Matrix-Servern, von denen die eigenen Benutzer keine Medien herunterladen dürfen.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 []
