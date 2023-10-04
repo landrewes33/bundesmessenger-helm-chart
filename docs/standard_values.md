@@ -771,7 +771,7 @@ true
         <div style="max-width: 150px;"><a href="../values.yaml#L258">extraConfig.require_membership_for_aliases</a></div>
       </td>
       <td>bool</td>
-      <td>Alias nur für registrierte Nutzer (sowieso, nicht authentifizierte Nutzer sind abgeschaltet)</td>
+      <td>Nur Raummitglieder können einen Alias für einen Raum konfigurieren.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 true
@@ -784,10 +784,23 @@ true
         <div style="max-width: 150px;"><a href="../values.yaml#L260">extraConfig.user_ips_max_age</a></div>
       </td>
       <td>string</td>
-      <td>Maximale Speicherzeit für IPs von Nutzern (Whitelist mapping)</td>
+      <td>Maximale Speicherzeit für IPs von Nutzern</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 "28d"
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="extraConfig--forget_rooms_on_leave">
+        <div style="max-width: 150px;"><a href="../values.yaml#L236">extraConfig.forget_rooms_on_leave</a></div>
+      </td>
+      <td>bool</td>
+      <td>Benutzer vergessen Räume beim Verlassen automatisch. Nur wenn alle Nutzer einen Raum verlassen und vergessen haben, wird er automatisch vom Server gelöscht.</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+true
 </pre>
 </div>
       </td>
