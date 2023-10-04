@@ -254,10 +254,17 @@ extraConfig:
     enabled: true
     # -- (bool) Suche alle Nutzer, eingeschaltet
     search_all_users: true
-  # -- (bool) Alias nur für registrierte Nutzer (sowieso, nicht authentifizierte Nutzer sind abgeschaltet)
+  # -- (bool) Nur Raummitglieder können einen Alias für einen Raum konfigurieren.
   require_membership_for_aliases: true
-  # -- (string) Maximale Speicherzeit für IPs von Nutzern (Whitelist mapping)
+  # -- (string) Maximale Speicherzeit für IPs von Nutzern
   user_ips_max_age: 28d
+  # -- (bool) Benutzer vergessen Räume beim Verlassen automatisch.
+  # Nur wenn alle Nutzer einen Raum verlassen und vergessen haben,
+  # wird er automatisch vom Server gelöscht.
+  forget_rooms_on_leave: true
+  # -- (string) Zeitraum nachdem lokal vergessene Räume aus der Datenbank
+  # gelöscht werden. Wenn der Wert undefiniert oder null ist, wird nichts gelöscht.
+  forgotten_room_retention_period: 28d
   retention:
     # -- (bool) Nachrichtenaufbewahrungsrichtlinien einschalten (auf Raumebene)
     enabled: false
