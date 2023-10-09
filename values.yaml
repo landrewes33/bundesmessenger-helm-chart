@@ -1028,19 +1028,15 @@ sygnal:
   ## Healthcheck
   livenessProbe:
     periodSeconds: 10
-    httpGet:
-      # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
-      path: /health
+    tcpSocket:
       # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks
       port: sygnal-port
 
   ## Bereitschaftscheck
   readinessProbe:
-    periodSeconds: 3
-    httpGet:
-      # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
-      path: /health
-      # -- (string) Konfiguration des Ports vom Bereitschaftscheck
+    periodSeconds: 10
+    tcpSocket:
+      # -- (string) Zu verwendende Konfiguration für den Port des Bereitschaftscheck
       port: sygnal-port
 
   # -- (object) Node Selektor Konfiguration für Sygnal-Container.
