@@ -22,9 +22,11 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
   Charts](https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
   kompatibel. (!internalpostgres)
 - Korrektur der Env-Var `SYGNAL_CONF` auf absoluten Pfad vom Sygnal-Container.
+  Contributed by Jakob-Tobias Winter (@wintix:matrix.org).
   (!190)
 - Hinzufügen der konfigurierbaren `image.pullPolicy` in alle Container des
-  Schadcodescanners. (!191)
+  Schadcodescanners.
+  Contributed by Jakob-Tobias Winter (@wintix:matrix.org). (!191)
 
 
 ## BundesMessenger Helm Chart 1.3.0 (2023-08-29)
@@ -167,7 +169,8 @@ Sie befinden sich weiterhin in Arbeit und Review.
   `values.yaml`. (!139)
 - Das Media Repository bzw. dazugehörige `PersistentVolumeClaim` wird bei
   aktivierter `persistence` nicht mehr durch Helm gelöscht. (!145)
-- Volume für fehlendes TMP-Verzeichnis hinzugefügt. (!146)
+- Volume für fehlendes TMP-Verzeichnis hinzugefügt.
+  Contributed by Jakob-Tobias Winter (@wintix:matrix.org). (!146)
 - Workaround zu 'warning: command substitution: ignored null byte in input'
   durch c-icap HTML Nachricht. (!152)
 
@@ -353,9 +356,10 @@ Sie befinden sich weiterhin in Arbeit und Review.
 
 - Aktualisierung der genutzten Anwendungs-Images. (!21, !32)
 - Service-Port vom Schadcodescanner auf Port `1344` für C-ICAP als Standard
-  gesetzt. (!24)
+  gesetzt. Contributed by Hajk Nagdaljan (@hajk:matrix.org). (!24)
 - Korrektur von konfigurierten Resourcen-Limits. (!35)
-- Fehlerbehebung im Image des Schadcodescanners (ClamAV).
+- Fehlerbehebung im Image des Schadcodescanners
+  Contributed by Hajk Nagdaljan (@hajk:matrix.org). (ClamAV).
 
 ### 📚 Dokumentation
 
