@@ -934,6 +934,10 @@ volumePermissions:
   # -- (int) Nutzer-ID
   # Notwendig für policy 'require-uid-greater-2000'
   gid: 2666
+  # -- (map) SecurityContext für den Init-Container
+  securityContext:
+    runAsNonRoot: false
+    runAsUser: 0
 
   image:
     # -- (string) das Repository für das zu nutzende Image zur Rechtebereinigung
