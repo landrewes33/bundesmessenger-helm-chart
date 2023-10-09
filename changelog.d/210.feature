@@ -1,0 +1,1 @@
+Hinzufügen von weiteren Endpunkten im Ingress zu den Workern.
