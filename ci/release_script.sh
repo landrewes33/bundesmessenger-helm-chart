@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # Script to help creating a release
-# skopeo and yq are required in PATH.
+# skopeo (not more) and yq are required in PATH.
 
 scriptDir=$(dirname $(readlink -f "${BASH_SOURCE:-$0}"))
 chart_file=$scriptDir/../Chart.yaml
@@ -24,13 +24,13 @@ if [ $ret -ne 0 ]; then
     envError=1
 fi
 
-# skopeo
-skopeo --version
-ret=$?
-if [ $ret -ne 0 ]; then
-    printf "Fatal: skopeo is not installed in the environment.\n"
-    envError=1
-fi
+# # skopeo
+# skopeo --version
+# ret=$?
+# if [ $ret -ne 0 ]; then
+#     printf "Fatal: skopeo is not installed in the environment.\n"
+#     envError=1
+# fi
 
 # yq
 yq --version
@@ -111,60 +111,49 @@ fi
 printf "\n================================================================================\n"
 printf "Create config YAML (ci/versions/v${nextVersion}.yaml)\n"
 
-old_config_file=$scriptDir/versions/v${cur_git_tag_version}.yaml
-new_config_file=$scriptDir/versions/v${nextVersion}.yaml
+# new_config_file=$scriptDir/versions/v${nextVersion}.yaml
 
-# ToDo: pick other version of file
-
-if [ -f "$new_config_file" ]; then
-  printf "$new_config_file already exists.\n"
-else
-  printf "Create $new_config_file from last version ($cur_git_tag_version).\n"
-  cp $old_config_file $new_config_file
-fi
-
-# ToDo: configure date
-yq -i '
-    (.[].version = "'$nextVersion'") |
-    (.[].tag = "v'$nextVersion'") |
-    (.[].date = "'$(date -u +'%Y-%m-%d')'")
-' $new_config_file
+$scriptDir/create_version_yaml_file.sh $nextVersion
 
 printf "\n================================================================================\n"
 printf "Update Helm Chart\n"
 
-printf "\n"
-while true; do
-    read -p "Would you like update used images/tag? (ask/auto/no) " yn
-    case $yn in
-        ask* )
-            $scriptDir/get_newest_image_tags.sh -f $nextVersion -t ask
-            break;;
-        auto* )
-            $scriptDir/get_newest_image_tags.sh -f $nextVersion -t update
-            break;;
-        [Nn]* ) break;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
+# printf "\n"
+# while true; do
+#     read -p "Would you like update used images/tag? (ask/auto/no) " yn
+#     case $yn in
+#         ask* )
+#             $scriptDir/get_newest_image_tags.sh -f $nextVersion -t ask
+#             break;;
+#         auto* )
+#             $scriptDir/get_newest_image_tags.sh -f $nextVersion -t update
+#             break;;
+#         [Nn]* ) break;;
+#         * ) echo "Please answer yes or no.";;
+#     esac
+# done
 
-printf "\nSet image tags in values.yaml\n"
-$scriptDir/update_images_in_chart.sh $nextVersion
+# printf "\nSet image tags in values.yaml\n"
+# $scriptDir/update_images_in_chart.sh $nextVersion
 
-printf "\nCreate docs (docs/versions/)\n"
+printf "\nCreate docs (docs/versions/v${nextVersion}.md)\n"
 $scriptDir/create_version_docs.sh $nextVersion
 
-printf "\Update Chart.yaml\n"
-synapse_version=$(yq '.[].images[] | select(.name == "Synapse") | .version' $new_config_file)
+printf "\nUpdate Chart.yaml\n"
+# synapse_version=$(yq '.[].images[] | select(.name == "Synapse") | .version' $new_config_file)
 yq '(
-        .version = "'$nextVersion'" |
-        .appVersion = "'$synapse_version'"
+        .version = "'$nextVersion'"
     )' $chart_file | diff -B $chart_file - | patch $chart_file -
 # keep blank lines in YAML: https://github.com/mikefarah/yq/issues/515#issuecomment-1113420114
 
 printf "\n================================================================================\n"
 printf "Commit\n"
 
+git add --no-all \
+    $chart_file \
+    $scriptDir/../changelog.d/* \
+    $scriptDir/versions/v${nextVersion}.yaml \
+    $scriptDir/../docs/versions/v${nextVersion}.md
 git commit -a -m "Setting version for the release ${nextVersion}"
 
 printf "\n================================================================================\n"
@@ -180,23 +169,23 @@ fi
 
 
 printf "\n================================================================================\n"
-read -p "Cherry pick or add other commits.\n"
+read -p "Cherry pick or add other commits.\n" yn
 
 printf "\n================================================================================\n"
-read -p "Create CHNAGELOG and review it.\n"
+read -p "Create CHANGELOG and review it.\n" yn
 # ToDo: optional here with towncrier
 
 printf "\n================================================================================\n"
-read -p "Merge branch into main and push.\n"
+read -p "Merge branch into main and push.\n" yn
 
 printf "\n================================================================================\n"
-read -p "Check CI pipeline for tagging and mirroring.\n"
+read -p "Check CI pipeline for tagging and mirroring.\n" yn
 
 printf "\n================================================================================\n"
-read -p "Merge branch main back into develop and push.\n"
+read -p "Merge branch main back into develop and push.\n" yn
 
 printf "\n================================================================================\n"
-read -p "Delete release branch.\n"
+read -p "Delete release branch.\n" yn
 
 printf "\n================================================================================\n"
 printf "Done!\n"
