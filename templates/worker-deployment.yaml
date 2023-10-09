@@ -57,8 +57,7 @@ spec:
           image: "{{ $.Values.volumePermissions.image.repository }}:{{ $.Values.volumePermissions.image.tag }}"
           imagePullPolicy: {{ $.Values.volumePermissions.image.pullPolicy }}
           securityContext:
-            runAsNonRoot: false
-            runAsUser: 0
+          {{- $.Values.volumePermissions.securityContext | default $default.securityContext | toYaml | nindent 12 }}
           resources: {{ $.Values.volumePermissions.resources | toYaml | nindent 12 }}
           volumeMounts:
             - name: media
