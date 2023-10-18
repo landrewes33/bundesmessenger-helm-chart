@@ -782,9 +782,13 @@ workers:
 
     ## Konfiguration für das auto-scaling der Applikation.
     autoscaling:
-      # -- (bool) schalte das HPA für die Container ein
-      # Hinweis: Kann für alle spezifischen Worker benutzt werden
-      # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden
+      # -- (bool) schalte das HPA für die Container ein.
+      # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden.
+      # Hinweis: Kann für alle spezifischen Worker benutzt werden.
+      # Eine Ausnahme besteht für Stream Writer Worker mit "listeners: [replication]".
+      # https://matrix-org.github.io/synapse/latest/workers.html#stream-writers
+      # Auf Grund der Synapse und HPA Architektur ist dies nicht möglich. Wenn diese Worker genutzt werden,
+      # wird empfohlen die Anzahl der worker manuell via "replicaCount" zu konfigurieren.
       enabled: false
       # -- (int) minimale Anzahl der Worker-Container
       minReplicas: 2

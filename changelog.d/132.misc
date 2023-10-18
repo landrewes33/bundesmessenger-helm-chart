@@ -1,0 +1,1 @@
+Aktualisierung der [Synapse Einstellung](https://github.com/matrix-org/synapse/blob/develop/docs/upgrade.md#upgrading-to-v1830) zur Replikation (`worker_replication_*` => `instance_map`).
