@@ -87,7 +87,6 @@ Sie benötigen Hostnamen inkl. DNS-Auflösung für die folgenden Infrastrukturko
 | Synapse | erforderlich | `serverName` bzw. `publicServerName` | |
 | [Synapse-Admin](synapse_admin.md) | optional, aber empfohlen | `synapse_admin.uri` | Empfohlen für eine Erreichbarkeit nur von intern, `.local`-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :smiley:<br />Kann aktiviert werden mit `synapse_admin.enabled=true`. |
 | Monitoring | empfohlen | tbd | ToDo |
-| CoTurn-Server | optional | tbd | nicht empfohlen in Kubernetes umzusetzen, nicht im Scope |
 
 ## Container-Basisimages
 
