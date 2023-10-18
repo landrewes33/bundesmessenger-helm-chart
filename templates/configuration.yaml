@@ -45,6 +45,26 @@ data:
     log_config: "/synapse/config/log.yaml"
     report_stats: {{ required "You need to specify config.reportStats" .Values.config.reportStats }}
 
+    instance_map:
+      main:
+        host: {{ include "matrix-synapse.replicationname" . | quote }}
+        port: 9093
+        tls: false
+    {{- $default := .Values.workers.default }}
+    {{- range $worker, $config := .Values.workers }}
+        {{- if and $config.enabled $config.listeners (has "replication" $config.listeners) }}
+        {{- $name := $worker | replace "_" "-" }}
+          {{- range $i, $e := until ($config.replicaCount | default $default.replicaCount | int) }}
+            {{- $worker_name := printf "%s-%d" (include "matrix-synapse.workername" (dict "global" $ "worker" $name)) $i }}
+      {{ $worker_name }}:
+        host: {{ $worker_name | quote }}
+        port: 9093
+        tls: false
+          {{- end }}
+      {{- end }}
+    {{- end }}
+
+
     ## Ports ##
 
     listeners:

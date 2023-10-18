@@ -20,10 +20,18 @@ spec:
       - podSelector:
           matchLabels:
             app.kubernetes.io/component: synapse
+    {{- range $worker_egress, $config_egress := $.Values.workers }}
+      {{- if and $config_egress.enabled (has "replication" $config_egress.listeners) }}
+        {{- $name_egress := $worker_egress | replace "_" "-" }}
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: {{ $name_egress }}
+      {{- end }}
+    {{- end }}
       ports:
       - protocol: TCP
         port: 9093
-      {{- if $.Values.postgresql.enabled }}
+    {{- if $.Values.postgresql.enabled }}
     - to:
       - podSelector:
           matchLabels:
@@ -31,19 +39,19 @@ spec:
       ports:
       - protocol: TCP
         port: 5432
-      {{- else if $.Values.networkpolicies.postgres.labelselector }}
+    {{- else if $.Values.networkpolicies.postgres.labelselector }}
       - podSelector:
           matchLabels:
             {{ $.Values.networkpolicies.postgres.labelselector }}
-      {{- else }}
+    {{- else }}
     - to:
       - ipBlock:
           cidr: "{{ $.Values.networkpolicies.postgres.externalPostgresIP }}/32"
       ports:
       - protocol: TCP
         port: 5432
-      {{- end }}
-      {{- if $.Values.redis.enabled }}
+    {{- end }}
+    {{- if $.Values.redis.enabled }}
     - to:
       - podSelector:
           matchLabels:
@@ -51,14 +59,14 @@ spec:
       ports:
       - protocol: TCP
         port: 6379
-      {{ else }}
+    {{ else }}
     - to:
       - ipBlock:
           cidr: "{{ $.Values.externalRedis.host }}/32"
       ports:
       - protocol: TCP
         port: 6379
-      {{- end }}
+    {{- end }}
     {{- if and $.Values.sygnal.enabled (or (eq $worker "pusher") (eq ($config.app | default "") "pusher")) }}
     - to:
       - podSelector:
@@ -81,6 +89,23 @@ spec:
   policyTypes:
     - Ingress
   ingress:
+    {{- if has "replication" $config.listeners }}
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: synapse
+    {{- range $worker_ingress, $config_ingress := $.Values.workers }}
+      {{- if $config_ingress.enabled }}
+      {{- $name_ingress := $worker_ingress | replace "_" "-" }}
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: {{ $name_ingress }}
+      {{- end }}
+    {{- end }}
+      ports:
+      - protocol: TCP
+        port: 9093
+    {{- end }}
     - from:
       - namespaceSelector:
           matchLabels:
