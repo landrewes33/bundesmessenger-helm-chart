@@ -1732,45 +1732,6 @@ schadcodescanner:
 
 
 ######################################################################################
-##          Konfiguration für CoTurn
-######################################################################################
-## Standard: wenn aktiviert, wird CoTurn unter dem Standard-Namensraum bereitgestellt,
-## um von mehr als einer Instanz als CoTurn/STUN Server verwendet zu werden
-## Wenn `coturn.enabled=true` und `coturn.existingcoturn=true` ebenfalls,
-## wird das Deployment so konfiguriert, dass er als Dienst unter dem Namespace 'coturn.default_ns'
-## deployed wird
-
-coturn:
-  # -- (bool) CoTurn als Deployment aktivieren
-  # Hinweis: Nicht empfohlen!
-  enabled: false
-  # -- (map) TurnUris zusammenbauen lassen, aktuell deaktiviert,
-  # Als Liste unter `config.turnUris` konfigurieren
-  # Beispiel:
-  #  udp: 3478
-  #  tcp: 3478
-  #  realm: "turn.example.com"
-  turnUris: {}
-
-  existingcoturn:
-    # -- (bool) Schalter um bereits existenten CoTurn im K8s-Cluster zu nutzen
-    enabled: false
-  # -- (string) Namespace für den CoTurn-Dienst
-  default_ns: default
-  # -- (map) Konfiguration für das Image vom CoTurn
-  image:
-    repository: HIER BITTE EIN REPOSITORY FÜR COTURN EINTRAGEN - NICHT EMPFOHLEN!
-    tag: Hier das Tag für das Image des Coturn eintragen - NICHT EMPFOHLEN!
-    pullPolicy: IfNotPresent
-  # -- (map) SecurityContext für den Container
-  securityContext:
-    runAsUser: 2011
-    runAsGroup: 2011
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-
-
-######################################################################################
 ##          Konfiguration für Synapse Admin
 ######################################################################################
 
