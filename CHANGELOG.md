@@ -7,6 +7,86 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.4.0 (2023-10-26)
+
+### ✨ Features
+
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web`
+  auf Version `2.10.0` aktualisiert.
+  (!de-bwi-bundesmessenger-backend-container-images-bundesmessenger-web)
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl`
+  auf Version `1.28.2` aktualisiert.
+  (!de-bwi-bundesmessenger-backend-container-images-kubectl)
+- Konfiguration
+  [`forget_rooms_on_leave`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#forget_rooms_on_leave)
+  für [Synapse
+  1.84.0](https://github.com/matrix-org/synapse/releases/tag/v1.84.0)
+  und
+  [`forgotten_room_retention_period`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#forgotten_room_retention_period)
+  für [Synapse
+  1.93.0](https://github.com/matrix-org/synapse/releases/tag/v1.93.0)
+  hinzugefügt. (!136)
+- Konfiguration
+  [`prevent_media_downloads_from`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#prevent_media_downloads_from)
+  für [Synapse
+  1.84.0](https://github.com/matrix-org/synapse/releases/tag/v1.84.0)
+  hinzugefügt. (!137)
+- Hinzufügen von weiteren Endpunkten im Ingress zu den Workern. (!210)
+- SecurityContext des VolumePermissions-Init-Container
+  (`volumePermissions.securityContext`) lässt sicher in der `values.yaml`
+  konfigurieren. Contributed by Klaus Mueller (@klmlklml:matrix.org). (!213)
+- Sygnal-Checks auf `tcpSocket` umgestellt, für besseres Loghandling. (!219)
+- Image `bwi/bundesmessenger/backend/container-images/synapse` auf Version
+  `1.94.0` aktualisiert.
+
+### 📚 Dokumentation
+
+- Aktualisierung der Anforderungen an Helm und Kubernetes in der README.md.
+  (!229)
+
+### 📝 Weitere Änderungen
+
+- `registry.gitlab.com/gitlab-org/release-cli` in der CI-Pipeline auf Version
+  `v0.16.0` aktualisiert. (!com-gitlab-org-release-cli)
+- `docker.io/aquasec/trivy` in der CI-Pipeline auf Version `0.46.0`
+  aktualisiert. (!io-aquasec-trivy)
+- `git-mirror` in der CI-Pipeline auf Version `v1.5.5` aktualisiert.
+  (!tech-bwmessenger-git-mirror)
+- Aktualisierung der [Synapse
+  Einstellung](https://github.com/matrix-org/synapse/blob/develop/docs/upgrade.md#upgrading-to-v1830)
+  zur Replikation (`worker_replication_*` => `instance_map`). (!132)
+- Management der CI-Pipeline und Helm Abhängigkeiten mit
+  [Renovate](https://github.com/renovatebot/renovate). (!194)
+- Umbenennung von `schadcodescanner.imageclamav` nach
+  `schadcodescanner.clamavImage`
+  und `schadcodescanner.imagecicap` nach `schadcodescanner.icapImage` (in der
+  `values.yaml`)
+  um die Kompatibilität zu
+  [Renovate](https://docs.renovatebot.com/modules/manager/helm-values/#additional-information)
+  herzustellen. (!207)
+- Management der vom Chart genutzten Applikationen (wie Synapse) mit
+  [Renovate](https://github.com/renovatebot/renovate). (!208)
+- Aktualisierung des Release Prozesses in Folge der Einführung von Renovate.
+  (!209)
+- Ergänzung von fehlender Changelog Kategorie `removal`. (!212)
+- Contribution früherer MR hinzugefügt. (!214)
+- Eine manuelle CI-Pipeline zur Prüfung von Images mit
+  [trivy](https://github.com/aquasecurity/trivy) hinzugefügt. (!227)
+- `alpine/helm` in der CI-Pipeline auf Version `3.13.1` aktualisiert.
+- `alpine` in der CI-Pipeline auf Version `3.18` aktualisiert.
+- `jnorwood/helm-docs` in der CI-Pipeline auf Version `v1.11.3` aktualisiert.
+- `kubernetes-sigs/kustomize` in der CI-Pipeline auf Version `5.2.1`
+  aktualisiert.
+- `kyverno/kyverno` in der CI-Pipeline auf Version `v1.10.3` aktualisiert.
+- `python` in der CI-Pipeline auf Version `3.12` aktualisiert.
+
+### 🦖 Abkündigungen und Bereinigungen
+
+- Entfernen von CoTurn aus dem Helm-Chart und Dokumentationen. (!232)
+
+
 ## BundesMessenger Helm Chart 1.3.1 (2023-09-25)
 
 ### ✨ Features
@@ -22,9 +102,11 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
   Charts](https://github.com/bitnami/charts/tree/main/bitnami/postgresql)
   kompatibel. (!internalpostgres)
 - Korrektur der Env-Var `SYGNAL_CONF` auf absoluten Pfad vom Sygnal-Container.
+  Contributed by Jakob-Tobias Winter (@wintix:matrix.org).
   (!190)
 - Hinzufügen der konfigurierbaren `image.pullPolicy` in alle Container des
-  Schadcodescanners. (!191)
+  Schadcodescanners.
+  Contributed by Jakob-Tobias Winter (@wintix:matrix.org). (!191)
 
 
 ## BundesMessenger Helm Chart 1.3.0 (2023-08-29)
@@ -167,7 +249,8 @@ Sie befinden sich weiterhin in Arbeit und Review.
   `values.yaml`. (!139)
 - Das Media Repository bzw. dazugehörige `PersistentVolumeClaim` wird bei
   aktivierter `persistence` nicht mehr durch Helm gelöscht. (!145)
-- Volume für fehlendes TMP-Verzeichnis hinzugefügt. (!146)
+- Volume für fehlendes TMP-Verzeichnis hinzugefügt.
+  Contributed by Jakob-Tobias Winter (@wintix:matrix.org). (!146)
 - Workaround zu 'warning: command substitution: ignored null byte in input'
   durch c-icap HTML Nachricht. (!152)
 
@@ -353,9 +436,10 @@ Sie befinden sich weiterhin in Arbeit und Review.
 
 - Aktualisierung der genutzten Anwendungs-Images. (!21, !32)
 - Service-Port vom Schadcodescanner auf Port `1344` für C-ICAP als Standard
-  gesetzt. (!24)
+  gesetzt. Contributed by Hajk Nagdaljan (@hajk:matrix.org). (!24)
 - Korrektur von konfigurierten Resourcen-Limits. (!35)
-- Fehlerbehebung im Image des Schadcodescanners (ClamAV).
+- Fehlerbehebung im Image des Schadcodescanners
+  Contributed by Hajk Nagdaljan (@hajk:matrix.org). (ClamAV).
 
 ### 📚 Dokumentation
 

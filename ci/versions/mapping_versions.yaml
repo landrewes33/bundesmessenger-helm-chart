@@ -2,9 +2,9 @@
   app: Basis
 - path: webclient.image
   app: Webclient
-- path: schadcodescanner.imageclamav
+- path: schadcodescanner.clamavImage
   app: ClamAV
-- path: schadcodescanner.imagecicap
+- path: schadcodescanner.icapImage
   app: cicap
 - path: contentscanner.image
   app: Matrix-Content-Scanner

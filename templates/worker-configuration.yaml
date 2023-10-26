@@ -32,9 +32,6 @@ data:
 
     worker_name: "@@HOSTNAME@@"
 
-    worker_replication_host: {{ include "matrix-synapse.replicationname" $ | quote }}
-    worker_replication_http_port: 9093
-
     worker_listeners:
       - port: 9090
         tls: false
@@ -49,6 +46,23 @@ data:
           - names: [metrics]
             compress: false
     {{- if $config.listeners }}
+      {{- if has "replication" $config.listeners }}
+
+      - port: 9093
+        tls: false
+        {{- if $.Values.ipv4Only }}
+        bind_addresses: ['0.0.0.0']
+        {{- else }}
+        bind_addresses: ['::']
+        {{- end }}
+        type: http
+        x_forwarded: true
+
+        resources:
+          - names: [replication]
+            compress: false
+      {{- end }}
+
 
       - port: 8083
         tls: false
@@ -62,7 +76,7 @@ data:
 
         resources:
           - names:
-              {{- toYaml $config.listeners | nindent 14 }}
+              {{- toYaml (without $config.listeners "replication") | nindent 14 }}
             compress: false
     {{- end }}
 

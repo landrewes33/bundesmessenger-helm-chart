@@ -113,7 +113,7 @@ signingkey:
     # finaler Tag kann sich noch ändern
     publishImage:
       repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl
-      tag: 1.28.1-jammy-production
+      tag: 1.28.2-jammy-production
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
@@ -254,10 +254,17 @@ extraConfig:
     enabled: true
     # -- (bool) Suche alle Nutzer, eingeschaltet
     search_all_users: true
-  # -- (bool) Alias nur für registrierte Nutzer (sowieso, nicht authentifizierte Nutzer sind abgeschaltet)
+  # -- (bool) Nur Raummitglieder können einen Alias für einen Raum konfigurieren.
   require_membership_for_aliases: true
-  # -- (string) Maximale Speicherzeit für IPs von Nutzern (Whitelist mapping)
+  # -- (string) Maximale Speicherzeit für IPs von Nutzern
   user_ips_max_age: 28d
+  # -- (bool) Benutzer vergessen Räume beim Verlassen automatisch.
+  # Nur wenn alle Nutzer einen Raum verlassen und vergessen haben,
+  # wird er automatisch vom Server gelöscht.
+  forget_rooms_on_leave: true
+  # -- (string) Zeitraum nachdem lokal vergessene Räume aus der Datenbank
+  # gelöscht werden. Wenn der Wert undefiniert oder null ist, wird nichts gelöscht.
+  forgotten_room_retention_period: 28d
   retention:
     # -- (bool) Nachrichtenaufbewahrungsrichtlinien einschalten (auf Raumebene)
     enabled: false
@@ -270,12 +277,12 @@ extraConfig:
   enable_3pid_lookup: false
   # -- (bool) Gastzugang, abgeschaltet
   allow_guest_access: false
-  # -- (object) Passwortkonfiguration
-  # @default -- folgende Aufschlüsselung
+  # -- (object) Konfiguration für Login mit Passwort
   password_config:
-    # -- (bool) Passwortkonfiguration selbst definieren, eingeschaltet
+    # -- (bool) Login mit Passwort erlauben, eingeschaltet
     enabled: true
     # -- (bool) lokale Nutzerdatenbank, eingeschaltet
+    # Wenn dies deaktiviert wird, müssen andere `password_providers` definiert werden.
     localdb_enabled: true
     policy:
       # -- (bool) Passwortpolicy nutzen, eingeschaltet
@@ -312,8 +319,14 @@ extraConfig:
     # Die einzelnen Server verfolgen Ereignisse und melden
     # sie an einen zentralen Server - im Fall von Synapse: Jaeger.
     enabled: false
-  # -- (list) Whitelist (Domainbased) für Föderation
+  # -- (list) Whitelist (Matrix-Server-Namen) für Föderation
   federation_domain_whitelist: []
+  #  - poc1.dvs.example.com
+  #  - poc2.dvs.example.com
+  #  - poc3.dvs.example.com
+  # -- (list) Eine Liste von Matrix-Servern, von denen die eigenen Benutzer
+  # keine Medien herunterladen dürfen.
+  prevent_media_downloads_from: []
   #  - poc1.dvs.example.com
   #  - poc2.dvs.example.com
   #  - poc3.dvs.example.com
@@ -683,6 +696,10 @@ workers:
       - "/_matrix/client/(api/v1|r0|v3|unstable/.*)/rooms/.*/aliases"
       - "/_matrix/client/v1/rooms/.*/timestamp_to_event$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/search$"
+      - "/_matrix/client/(r0|v3|unstable)/user/.*/filter(/|$)"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/directory/room/.*$"
+      - "/_matrix/client/(r0|v3|unstable)/capabilities$"
+      - "/_matrix/client/(r0|v3|unstable)/notifications$"
 
       ## Encryption requests
       - "/_matrix/client/(r0|v3|unstable)/keys/query$"
@@ -694,6 +711,7 @@ workers:
       ## Registration/login requests
       - "/_matrix/client/(api/v1|r0|v3|unstable)/login$"
       - "/_matrix/client/(r0|v3|unstable)/register$"
+      - "/_matrix/client/(r0|v3|unstable)/register/available$"
       - "/_matrix/client/v1/register/m.login.registration_token/validity$"
 
       ## Event sending requests
@@ -701,6 +719,7 @@ workers:
       - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/send"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/(join|invite|leave|ban|unban|kick)$"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/join/"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/knock/"
       - "/_matrix/client/(api/v1|r0|v3|unstable)/profile/"
       - "/_matrix/client/(v1|unstable/org.matrix.msc2716)/rooms/.*/batch_send"
 
@@ -763,9 +782,13 @@ workers:
 
     ## Konfiguration für das auto-scaling der Applikation.
     autoscaling:
-      # -- (bool) schalte das HPA für die Container ein
-      # Hinweis: Kann für alle spezifischen Worker benutzt werden
-      # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden
+      # -- (bool) schalte das HPA für die Container ein.
+      # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden.
+      # Hinweis: Kann für alle spezifischen Worker benutzt werden.
+      # Eine Ausnahme besteht für Stream Writer Worker mit "listeners: [replication]".
+      # https://matrix-org.github.io/synapse/latest/workers.html#stream-writers
+      # Auf Grund der Synapse und HPA Architektur ist dies nicht möglich. Wenn diese Worker genutzt werden,
+      # wird empfohlen die Anzahl der worker manuell via "replicaCount" zu konfigurieren.
       enabled: false
       # -- (int) minimale Anzahl der Worker-Container
       minReplicas: 2
@@ -915,6 +938,10 @@ volumePermissions:
   # -- (int) Nutzer-ID
   # Notwendig für policy 'require-uid-greater-2000'
   gid: 2666
+  # -- (map) SecurityContext für den Init-Container
+  securityContext:
+    runAsNonRoot: false
+    runAsUser: 0
 
   image:
     # -- (string) das Repository für das zu nutzende Image zur Rechtebereinigung
@@ -1005,19 +1032,15 @@ sygnal:
   ## Healthcheck
   livenessProbe:
     periodSeconds: 10
-    httpGet:
-      # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
-      path: /health
+    tcpSocket:
       # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks
       port: sygnal-port
 
   ## Bereitschaftscheck
   readinessProbe:
-    periodSeconds: 3
-    httpGet:
-      # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
-      path: /health
-      # -- (string) Konfiguration des Ports vom Bereitschaftscheck
+    periodSeconds: 10
+    tcpSocket:
+      # -- (string) Zu verwendende Konfiguration für den Port des Bereitschaftscheck
       port: sygnal-port
 
   # -- (object) Node Selektor Konfiguration für Sygnal-Container.
@@ -1578,12 +1601,12 @@ schadcodescanner:
   # -- (bool) Aktivieren des ClamAV-Container
   enabled: false
   # -- (map) Konfiguration des ClamAV-Image/Repository
-  imageclamav:
+  clamavImage:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/clamav
     tag: 0.103.9_dfsg-0ubuntu0.22.04.1-jammy-production
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
-  imagecicap:
+  icapImage:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/icap
     tag: 1_0.5.6-2build1-jammy-production
     pullPolicy: IfNotPresent
@@ -1709,45 +1732,6 @@ schadcodescanner:
 
 
 ######################################################################################
-##          Konfiguration für CoTurn
-######################################################################################
-## Standard: wenn aktiviert, wird CoTurn unter dem Standard-Namensraum bereitgestellt,
-## um von mehr als einer Instanz als CoTurn/STUN Server verwendet zu werden
-## Wenn `coturn.enabled=true` und `coturn.existingcoturn=true` ebenfalls,
-## wird das Deployment so konfiguriert, dass er als Dienst unter dem Namespace 'coturn.default_ns'
-## deployed wird
-
-coturn:
-  # -- (bool) CoTurn als Deployment aktivieren
-  # Hinweis: Nicht empfohlen!
-  enabled: false
-  # -- (map) TurnUris zusammenbauen lassen, aktuell deaktiviert,
-  # Als Liste unter `config.turnUris` konfigurieren
-  # Beispiel:
-  #  udp: 3478
-  #  tcp: 3478
-  #  realm: "turn.example.com"
-  turnUris: {}
-
-  existingcoturn:
-    # -- (bool) Schalter um bereits existenten CoTurn im K8s-Cluster zu nutzen
-    enabled: false
-  # -- (string) Namespace für den CoTurn-Dienst
-  default_ns: default
-  # -- (map) Konfiguration für das Image vom CoTurn
-  image:
-    repository: HIER BITTE EIN REPOSITORY FÜR COTURN EINTRAGEN - NICHT EMPFOHLEN!
-    tag: Hier das Tag für das Image des Coturn eintragen - NICHT EMPFOHLEN!
-    pullPolicy: IfNotPresent
-  # -- (map) SecurityContext für den Container
-  securityContext:
-    runAsUser: 2011
-    runAsGroup: 2011
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-
-
-######################################################################################
 ##          Konfiguration für Synapse Admin
 ######################################################################################
 
@@ -1828,7 +1812,7 @@ webclient:
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.8.0-jammy-production
+    tag: 2.10.0-jammy-production
     pullPolicy: IfNotPresent
   annotations:
     nginx.ingress.kubernetes.io/configuration-snippet: |

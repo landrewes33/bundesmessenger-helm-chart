@@ -68,8 +68,7 @@ spec:
           resources:
             {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
           securityContext:
-            runAsNonRoot: false
-            runAsUser: 0
+            {{- toYaml .Values.volumePermissions.securityContext | nindent 12 }}
           volumeMounts:
             - name: media
               mountPath: /synapse/data

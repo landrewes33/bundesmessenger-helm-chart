@@ -13,7 +13,7 @@ spec:
   policyTypes:
     - Egress
   egress:
-  {{- if .Values.postgresql.enabled }}
+    {{- if .Values.postgresql.enabled }}
     - to:
       - podSelector:
           matchLabels:
@@ -21,7 +21,7 @@ spec:
       ports:
       - protocol: TCP
         port: 5432
-   {{- else if .Values.networkpolicies.postgres.labelselector }}
+    {{- else if .Values.networkpolicies.postgres.labelselector }}
     - to:
       - podSelector:
           matchLabels:
@@ -61,6 +61,18 @@ spec:
       ports:
       - protocol: TCP
         port: 5000
+    {{- end }}
+    {{- range $worker, $config := .Values.workers }}
+      {{- if and $config.enabled (has "replication" $config.listeners) }}
+        {{- $name := $worker | replace "_" "-" }}
+    - to:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: {{ $name }}
+      ports:
+      - protocol: TCP
+        port: 9093
+      {{- end }}
     {{- end }}
 ---
 apiVersion: networking.k8s.io/v1

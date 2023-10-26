@@ -83,12 +83,6 @@ Die größten Änderungen zu dem zugrundeliegenden Chart sind:
 - Hinzufügen und Konfiguration des Sygnal-Push-Dienstes
 - Konfiguration des kompletten Dienstes für das Service-Monitoring per Prometheus
   (wird automatisch an clustereigenen Prometheus promoted)
-- **Out of scope!** mögliche Integration eines [CoTurn-Servers](https://github.com/coturn/coturn)
-  zur Nutzung der VoIP-Dienste
-  - *Optional: Installation und Konfiguration eines dedizierten NginX
-    Controllers für UDP Traffic*
-  - :pushpin: **Empfehlung: Installation eines CoTurn außerhalb des Kubernetes
-    und Konfiguration zur Erreichbarkeit dort vornehmen**
 - Konfiguration der Dienste nach Best Practice
 - Anpassung an Dual-Stack bzw. reine IPv4-Umgebungen
 - Integration eines eigenen gehärteten WebClients
@@ -243,20 +237,11 @@ Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
   - Eine (Sub-)Domain für den WebClient z.B. `app.example.com`, besser `app.example.net`
   - Eine (Sub-)Domain für die Administrationsoberfläche um den Zugriff zu separieren
   bzw. die Admin-Schnittstelle vor öffentlichen Zugriff zu schützen (Parameter `synapse_admin.uri`)
-- [Kubernetes](https://kubernetes.io/) 1.19+
-- [Helm](https://helm.sh/) 3.0+
+- [Kubernetes](https://kubernetes.io/) 1.23+
+- [Helm](https://helm.sh/) 3.11+
 - Ingress Controller (NginX) im Cluster installiert
-  - *Optional: Nicht Policy-Konform: Bei Nutzung von CoTurn des Helm Charts,
-  muss der IngressController den Port 3478 TCP zugefügt werden (Patch) oder
-  durch vorgeschalteten Reverse-Proxy an die Nodeports direkt durchgeleitet
-  werden. Weiterhin müsste bei der Nutzung von CoTurn innerhalb von K8s ein
-  weiterer NginX-Controller installiert werden, welcher sich um den
-  UDP-Traffic kümmert **(nicht empfohlen)***
 - vorgelagerte Loadbalancer und vorkonfigurierte Firewalls, um den Service
   in vollem Umfang zu nutzen
-  - *Optional: bei Nutzung von CoTurn wird ein NginX-Reverse-Proxy empfohlen,
-    der die TCP/UDP-Streams weiterleitet. Das ist nicht policykonform, da
-    Host-Ports angesprochen werden müssen.*
 - *Optional: Storage muss `PersistentVolumeClaims` zulassen und konfiguriert
   haben (von Vorteil für die Datenbank und Media)*
 - Zugriff auf vorhandenen [PostgreSQL](https://www.postgresql.org/)
@@ -440,7 +425,6 @@ auch Hinweise zu den einzelnen zusätzlichen Diensten:
 - [Benutzerverwaltung](./docs/nutzerverwaltung.md)
 - [BundesMessenger WebClient](./docs/webclient.md)
 - [Synapse Admin](./docs/synapse_admin.md)
-- [TURN (Audio / Video)](./docs/turn.md)
 - [Sygnal (Push-Service)](./docs/sygnal_push.md)
 
 # Kontakt und Austausch

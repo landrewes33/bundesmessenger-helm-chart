@@ -57,8 +57,7 @@ spec:
           image: "{{ $.Values.volumePermissions.image.repository }}:{{ $.Values.volumePermissions.image.tag }}"
           imagePullPolicy: {{ $.Values.volumePermissions.image.pullPolicy }}
           securityContext:
-            runAsNonRoot: false
-            runAsUser: 0
+          {{- $.Values.volumePermissions.securityContext | default $default.securityContext | toYaml | nindent 12 }}
           resources: {{ $.Values.volumePermissions.resources | toYaml | nindent 12 }}
           volumeMounts:
             - name: media
@@ -147,9 +146,16 @@ spec:
               containerPort: 9090
               protocol: TCP
           {{- if $config.listeners }}
+            {{- if without $config.listeners "replication" }}
             - name: listener
               containerPort: 8083
               protocol: TCP
+            {{- end }}
+            {{- if has "replication" $config.listeners }}
+            - name: replication
+              containerPort: 9093
+              protocol: TCP
+            {{- end }}
           {{- end }}
           {{- if (or $config.readinessProbe $default.readinessProbe) }}
           readinessProbe:
