@@ -61,8 +61,12 @@ for path in $loop_var ; do
   }]' $version_file
 done
 
-# Synpase Tag wird über die Chart.yaml gesteuert.
-yq -i '.[].images[] |= select(.name == "Synapse").tag = "'$(echo "$chart_content" | yq '.appVersion')'"' $version_file
+# Synpase Tag wird über die Chart.yaml gesteuert und
+# via Helm-Template (_helpers.tpl - define "matrix-synapse.imageTag")
+# um einen statischen Teil ergänzt
+yq -i '.[].images[] |=
+  select(.name == "Synapse").tag =
+    "'$(echo "$chart_content" | yq '.appVersion')'-jammy-production"' $version_file
 
 # Doppele Images entfernen
 yq -i '.[].images |= unique_by(.name)' $version_file
