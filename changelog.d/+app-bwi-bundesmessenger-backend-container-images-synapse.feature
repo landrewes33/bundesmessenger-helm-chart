@@ -1,1 +1,1 @@
-Image `bwi/bundesmessenger/backend/container-images/synapse` auf Version `1.93.0` aktualisiert.
+Image `bwi/bundesmessenger/backend/container-images/synapse` auf Version `1.94.0` aktualisiert.
