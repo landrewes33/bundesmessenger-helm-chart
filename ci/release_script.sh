@@ -169,23 +169,23 @@ fi
 
 
 printf "\n================================================================================\n"
-read -p "Cherry pick or add other commits.\n" yn
+read -p "Cherry pick or add other commits." yn
 
 printf "\n================================================================================\n"
-read -p "Create CHANGELOG and review it.\n" yn
+read -p "Create CHANGELOG and review it." yn
 # ToDo: optional here with towncrier
 
 printf "\n================================================================================\n"
-read -p "Merge branch into main and push.\n" yn
+read -p "Merge branch into main and push." yn
 
 printf "\n================================================================================\n"
-read -p "Check CI pipeline for tagging and mirroring.\n" yn
+read -p "Check CI pipeline for tagging and mirroring." yn
 
 printf "\n================================================================================\n"
-read -p "Merge branch main back into develop and push.\n" yn
+read -p "Merge branch main back into develop and push." yn
 
 printf "\n================================================================================\n"
-read -p "Delete release branch.\n" yn
+read -p "Delete release branch." yn
 
 printf "\n================================================================================\n"
 printf "Done!\n"
