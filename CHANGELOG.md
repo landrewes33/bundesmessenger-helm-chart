@@ -84,7 +84,8 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 
 ### 🦖 Abkündigungen und Bereinigungen
 
-- Enternfen von CoTurn aus dem Helm-Chart und Dokumentationen. (!232)
+- Entfernen von CoTurn aus dem Helm-Chart und Dokumentationen. (!232)
+
 
 ## BundesMessenger Helm Chart 1.3.1 (2023-09-25)
 
