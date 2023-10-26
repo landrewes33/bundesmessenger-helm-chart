@@ -1,1 +1,0 @@
-Konfiguration [`prevent_media_downloads_from`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#prevent_media_downloads_from) für [Synapse 1.84.0](https://github.com/matrix-org/synapse/releases/tag/v1.84.0) hinzugefügt.
