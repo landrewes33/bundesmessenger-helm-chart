@@ -75,7 +75,11 @@ data:
       },
       {{- if .Values.additionalConfig.locationSharing.enabled }}
       "m.tile_server": {
+        {{- if .Values.additionalConfig.locationSharing.map_style_url }}
+        "map_style_url": {{ .Values.additionalConfig.locationSharing.map_style_url | quote }}
+        {{- else }}
         "map_style_url": "{{- printf "https://%s" ( .Values.publicServerName | default .Values.serverName ) }}/_matrix/cconfig/style.json"
+        {{- end }}
       },
       {{- end }}
       "de.bwi": {

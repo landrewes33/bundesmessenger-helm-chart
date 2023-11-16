@@ -1870,6 +1870,32 @@ additionalConfig:
     # notwendige Konfiguration selbst vorzunehmen.
     enabled: true
 
+    # -- (string) Link zur Style Map für den Tiles Server (https://docs.mapbox.com/style-spec/guides/)
+    # Diese URL wird via /.well-known/matrix/client an die Clients übergeben um die Informationen
+    # über den Karten-Server zu erhalten. Wenn der Wert nicht gesetzt ist, wird dem Client die
+    # Konfiguration aus `map_style_config` übergeben.
+    map_style_url: null
+
+    # -- (object) Konfiguration für den Client mit den Informationen über den Tiles Server.
+    # Wenn `map_style_url` konfiguriert ist, wird diese Angabe ignoriert.
+    # Die Konfiguration wird mit der Funktion "toRawJson" gerendert.
+    # Anführungszeichen (") werden automatisch von Helm escaped (zu \").
+    map_style_config:
+      version: 8
+      name: wms
+      sources:
+        wms_topplus:
+          type: raster
+          tiles:
+            - https://sgx.geodatenzentrum.de/wms_topplus_open?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&width=256&height=256&layers=web_scale&styles=
+          tileSize: 256
+          attribution: <a href="https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/Datenquellen_TopPlusOpen.html" target="_blank">&copy; Bundesamt f&uuml;r Kartographie und Geod&auml;sie (2023)</a>
+      layers:
+        - id: web_layer
+          source: wms_topplus
+          source-layer: web
+          type: raster
+
   # -- (map) Die Nutzer werden mit diesen Informationen auf die bevorstehende geplante Downtime,
   # bzw. auf die aktive Downtime, hingewiesen.
   # Weiterhin besteht die Möglichkeit, die Nutzer zum Update des Clients zu motivieren bzw. zu zwingen.
