@@ -376,7 +376,7 @@ synapse:
   #    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"
   #  - name: no_proxy
   #    value: "*.cluster.local,push-local"
-  # extraEnv: []
+  extraEnv: []
 
   # -- (list) Zusätzliche in Synapse zu mountende Datenträger (Volumes)
   # Beispiel:
@@ -1947,6 +1947,13 @@ additionalConfig:
 
 networkpolicies:
   enabled: false
+  # -- (list) IP(s) der Proxy(s), die für den Synapse und seine Worker via Env-Variablen
+  # erreichbar sein sollen. Diese werden per Egress-Regeln erlaubt.
+  # Die Einträge müssen in CIDR-Schreibweise vorgenommen werden: Start-IP/Netzmaske:Proxyport
+  # Bsp:
+  # - "192.168.10.0/24:8765"
+  # - "10.10.0.0/16:5000"
+  fwProxyList: []
   # -- (string) Hierbei handelt es sich um den Namespace indem ein Ingress Controller gehostet wird.
   # Aktuell wird nur eine Architektur mit einem L7 Ingress Controller unterstützt.
   # Absolut notwendig für die Network-Policies
