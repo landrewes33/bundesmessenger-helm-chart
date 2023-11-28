@@ -76,6 +76,16 @@ spec:
       - protocol: TCP
         port: 5000
     {{- end }}
+    {{- if $.Values.networkpolicies.fwProxyList }}
+      {{- range $.Values.networkpolicies.fwProxyList }}
+    - to:
+      - ipBlock:
+          cidr: {{ (split ":" . )._0 | quote }}
+        ports:
+        - protcoll: TCP
+          port: {{ (split ":" . )._1 | quote }}
+      {{- end }}
+    {{- end }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
