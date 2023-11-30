@@ -31,7 +31,9 @@ spec:
     {{- if has $webclientUri .hosts }}
   tls:
     - hosts:
-        - {{ $webclientUri }}
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
       {{- if .secretName }}
       secretName: {{ .secretName }}
       {{- end }}
