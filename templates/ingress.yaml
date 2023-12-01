@@ -52,6 +52,8 @@ spec:
   {{- if .Values.ingress.includeServerName }}
     {{- $wkHosts = concat (list .Values.serverName) $wkHosts }}
   {{- end }}
+  {{- /* Add .well-known to Synapse FQDN for client configuration */}}
+  {{- $wkHosts = uniq (concat (list ( .Values.publicServerName | default .Values.serverName )) $wkHosts ) }}
   {{- $hosts := uniq (concat $s2sHosts $csHosts $wkHosts) }}
   {{- range $hosts }}
     {{- $host := . }}
