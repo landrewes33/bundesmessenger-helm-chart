@@ -1,0 +1,1 @@
+Verlagern der Snippet-Configuration des Webclient in nginx-Configuration vom Container.
