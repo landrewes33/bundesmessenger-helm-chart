@@ -1,0 +1,1 @@
+Hinzufügen der [Darstellung](docs/images/Bum_Network_policies.jpg) der Network-Policy-Struktur.

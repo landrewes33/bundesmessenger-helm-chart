@@ -37,3 +37,4 @@ towncrier.toml
 /ci/
 pusher-values.yaml
 /docs/images/*.vsdx
+/docs/images/*.jpg
