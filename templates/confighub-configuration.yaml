@@ -41,28 +41,11 @@ data:
       }
     }
   style.json: |
-    {
-      "version": 8,
-      "name": "wms",
-      "sources": {
-        "wms_topplus": {
-          "type": "raster",
-          "tiles": [
-              "https://sgx.geodatenzentrum.de/wms_topplus_open?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&width=256&height=256&layers=web_scale&styles="
-          ],
-          "tileSize": 256,
-          "attribution": "<a href=\"https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/Datenquellen_TopPlusOpen.html\" target=\"_blank\">&copy; Bundesamt f&uuml;r Kartographie und Geod&auml;sie (2023)</a>"
-        }
-      },
-      "layers": [
-        {
-          "id": "web_layer",
-          "source": "wms_topplus",
-          "source-layer": "web",
-          "type": "raster"
-        }
-      ]
-    }
+    {{- if .Values.additionalConfig.locationSharing.map_style_config }}
+{{ toRawJson .Values.additionalConfig.locationSharing.map_style_config | indent 4 }}
+    {{- else }}
+{{ printf "{}" | indent 4 }}
+    {{- end }}
   maintenance.json: |
     {{- if .Values.additionalConfig.maintenance }}
 {{ toPrettyJson .Values.additionalConfig.maintenance | indent 4 }}

@@ -7,6 +7,54 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.5.0 (2023-12-18)
+
+### ✨ Features
+
+- Hinzufügen von Network-Policy-Einträgen für Proxy-Environments via Env-Vars.
+  (!224)
+- Ermöglicht die eigene Konfiguration
+  (`additionalConfig.locationSharing.map_style_url` und
+  `additionalConfig.locationSharing.map_style_config`)
+  des durch den Client verwendeten Karten-Servers. (!244)
+- Verlagern der Snippet-Configuration des Webclient in nginx-Configuration vom
+  Container. (!255)
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl`
+  auf Version `1.28.3` aktualisiert.
+
+### 🐛 Bugfixes
+
+- Korrektur der TLS-Einbindung in der Webclient-Ingress-Ressource. (!253)
+
+### 📚 Dokumentation
+
+- Hinzufügen der [Darstellung](docs/images/Bum_Network_policies.jpg) der
+  Network-Policy-Struktur. (!256, !263)
+- Aktualisierung der Dokumentation auf eine "stable" Version. (!264)
+- Beispiele zur Installation mit Nutzung von einer OCI-Registry hinzugefügt.
+  (!265)
+
+### 📝 Weitere Änderungen
+
+- Erklärung für Well-known und Ergänzungen zur Ingress Dokumentation
+  hinzugefügt. (!109)
+- Die `.well-known` URL zum Ingress für den Synapse Server hinzugefügt für eine
+  bessere Client Konfiguration. (!178)
+- Fixierung der genutzten `towncrier` Version in der CI-Pipeline. (!237)
+- `alpine/helm` in der CI-Pipeline auf Version `3.13.3` aktualisiert.
+- `alpine` in der CI-Pipeline auf Version `3.19` aktualisiert.
+- `docker.io/aquasec/trivy` in der CI-Pipeline auf Version `0.48.0`
+  aktualisiert.
+- `kubernetes-sigs/kustomize` in der CI-Pipeline auf Version `5.3.0`
+  aktualisiert.
+- `kyverno/kyverno` in der CI-Pipeline auf Version `v1.11.1` aktualisiert.
+- `towncrier` in der CI-Pipeline auf Version `23.11.0` aktualisiert.
+
+### 🦖 Abkündigungen und Bereinigungen
+
+- Alte CI-Pipeline zum Aktualisieren der Helm Dependencies entfernt. (!211)
+
 ## BundesMessenger Helm Chart 1.4.0 (2023-10-26)
 
 ### ✨ Features

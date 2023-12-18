@@ -113,7 +113,7 @@ signingkey:
     # finaler Tag kann sich noch ändern
     publishImage:
       repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl
-      tag: 1.28.2-jammy-production
+      tag: 1.28.3-jammy-production
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
@@ -376,7 +376,7 @@ synapse:
   #    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"
   #  - name: no_proxy
   #    value: "*.cluster.local,push-local"
-  # extraEnv: []
+  extraEnv: []
 
   # -- (list) Zusätzliche in Synapse zu mountende Datenträger (Volumes)
   # Beispiel:
@@ -1814,12 +1814,6 @@ webclient:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
     tag: 2.10.0-jammy-production
     pullPolicy: IfNotPresent
-  annotations:
-    nginx.ingress.kubernetes.io/configuration-snippet: |
-      add_header X-Frame-Options SAMEORIGIN;
-      add_header X-Content-Type-Options nosniff;
-      add_header X-XSS-Protection "1; mode=block";
-      add_header Content-Security-Policy "frame-ancestors 'none'";
 
   # -- (map) Informationen zum Sicherheitskontext, die der Container übernehmen soll.
   # weitere Möglichkeiten:
@@ -1869,6 +1863,32 @@ additionalConfig:
     # Wenn wellknown.enable oder confighub.enable deaktiviert sind, ist die
     # notwendige Konfiguration selbst vorzunehmen.
     enabled: true
+
+    # -- (string) Link zur Style Map für den Tiles Server (https://docs.mapbox.com/style-spec/guides/)
+    # Diese URL wird via /.well-known/matrix/client an die Clients übergeben um die Informationen
+    # über den Karten-Server zu erhalten. Wenn der Wert nicht gesetzt ist, wird dem Client die
+    # Konfiguration aus `map_style_config` übergeben.
+    map_style_url: null
+
+    # -- (object) Konfiguration für den Client mit den Informationen über den Tiles Server.
+    # Wenn `map_style_url` konfiguriert ist, wird diese Angabe ignoriert.
+    # Die Konfiguration wird mit der Funktion "toRawJson" gerendert.
+    # Anführungszeichen (") werden automatisch von Helm escaped (zu \").
+    map_style_config:
+      version: 8
+      name: wms
+      sources:
+        wms_topplus:
+          type: raster
+          tiles:
+            - https://sgx.geodatenzentrum.de/wms_topplus_open?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&width=256&height=256&layers=web_scale&styles=
+          tileSize: 256
+          attribution: <a href="https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/Datenquellen_TopPlusOpen.html" target="_blank">&copy; Bundesamt f&uuml;r Kartographie und Geod&auml;sie (2023)</a>
+      layers:
+        - id: web_layer
+          source: wms_topplus
+          source-layer: web
+          type: raster
 
   # -- (map) Die Nutzer werden mit diesen Informationen auf die bevorstehende geplante Downtime,
   # bzw. auf die aktive Downtime, hingewiesen.
@@ -1921,6 +1941,13 @@ additionalConfig:
 
 networkpolicies:
   enabled: false
+  # -- (list) IP(s) der Proxy(s), die für den Synapse und seine Worker via Env-Variablen
+  # erreichbar sein sollen. Diese werden per Egress-Regeln erlaubt.
+  # Die Einträge müssen in CIDR-Schreibweise vorgenommen werden: Start-IP/Netzmaske:Proxyport
+  # Bsp:
+  # - "192.168.10.0/24:8765"
+  # - "10.10.0.0/16:5000"
+  fwProxyList: []
   # -- (string) Hierbei handelt es sich um den Namespace indem ein Ingress Controller gehostet wird.
   # Aktuell wird nur eine Architektur mit einem L7 Ingress Controller unterstützt.
   # Absolut notwendig für die Network-Policies

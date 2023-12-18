@@ -5,7 +5,7 @@
 Ingress-Regeln in Kubernetes sind eine Methode, um den eingehenden Datenverkehr
 in Ihre Anwendungen zu steuern.
 Sie ermöglichen es Ihnen, den Datenverkehr basierend auf verschiedenen Kriterien
-wie Hostnamen, Pfaden und Protokollen zu routen und filtern.
+wie Hostnamen, Pfaden und Protokollen zu routen.
 
 Um es genauer zu erklären: In Kubernetes ist ein Ingress-Objekt eine Art Ressource,
 die definiert, wie der eingehende Netzwerkverkehr auf eine Gruppe von Diensten
@@ -90,3 +90,9 @@ die Skalierbarkeit verbessern und die Flexibilität erhöhen.
 
 Es ist damit durchaus möglich,
 das weitere Unterteilungen in eigene Ingress-Ressourcen zukünftig umgesetzt werden.
+
+## Ausblick
+
+Zukünftig kann unter Nutzung von Service-Mesh-Systemen diese Separierung
+fortgeführt und verfeinert werden. Zusätzlich lassen sich dadurch neue Synergien
+im Sinne der Netzwerksicherheit finden und nutzen.
