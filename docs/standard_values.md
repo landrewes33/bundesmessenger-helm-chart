@@ -1,6 +1,6 @@
 # bundesmessenger
 
-![Version: 1.4.0](https://img.shields.io/badge/Version-1.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.94.0](https://img.shields.io/badge/AppVersion-1.94.0-informational?style=flat-square)
+![Version: 1.5.0](https://img.shields.io/badge/Version-1.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.94.0](https://img.shields.io/badge/AppVersion-1.94.0-informational?style=flat-square)
 
 BWI Matrix BundesMessenger
 
@@ -266,7 +266,7 @@ wird im Chart.yaml gesetzt
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl",
-  "tag": "1.28.2-jammy-production"
+  "tag": "1.28.3-jammy-production"
 }
 </pre>
 </div>
@@ -1192,6 +1192,19 @@ wird nachfolgend einzeln aufgeschlüsselt
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 {}
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="synapse--extraEnv">
+        <div style="max-width: 150px;"><a href="../values.yaml#L379">synapse.extraEnv</a></div>
+      </td>
+      <td>list</td>
+      <td>Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind. Dies ist unter anderem für die Nutzung eines ausgehenden Proxies (https://matrix-org.github.io/synapse/latest/setup/forward_proxy.html) notwendig. Achtung: U.U. sind die gleichen Einstellungen zusätzlich unter "workers.default" bzw. für den Sygnal selbst zu konfigurieren. Der Sygnal muss in der "no_proxy" Ausnahme enthalten sein, da Synapse ihn sonst versucht via Proxy zu erreichen. Für die BuM Apps ist dies "push-local". Beispiel:  - name: LD_PRELOAD    value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2  - name: SYNAPSE_CACHE_FACTOR    value: "2"  - name: http_proxy    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"  - name: https_proxy    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"  - name: no_proxy    value: "*.cluster.local,push-local"</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+[]
 </pre>
 </div>
       </td>
@@ -4656,21 +4669,8 @@ false
       </td>
     </tr>
     <tr>
-      <td id="webclient--annotations--"nginx--ingress--kubernetes--io/configuration-snippet"">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1818">webclient.annotations."nginx.ingress.kubernetes.io/configuration-snippet"</a></div>
-      </td>
-      <td>string</td>
-      <td></td>
-      <td>
-        <div style="max-width: 300px;"><pre lang="json">
-"add_header X-Frame-Options SAMEORIGIN;\nadd_header X-Content-Type-Options nosniff;\nadd_header X-XSS-Protection \"1; mode=block\";\nadd_header Content-Security-Policy \"frame-ancestors 'none'\";\n"
-</pre>
-</div>
-      </td>
-    </tr>
-    <tr>
       <td id="webclient--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1827">webclient.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1821">webclient.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die der Container übernehmen soll. weitere Möglichkeiten:  fsGroup: 1001</td>
@@ -4686,7 +4686,7 @@ false
     </tr>
     <tr>
       <td id="webclient--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1836">webclient.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1830">webclient.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie weitere Möglichkeiten:  capabilities:    drop:    - ALL</td>
@@ -4702,7 +4702,7 @@ false
     </tr>
     <tr>
       <td id="webclient--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1844">webclient.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1838">webclient.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die auf den webclient-server anzuwenden sind.</td>
@@ -4715,7 +4715,7 @@ false
     </tr>
     <tr>
       <td id="webclient--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1846">webclient.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1840">webclient.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind.</td>
@@ -4728,7 +4728,7 @@ false
     </tr>
     <tr>
       <td id="webclient--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1849">webclient.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1843">webclient.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die auf den webclient-server anzuwenden sind.</td>
@@ -4741,7 +4741,7 @@ false
     </tr>
     <tr>
       <td id="webclient--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1851">webclient.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1845">webclient.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die auf den webclient-server anzuwenden sind.</td>
@@ -4769,7 +4769,7 @@ false
   <tbody>
     <tr>
       <td id="additionalConfig--locationSharing--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1871">additionalConfig.locationSharing.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1865">additionalConfig.locationSharing.enabled</a></div>
       </td>
       <td>bool</td>
       <td>Aktivierung und Konfiguration von Standort teilen (location sharing) in den Clients Führt zur Konfiguration der /.well-known/client und /_matrix/cconfig/style.json Wenn wellknown.enable oder confighub.enable deaktiviert sind, ist die notwendige Konfiguration selbst vorzunehmen.</td>
@@ -4781,8 +4781,55 @@ true
       </td>
     </tr>
     <tr>
+      <td id="additionalConfig--locationSharing--map_style_url">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1871">additionalConfig.locationSharing.map_style_url</a></div>
+      </td>
+      <td>string</td>
+      <td>Link zur Style Map für den Tiles Server (https://docs.mapbox.com/style-spec/guides/) Diese URL wird via /.well-known/matrix/client an die Clients übergeben um die Informationen über den Karten-Server zu erhalten. Wenn der Wert nicht gesetzt ist, wird dem Client die Konfiguration aus `map_style_config` übergeben.</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+null
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
+      <td id="additionalConfig--locationSharing--map_style_config">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1877">additionalConfig.locationSharing.map_style_config</a></div>
+      </td>
+      <td>object</td>
+      <td>Konfiguration für den Client mit den Informationen über den Tiles Server. Wenn `map_style_url` konfiguriert ist, wird diese Angabe ignoriert. Die Konfiguration wird mit der Funktion "toRawJson" gerendert. Anführungszeichen (") werden automatisch von Helm escaped (zu \").</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+{
+  "layers": [
+    {
+      "id": "web_layer",
+      "source": "wms_topplus",
+      "source-layer": "web",
+      "type": "raster"
+    }
+  ],
+  "name": "wms",
+  "sources": {
+    "wms_topplus": {
+      "attribution": "\u003ca href=\"https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/Datenquellen_TopPlusOpen.html\" target=\"_blank\"\u003e\u0026copy; Bundesamt f\u0026uuml;r Kartographie und Geod\u0026auml;sie (2023)\u003c/a\u003e",
+      "tileSize": 256,
+      "tiles": [
+        "https://sgx.geodatenzentrum.de/wms_topplus_open?bbox={bbox-epsg-3857}\u0026format=image/png\u0026service=WMS\u0026version=1.1.1\u0026request=GetMap\u0026srs=EPSG:3857\u0026width=256\u0026height=256\u0026layers=web_scale\u0026styles="
+      ],
+      "type": "raster"
+    }
+  },
+  "version": 8
+}
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
       <td id="additionalConfig--maintenance">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1915">additionalConfig.maintenance</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1935">additionalConfig.maintenance</a></div>
       </td>
       <td>map</td>
       <td>Die Nutzer werden mit diesen Informationen auf die bevorstehende geplante Downtime, bzw. auf die aktive Downtime, hingewiesen. Weiterhin besteht die Möglichkeit, die Nutzer zum Update des Clients zu motivieren bzw. zu zwingen. Die Konfiguration wird vom confighub ausgeliefert, daher ist es notwendig, dass `confighub.enable: true` gesetzt ist.  downtime[]   warning_start_time: Startzeit der Warnmeldung (ISO 8601)                       Beispiele: 2023-08-06T14:00:00Z (UTC)                                  2009-01-01T12:00:00+01:00 (MEZ)                                  2009-06-30T18:30:00+02:00 (MESZ - Sommerzeit)   start_time:         Startzeit der Downtime (ISO 8601)   end_time:           Ende der Downtime (ISO 8601)   type:     MAINTENANCE:  Default Text in Anwendung für Wartungsfenster.                   Feld `description` wird zusätzlich darunter mit 1 Zeile Abstand angezeigt,                   wenn vorhanden     ADHOC_MESSAGE: Nur der Text aus dem Feld `description` wird angezeigt.   description:  optionaler Text zusätzlich zum Standard-Wartungstext   blocking:     Bei true werden Login und Requests vom Client blockiert (auch im eingeloggten Zustand)                 Requests auf die Maintenance-Schnittstelle werden nicht blockiert.  versions: ios oder android (web unterstützt die Funktion aktuell nicht)   Für die Versionsangabe sind vollständige Versionsnummern (Major.Minor.Patch) anzugeben. update_before: die letzte Version, die gedulded wird, ältere müssen updaten warn_before: die letzte Version ohne Update-Hinweis, ältere sollten updaten  maintenance:   downtime:     - warning_start_time: "2022-12-14T11:00:00Z"       start_time: "2022-12-23T11:00:00Z"       end_time: "2022-12-24T20:00:00Z"       type: "MAINTENANCE"       description: "Weihnachtswartung 2022"       blocking: true   versions:     ios:       update_before: "1.17.0"       warn_before: "1.19.0"     android:       update_before: "1.17.0"       warn_before: "1.19.0"</td>
@@ -4810,7 +4857,7 @@ true
   <tbody>
     <tr>
       <td id="networkpolicies--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1923">networkpolicies.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1943">networkpolicies.enabled</a></div>
       </td>
       <td>bool</td>
       <td></td>
@@ -4822,8 +4869,21 @@ false
       </td>
     </tr>
     <tr>
+      <td id="networkpolicies--fwProxyList">
+        <div style="max-width: 150px;"><a href="../values.yaml#L1950">networkpolicies.fwProxyList</a></div>
+      </td>
+      <td>list</td>
+      <td>IP(s) der Proxy(s), die für den Synapse und seine Worker via Env-Variablen erreichbar sein sollen. Diese werden per Egress-Regeln erlaubt. Die Einträge müssen in CIDR-Schreibweise vorgenommen werden: Start-IP/Netzmaske:Proxyport Bsp: - "192.168.10.0/24:8765" - "10.10.0.0/16:5000"</td>
+      <td>
+        <div style="max-width: 300px;"><pre lang="json">
+[]
+</pre>
+</div>
+      </td>
+    </tr>
+    <tr>
       <td id="networkpolicies--ingressNamespace">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1927">networkpolicies.ingressNamespace</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1954">networkpolicies.ingressNamespace</a></div>
       </td>
       <td>string</td>
       <td>Hierbei handelt es sich um den Namespace indem ein Ingress Controller gehostet wird. Aktuell wird nur eine Architektur mit einem L7 Ingress Controller unterstützt. Absolut notwendig für die Network-Policies</td>
@@ -4836,7 +4896,7 @@ false
     </tr>
     <tr>
       <td id="networkpolicies--postgres--externalPostgresIP">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1933">networkpolicies.postgres.externalPostgresIP</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1960">networkpolicies.postgres.externalPostgresIP</a></div>
       </td>
       <td>string</td>
       <td></td>
@@ -4849,7 +4909,7 @@ false
     </tr>
     <tr>
       <td id="networkpolicies--postgres--labelselector">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1937">networkpolicies.postgres.labelselector</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1964">networkpolicies.postgres.labelselector</a></div>
       </td>
       <td>string</td>
       <td>Der labelselector wird dafür genutzt eine Postgres Instanz innerhalb des Clusters zu adressieren. Sollte das Label bei einer eigens betriebenen Instanz abweichen, kann dies hier angepasst werden.</td>
@@ -4877,7 +4937,7 @@ false
   <tbody>
     <tr>
       <td id="tests--image">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1946">tests.image</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1973">tests.image</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für das Image der Tests</td>
@@ -4894,7 +4954,7 @@ false
     </tr>
     <tr>
       <td id="tests--annotations">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1952">tests.annotations</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1979">tests.annotations</a></div>
       </td>
       <td>map</td>
       <td>Annotations, die zusätzlich auf die Tests anzuwenden sind.</td>
@@ -4909,7 +4969,7 @@ false
     </tr>
     <tr>
       <td id="tests--podSecurityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1956">tests.podSecurityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1983">tests.podSecurityContext</a></div>
       </td>
       <td>map</td>
       <td>Informationen zum Sicherheitskontext, die der Container übernehmen soll.</td>
@@ -4925,7 +4985,7 @@ false
     </tr>
     <tr>
       <td id="tests--securityContext">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1961">tests.securityContext</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1988">tests.securityContext</a></div>
       </td>
       <td>map</td>
       <td>Konfiguration für die Container-Sicherheitsrichtlinie</td>
@@ -4943,7 +5003,7 @@ false
     </tr>
     <tr>
       <td id="tests--resources--limits--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1971">tests.resources.limits.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L1998">tests.resources.limits.cpu</a></div>
       </td>
       <td>string</td>
       <td>Rechenressourcengrenzen, die für Tests anzuwenden sind.</td>
@@ -4956,7 +5016,7 @@ false
     </tr>
     <tr>
       <td id="tests--resources--limits--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1973">tests.resources.limits.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L2000">tests.resources.limits.memory</a></div>
       </td>
       <td>string</td>
       <td>RAM Ressourcengrenzen, die für Tests anzuwenden sind.</td>
@@ -4969,7 +5029,7 @@ false
     </tr>
     <tr>
       <td id="tests--resources--requests--cpu">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1976">tests.resources.requests.cpu</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L2003">tests.resources.requests.cpu</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an Rechenressourcen, die für Tests anzuwenden sind.</td>
@@ -4982,7 +5042,7 @@ false
     </tr>
     <tr>
       <td id="tests--resources--requests--memory">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1978">tests.resources.requests.memory</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L2005">tests.resources.requests.memory</a></div>
       </td>
       <td>string</td>
       <td>Anforderungen an RAM Ressourcen, die für Tests anzuwenden sind.</td>
@@ -5010,7 +5070,7 @@ false
   <tbody>
     <tr>
       <td id="demomode--enabled">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1988">demomode.enabled</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L2015">demomode.enabled</a></div>
       </td>
       <td>boolean</td>
       <td>Aktivieren des Demoworkflows für Kubernetes ab v1.21.0 Achtung: Der Demomodus setzt per CronJob die Datenbank regelmäßig zurück.</td>
@@ -5023,7 +5083,7 @@ false
     </tr>
     <tr>
       <td id="demomode--mode">
-        <div style="max-width: 150px;"><a href="../values.yaml#L1996">demomode.mode</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L2023">demomode.mode</a></div>
       </td>
       <td>string</td>
       <td>Auswahl des Demomodus Folgende Möglichkeiten:   "complete": Es wird die gesamte Datenbank gelöscht und neu erstellt.   "defined": Es wird ein Datenbank-Dump zurück gespielt.              Dieser muss als DB-Dump bereit gestellt werden. (TBD)   "federation": Wie "defined", jedoch mit der Option als Förderationspartner zu fungieren. (TBD)</td>
@@ -5036,7 +5096,7 @@ false
     </tr>
     <tr>
       <td id="demomode--interval">
-        <div style="max-width: 150px;"><a href="../values.yaml#L2017">demomode.interval</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L2044">demomode.interval</a></div>
       </td>
       <td>string</td>
       <td>Angabe der Laufzeit des Demomodus Nutzung der Crontab-Zeitnotation Die Crontab-Zeitnotation besteht aus fünf oder sechs Stichpunkten, die die Zeitintervalle angeben: Minute (0-59): Die Minute, zu der die Aufgabe ausgeführt werden soll. Stunde (0-23): Die Stunde, zu der die Aufgabe ausgeführt werden soll. Tag des Monats (1-31): Der Tag des Monats, an dem die Aufgabe ausgeführt werden soll. Monat (1-12): Der Monat, in dem die Aufgabe ausgeführt werden soll. Tag der Woche (0-6): Der Tag der Woche, an dem die Aufgabe ausgeführt werden soll (0 steht für Sonntag). (optional) Jahr (z. B. 2023): Das Jahr, in dem die Aufgabe ausgeführt werden soll. Die Stichpunkte können folgende Werte enthalten: Eine konkrete Zahl (z. B. 5): Die Aufgabe wird zu diesem spezifischen Wert ausgeführt. Eine Liste von Zahlen (z. B. 1,3,5): Die Aufgabe wird zu jedem der angegebenen Werte ausgeführt. Ein Bereich von Zahlen (z. B. 1-5): Die Aufgabe wird zu allen Werten im angegebenen Bereich ausgeführt. Eine Schrittgröße (z. B. */10): Die Aufgabe wird in Intervallen entsprechend der angegebenen Schrittgröße ausgeführt. Zusätzlich können spezielle Zeichen verwendet werden: Asterisk (*): Steht für "jeder Wert" und wird verwendet, um anzuzeigen, dass die Aufgabe zu jeder möglichen Zeit ausgeführt werden soll. Komma (,): Trennt mehrere Werte oder Wertebereiche voneinander. Schrägstrich (/): Wird verwendet, um eine Schrittgröße anzugeben. @default 0 0 * * 0, Dies bedeutet, dass die Aufgabe um 0:00 Uhr (Mitternacht) an jedem Sonntag (Tag der Woche = 0) ausgeführt wird</td>
@@ -5049,7 +5109,7 @@ false
     </tr>
     <tr>
       <td id="demomode--existingClaim">
-        <div style="max-width: 150px;"><a href="../values.yaml#L2020">demomode.existingClaim</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L2047">demomode.existingClaim</a></div>
       </td>
       <td>string</td>
       <td>existingClaim für PostgreSQL-Dump</td>
@@ -5062,7 +5122,7 @@ false
     </tr>
     <tr>
       <td id="demomode--sqldump">
-        <div style="max-width: 150px;"><a href="../values.yaml#L2023">demomode.sqldump</a></div>
+        <div style="max-width: 150px;"><a href="../values.yaml#L2050">demomode.sqldump</a></div>
       </td>
       <td>string</td>
       <td>Postgresql-Dump, welcher auf dem PVC vom PostgreSQL-Server liegt</td>
