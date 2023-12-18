@@ -165,9 +165,6 @@ Für mehr Informationen nutzen Sie die öffentlich erreichbaren Dokumentationen:
 
 # Installation
 
-| :warning: Das Helm Chart sollte derzeit nicht in einer produktiven Umgebung genutzt werden. Es dient dem Einsatz im PoC der DVS, für Teststellungen und hat BETA-Status. |
-| --- |
-
 :pushpin: Alle möglichen Konfigurationswerte bzw. Parameter für das Helm Chart
 sind in der [`values.yaml`](./values.yaml) aufgeführt.
 Die ausführliche Dokumentation hierfür erfolgt zu einem späteren Zeitpunkt.
@@ -418,7 +415,7 @@ helm upgrade bundesmessenger . -f values.yaml
 
 ## Weiterführende Dokumentation
 
-Eine Anweisung für die Installation einer PoC-Umgebung finden Sie hier, so wie
+Eine Anweisung für die Installation einer Umgebung finden Sie hier, so wie
 auch Hinweise zu den einzelnen zusätzlichen Diensten:
 
 - [PoC Requirements](./docs/requirements_poc.md)
