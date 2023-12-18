@@ -53,8 +53,10 @@ stellt [Let's Encrypt](https://letsencrypt.org/de/) oder Self-Signed Zertifikate
 für die Webseiten aus.
 
 ```shell
-kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.12.0/cert-manager.crds.yaml
-helm install cert-manager cert-manager --namespace cert-manager --create-namespace --repo https://charts.jetstack.io
+helm upgrade --install cert-manager cert-manager \
+  --namespace cert-manager --create-namespace \
+  --repo https://charts.jetstack.io \
+  --set installCRDs=true
 ```
 
 Konfiguration des Cert Manager.
@@ -191,12 +193,22 @@ ingress:
 
 Installation des BundesMessenger auf dem Kubernetes Cluster:
 
-```shell
-helm upgrade --install demo1 bundesmessenger \
-  --repo https://gitlab.opencode.de/api/v4/projects/560/packages/helm/beta \
-  --namespace bum --create-namespace \
-  -f bum-configuration.yaml -f bum-tls.yaml
-```
+- Chart Museum Repository
+
+  ```shell
+  helm upgrade --install demo1 bundesmessenger \
+    --namespace bum --create-namespace \
+    -f bum-configuration.yaml -f bum-tls.yaml \
+    --repo https://gitlab.opencode.de/api/v4/projects/560/packages/helm/beta
+  ```
+
+- OCI-Registry
+
+  ```shell
+  helm upgrade --install --namespace bum --create-namespace \
+    -f bum-configuration.yaml -f bum-tls.yaml \
+    demo1 oci://registry.opencode.de/bwi/bundesmessenger/backend/helm-chart/bundesmessenger
+  ```
 
 ## Monitoring
 

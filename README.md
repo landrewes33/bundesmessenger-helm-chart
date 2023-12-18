@@ -180,10 +180,14 @@ Weiterführende Links:
 Kubernetes.
 
 Im weiteren Verlauf der Anleitung wird die Installation mit dem Befehl
-`helm install bundesmessenger bundesmessenger/bundesmessenger` und der direkten
-Angabe der Parameter mit dem automatischen Download aus dem Repository
-beschrieben. Mit dem Repository kann sich mit dem folgenden Befehl verbunden
-werden:
+
+```console
+helm install bundesmessenger bundesmessenger/bundesmessenger
+```
+
+und der direkten Angabe der Parameter mit dem automatischen Download aus dem
+Chart Museum Repository beschrieben.
+Mit dem Repository (Chart Museum) kann sich mit dem folgenden Befehl verbunden werden:
 
 ```console
 helm repo add bundesmessenger https://gitlab.opencode.de/api/v4/projects/560/packages/helm/beta
@@ -203,11 +207,28 @@ Eine Installation würde dann mit folgendem Beispiel-Befehl erfolgen:
 helm install bundesmessenger . -f values.yaml
 ```
 
-optional mit dem Erstellen eines neuen Namespace `bum`:
+Optional mit dem Erstellen eines neuen Namespace `bum`:
 
-```console
-helm install bundesmessenger . -f values.yaml --create-namespace -n bum
-```
+- lokales Verzeichnis
+
+  ```console
+  helm install bundesmessenger . \
+    -f values.yaml --create-namespace -n bum
+  ```
+
+- Chart Museum Repository
+
+  ```console
+  helm install bundesmessenger bundesmessenger/bundesmessenger \
+    -f values.yaml --create-namespace -n bum
+  ```
+
+- OCI-Registry
+
+  ```console
+  helm install bundesmessenger oci://registry.opencode.de/bwi/bundesmessenger/backend/helm-chart/bundesmessenger \
+    -f values.yaml --create-namespace -n bum
+  ```
 
 ## Infrastruktur
 
@@ -288,7 +309,7 @@ helm install bundesmessenger bundesmessenger/bundesmessenger \
 Es wird bereitgestellt:
 
 - Synapse für Client- und Föderations-Verbindungen auf `example.com/_matrix`
-- lighttp Server für well-known-Anfragen auf `example.com/.well-known/matrix/server`
+- Nginx Server für well-known-Anfragen auf `example.com/.well-known/matrix/server`
 
 Es ist auch möglich, Synapse auf einer Subdomain (`matrix.example.com`) laufen
 zu lassen, wobei diese dann Teil Ihrer MXIDs wird:
@@ -323,7 +344,7 @@ DNS (:warning: nicht empfohlen) oder well-known.
   Es wird bereitgestellt:
 
   - Synapse für Client- und Föderations-Verbindungen auf `matrix.example.com/_matrix`
-  - lighttp Server für well-known-Anfragen auf `example.com/.well-known/matrix/server`
+  - Nginx Server für well-known-Anfragen auf `example.com/.well-known/matrix/server`
 
   :pushpin: Sie benötigen zusätzlich zum Zertifikat für `matrix.example.com`
   ein weiteres für `example.com`.
@@ -409,9 +430,26 @@ helm upgrade bundesmessenger bundesmessenger/bundesmessenger \
 
 Upgrade mit Angabe der Parameter in der `values.yaml`:
 
-```console
-helm upgrade bundesmessenger . -f values.yaml
-```
+- lokales Verzeichnis
+
+  ```console
+  helm upgrade bundesmessenger . \
+    -f values.yaml --create-namespace -n bum
+  ```
+
+- Chart Museum Repository
+
+  ```console
+  helm upgrade bundesmessenger bundesmessenger/bundesmessenger \
+    -f values.yaml --create-namespace -n bum
+  ```
+
+- OCI-Registry
+
+  ```console
+  helm upgrade bundesmessenger oci://registry.opencode.de/bwi/bundesmessenger/backend/helm-chart/bundesmessenger \
+    -f values.yaml --create-namespace -n bum
+  ```
 
 ## Weiterführende Dokumentation
 
