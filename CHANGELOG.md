@@ -29,7 +29,7 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 
 ### 📚 Dokumentation
 
-- Hinzufügen der [Darstellung](docs/images/Bum_Network_policies.jpg) der
+- Hinzufügen der [Darstellung](docs/images/Bum_Network_Policies.jpg) der
   Network-Policy-Struktur. (!256, !263)
 - Aktualisierung der Dokumentation auf eine "stable" Version. (!264)
 - Beispiele zur Installation mit Nutzung von einer OCI-Registry hinzugefügt.
