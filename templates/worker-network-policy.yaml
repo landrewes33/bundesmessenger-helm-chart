@@ -38,7 +38,7 @@ spec:
             {{ $.Values.networkpolicies.postgres.labelselector | default "app.kubernetes.io/name: postgresql" }}
       ports:
       - protocol: TCP
-        port: 5432
+        port: {{ $.Values.postgresql.containerPorts.postgresql | default 5432 }}
     {{- else if $.Values.networkpolicies.postgres.labelselector }}
       - podSelector:
           matchLabels:
@@ -49,7 +49,7 @@ spec:
           cidr: "{{ $.Values.networkpolicies.postgres.externalPostgresIP }}/32"
       ports:
       - protocol: TCP
-        port: 5432
+        port: {{ $.Values.externalPostgresql.port | default 5432 }}
     {{- end }}
     {{- if $.Values.redis.enabled }}
     - to:

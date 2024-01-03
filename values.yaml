@@ -1282,6 +1282,10 @@ postgresql:
       # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
       adminPasswordKey: postgres-password
 
+  # -- (int) PostgreSQL container port
+  containerPorts:
+    postgresql: 5432
+
   primary:
     initdb:
       # -- (string) Extra Argumente zur Initialisierung der Datenbank
