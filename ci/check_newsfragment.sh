@@ -18,8 +18,12 @@ for f in $(git diff --diff-filter=d --name-only origin/$CI_DEFAULT_BRANCH -- cha
         exit 1
     fi
 
-    # see if this newsfile corresponds to the right PR
-    if [ -n "$CI_MERGE_REQUEST_IID" ] && [ "$f" = changelog.d/"$CI_MERGE_REQUEST_IID".* ]; then
+    # see if this newsfile corresponds to the right PR, ignore *.notes files
+    if \
+       [ -n "$CI_MERGE_REQUEST_IID" ] && \
+       [ -z "${f##changelog.d/$CI_MERGE_REQUEST_IID.*}" ] && \
+       [ -n "${f##changelog.d/$CI_MERGE_REQUEST_IID.notes}" ]; \
+    then
         matched=1
     fi
     # allow exceptions for renovate bot, file must begin with "changelog.d/+"
