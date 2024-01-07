@@ -39,7 +39,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print .Template.BasePath "/well-known-config.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/well-known-config.yaml") . | sha256sum }}
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
