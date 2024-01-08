@@ -4,23 +4,30 @@
 {{- end }}
 {{- $name := include "matrix-synapse.workername" (dict "global" . "worker" "signingkey-job") }}
 {{- $secretName := include "matrix-synapse.workername" (dict "global" . "worker" "signingkey") }}
-{{- if not (lookup "v1" "secret" .Release.Namespace $secretName)}}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: signingkey-job
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: hook-succeeded
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: signingkey-job
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: hook-succeeded
 rules:
   - apiGroups:
       - ""
@@ -40,6 +47,9 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: signingkey-job
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: hook-succeeded
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
@@ -48,62 +58,6 @@ subjects:
   - kind: ServiceAccount
     name: {{ $name }}
     namespace: {{ .Release.Namespace }}
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ $name }}-check
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "matrix-synapse.labels" . | nindent 4 }}
-data: 
-  check.sh: |
-    #!/bin/bash
-    # Das Script dient zur Fake-Überwachung vom signing-key-job
-
-    # Überprüfen der Anzahl der übergebenen Parameter
-    # Optionen und ihre Standardwerte
-    option=""
-
-    # Optionen parsen
-    while getopts ":rh:" opt; do
-      case $opt in
-        o)
-          option=$OPTARG
-          ;;
-        \?)
-          echo "Ungültige Option: -$OPTARG"
-          echo "[-o ready] für readiness oder [-o health] für healtcheck"
-          exit 1
-          ;;
-      esac
-    done
-
-    # Überprüfen der Eingabeoption
-    case $option in
-      ready)
-        if [ -f "/usr/local/bin/generate_signing_key" ]; then
-          #Job ist bereit
-        else
-          exit 1
-        fi
-        ;;
-      health)
-        if pgrep -f "generate_signing_key.py" >/dev/null || pgrep -f "/scripts/signing-key.sh" >/dev/null ; then
-        #Job läuft, alles gut
-          exit 0
-        else
-        #Job läuft nicht
-          exit 1
-        fi
-        ;;
-      *)
-        echo "Ungültige Eingabeoption. Bitte ready oder health als Option angeben angeben."
-        exit 1
-        ;;
-    esac
-
 ---
 apiVersion: batch/v1
 kind: Job
@@ -113,6 +67,12 @@ metadata:
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: signingkey-job
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: hook-succeeded
+  {{- with .Values.signingkey.job.annotations }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   ttlSecondsAfterFinished: 0
   template:
@@ -122,7 +82,7 @@ spec:
         app.kubernetes.io/component: signingkey-job
         to-apiserver: allowed
     spec:
-      {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
+    {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       serviceAccountName: {{ $name }}
       containers:
         - command:
@@ -138,33 +98,23 @@ spec:
           image: "{{ .Values.signingkey.job.generateImage.repository }}:{{ .Values.signingkey.job.generateImage.tag | default ( include "matrix-synapse.imageTag" .) }}"
           imagePullPolicy: {{ .Values.signingkey.job.generateImage.pullPolicy }}
           name: signing-key-generate
+          {{- with .Values.signingkey.job.readinessProbe }}
           readinessProbe:
-            exec:
-              command:
-              - /bin/bash
-              - -c
-              - /config/check.sh -o ready
-            initialDelaySeconds: 5
-            periodSeconds: 10
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.signingkey.job.livenessProbe }}
           livenessProbe:
-            exec:
-              command:
-              - /bin/bash
-              - -c
-              - /config/check.sh -o health
-            initialDelaySeconds: 10
-            periodSeconds: 15
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.signingkey.job.resources }}
           resources:
-            {{- toYaml .Values.signingkey.resources | nindent 12 }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - mountPath: /synapse/keys
               name: matrix-synapse-keys
-            - name: check-mount
-              mountPath: /config
           securityContext:
-            runAsNonRoot: true
-            runAsUser: 2018
-            readOnlyRootFilesystem: true
+            {{- toYaml .Values.signingkey.job.securityContext | nindent 10 }}
         - command:
             - sh
             - -c
@@ -178,34 +128,22 @@ spec:
           image: "{{ .Values.signingkey.job.publishImage.repository }}:{{ .Values.signingkey.job.publishImage.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.signingkey.job.publishImage.pullPolicy }}
           name: signing-key-upload
+          {{- with .Values.signingkey.job.readinessProbe }}
           readinessProbe:
-            exec:
-              command:
-              - /bin/bash
-              - -c
-              - /config/check.sh -o ready
-            initialDelaySeconds: 5
-            periodSeconds: 10
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.signingkey.job.livenessProbe }}
           livenessProbe:
-            exec:
-              command:
-              - /bin/bash
-              - -c
-              - /config/check.sh -o health
-            initialDelaySeconds: 10
-            periodSeconds: 15          
-          securityContext:
-            runAsNonRoot: true
-            runAsUser: 2019
-            readOnlyRootFilesystem: true
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.signingkey.job.resources }}
           resources:
-            {{- toYaml .Values.signingkey.resources | nindent 12 }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           volumeMounts:
             - mountPath: /scripts
               name: scripts
               readOnly: true
-            - name: check-mount
-              mountPath: /config              
             - mountPath: /synapse/keys
               name: matrix-synapse-keys
               readOnly: true
@@ -216,15 +154,30 @@ spec:
           configMap:
             name: {{ include "matrix-synapse.fullname" . }}-scripts
             defaultMode: 0755
-        - name: check-mount
-          configMap: 
-            name: {{ $name }}-check
-            defaultMode: 0755
         - name: matrix-synapse-keys
-          emptyDir:
+          emptyDir: 
             sizeLimit: 1Mi
   parallelism: 1
   completions: 1
   backoffLimit: 1
-{{- end }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    helm.sh/hook: pre-install
+    helm.sh/hook-delete-policy: never
+    helm.sh/resource-policy: keep
+    argocd.argoproj.io/hook: Skip
+    argocd.argoproj.io/hook-delete-policy: Never
+  name: {{ $secretName }}
+  namespace: {{ .Release.Namespace }} 
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: signingkey-job
+{{ $secret := (lookup "v1" "Secret" .Release.Namespace $secretName) -}}
+{{ if $secret -}}
+data:
+  signing.key: {{ (b64dec (index $secret.data "signing.key")) | b64enc }}
+{{ end -}}
 {{- end }}

@@ -1,0 +1,3 @@
+Zur Erstellung der Signierungsschlüssel für Matrix wurde der Job umgestellt,
+sodass er Helm Hooks nutzt. Alle bestehenden Installationen sollten den Job
+ab sofort deaktivieren: `signingkey.job.enabled: false`.
