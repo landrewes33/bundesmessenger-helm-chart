@@ -25,6 +25,18 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/*
+Create the name of the service account to use
+*/}}
+{{- define "matrix-synapse.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (include "matrix-synapse.fullname" .) .Values.serviceAccount.name }}
+{{- else -}}
+    {{/* Default name is ".Release.Name" and not "default" due to DVC requirements. */}}
+    {{ default .Release.Name .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Create a default replication name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}

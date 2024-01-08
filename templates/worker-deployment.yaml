@@ -46,6 +46,10 @@ spec:
         {{- . | toYaml | nindent 8 }}
       {{- end }}
     spec:
+      serviceAccountName: {{ include "matrix-synapse.serviceAccountName" $ }}
+      {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
+      securityContext:
+        {{- $config.podSecurityContext | default $default.podSecurityContext | toYaml | nindent 8 }}
       initContainers:
     {{- if and $needsVolumePermissions (eq $name "media-repository") }}
         - name: volume-permissions
@@ -77,10 +81,6 @@ spec:
             name: temp-worker-config
           - mountPath: "/synapse/config/"
             name: worker-config
-      serviceAccountName: {{ $releaseName }}
-      {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
-      securityContext:
-        {{- $config.podSecurityContext | default $default.podSecurityContext | toYaml | nindent 8 }}
       containers:
         - name: {{ $name }}
           command:

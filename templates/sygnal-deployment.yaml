@@ -27,7 +27,7 @@ spec:
         {{- include "matrix-synapse.monitoringLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
     spec:
-      serviceAccountName: {{ .Release.Name }}
+      serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       securityContext:
         {{- .Values.sygnal.podSecurityContext | toYaml | nindent 8 }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}

@@ -29,7 +29,7 @@ spec:
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       securityContext:
         {{- $config.podSecurityContext | toYaml | nindent 8 }}
-      serviceAccountName: {{ .Release.Name }}
+      serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       containers:
       - name: {{ $name }}
         image: "{{ $config.image.repository }}:{{ $config.image.tag }}"

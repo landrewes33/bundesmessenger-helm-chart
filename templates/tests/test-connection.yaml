@@ -35,7 +35,7 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  serviceAccountName: {{ .Release.Name }}
+  serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
   {{- include "matrix-synapse.imagePullSecrets" . | nindent 2 }}
   securityContext:
     {{- toYaml .Values.tests.podSecurityContext | nindent 4 }}
@@ -58,7 +58,7 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  serviceAccountName: {{ .Release.Name }}
+  serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
   {{- include "matrix-synapse.imagePullSecrets" . | nindent 2 }}
   securityContext:
     {{- toYaml .Values.tests.podSecurityContext | nindent 4 }}
@@ -79,7 +79,7 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  serviceAccountName: {{ .Release.Name }}
+  serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
   {{- include "matrix-synapse.imagePullSecrets" . | nindent 2 }}
   securityContext:
     {{- toYaml .Values.tests.podSecurityContext | nindent 4 }}
@@ -103,7 +103,7 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  serviceAccountName: {{ .Release.Name }}
+  serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
   {{- include "matrix-synapse.imagePullSecrets" . | nindent 2 }}
   securityContext:
     {{- toYaml .Values.tests.podSecurityContext | nindent 4 }}
@@ -127,7 +127,7 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  serviceAccountName: {{ .Release.Name }}
+  serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
   {{- include "matrix-synapse.imagePullSecrets" . | nindent 2 }}
   securityContext:
     {{- toYaml .Values.tests.podSecurityContext | nindent 4 }}
@@ -151,7 +151,7 @@ metadata:
       {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
-  serviceAccountName: {{ .Release.Name }}
+  serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
   {{- include "matrix-synapse.imagePullSecrets" . | nindent 2 }}
   securityContext:
     {{- toYaml .Values.tests.podSecurityContext | nindent 4 }}

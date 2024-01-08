@@ -78,6 +78,17 @@ monitoring:
 # @default -- Messenger deiner Organisation
 displayName: "Messenger deiner Organisation"
 
+## Erstellen eines ServiceAccounts, samt gewünschter Annotations
+## oder Nutzung eines vorhandenen ServiceAccounts.
+## Es werden darüber hinaus noch weitere ServiceAccounts angelegt, z.B. für den Signing-Key Job oder Redis.
+## Der ServiceAccount für Redis kann via `redis.serviceAccount.name` konfiguriert werden.
+##
+serviceAccount:
+  create: true
+  annotations: {}
+    # eks.amazonaws.com/role-arn: arn:aws:iam::000000000000:role/matrix-synapse
+  # name: non-default-service-name
+
 ## Die Quelle des von Synapse im Verbund verwendeten Signierschlüssels.
 ##
 signingkey:
