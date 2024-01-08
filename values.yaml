@@ -91,10 +91,42 @@ signingkey:
   ## möglicherweise nicht mehr vom weiteren Netzwerk als vertrauenswürdig eingestuft wird.
 
   job:
-    # -- (bool) es wird ein Job zu Beginn des Deployments gestartet, der einen Signierschlüssel erzeugt.
-    # Wenn abgeschaltet, muss ein vorhandener Schlüssel eingebunden werden, ansonsten ist eine Föderation
-    # als nicht vertrauenswürdig eingestuft
+    # -- (bool) Mit dem Job wird zur Installation ein Signierschlüssel erzeugt.
+    # Nach der Erstellung des Keys oder bei manueller Einbindung eines Keys (`extraConfig.old_signing_keys`)
+    # sollte der Job deaktiviert werden.
     enabled: true
+
+    ## -- (list) Annotations to apply to the signing-key-job.
+    # Bsp:
+    # argocd.argoproj.io/hook: PostSync
+    # argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    annotations: {}
+
+    ## Bereitschaftstest
+    readinessProbe:
+      exec:
+        command:
+        - /bin/bash
+        - -c
+        - /scripts/signing-key-check.sh -o ready
+      initialDelaySeconds: 5
+      periodSeconds: 10
+
+    ## Healthcheck
+    livenessProbe:
+      exec:
+        command:
+        - /bin/bash
+        - -c
+        - /scripts/signing-key-check.sh -o health
+      initialDelaySeconds: 10
+      periodSeconds: 15
+
+    ## SecurityContext
+    securityContext:
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 2666
 
     generateImage:
       # -- (string) Repository/Image Konfiguration für Synapse-signing-key-job. Es wird dringend

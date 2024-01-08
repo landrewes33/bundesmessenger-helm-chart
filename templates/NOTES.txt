@@ -1,4 +1,7 @@
 ** Hinweis: Das Chart benötigt einige Minuten, bitte haben Sie Geduld. **
+{{- if .Values.signingkey.job.enabled }}
+* * Schalten Sie den Signing-Key-Job nach erfolgreichem Deployment wieder ab (signingkey.job.enabled=false) **
+{{- end }}
 {{- if not .Values.ingress.enabled }}
 
 Synapse wurde ohne Ingress installiert.
