@@ -29,6 +29,10 @@ unter "/.well-known/matrix/client" für die DSGVO-konforme Nutzung der Clients.
 {{- end }}
 {{- end }}
 
+{{- if not .Values.serviceAccount.create }}
+Gehen Sie sicher, dass {{  include "matrix-synapse.serviceAccountName" . }} als ServiceAccount vorhanden ist.
+{{- end }}
+
 {{- if .Values.config.enableRegistration }}
 Sie können sich nun an Ihrer BundesMessenger Installation mit jedem kompatiblen
 Matrix-Client verbinden - und einen Account erstellen - sobald die Installation

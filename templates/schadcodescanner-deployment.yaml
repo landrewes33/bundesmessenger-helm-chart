@@ -27,7 +27,7 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/schadcodescanner-configuration.yaml") . | sha256sum }}
     spec:
     {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
-      serviceAccountName: {{ .Release.Name }}
+      serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       securityContext:
         {{- $config.podSecurityContext | toYaml | nindent 8 }}
       initContainers:
