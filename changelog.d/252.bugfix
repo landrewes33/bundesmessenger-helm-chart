@@ -1,0 +1,1 @@
+Warnung vom Nginx-Ingress (`warnings.go:70] path /.well-known/matrix cannot be used with pathType Prefix`) behoben.
