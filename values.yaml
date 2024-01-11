@@ -1063,9 +1063,9 @@ sygnal:
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.
-      cpu: 150m
+      cpu: 300m
       # -- (string) RAM Ressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.
-      memory: 45Mi
+      memory: 100Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den Sygnal-Container anzuwenden sind.
       cpu: 150m
