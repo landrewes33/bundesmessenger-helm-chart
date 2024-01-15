@@ -444,7 +444,7 @@ synapse:
   # - 'patch -d/usr/local/lib/python3.7/site-packages/synapse -p2 < /synapse/patches/something.patch'
   extraCommands: []
 
-  # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie, Synapse wird immer als
+  # -- (object) Konfiguration für die Pod-Sicherheitsrichtlinie, Synapse wird immer als
   # sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist.
   # Beachten Sie, dass eine Änderung dieser Einstellung auch die Verwendung der volumePermission
   # Hilfsprogramm verwenden müssen, abhängig von Ihrem Speicher.
@@ -611,7 +611,7 @@ workers:
     # - 'patch -d/usr/local/lib/python3.7/site-packages/synapse -p2 < /synapse/patches/something.patch'
     extraCommands: []
 
-    # -- (map) Informationen zum Sicherheitskontext, die den Workern mitgeteilt werden sollen.
+    # -- (map) Informationen zum Pod-Sicherheitskontext, die den Worker-Pods mitgeteilt werden sollen.
     # DEFAULT gilt für alle Synapse-Worker-Container.
     # Beispiele:
     #   fsGroup: 2666
@@ -1037,7 +1037,7 @@ sygnal:
   # Network Policies zwingend erforderlich
   proxy: ""
 
-  # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
   # weitere Beispiele:
   #  runAsNonRoot: true
@@ -1175,7 +1175,7 @@ wellknown:
     tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
 
-  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
@@ -1243,7 +1243,7 @@ confighub:
     tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
 
-  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
@@ -1623,7 +1623,7 @@ contentscanner:
       memory: 500Mi
 
 
-  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
@@ -1751,13 +1751,13 @@ schadcodescanner:
       # -- (string) Anforderungen an RAM Ressourcen, die auf den C-Icap-Container anzuwenden sind.
       memory: 50Mi
 
-  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
     runAsNonRoot: true
 
-  # -- (map) Konfiguration für die ClamAv-Container-Sicherheitsrichtlinie
+  # -- (map) Konfiguration für die ClamAV-Container-Sicherheitsrichtlinie
   # weitere Möglichkeiten:
   #  capabilities:
   #    drop:
@@ -1806,7 +1806,7 @@ synapse_admin:
       # -- (string) Anforderungen an RAM Ressourcen, die auf den Synapse-Admin Server anzuwenden sind.
       memory: 15Mi
 
-  # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
   # weitere Beispiele:
   #  runAsNonRoot: true
@@ -1862,7 +1862,7 @@ webclient:
     tag: 2.10.0-jammy-production
     pullPolicy: IfNotPresent
 
-  # -- (map) Informationen zum Sicherheitskontext, die der Container übernehmen soll.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
@@ -2026,7 +2026,7 @@ tests:
   annotations:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 
-  # -- (map) Informationen zum Sicherheitskontext, die der Container übernehmen soll.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   podSecurityContext:
     runAsUser: 1001
     runAsGroup: 1001
