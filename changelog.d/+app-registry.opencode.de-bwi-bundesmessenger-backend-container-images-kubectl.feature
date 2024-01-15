@@ -1,0 +1,1 @@
+Image `registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl` auf Version `1.29.0` aktualisiert.
