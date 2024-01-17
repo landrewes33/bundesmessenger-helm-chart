@@ -21,7 +21,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/sygnal-configuration.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/sygnal/sygnal-configuration.yaml") . | sha256sum }}
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         {{- include "matrix-synapse.monitoringLabels" . | nindent 8 }}
