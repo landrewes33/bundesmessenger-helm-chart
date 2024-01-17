@@ -1,148 +1,108 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "matrix-synapse.fullname" . -}}
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
-{{- $isSynapseAdmin := $.Values.synapse_admin.enabled -}}
-{{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
 {{- $adminUri := .Values.adminAPIServerName | required "A valid URI for the synapse Admin API (adminAPIServerName) is required." -}}
-{{- $adminWebGui := include "synapse-admin.host" . -}}
 
-{{- if $v1Ingress -}}
+  {{- if $v1Ingress -}}
 apiVersion: networking.k8s.io/v1
-{{- else -}}
+  {{- else -}}
 apiVersion: networking.k8s.io/v1beta1
-{{- end }}
+  {{- end }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}-admin
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- with .Values.ingress.annotationsAdminAPI }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.ingress.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
-{{- if .Values.ingress.className }}
+  {{- if .Values.ingress.className }}
   ingressClassName: {{ .Values.ingress.className }}
-{{- end }}
-{{- if .Values.ingress.tls }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
   tls:
-  {{- range .Values.ingress.tls }}
-    {{- if or (has $adminUri .hosts) (and $isSynapseAdmin (has $adminWebGui .hosts)) }}
+    {{- range .Values.ingress.tls }}
+      {{- if has $adminUri .hosts }}
     - hosts:
-      {{- range .hosts }}
+        {{- range .hosts }}
         - {{ . | quote }}
-      {{- end }}
-      {{- if .secretName }}
+        {{- end }}
+        {{- if .secretName }}
       secretName: {{ .secretName }}
+        {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}
-{{- end }}
   rules:
-  {{- $hosts := uniq (concat (list $adminUri) (list $adminWebGui)) }}
-  {{- range $hosts }}
-    {{- $host := . }}
-    {{- if $host }}
-    - host: {{ . | quote }}
+    - host: {{ $adminUri | quote }}
       http:
         paths:
-      {{- if or ( and (eq $adminUri $adminWebGui)  $isSynapseAdmin) ( and (eq $host $adminUri) (not (eq $adminUri $adminWebGui) )) }}
-        {{- $default := $.Values.workers.default }}
-        {{- range $worker, $config := $.Values.workers }}
-          {{- $name := $worker | replace "_" "-" }}
-          {{- if and $config.enabled $config.listeners (or $config.paths $config.csPaths) }}
-            {{- $service := include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}
-              {{- range $config.csPaths }}
-                  {{- if $.Values.ingress.traefikPaths }}
+  {{- $default := $.Values.workers.default }}
+  {{- range $worker, $config := $.Values.workers }}
+    {{- $name := $worker | replace "_" "-" }}
+    {{- if and $config.enabled $config.listeners (or $config.paths $config.csPaths) }}
+      {{- $service := include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}
+      {{- range $config.csPaths }}
+        {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
             backend:
-                    {{- if $v1Ingress }}
+          {{- if $v1Ingress }}
               service:
                 name: {{ $service }}
                 port:
                   number: 8083
             pathType: ImplementationSpecific
-                    {{- else }}
+          {{- else }}
               serviceName: {{ $service }}
               servicePort: 8083
-                    {{- end }}
-                  {{- else }}
+          {{- end }}
+        {{- else }}
           - path: {{ . | quote }}
             backend:
-                    {{- if $v1Ingress }}
+          {{- if $v1Ingress }}
               service:
                 name: {{ $service }}
                 port:
                   number: 8083
             pathType: ImplementationSpecific
-                    {{- else }}
+          {{- else }}
               serviceName: {{ $service }}
               servicePort: 8083
-                    {{- end }}
-                  {{- end }}
-            {{- end }}
           {{- end }}
         {{- end }}
-
+      {{- end }}
+    {{- end }}
+  {{- end }}
           - path: /_synapse
             backend:
-          {{- if $v1Ingress }}
+  {{- if $v1Ingress }}
               service:
                 name: {{ $fullName }}
                 port:
                   number: {{ $.Values.service.port }}
             pathType: Prefix
-          {{- else }}
+  {{- else }}
               serviceName: {{ $fullName }}
               servicePort: {{ $.Values.service.port }}
-          {{- end }}
+  {{- end }}
 
           - path: /_matrix
             backend:
-          {{- if $v1Ingress }}
+  {{- if $v1Ingress }}
               service:
                 name: {{ $fullName }}
                 port:
                   number: {{ $.Values.service.port }}
             pathType: Prefix
-          {{- else }}
+  {{- else }}
               serviceName: {{ $fullName }}
               servicePort: {{ $.Values.service.port }}
-          {{- end }}
-
-        {{- if eq $host $adminWebGui }}
-          - path: /
-            backend:
-          {{- if $v1Ingress }}
-              service:
-                name: {{ $adminName }}
-                port:
-                  number: 8080
-            pathType: Prefix
-          {{- else }}
-              serviceName: {{ $adminName }}
-              servicePort: 8080
-          {{- end }}
-        {{- end }}
-
-       {{- end }}
-
-       {{- if and ( and (eq $host $adminWebGui) (not (eq $adminUri $adminWebGui) )) $isSynapseAdmin }}
-          - path: /
-            backend:
-          {{- if $v1Ingress }}
-              service:
-                name: {{ $adminName }}
-                port:
-                  number: 8080
-            pathType: Prefix
-          {{- else }}
-              serviceName: {{ $adminName }}
-              servicePort: 8080
-          {{- end }}
-        {{- end }}
-
-    {{- end }}
   {{- end }}
 {{- end }}
+

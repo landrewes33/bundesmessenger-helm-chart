@@ -1515,6 +1515,11 @@ ingress:
   #  kubernetes.io/ingress.class: nginx
   #  kubernetes.io/tls-acme: "true"
 
+  # -- (map) Annotations zur Konfiguration des Ingress für die Admin-API.
+  # Dies ermöglicht z.B. das Konfigurieren eines IP-Filters für den administrativen Zugriff.
+  # Bsp: nginx.ingress.kubernetes.io/whitelist-source-range: "192.168.10.0/24, 10.10.12.0/24, 10.0.0.1"
+  annotationsAdminAPI: {}
+
   # -- (list) Hosts, die der Ingress-Konfiguration für die Verarbeitung von
   # Client-to-Server-API-Anfragepfade hinzugefügt werden sollen.
   # Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
