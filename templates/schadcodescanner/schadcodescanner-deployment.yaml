@@ -24,7 +24,7 @@ spec:
         {{- include "matrix-synapse.selectorLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/schadcodescanner-configuration.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/schadcodescanner/schadcodescanner-configuration.yaml") . | sha256sum }}
     spec:
     {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
