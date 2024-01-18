@@ -82,7 +82,9 @@ spec:
         app.kubernetes.io/component: signingkey-job
         to-apiserver: allowed
     spec:
-    {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
+      {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
+      securityContext:
+        {{- toYaml .Values.signingkey.podSecurityContext | nindent 8 }}
       serviceAccountName: {{ $name }}
       containers:
         - command:
@@ -97,24 +99,24 @@ spec:
               fi
           image: "{{ .Values.signingkey.job.generateImage.repository }}:{{ .Values.signingkey.job.generateImage.tag | default ( include "matrix-synapse.imageTag" .) }}"
           imagePullPolicy: {{ .Values.signingkey.job.generateImage.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.signingkey.securityContext | nindent 12 }}
           name: signing-key-generate
-          {{- with .Values.signingkey.job.readinessProbe }}
+          {{- with .Values.signingkey.readinessProbe }}
           readinessProbe:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          {{- with .Values.signingkey.job.livenessProbe }}
+          {{- with .Values.signingkey.livenessProbe }}
           livenessProbe:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          {{- with .Values.signingkey.job.resources }}
+          {{- with .Values.signingkey.resources }}
           resources:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
           volumeMounts:
             - mountPath: /synapse/keys
               name: matrix-synapse-keys
-          securityContext:
-            {{- toYaml .Values.signingkey.job.securityContext | nindent 10 }}
         - command:
             - sh
             - -c
@@ -127,16 +129,18 @@ spec:
               value: {{ $secretName }}
           image: "{{ .Values.signingkey.job.publishImage.repository }}:{{ .Values.signingkey.job.publishImage.tag | default "latest" }}"
           imagePullPolicy: {{ .Values.signingkey.job.publishImage.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.signingkey.securityContext | nindent 12 }}
           name: signing-key-upload
-          {{- with .Values.signingkey.job.readinessProbe }}
+          {{- with .Values.signingkey.readinessProbe }}
           readinessProbe:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          {{- with .Values.signingkey.job.livenessProbe }}
+          {{- with .Values.signingkey.livenessProbe }}
           livenessProbe:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          {{- with .Values.signingkey.job.resources }}
+          {{- with .Values.signingkey.resources }}
           resources:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -155,7 +159,7 @@ spec:
             name: {{ include "matrix-synapse.fullname" . }}-scripts
             defaultMode: 0755
         - name: matrix-synapse-keys
-          emptyDir: 
+          emptyDir:
             sizeLimit: 1Mi
   parallelism: 1
   completions: 1
@@ -171,7 +175,7 @@ metadata:
     argocd.argoproj.io/hook: Skip
     argocd.argoproj.io/hook-delete-policy: Never
   name: {{ $secretName }}
-  namespace: {{ .Release.Namespace }} 
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: signingkey-job

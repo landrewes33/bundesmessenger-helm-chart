@@ -113,32 +113,6 @@ signingkey:
     # argocd.argoproj.io/hook-delete-policy: HookSucceeded
     annotations: {}
 
-    ## Bereitschaftstest
-    readinessProbe:
-      exec:
-        command:
-        - /bin/bash
-        - -c
-        - /scripts/signing-key-check.sh -o ready
-      initialDelaySeconds: 5
-      periodSeconds: 10
-
-    ## Healthcheck
-    livenessProbe:
-      exec:
-        command:
-        - /bin/bash
-        - -c
-        - /scripts/signing-key-check.sh -o health
-      initialDelaySeconds: 10
-      periodSeconds: 15
-
-    ## SecurityContext
-    securityContext:
-      readOnlyRootFilesystem: true
-      runAsNonRoot: true
-      runAsUser: 2666
-
     generateImage:
       # -- (string) Repository/Image Konfiguration für Synapse-signing-key-job. Es wird dringend
       # empfohlen, dass die gleiche Konfiguration wie vom Synapse bzw. den Workernodes genutzt wird.
@@ -148,8 +122,6 @@ signingkey:
       # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
       # @default -- wird im Chart.yaml gesetzt
       # tag: ""
-      pullSecrets: []
-      #  - name: myRegistryKeySecretName
       # -- (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
     # -- (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.
@@ -163,6 +135,26 @@ signingkey:
   # existingSecret: secret-name
   # existingSecretKey: signing.key
 
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  podSecurityContext:
+    runAsUser: 2666
+
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 2666
+
+  ## Bereitschaftscheck
+  readinessProbe:
+    exec:
+      command:
+      - /bin/sh
+      - -c
+      - /scripts/signing-key-check.sh -o ready
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
   ## Ressourcen für das Image der Erzeugung vom Signierschlüssel
   resources:
     limits:
@@ -171,6 +163,17 @@ signingkey:
     requests:
       cpu: 100m
       memory: 250Mi
+
+  ## Healthcheck
+  livenessProbe:
+    exec:
+      command:
+      - /bin/sh
+      - -c
+      - /scripts/signing-key-check.sh -o health
+    initialDelaySeconds: 10
+    periodSeconds: 15
+
 
 # -- (bool) Schaltet alle internen IP-Adressevergaben auf IPv4-only
 # Wenn `true` sind alle Listener und Anbindungspunkte `0.0.0.0`,
