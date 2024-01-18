@@ -481,7 +481,7 @@ synapse:
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
-      cpu: 1000m
+      cpu: 1500m
       # -- (string) RAM Ressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
       memory: 2000Mi
     requests:
@@ -1198,9 +1198,9 @@ wellknown:
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den well-known server anzuwenden sind.
-      cpu: 5m
+      cpu: 50m
       # -- (string) RAM Ressourcengrenzen, die auf den well-known server anzuwenden sind.
-      memory: 15Mi
+      memory: 50Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den well-known server anzuwenden sind.
       cpu: 5m
@@ -1266,9 +1266,9 @@ confighub:
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den confighub anzuwenden sind.
-      cpu: 5m
+      cpu: 50m
       # -- (string) RAM Ressourcengrenzen, die auf den confighub anzuwenden sind.
-      memory: 15Mi
+      memory: 50Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den confighub anzuwenden sind.
       cpu: 5m
@@ -1351,9 +1351,9 @@ postgresql:
     resources:
       limits:
         # -- (string) Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
-        cpu: 500m
+        cpu: 1
         # -- (string) RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
-        memory: 1024Mi
+        memory: 4096Mi
       requests:
         # -- (string) Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind.
         cpu: 250m
@@ -1419,7 +1419,7 @@ redis:
     existingSecret: ""
     existingSecretPasswordKey: redis-password
 
-  # -- (map) Konfiguration zur Härtung des Redis-Images
+  # -- (map) Konfiguration zur Härtung des InitContainers des Redis-Images
   # (https://docs.bitnami.com/kubernetes/infrastructure/redis/administration/configure-kernel-settings/)
   sysctl:
     enabled: true
@@ -1432,8 +1432,8 @@ redis:
     mountHostSys: true
     resources:
       limits:
-        cpu: 200m
-        memory: 256Mi
+        cpu: 400m
+        memory: 512Mi
       requests:
         cpu: 100m
         memory: 128Mi
@@ -1462,7 +1462,7 @@ redis:
         # -- (string) Rechenressourcengrenzen, die auf den Redis-Container anzuwenden sind.
         cpu: 500m
         # -- (string) RAM Ressourcengrenzen, die auf den Redis-Container anzuwenden sind.
-        memory: 512Mi
+        memory: 768Mi
       requests:
         # -- (string) Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind.
         cpu: 300m
@@ -1805,9 +1805,9 @@ synapse_admin:
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.
-      cpu: 5m
+      cpu: 50m
       # -- (string) RAM Ressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.
-      memory: 15Mi
+      memory: 50Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den Synapse-Admin Server anzuwenden sind.
       cpu: 5m
@@ -1890,9 +1890,9 @@ webclient:
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den webclient-server anzuwenden sind.
-      cpu: 100m
+      cpu: 150m
       # -- (string) RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind.
-      memory: 90Mi
+      memory: 100Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den webclient-server anzuwenden sind.
       cpu: 50m
