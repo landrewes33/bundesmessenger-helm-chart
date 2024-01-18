@@ -1,0 +1,21 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: dsgvo-export
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/resource-policy: keep
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "1G"
+  {{- if .Values.persistence.storageClass }}
+    {{- if (eq "-" .Values.persistence.storageClass) }}
+  storageClassName: ""
+    {{- else }}
+  storageClassName: "{{ .Values.persistence.storageClass }}"
+    {{- end }}
+  {{- end }}
