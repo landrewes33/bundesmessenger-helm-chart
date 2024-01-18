@@ -174,6 +174,7 @@ Weiterführende Links:
 - [Liste alle Konfigurationswerte mit Beschreibung](docs/standard_values.md)
 - [Mindestkonfiguration von Parametern](docs/requirements_poc.md#requirements-für-die-konfiguration)
 - [Kurzanleitung zur Installation einer Testumgebung](docs/installation_testumgebung.md)
+- [Hinweise zur Nutzung mit ArgoCD](docs/ArgoCD_SigningKey.md)
 
 :pushpin: Getestet wird das Helm Chart auf einer Kubernetes-Infrastruktur mit einem
 [4-Node-Cluster](./docs/requirements_poc.md#maschinengröße) auf Basis von vanilla
