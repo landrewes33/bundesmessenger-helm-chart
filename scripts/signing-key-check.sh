@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 # Das Script dient zur Fake-Überwachung vom signing-key-job
 
 # Überprüfen der Anzahl der übergebenen Parameter
@@ -6,7 +6,7 @@
 option=""
 
 # Optionen parsen
-while getopts ":rh:" opt; do
+while getopts o: opt; do
   case $opt in
     o)
       option=$OPTARG
@@ -22,8 +22,9 @@ done
 # Überprüfen der Eingabeoption
 case $option in
   ready)
-    if [ -f "/usr/local/bin/generate_signing_key" ]; then
+    if test -f "/usr/local/bin/generate_signing_key" ; then
       #Job ist bereit
+      exit 0
     else
       exit 1
     fi
