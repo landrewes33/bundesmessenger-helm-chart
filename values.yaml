@@ -89,6 +89,11 @@ serviceAccount:
     # eks.amazonaws.com/role-arn: arn:aws:iam::000000000000:role/matrix-synapse
   # name: non-default-service-name
 
+## Manuelle Aktivierung bei Nutzung von ArgoCD.
+# Sollte durch `.Capabilities.APIVersions.Has "argoproj.io/v1alpha1"` erkannt werden,
+# kann hier aber erzwungen werden.
+# argoCD: true
+
 ## Die Quelle des von Synapse im Verbund verwendeten Signierschlüssels.
 ##
 signingkey:
@@ -100,6 +105,8 @@ signingkey:
   ##
   ## Wenn Sie Ihren Signierschlüssel verlieren, kann es sein, dass der Föderationsverkehr von Ihrer Instanz
   ## möglicherweise nicht mehr vom weiteren Netzwerk als vertrauenswürdig eingestuft wird.
+  ##
+  ## Sollte nach dem initialen Durchlauf deaktiviert werden, um Upgrades zu beschleunigen.
 
   job:
     # -- (bool) Mit dem Job wird zur Installation ein Signierschlüssel erzeugt.
