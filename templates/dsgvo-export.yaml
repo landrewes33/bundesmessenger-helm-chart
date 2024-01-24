@@ -65,7 +65,7 @@ spec:
             app.kubernetes.io/component: dsgvo-exporter-cronjob
             to-apiserver: allowed
         spec:
-        {{- include "matrix-synapse.imagePullSecrets" $ | nindent 14 }}
+        {{- include "matrix-synapse.imagePullSecrets" . | nindent 10 }}
           serviceAccountName: {{ $name }}
           containers:
             - name: dsgvo-exporter
