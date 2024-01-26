@@ -429,7 +429,7 @@ Sie befinden sich weiterhin in Arbeit und Review.
   [`towncrier`](https://github.com/twisted/towncrier). (!63, !64)
 - Umsetzung von DVS Vorgaben für den ClamAV-Schadcodescanner. (!66)
 - Konfiguration zur Härtung des Redis-Images gemäß
-  [Bitnami-Empfehlungen](https://docs.bitnami.com/kubernetes/infrastructure/redis/administration/configure-kernel-settings/).
+  [Bitnami-Empfehlungen](https://github.com/bitnami/charts/tree/main/bitnami/redis/#host-kernel-settings).
   (!67)
 - Auslagern des Skriptes zum Erstellen der `docs/standard_values.md` in eine
   separate Datei. (!68)
