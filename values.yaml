@@ -2105,8 +2105,14 @@ demomode:
   # @default 0 0 * * 0, Dies bedeutet, dass die Aufgabe um 0:00 Uhr (Mitternacht) an jedem Sonntag (Tag der Woche = 0) ausgeführt wird
   interval: "0 0 * * 0"
 
-  # -- (string) existingClaim für PostgreSQL-Dump
-  existingClaim: sqldump
+  # -- (string) existingClaim für Volume/Storage PostgreSQL-Dump und Media-Files
+  existingClaim: ""
+
+  # -- (string) Image für den Dump-Container, muss mit dem genutzten PostgreSQL kompatibel sein.
+  # anzugeben in der Form: Registry/Repository/Image:Tag
+  # Beispiel: registry.opencode.de/ig-bvc/demo-apps/postgresql/postgres:14
+  # Wenn nicht gesetzt, wird das Image vom weiter oben konfigurierten internen PostgreSQL-Server genutzt.
+  postgresqldump: ""
 
   # -- (string) Postgresql-Dump, welcher auf dem PVC vom PostgreSQL-Server liegt
   sqldump: dump.sql
