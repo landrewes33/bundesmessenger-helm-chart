@@ -462,6 +462,7 @@ auch Hinweise zu den einzelnen zusätzlichen Diensten:
 - [BundesMessenger WebClient](./docs/webclient.md)
 - [Synapse Admin](./docs/synapse_admin.md)
 - [Sygnal (Push-Service)](./docs/sygnal_push.md)
+- [Synapse Module](./docs/synapse_modules.md)
 
 # Kontakt und Austausch
 
