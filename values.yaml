@@ -434,24 +434,21 @@ synapse:
   # -- (list) Zusätzliche in Synapse zu mountende Datenträger (Volumes)
   # Beispiel:
   #  - name: spamcheck
-  #    flexVolume:
-  #      driver: dvs/git-live
-  #      options:
-  #        repo: https://gitlab.opencode.de/bwi/bundesmessenger/synapse-module
-  #        interval: 1d
-  #      readOnly: true
+  #    configMap:
+  #      name: spamcheck
   extraVolumes: []
 
   # -- (list) Zusätzliche in Synapse zu mountende Datenträgerpfade (Volumes)
   # Beispiel:
   #  - name: spamcheck
-  #    mountPath: /usr/local/lib/python3.7/site-packages/company
+  #    mountPath: /usr/local/lib/python3.10/site-packages/company
+  #    readOnly: true
   extraVolumeMounts: []
 
   # -- (list) Zusätzliche Befehle, die beim Starten von Synapse ausgeführt werden
   # Beispiele:
   # - 'apt-get update -yqq && apt-get install patch -yqq'
-  # - 'patch -d/usr/local/lib/python3.7/site-packages/synapse -p2 < /synapse/patches/something.patch'
+  # - 'patch -d/usr/local/lib/python3.10/site-packages/synapse -p2 < /synapse/patches/something.patch'
   extraCommands: []
 
   # -- (object) Konfiguration für die Pod-Sicherheitsrichtlinie, Synapse wird immer als
@@ -618,7 +615,7 @@ workers:
     # DEFAULT gilt für alle Synapse-Worker-Container.
     # Beispiele:
     # - 'apt-get update -yqq && apt-get install patch -yqq'
-    # - 'patch -d/usr/local/lib/python3.7/site-packages/synapse -p2 < /synapse/patches/something.patch'
+    # - 'patch -d/usr/local/lib/python3.10/site-packages/synapse -p2 < /synapse/patches/something.patch'
     extraCommands: []
 
     # -- (map) Informationen zum Pod-Sicherheitskontext, die den Worker-Pods mitgeteilt werden sollen.
@@ -2080,7 +2077,7 @@ demomode:
   # Folgende Möglichkeiten:
   #   "complete": Es wird die gesamte Datenbank gelöscht und neu erstellt.
   #   "defined": Es wird ein Datenbank-Dump zurück gespielt.
-  #              Dieser muss als DB-Dump bereit gestellt werden. (TBD)
+  #              Dieser muss als DB-Dump bereitgestellt werden. (TBD)
   #   "federation": Wie "defined", jedoch mit der Option als Förderationspartner zu fungieren. (TBD)
   mode: complete
 
