@@ -1,19 +1,13 @@
-# Installation
+# Synapse-Admin
 
 Zur Administration mit Hilfe einer Weboberfläche kann
 [Synapse-Admin](https://github.com/Awesome-Technologies/synapse-admin)
-bereitgestellt werden.
+mit dem Helm Chart installiert werden.
 
-In dem folgenden Beispiel wir zusätzlich zur Synapse Installation Synapse Admin
+In dem folgenden Beispiel wird zusätzlich zur Synapse Installation Synapse-Admin
 
 - aktiviert (`synapse_admin.enabled=true`) und
 - eine URL festgelegt (`synapse_admin.uri`).
-
-Die Administrations-Oberfläche ist im Anschluss auf `adminportal.example.com` erreichbar.
-Die Administrations-Oberfläche greift auf die administrativen APIs von Synapse zu.
-Der Servername unter dem die API erreichbar wird mit Hilfe von `adminAPIServerName`
-konfiguriert. Beides ***kann*** auch auf dem selben Servernamen laufen.
-Die Admin API `admin.example.com` sollte nicht via Internet erreichbar sein.
 
 ```console
 helm install bundesmessenger bundesmessenger/bundesmessenger \
@@ -22,3 +16,19 @@ helm install bundesmessenger bundesmessenger/bundesmessenger \
   --set synapse_admin.enabled=true \
   --set synapse_admin.uri=adminportal.example.com
 ```
+
+Die Administrations-Oberfläche ist im Anschluss auf über die mit
+`synapse_admin.uri` angegebene URL (hier: `adminportal.example.com`) erreichbar.
+
+Die beim Login auf der Administrations-Oberfläche wird neben dem
+Benutzernamen und Passwort eines Synapse Administrators auch die
+URL mit den administrativen API Endpunkten angegeben. Diese
+wird mit `adminAPIServerName` (hier: `admin.example.com`) konfiguriert.
+
+Zur Vereinfachung ***können*** beide URLs (`adminAPIServerName` und `synapse_admin.uri`)
+gleich sein.
+
+:warning: Die Admin API `adminAPIServerName` (hier: `admin.example.com`) sollte
+nicht via Internet erreichbar sein. Dies lässt sich u.a. durch Annotations
+am Ingress (`ingress.annotationsAdminAPI`) realisieren - für Nginx mit
+[`nginx.ingress.kubernetes.io/whitelist-source-range`](https://github.com/kubernetes/ingress-nginx/blob/main/docs/user-guide/nginx-configuration/annotations.md#whitelist-source-range).
