@@ -43,6 +43,10 @@ data:
       index index.html index.htm index.nginx-debian.html;
 
       server_name _;
+      
+      # X-Header for CORS-Policy
+      include /etc/nginx/conf.d/cors_headers.conf;
+
       # livenessProbe auf /status, logging deaktiviert
       location /status {
         return 200;
