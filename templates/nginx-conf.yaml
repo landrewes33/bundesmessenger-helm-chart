@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nginx-default-conf
+  name: nginx-conf-default
   namespace: {{ .Release.Namespace }}
 data:
   nginx.conf: |
@@ -15,3 +15,16 @@ data:
       include /etc/nginx/sites-enabled/default.conf;
       include mime.types;
     }
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf-d
+  namespace: {{ .Release.Namespace }}
+data:
+  cors_headers.conf: |
+    add_header X-Frame-Options SAMEORIGIN;
+    add_header X-Content-Type-Options nosniff;
+    add_header X-XSS-Protection "1; mode=block";
+    add_header Content-Security-Policy "frame-ancestors 'none'";

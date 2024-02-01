@@ -76,10 +76,7 @@ data:
       index index.html index.htm index.nginx-debian.html;
 
       # X-Header for CORS-Policy
-      add_header X-Frame-Options SAMEORIGIN;
-      add_header X-Content-Type-Options nosniff;
-      add_header X-XSS-Protection "1; mode=block";
-      add_header Content-Security-Policy "frame-ancestors 'none'";
+      include /etc/nginx/conf.d/cors_headers.conf;
 
       server_name _;
       # livenessProbe auf /status, logging deaktiviert

@@ -69,10 +69,13 @@ spec:
               port: http
             periodSeconds: 10
           volumeMounts:
-            - mountPath: /etc/nginx/nginx.conf
-              name: nginx-conf
-              readOnly: true
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
+              readOnly: true            
+            - name: nginx-conf-d
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
             - mountPath: /etc/nginx/sites-enabled/default.conf
               name: site
               readOnly: true
@@ -90,7 +93,10 @@ spec:
       volumes:
         - name: nginx-conf
           configMap:
-            name: nginx-default-conf
+            name: nginx-conf-default
+        - name: nginx-conf-d
+          configMap:
+            name: nginx-conf-d
         - name: files
           configMap:
             name: {{ $name }}
