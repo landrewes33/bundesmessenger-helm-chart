@@ -463,6 +463,7 @@ auch Hinweise zu den einzelnen zusätzlichen Diensten:
 - [Synapse Admin](./docs/synapse_admin.md)
 - [Sygnal (Push-Service)](./docs/sygnal_push.md)
 - [Synapse Module](./docs/synapse_modules.md)
+- [Matrix-Authentication-Service](./docs/matrix-authentication-service.md)
 
 # Kontakt und Austausch
 

@@ -1,0 +1,124 @@
+{{- if .Values.mas.enabled }}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-authentication-service") -}}
+{{- $component := "matrix-authentication-service" -}}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    component: {{ $component }}
+data:
+  config.yaml: |
+    http:
+      # Public URL base used when building absolute public URLs
+      public_base: "https://{{ include "matrix-synapse.masUri" . }}"
+
+      # OIDC issuer advertised by the service. Defaults to `public_base`
+      issuer: "https://{{ include "matrix-synapse.masUri" . }}"
+
+      # Each listener can serve multiple resources, and listen on multiple TCP ports or UNIX sockets.
+      listeners:
+      - name: metrics
+        resources:
+          - name: prometheus
+          - name: health
+        binds:
+          # First option: listen to the given address
+        {{- if not .Values.ipv4Only }}
+          - address: '[::]:9090'
+        {{- else }}
+          - address: '0.0.0.0:9090'
+        {{- end }}
+        proxy_protocol: false
+      # The name of the listener, used in logs and metrics
+      - name: web
+        # List of resources to serve
+        resources:
+          # Serves the .well-known/openid-configuration document
+          - name: discovery
+          # Serves the human-facing pages, such as the login page
+          - name: human
+          # Serves the OAuth 2.0/OIDC endpoints
+          - name: oauth
+          ## Serves the Matrix C-S API compatibility endpoints
+          - name: compat
+          ## Serve the GraphQL API used by the frontend,
+          ## and optionally the GraphQL playground
+          - name: graphql
+          #  playground: true
+          ## Serve the given folder on the /assets/ path
+          - name: assets
+            path: /usr/local/share/mas-cli/assets
+
+        # List of addresses and ports to listen to
+        binds:
+          # First option: listen to the given address
+        {{- if not .Values.ipv4Only }}
+          - address: '[::]:8080'
+        {{- else }}
+          - address: '0.0.0.0:8080'
+        {{- end }}
+
+          ## Second option: listen on the given host and port combination
+          #- host: localhost
+          #  port: 8081
+
+          ## Third option: listen on the given UNIX socket
+          #- socket: /tmp/mas.sock
+
+          ## Fourth option: grab an already open file descriptor given by the parent process
+          ## This is useful when using systemd socket activation
+          #- fd: 1
+          #  # Kind of socket that was passed, defaults to tcp
+          #  kind: tcp # or unix
+
+        # Whether to enable the PROXY protocol on the listener
+        proxy_protocol: false
+
+    passwords:
+      # Whether to enable the password database.
+      # If disabled, users will only be able to log in using upstream OIDC providers
+      enabled: true
+
+      # List of password hashing schemes being used
+      # /!\ Only change this if you know what you're doing
+      # TODO: document this section better
+      schemes:
+        - version: 1
+          algorithm: argon2id
+
+    templates:
+      # From where to load the templates
+      # This is relative to the current working directory, *not* the config file
+      path: /usr/local/share/mas-cli/templates
+      # Path to the frontend assets manifest file
+      assets_manifest: /usr/local/share/mas-cli/manifest.json
+
+    telemetry:
+      tracing:
+        # The default: don't export traces
+        propagators: []
+        exporter: none
+
+      metrics:
+        # The default: don't export metrics
+        #exporter: none
+
+        # Export metrics to an OTLP-compatible endpoint
+        #exporter: otlp
+        #endpoint: https://localhost:4317
+
+        # Export metrics by exposing a Prometheus endpoint
+        # This requires mounting the `prometheus` resource to an HTTP listener
+        exporter: prometheus
+
+    {{- with .Values.mas.policy }}
+
+    policy:
+      data:
+        {{- . | toYaml | nindent 8 }}
+    {{- end }}
+
+{{- end }}

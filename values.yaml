@@ -1608,6 +1608,148 @@ ingress:
 
 
 ######################################################################################
+##          Konfiguration für Matrix-Authentication-Service
+######################################################################################
+## Achtung: Der MAS ist "work in progress" bzw. experimentell, siehe: docs/matrix-authentication-service.md
+## Wenn der matrix-authentication-service Pod nicht startet, befinden sich
+## die relevanten Fehlermeldungen meist im initContainer "initconfig".
+## Reference: https://github.com/matrix-org/matrix-authentication-service
+
+mas:
+  # -- (boolean) Aktivieren des Matrix-Authentication-Service
+  enabled: false
+  # -- (object) Konfiguration des Image/Repository
+  image:
+    repository: ghcr.io/matrix-org/matrix-authentication-service
+    # Tag mit "-debug" um shell zu haben
+    tag: 0.7-debug
+    pullPolicy: IfNotPresent
+
+  # -- (string) URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider
+  # Eine URI ist dringend ratsam, damit der Dienst routing-technisch getrennt ist.
+  # Ein stabiles Deployment ohne eigene URI wurde bisher nicht erprobt.
+  uri: ""
+  # -- (object) Zugangsdaten für die benötigte PostreSQL-Datenbank.
+  # Diese wird nicht automatisch angelegt und muss bereit gestellt werden.
+  # https://matrix-org.github.io/matrix-authentication-service/setup/database.htmlpostgre#set-up-a-database
+  postgresql:
+    database: mas_synapse
+    username: massynapse
+    password: mas-synapse
+
+  # -- (list) Diese URLs ersetzen bzw. überlagern die URLs vom Synapse.
+  # D.h., dass diese URLs vom MAS anstatt von Synapse beantwortet werden müssen.
+  # Die hier definierten URLs werden von dem Ingress des Synapse entfernt und
+  # dem MAS zugeordnet, wenn vorhanden.
+  paths:
+    - "/_matrix/client/(api/v1|r0|v3|unstable)/login"
+    - "/_matrix/client/(api/v1|r0|v3|unstable)/logout"
+    - "/_matrix/client/(api/v1|r0|v3|unstable)/refresh"
+
+  # -- (list) Liste der URL-Einstiegspunkte, die der MAS benötigt bzw.
+  # der `mas.uri` zugeordnet werden.
+  masPaths:
+    - "/authorize"
+    - "/oauth2"
+    - "/account"
+    - "/graphql"
+    - "/.well-known/openid-configuration"
+    - "/"
+
+  # -- (list) Konfiguration eines Upstream Authentification Providers zur Delegierung
+  # der Authentifizierung. Die Angaben werden automatisch in die Konfiguration unter
+  # `upstream_oauth2.providers` bereit gestellt.
+  # https://matrix-org.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
+  # https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#upstream_oauth2
+  upstream_oauth2_provider: []
+
+  # -- (object) Zusätzliche Policy Konfiguration für MAS.
+  # Die Angaben werden automatisch in die Konfiguration unter `policy.data` bereit gestellt.
+  # https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#policy
+  policy:
+    admin_users: []
+
+    # -- (object) Registration using passwords
+    passwords:
+      # -- (int) minimum length of a password. default: ?
+      min_length: 8
+      # -- (bool) require at least one lowercase character in a password. default: false
+      require_lowercase: true
+      # -- (bool) require at least one uppercase character in a password. default: false
+      require_uppercase: true
+      # -- (bool) require at least one number in a password. default: false
+      require_number: true
+
+  # -- (object) Zusätzliche E-Mail Konfiguration für MAS.
+  # https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#email
+  email:
+    # Default transport: don't send any emails
+    transport: blackhole
+
+  # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie, Synapse wird immer als
+  # sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist.
+  # Beachten Sie, dass eine Änderung dieser Einstellung auch die Verwendung der volumePermission
+  # Hilfsprogramm verwenden müssen, abhängig von Ihrem Speicher.
+  podSecurityContext:
+    runAsNonRoot: true
+    fsGroup: 1007
+    runAsGroup: 1007
+    runAsUser: 1007
+
+  # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie, siehe oben
+  # podSecurityContext für weitere relevante Informationen.
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1007
+  #  capabilities:
+  #    drop:
+  #    - ALL
+
+  resources:
+    limits:
+      # -- (string) Rechenressourcengrenzen, die auf den MAS anzuwenden sind.
+      cpu: 500m
+      # -- (string) RAM Ressourcengrenzen, die auf den MAS anzuwenden sind.
+      memory: 200Mi
+    requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf den MAS anzuwenden sind.
+      cpu: 300m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den MAS anzuwenden sind.
+      memory: 50Mi
+
+  ## Healthcheck
+  livenessProbe:
+    periodSeconds: 10
+    httpGet:
+      # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
+      path: /health
+      # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks
+      port: metrics
+
+  ## Bereitschaftscheck
+  readinessProbe:
+    periodSeconds: 3
+    httpGet:
+      # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
+      path: /health
+      # -- (string) Konfiguration des Ports vom Bereitschaftscheck
+      port: metrics
+
+  # Startup-Check
+  startupProbe:
+    # -- (int) Anzahl der Fehlversuche, damit Startzeit für Worker bei 60 Sekunden landet; Timeout default bei 10 Sekunden
+    failureThreshold: 6
+    httpGet:
+      # -- (string) Konfiguration des Pfads vom Startup-Check
+      # DEFAULT gilt für alle Synapse-Worker-Container.
+      path: /health
+      # -- (string) Konfiguration des Ports vom Startup-Check
+      # DEFAULT gilt für alle Synapse-Worker-Container.
+      port: metrics
+
+
+######################################################################################
 ##          Konfiguration für Matrix-Content-Scanner
 ######################################################################################
 
@@ -1953,7 +2095,7 @@ additionalConfig:
   # bzw. auf die aktive Downtime, hingewiesen.
   # Weiterhin besteht die Möglichkeit, die Nutzer zum Update des Clients zu motivieren bzw. zu zwingen.
   # Die Konfiguration wird vom confighub ausgeliefert, daher ist es notwendig, dass
-  # `confighub.enable: true` gesetzt ist.
+  # `confighub.enabled: true` gesetzt ist.
   #
   # downtime[]
   #   warning_start_time: Startzeit der Warnmeldung (ISO 8601)

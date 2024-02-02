@@ -1,6 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "matrix-synapse.fullname" . -}}
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
+{{- $masName := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-authentication-service") -}}
 {{- $adminUri := .Values.adminAPIServerName | required "A valid URI for the synapse Admin API (adminAPIServerName) is required." -}}
 
   {{- if $v1Ingress -}}
@@ -48,7 +49,18 @@ spec:
     {{- $name := $worker | replace "_" "-" }}
     {{- if and $config.enabled $config.listeners (or $config.paths $config.csPaths) }}
       {{- $service := include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}
-      {{- range $config.csPaths }}
+      {{- $csPaths := $config.csPaths }}
+      {{- if $.Values.mas.enabled }}
+        {{- range $csPath := $csPaths }}
+          {{- range $path := $.Values.mas.paths }}
+            {{/* csPath starts with path, path from MAS has more priority */}}
+            {{- if hasPrefix $path $csPath }}
+              {{- $csPaths = without $csPaths $csPath }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+      {{- end }}
+      {{- range $csPaths }}
         {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
             backend:
@@ -79,6 +91,39 @@ spec:
       {{- end }}
     {{- end }}
   {{- end }}
+
+  {{- if and $.Values.mas.enabled }}
+    {{- range $.Values.mas.paths }}
+      {{- if $.Values.ingress.traefikPaths }}
+          - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
+            backend:
+              {{- if $v1Ingress }}
+              service:
+                name: {{ $masName }}
+                port:
+                  number: 8080
+            pathType: ImplementationSpecific
+              {{- else }}
+              serviceName: {{ $masName }}
+              servicePort: 8080
+              {{- end }}
+            {{- else }}
+          - path: {{ . | quote }}
+            backend:
+              {{- if $v1Ingress }}
+              service:
+                name: {{ $masName }}
+                port:
+                  number: 8080
+            pathType: ImplementationSpecific
+              {{- else }}
+              serviceName: {{ $masName }}
+              servicePort: 8080
+              {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
           - path: /_synapse
             backend:
   {{- if $v1Ingress }}
@@ -105,4 +150,3 @@ spec:
               servicePort: {{ $.Values.service.port }}
   {{- end }}
 {{- end }}
-

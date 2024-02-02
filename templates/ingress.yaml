@@ -3,6 +3,7 @@
 {{- $scannerName := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-content-scanner") -}}
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") -}}
 {{- $chubName := include "matrix-synapse.externalname" (dict "global" . "external" "confighub-nginx") -}}
+{{- $masName := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-authentication-service") -}}
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 {{- $schadcodescan := $.Values.contentscanner.enabled -}}
 {{- $matrixUri := .Values.publicServerName | default .Values.serverName }}
@@ -41,7 +42,7 @@ spec:
 {{- end }}
   rules:
   {{- $csHosts := .Values.ingress.csHosts }}
-  {{- if and $.Values.ingress.includeServerName }}
+  {{- if $.Values.ingress.includeServerName }}
     {{- $csHosts = concat (list (.Values.publicServerName | default .Values.serverName)) $csHosts }}
   {{- end }}
   {{- $s2sHosts := .Values.ingress.hosts }}
@@ -66,10 +67,21 @@ spec:
           {{- if and $config.enabled $config.listeners (or $config.paths $config.csPaths) }}
             {{- $service := include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}
             {{- if has $host $csHosts }}
-              {{- range $config.csPaths }}
+              {{- $csPaths := $config.csPaths }}
+              {{- if $.Values.mas.enabled }}
+                {{- range $csPath := $csPaths }}
+                  {{- range $path := $.Values.mas.paths }}
+                    {{/* csPath starts with path, path from MAS has more priority */}}
+                    {{- if hasPrefix $path $csPath }}
+                      {{- $csPaths = without $csPaths $csPath }}
+                    {{- end }}
+                  {{- end }}
+                {{- end }}
+              {{- end }}
+              {{- range $csPaths }}
                 {{/* do not include if path is "/_synapse/admin"
                 admin API has its own config file "ingress-admin.yaml" */}}
-                {{- if (not (contains "/_synapse/admin" .)) }}
+                {{- if (not ( contains "/_synapse/admin" . )) }}
                   {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
             backend:
@@ -160,6 +172,39 @@ spec:
           {{- end }}
         {{- end }}
 
+        {{/* map paths like login to mas instead of Synapse  */}}
+        {{- if $.Values.mas.enabled }}
+          {{- range $.Values.mas.paths }}
+            {{- if $.Values.ingress.traefikPaths }}
+          - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
+            backend:
+              {{- if $v1Ingress }}
+              service:
+                name: {{ $masName }}
+                port:
+                  number: 8080
+            pathType: ImplementationSpecific
+              {{- else }}
+              serviceName: {{ $masName }}
+              servicePort: 8080
+              {{- end }}
+            {{- else }}
+          - path: {{ . | quote }}
+            backend:
+              {{- if $v1Ingress }}
+              service:
+                name: {{ $masName }}
+                port:
+                  number: 8080
+            pathType: ImplementationSpecific
+              {{- else }}
+              serviceName: {{ $masName }}
+              servicePort: 8080
+              {{- end }}
+            {{- end }}
+          {{- end }}
+        {{- end }}
+        
         {{- if has . $wkHosts }}
           {{- if $.Values.wellknown.enabled }}
           - path: "/.well-known/matrix"

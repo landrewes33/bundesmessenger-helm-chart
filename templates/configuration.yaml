@@ -133,7 +133,11 @@ data:
     {{end}}
     ## Registration ##
 
+    {{ if .Values.mas.enabled -}}
+    enable_registration: false
+    {{- else -}}
     enable_registration: {{ .Values.config.enableRegistration | default false }}
+    {{- end }}
 
     ## Metrics ###
 
@@ -189,7 +193,13 @@ data:
         {{- end }}
       {{- end }}
     {{- end }}
-    {{- with .Values.extraConfig }}
+    {{ $extraConfig := .Values.extraConfig }}
+    {{- if .Values.mas.enabled -}}
+      {{ $passwordDict := dict "password_config" (dict "enabled" false) }}
+      {{ $extraConfig := mergeOverwrite $extraConfig $passwordDict }}
+    {{- end -}}
+
+    {{- with $extraConfig }}
 
     ## Extra config ##
     {{ . | toYaml | nindent 4 }}

@@ -19,7 +19,6 @@ data:
       server_name _;
 
       root {{ .Values.wellknown.htdocsPath }};
-
       # livenessProbe auf /status, logging deaktiviert
       location /status {
         return 200;

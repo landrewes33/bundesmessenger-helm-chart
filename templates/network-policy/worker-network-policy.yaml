@@ -76,6 +76,15 @@ spec:
       - protocol: TCP
         port: 5000
     {{- end }}
+    {{- if $.Values.mas.enabled }}
+    - to:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: matrix-authentication-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    {{- end }}
     {{- if $.Values.networkpolicies.fwProxyList }}
       {{- range $.Values.networkpolicies.fwProxyList }}
     - to:
