@@ -68,3 +68,6 @@ networkpolicies:
 # only to validate template
 demomode:
   enabled: true
+
+mas:
+  enabled: true

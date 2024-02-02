@@ -68,6 +68,12 @@ data:
       "m.homeserver": {
         "base_url": "{{- printf "https://%s" ( .Values.publicServerName | default .Values.serverName ) }}"
       },
+      {{- if .Values.mas.enabled }}
+      "org.matrix.msc2965.authentication": {
+        "issuer": "https://{{ include "matrix-synapse.masUri" . }}",
+        "account": "https://{{ include "matrix-synapse.masUri" . }}/account"
+      },
+      {{- end }}
       "io.element.e2ee": {
         "secure_backup_required": true,
         "secure_backup_setup_methods": ["passphrase"],
@@ -88,7 +94,6 @@ data:
       }
     }
 {{-   end }}
-
 {{-   range $key, $value := .Values.wellknown.extraData }}
   {{ $key }}.json: |-
 {{-     if $value | kindIs "string" -}}

@@ -18,6 +18,11 @@ spec:
       - podSelector:
           matchLabels:
             app.kubernetes.io/component: synapse
+{{- if .Values.mas.enabled }}
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: matrix-authentication-service
+{{- end }}
 {{- range $worker, $config := .Values.workers }}
   {{- if $config.enabled }}
 {{- $name := $worker | replace "_" "-" }}            

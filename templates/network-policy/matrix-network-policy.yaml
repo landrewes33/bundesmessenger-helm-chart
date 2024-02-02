@@ -62,6 +62,15 @@ spec:
       - protocol: TCP
         port: 5000
     {{- end }}
+    {{- if .Values.mas.enabled }}
+    - to:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: matrix-authentication-service
+      ports:
+      - protocol: TCP
+        port: 8080
+    {{- end }}
     {{- range $worker, $config := .Values.workers }}
       {{- if and $config.enabled (has "replication" $config.listeners) }}
         {{- $name := $worker | replace "_" "-" }}
@@ -124,6 +133,15 @@ spec:
       - podSelector:
           matchLabels:
             app.kubernetes.io/component: matrix-content-scanner
+      ports:
+      - protocol: TCP
+        port: 8008
+    {{- end }}
+    {{- if .Values.mas.enabled }}
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: matrix-authentication-service
       ports:
       - protocol: TCP
         port: 8008
