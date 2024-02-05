@@ -1,0 +1,93 @@
+{{- if .Values.networkpolicies.enabled }}
+{{- $component := "matrix-authentication-service" -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-{{ $component }}-allow-egress-postgres
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: {{ $component }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: synapse
+      ports:
+      - protocol: TCP
+        port: 8008
+    {{- if .Values.postgresql.enabled }}
+    - to:
+      - podSelector:
+          matchLabels:
+            {{ .Values.networkpolicies.postgres.labelselector | default "app.kubernetes.io/name: postgresql" }}
+      ports:
+      - protocol: TCP
+        port: {{ .Values.postgresql.containerPorts.postgresql | default 5432 }}
+    {{- else if .Values.networkpolicies.postgres.labelselector }}
+    - to:
+      - podSelector:
+          matchLabels:
+           {{ .Values.networkpolicies.postgres.labelselector }}
+      ports:
+      - protocol: TCP
+        port: {{ .Values.externalPostgresql.port | default 5432 }}
+    {{- else }}
+    - to:
+      - ipBlock:
+          cidr: "{{ .Values.networkpolicies.postgres.externalPostgresIP }}/32"
+      ports:
+      - protocol: TCP
+        port: {{ .Values.externalPostgresql.port | default 5432 }}
+    {{- end }}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-{{ $component }}-allow-ingress-monitoring
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: {{ $component }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: {{ .Values.networkpolicies.ingressNamespace }}
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: {{ .Release.Namespace }}
+      ports:
+      - protocol: TCP
+        port: 8080
+    - ports:
+      - protocol: TCP
+        port: 9090
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: synapse
+      ports:
+      - protocol: TCP
+        port: 8080
+    - from:
+    {{- range $worker, $config := .Values.workers }}
+      {{- if $config.enabled }}
+      {{- $name := $worker | replace "_" "-" }}
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: {{ $name }}
+      {{- end }}
+    {{- end }}
+      ports:
+      - protocol: TCP
+        port: 8080
+{{- end }}

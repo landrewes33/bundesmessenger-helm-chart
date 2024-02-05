@@ -78,6 +78,22 @@ monitoring:
 # @default -- Messenger deiner Organisation
 displayName: "Messenger deiner Organisation"
 
+## Erstellen eines ServiceAccounts, samt gewünschter Annotations
+## oder Nutzung eines vorhandenen ServiceAccounts.
+## Es werden darüber hinaus noch weitere ServiceAccounts angelegt, z.B. für den Signing-Key Job oder Redis.
+## Der ServiceAccount für Redis kann via `redis.serviceAccount.name` konfiguriert werden.
+##
+serviceAccount:
+  create: true
+  annotations: {}
+    # eks.amazonaws.com/role-arn: arn:aws:iam::000000000000:role/matrix-synapse
+  # name: non-default-service-name
+
+## Manuelle Aktivierung bei Nutzung von ArgoCD.
+# Sollte durch `.Capabilities.APIVersions.Has "argoproj.io/v1alpha1"` erkannt werden,
+# kann hier aber erzwungen werden.
+# argoCD: true
+
 ## Die Quelle des von Synapse im Verbund verwendeten Signierschlüssels.
 ##
 signingkey:
@@ -89,12 +105,20 @@ signingkey:
   ##
   ## Wenn Sie Ihren Signierschlüssel verlieren, kann es sein, dass der Föderationsverkehr von Ihrer Instanz
   ## möglicherweise nicht mehr vom weiteren Netzwerk als vertrauenswürdig eingestuft wird.
+  ##
+  ## Sollte nach dem initialen Durchlauf deaktiviert werden, um Upgrades zu beschleunigen.
 
   job:
-    # -- (bool) es wird ein Job zu Beginn des Deployments gestartet, der einen Signierschlüssel erzeugt.
-    # Wenn abgeschaltet, muss ein vorhandener Schlüssel eingebunden werden, ansonsten ist eine Föderation
-    # als nicht vertrauenswürdig eingestuft
+    # -- (bool) Mit dem Job wird zur Installation ein Signierschlüssel erzeugt.
+    # Nach der Erstellung des Keys oder bei manueller Einbindung eines Keys (`extraConfig.old_signing_keys`)
+    # sollte der Job deaktiviert werden.
     enabled: true
+
+    ## -- (list) Annotations to apply to the signing-key-job.
+    # Bsp:
+    # argocd.argoproj.io/hook: PostSync
+    # argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    annotations: {}
 
     generateImage:
       # -- (string) Repository/Image Konfiguration für Synapse-signing-key-job. Es wird dringend
@@ -105,20 +129,38 @@ signingkey:
       # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
       # @default -- wird im Chart.yaml gesetzt
       # tag: ""
-      pullSecrets: []
-      #  - name: myRegistryKeySecretName
       # -- (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
     # -- (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.
     # finaler Tag kann sich noch ändern
     publishImage:
       repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl
-      tag: 1.28.3-jammy-production
+      tag: 1.29.0-jammy-production
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
   # existingSecret: secret-name
   # existingSecretKey: signing.key
+
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  podSecurityContext:
+    runAsUser: 2666
+
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 2666
+
+  ## Bereitschaftscheck
+  readinessProbe:
+    exec:
+      command:
+      - /bin/sh
+      - -c
+      - /scripts/signing-key-check.sh -o ready
+    initialDelaySeconds: 5
+    periodSeconds: 10
 
   ## Ressourcen für das Image der Erzeugung vom Signierschlüssel
   resources:
@@ -128,6 +170,17 @@ signingkey:
     requests:
       cpu: 100m
       memory: 250Mi
+
+  ## Healthcheck
+  livenessProbe:
+    exec:
+      command:
+      - /bin/sh
+      - -c
+      - /scripts/signing-key-check.sh -o health
+    initialDelaySeconds: 10
+    periodSeconds: 15
+
 
 # -- (bool) Schaltet alle internen IP-Adressevergaben auf IPv4-only
 # Wenn `true` sind alle Listener und Anbindungspunkte `0.0.0.0`,
@@ -381,27 +434,24 @@ synapse:
   # -- (list) Zusätzliche in Synapse zu mountende Datenträger (Volumes)
   # Beispiel:
   #  - name: spamcheck
-  #    flexVolume:
-  #      driver: dvs/git-live
-  #      options:
-  #        repo: https://gitlab.opencode.de/bwi/bundesmessenger/synapse-module
-  #        interval: 1d
-  #      readOnly: true
+  #    configMap:
+  #      name: spamcheck
   extraVolumes: []
 
   # -- (list) Zusätzliche in Synapse zu mountende Datenträgerpfade (Volumes)
   # Beispiel:
   #  - name: spamcheck
-  #    mountPath: /usr/local/lib/python3.7/site-packages/company
+  #    mountPath: /usr/local/lib/python3.10/site-packages/company
+  #    readOnly: true
   extraVolumeMounts: []
 
   # -- (list) Zusätzliche Befehle, die beim Starten von Synapse ausgeführt werden
   # Beispiele:
   # - 'apt-get update -yqq && apt-get install patch -yqq'
-  # - 'patch -d/usr/local/lib/python3.7/site-packages/synapse -p2 < /synapse/patches/something.patch'
+  # - 'patch -d/usr/local/lib/python3.10/site-packages/synapse -p2 < /synapse/patches/something.patch'
   extraCommands: []
 
-  # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie, Synapse wird immer als
+  # -- (object) Konfiguration für die Pod-Sicherheitsrichtlinie, Synapse wird immer als
   # sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist.
   # Beachten Sie, dass eine Änderung dieser Einstellung auch die Verwendung der volumePermission
   # Hilfsprogramm verwenden müssen, abhängig von Ihrem Speicher.
@@ -435,7 +485,7 @@ synapse:
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
-      cpu: 1000m
+      cpu: 1500m
       # -- (string) RAM Ressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
       memory: 2000Mi
     requests:
@@ -565,10 +615,10 @@ workers:
     # DEFAULT gilt für alle Synapse-Worker-Container.
     # Beispiele:
     # - 'apt-get update -yqq && apt-get install patch -yqq'
-    # - 'patch -d/usr/local/lib/python3.7/site-packages/synapse -p2 < /synapse/patches/something.patch'
+    # - 'patch -d/usr/local/lib/python3.10/site-packages/synapse -p2 < /synapse/patches/something.patch'
     extraCommands: []
 
-    # -- (map) Informationen zum Sicherheitskontext, die den Workern mitgeteilt werden sollen.
+    # -- (map) Informationen zum Pod-Sicherheitskontext, die den Worker-Pods mitgeteilt werden sollen.
     # DEFAULT gilt für alle Synapse-Worker-Container.
     # Beispiele:
     #   fsGroup: 2666
@@ -985,7 +1035,7 @@ sygnal:
   # -- (maps) Image/Repo-Konfiguration von Sygnal
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal
-    tag: 0.12.0-jammy-production
+    tag: 0.13.0-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (string) Proxy, falls benötigt um die Push-Services zu erreichen.
@@ -994,7 +1044,7 @@ sygnal:
   # Network Policies zwingend erforderlich
   proxy: ""
 
-  # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
   # weitere Beispiele:
   #  runAsNonRoot: true
@@ -1020,9 +1070,9 @@ sygnal:
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.
-      cpu: 150m
+      cpu: 300m
       # -- (string) RAM Ressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.
-      memory: 45Mi
+      memory: 100Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den Sygnal-Container anzuwenden sind.
       cpu: 150m
@@ -1132,7 +1182,7 @@ wellknown:
     tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
 
-  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
@@ -1152,9 +1202,9 @@ wellknown:
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den well-known server anzuwenden sind.
-      cpu: 5m
+      cpu: 50m
       # -- (string) RAM Ressourcengrenzen, die auf den well-known server anzuwenden sind.
-      memory: 15Mi
+      memory: 50Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den well-known server anzuwenden sind.
       cpu: 5m
@@ -1200,7 +1250,7 @@ confighub:
     tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
 
-  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
@@ -1220,9 +1270,9 @@ confighub:
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den confighub anzuwenden sind.
-      cpu: 5m
+      cpu: 50m
       # -- (string) RAM Ressourcengrenzen, die auf den confighub anzuwenden sind.
-      memory: 15Mi
+      memory: 50Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den confighub anzuwenden sind.
       cpu: 5m
@@ -1282,6 +1332,10 @@ postgresql:
       # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
       adminPasswordKey: postgres-password
 
+  # -- (int) PostgreSQL container port
+  containerPorts:
+    postgresql: 5432
+
   primary:
     initdb:
       # -- (string) Extra Argumente zur Initialisierung der Datenbank
@@ -1301,9 +1355,9 @@ postgresql:
     resources:
       limits:
         # -- (string) Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
-        cpu: 500m
+        cpu: 1
         # -- (string) RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
-        memory: 1024Mi
+        memory: 4096Mi
       requests:
         # -- (string) Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind.
         cpu: 250m
@@ -1369,8 +1423,8 @@ redis:
     existingSecret: ""
     existingSecretPasswordKey: redis-password
 
-  # -- (map) Konfiguration zur Härtung des Redis-Images
-  # (https://docs.bitnami.com/kubernetes/infrastructure/redis/administration/configure-kernel-settings/)
+  # -- (map) Konfiguration zur Härtung des InitContainers des Redis-Images
+  # (https://github.com/bitnami/charts/tree/main/bitnami/redis/#host-kernel-settings)
   sysctl:
     enabled: true
     image:
@@ -1382,8 +1436,8 @@ redis:
     mountHostSys: true
     resources:
       limits:
-        cpu: 200m
-        memory: 256Mi
+        cpu: 400m
+        memory: 512Mi
       requests:
         cpu: 100m
         memory: 128Mi
@@ -1412,7 +1466,7 @@ redis:
         # -- (string) Rechenressourcengrenzen, die auf den Redis-Container anzuwenden sind.
         cpu: 500m
         # -- (string) RAM Ressourcengrenzen, die auf den Redis-Container anzuwenden sind.
-        memory: 512Mi
+        memory: 768Mi
       requests:
         # -- (string) Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind.
         cpu: 300m
@@ -1467,6 +1521,11 @@ ingress:
     ## Folgende Einträge sind bei der Nutzung des Cert-Managers mit lets-encrypt notwendig:
   #  kubernetes.io/ingress.class: nginx
   #  kubernetes.io/tls-acme: "true"
+
+  # -- (map) Annotations zur Konfiguration des Ingress für die Admin-API.
+  # Dies ermöglicht z.B. das Konfigurieren eines IP-Filters für den administrativen Zugriff.
+  # Bsp: nginx.ingress.kubernetes.io/whitelist-source-range: "192.168.10.0/24, 10.10.12.0/24, 10.0.0.1"
+  annotationsAdminAPI: {}
 
   # -- (list) Hosts, die der Ingress-Konfiguration für die Verarbeitung von
   # Client-to-Server-API-Anfragepfade hinzugefügt werden sollen.
@@ -1549,6 +1608,148 @@ ingress:
 
 
 ######################################################################################
+##          Konfiguration für Matrix-Authentication-Service
+######################################################################################
+## Achtung: Der MAS ist "work in progress" bzw. experimentell, siehe: docs/matrix-authentication-service.md
+## Wenn der matrix-authentication-service Pod nicht startet, befinden sich
+## die relevanten Fehlermeldungen meist im initContainer "initconfig".
+## Reference: https://github.com/matrix-org/matrix-authentication-service
+
+mas:
+  # -- (boolean) Aktivieren des Matrix-Authentication-Service
+  enabled: false
+  # -- (object) Konfiguration des Image/Repository
+  image:
+    repository: ghcr.io/matrix-org/matrix-authentication-service
+    # Tag mit "-debug" um shell zu haben
+    tag: 0.7-debug
+    pullPolicy: IfNotPresent
+
+  # -- (string) URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider
+  # Eine URI ist dringend ratsam, damit der Dienst routing-technisch getrennt ist.
+  # Ein stabiles Deployment ohne eigene URI wurde bisher nicht erprobt.
+  uri: ""
+  # -- (object) Zugangsdaten für die benötigte PostreSQL-Datenbank.
+  # Diese wird nicht automatisch angelegt und muss bereit gestellt werden.
+  # https://matrix-org.github.io/matrix-authentication-service/setup/database.htmlpostgre#set-up-a-database
+  postgresql:
+    database: mas_synapse
+    username: massynapse
+    password: mas-synapse
+
+  # -- (list) Diese URLs ersetzen bzw. überlagern die URLs vom Synapse.
+  # D.h., dass diese URLs vom MAS anstatt von Synapse beantwortet werden müssen.
+  # Die hier definierten URLs werden von dem Ingress des Synapse entfernt und
+  # dem MAS zugeordnet, wenn vorhanden.
+  paths:
+    - "/_matrix/client/(api/v1|r0|v3|unstable)/login"
+    - "/_matrix/client/(api/v1|r0|v3|unstable)/logout"
+    - "/_matrix/client/(api/v1|r0|v3|unstable)/refresh"
+
+  # -- (list) Liste der URL-Einstiegspunkte, die der MAS benötigt bzw.
+  # der `mas.uri` zugeordnet werden.
+  masPaths:
+    - "/authorize"
+    - "/oauth2"
+    - "/account"
+    - "/graphql"
+    - "/.well-known/openid-configuration"
+    - "/"
+
+  # -- (list) Konfiguration eines Upstream Authentification Providers zur Delegierung
+  # der Authentifizierung. Die Angaben werden automatisch in die Konfiguration unter
+  # `upstream_oauth2.providers` bereit gestellt.
+  # https://matrix-org.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
+  # https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#upstream_oauth2
+  upstream_oauth2_provider: []
+
+  # -- (object) Zusätzliche Policy Konfiguration für MAS.
+  # Die Angaben werden automatisch in die Konfiguration unter `policy.data` bereit gestellt.
+  # https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#policy
+  policy:
+    admin_users: []
+
+    # -- (object) Registration using passwords
+    passwords:
+      # -- (int) minimum length of a password. default: ?
+      min_length: 8
+      # -- (bool) require at least one lowercase character in a password. default: false
+      require_lowercase: true
+      # -- (bool) require at least one uppercase character in a password. default: false
+      require_uppercase: true
+      # -- (bool) require at least one number in a password. default: false
+      require_number: true
+
+  # -- (object) Zusätzliche E-Mail Konfiguration für MAS.
+  # https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#email
+  email:
+    # Default transport: don't send any emails
+    transport: blackhole
+
+  # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie, Synapse wird immer als
+  # sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist.
+  # Beachten Sie, dass eine Änderung dieser Einstellung auch die Verwendung der volumePermission
+  # Hilfsprogramm verwenden müssen, abhängig von Ihrem Speicher.
+  podSecurityContext:
+    runAsNonRoot: true
+    fsGroup: 1007
+    runAsGroup: 1007
+    runAsUser: 1007
+
+  # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie, siehe oben
+  # podSecurityContext für weitere relevante Informationen.
+  securityContext:
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1007
+  #  capabilities:
+  #    drop:
+  #    - ALL
+
+  resources:
+    limits:
+      # -- (string) Rechenressourcengrenzen, die auf den MAS anzuwenden sind.
+      cpu: 500m
+      # -- (string) RAM Ressourcengrenzen, die auf den MAS anzuwenden sind.
+      memory: 200Mi
+    requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf den MAS anzuwenden sind.
+      cpu: 300m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den MAS anzuwenden sind.
+      memory: 50Mi
+
+  ## Healthcheck
+  livenessProbe:
+    periodSeconds: 10
+    httpGet:
+      # -- (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
+      path: /health
+      # -- (string) Zu verwendende Konfiguration für den Port des Healthchecks
+      port: metrics
+
+  ## Bereitschaftscheck
+  readinessProbe:
+    periodSeconds: 3
+    httpGet:
+      # -- (string) Konfiguration des Pfads vom Bereitschaftscheck
+      path: /health
+      # -- (string) Konfiguration des Ports vom Bereitschaftscheck
+      port: metrics
+
+  # Startup-Check
+  startupProbe:
+    # -- (int) Anzahl der Fehlversuche, damit Startzeit für Worker bei 60 Sekunden landet; Timeout default bei 10 Sekunden
+    failureThreshold: 6
+    httpGet:
+      # -- (string) Konfiguration des Pfads vom Startup-Check
+      # DEFAULT gilt für alle Synapse-Worker-Container.
+      path: /health
+      # -- (string) Konfiguration des Ports vom Startup-Check
+      # DEFAULT gilt für alle Synapse-Worker-Container.
+      port: metrics
+
+
+######################################################################################
 ##          Konfiguration für Matrix-Content-Scanner
 ######################################################################################
 
@@ -1559,7 +1760,7 @@ contentscanner:
   # -- (map) Konfiguration des Image/Repository
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/matrix-content-scanner
-    tag: 1.0.3-jammy-production
+    tag: 1.0.5-jammy-production
     pullPolicy: IfNotPresent
 
   replicaCount: 1
@@ -1576,7 +1777,7 @@ contentscanner:
       memory: 500Mi
 
 
-  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
@@ -1704,13 +1905,13 @@ schadcodescanner:
       # -- (string) Anforderungen an RAM Ressourcen, die auf den C-Icap-Container anzuwenden sind.
       memory: 50Mi
 
-  # -- (map) Informationen zum Sicherheitskontext, die dem Container mitgeteilt werden sollen.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
     runAsNonRoot: true
 
-  # -- (map) Konfiguration für die ClamAv-Container-Sicherheitsrichtlinie
+  # -- (map) Konfiguration für die ClamAV-Container-Sicherheitsrichtlinie
   # weitere Möglichkeiten:
   #  capabilities:
   #    drop:
@@ -1750,16 +1951,16 @@ synapse_admin:
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.
-      cpu: 5m
+      cpu: 50m
       # -- (string) RAM Ressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.
-      memory: 15Mi
+      memory: 50Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den Synapse-Admin Server anzuwenden sind.
       cpu: 5m
       # -- (string) Anforderungen an RAM Ressourcen, die auf den Synapse-Admin Server anzuwenden sind.
       memory: 15Mi
 
-  # -- (map) Informationen zum Sicherheitskontext, die dem Sygnal mitgeteilt werden sollen.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
   # weitere Beispiele:
   #  runAsNonRoot: true
@@ -1812,10 +2013,10 @@ webclient:
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.10.0-jammy-production
+    tag: 2.13.0-jammy-production
     pullPolicy: IfNotPresent
 
-  # -- (map) Informationen zum Sicherheitskontext, die der Container übernehmen soll.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
@@ -1835,9 +2036,9 @@ webclient:
   resources:
     limits:
       # -- (string) Rechenressourcengrenzen, die auf den webclient-server anzuwenden sind.
-      cpu: 100m
+      cpu: 150m
       # -- (string) RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind.
-      memory: 90Mi
+      memory: 100Mi
     requests:
       # -- (string) Anforderungen an Rechenressourcen, die auf den webclient-server anzuwenden sind.
       cpu: 50m
@@ -1894,7 +2095,7 @@ additionalConfig:
   # bzw. auf die aktive Downtime, hingewiesen.
   # Weiterhin besteht die Möglichkeit, die Nutzer zum Update des Clients zu motivieren bzw. zu zwingen.
   # Die Konfiguration wird vom confighub ausgeliefert, daher ist es notwendig, dass
-  # `confighub.enable: true` gesetzt ist.
+  # `confighub.enabled: true` gesetzt ist.
   #
   # downtime[]
   #   warning_start_time: Startzeit der Warnmeldung (ISO 8601)
@@ -1979,7 +2180,7 @@ tests:
   annotations:
     helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
 
-  # -- (map) Informationen zum Sicherheitskontext, die der Container übernehmen soll.
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   podSecurityContext:
     runAsUser: 1001
     runAsGroup: 1001
@@ -2018,7 +2219,7 @@ demomode:
   # Folgende Möglichkeiten:
   #   "complete": Es wird die gesamte Datenbank gelöscht und neu erstellt.
   #   "defined": Es wird ein Datenbank-Dump zurück gespielt.
-  #              Dieser muss als DB-Dump bereit gestellt werden. (TBD)
+  #              Dieser muss als DB-Dump bereitgestellt werden. (TBD)
   #   "federation": Wie "defined", jedoch mit der Option als Förderationspartner zu fungieren. (TBD)
   mode: complete
 
@@ -2043,8 +2244,14 @@ demomode:
   # @default 0 0 * * 0, Dies bedeutet, dass die Aufgabe um 0:00 Uhr (Mitternacht) an jedem Sonntag (Tag der Woche = 0) ausgeführt wird
   interval: "0 0 * * 0"
 
-  # -- (string) existingClaim für PostgreSQL-Dump
-  existingClaim: sqldump
+  # -- (string) existingClaim für Volume/Storage PostgreSQL-Dump und Media-Files
+  existingClaim: ""
+
+  # -- (string) Image für den Dump-Container, muss mit dem genutzten PostgreSQL kompatibel sein.
+  # anzugeben in der Form: Registry/Repository/Image:Tag
+  # Beispiel: registry.opencode.de/ig-bvc/demo-apps/postgresql/postgres:14
+  # Wenn nicht gesetzt, wird das Image vom weiter oben konfigurierten internen PostgreSQL-Server genutzt.
+  postgresqldump: ""
 
   # -- (string) Postgresql-Dump, welcher auf dem PVC vom PostgreSQL-Server liegt
   sqldump: dump.sql

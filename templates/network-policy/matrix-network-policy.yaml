@@ -20,7 +20,7 @@ spec:
             {{ .Values.networkpolicies.postgres.labelselector | default "app.kubernetes.io/name: postgresql" }}
       ports:
       - protocol: TCP
-        port: 5432
+        port: {{ .Values.postgresql.containerPorts.postgresql | default 5432 }}
     {{- else if .Values.networkpolicies.postgres.labelselector }}
     - to:
       - podSelector:
@@ -28,14 +28,14 @@ spec:
            {{ $.Values.networkpolicies.postgres.labelselector }}
       ports:
       - protocol: TCP
-        port: 5432
+        port: {{ .Values.externalPostgresql.port | default 5432 }}
     {{- else }}
     - to:
       - ipBlock:
           cidr: "{{ .Values.networkpolicies.postgres.externalPostgresIP }}/32"
       ports:
       - protocol: TCP
-        port: 5432
+        port: {{ .Values.externalPostgresql.port | default 5432 }}
     {{- end }}
     {{- if .Values.redis.enabled }}
     - to:
@@ -61,6 +61,15 @@ spec:
       ports:
       - protocol: TCP
         port: 5000
+    {{- end }}
+    {{- if .Values.mas.enabled }}
+    - to:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: matrix-authentication-service
+      ports:
+      - protocol: TCP
+        port: 8080
     {{- end }}
     {{- range $worker, $config := .Values.workers }}
       {{- if and $config.enabled (has "replication" $config.listeners) }}
@@ -124,6 +133,15 @@ spec:
       - podSelector:
           matchLabels:
             app.kubernetes.io/component: matrix-content-scanner
+      ports:
+      - protocol: TCP
+        port: 8008
+    {{- end }}
+    {{- if .Values.mas.enabled }}
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: matrix-authentication-service
       ports:
       - protocol: TCP
         port: 8008

@@ -7,6 +7,104 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.6.0 (2024-02-05)
+
+### ⚠️ Versionshinweise
+
+- Es verändert sich die Logik für den Namen des automatisch erzeugten Service
+  Accounts.
+  Ein Upgrade des Helm Charts ist problemlos möglich. Es wird automatisch der
+  ServiceAccount
+  mit den neuen Namen angelegt. Wenn Helm den alten Service Account nicht
+  automatisch entfernt hat,
+  kann bei Bedarf der alte, nicht benötigte ServiceAccount mit dem Namen `{{
+  .Release.Name }}`, manuell gelöscht werden.
+- Zur Erstellung der Signierungsschlüssel für Matrix wurde der Job umgestellt,
+  sodass er Helm Hooks nutzt. Alle bestehenden Installationen sollten den Job
+  ab sofort deaktivieren: `signingkey.job.enabled: false`.
+
+### ✨ Features
+
+- Hinzufügen von Demo-Modus `demomode.mode: defined`, der aus zwei Cronjobs
+  (speichern und zurücksetzen der Daten) besteht.
+  Es gibt verschiedene Demo-Workflow-Ausprägungen (complete, defined,
+  federation).
+  Der Demomodus ist nicht kompatibel mit dem Matrix-Authentication-Service.
+  (!111)
+- Umsetzung des Signingkey Jobs via Annotation-Hooks. (!231)
+- Erstellen eines ServiceAccounts, samt gewünschter Annotations, oder Nutzung
+  eines vorhandenen ServiceAccounts. (!251)
+- IP-Filter für Admin-API per Ingress-Ressource. Synapse-Admin bekommt eigene
+  Ingress-Ressource. (!269)
+- Hinzufügen eines DSGVO-konformen Export von Nutzerdaten auf notwendigem
+  eigenen PVC. (!271, !304)
+- Ermöglichen der Konfiguration (`postgresql.containerPorts.postgresql`) des
+  Container Port im PostgreSQL-Bitnami-Chart. (!273)
+- Ermöglicht den `securityContext` im signingKey-Job zu konfigurieren.
+  Contributed by Dimitri Schwarz (dimitri.schwarz@muenchen.de). (!284)
+- Hinzufügen von Option `argoCD` und der Detektion ob das HelmChart im Rahmen
+  von ArgoCD ausgeführt wird.
+  Behebung von Fehlern die in diesem Zusammenhang auftreten. (!289)
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web`
+  auf Version `2.13.0` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl`
+  auf Version `1.29.0` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/matrix-content-scanner`
+  auf Version `1.0.5` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal`
+  auf Version `0.13.0` aktualisiert.
+
+### 🐛 Bugfixes
+
+- Warnung vom Nginx-Ingress (`warnings.go:70] path /.well-known/matrix cannot
+  be used with pathType Prefix`) behoben. (!252)
+- Korrektur der Ressourcen Limits für Sygnal. (!287)
+
+### 🚧 In Entwicklung
+
+- Hinzufügen und Konfiguration OAuth 2.0 und OpenID Provider Server
+  "Matrix-Authentication-Service".
+  Aktuell wird an dem Modul noch entwickelt und zukünftige strukturelle
+  Änderungen sind nicht ausgeschlossen. (!240)
+
+### 📚 Dokumentation
+
+- Korrektur von internem Link zum Network-Policies-Image in Changelog. (!274)
+- Korrektur der podSecurityContext Beschreibung in der values.yaml. (!286)
+- Nutzung und Einbindung von Synapse Modulen dokumentiert. (!305)
+- Korrektur Link zur Redis Chart Dokumentation. (!306)
+- Überarbeitung der Synapse-Admin Dokumentation. (!307)
+
+### 📝 Weitere Änderungen
+
+- Vereinfachung der Renovate Konfiguration. (!238)
+- Automatisches Upgrade der Renovate Konfiguration. (!243)
+- In der CI-Pipeline erlauben, dass das PostgreSQL Image nicht von OpenCoDE
+  geladen wird. (!266)
+- Harmonisierung der Annotation `checksum/config` gemäß der [Helm
+  Dokumentation](https://helm.sh/docs/howto/charts_tips_and_tricks/#automatically-roll-deployments).
+  (!279)
+- Die Möglichkeit der Erstellung von Release Notes mit Hilfe von towncrier
+  hinzugefügt. (!280)
+- Skript zum Berechnen der angefragten und maximalen Ressourcen (`resources`)
+  hinzugefügt. (!294)
+- Im Schadcodescanner Deployment den Code-Style angepasst. (!295)
+- Ordnung der Helm Templates in einer Ordnerstruktur. (!297)
+- Erhöhen der Ressourcen-Grenzen einiger Services und Subcharts. (!298)
+- Nutzung von `git push -u` zur Verknüpfung der Branches im Release Script.
+  (!301)
+- Verschieben der CORS-Header vom NginX zur Wiederverwendung in eine
+  Konfigurationsdatei. (!303)
+- `docker.io/aquasec/trivy` in der CI-Pipeline auf Version `0.49.0`
+  aktualisiert.
+- `git-mirror` in der CI-Pipeline auf Version `v1.5.6` aktualisiert.
+- `jnorwood/helm-docs` in der CI-Pipeline auf Version `v1.12.0` aktualisiert.
+- `kyverno/kyverno` in der CI-Pipeline auf Version `v1.11.4` aktualisiert.
+
 ## BundesMessenger Helm Chart 1.5.0 (2023-12-18)
 
 ### ✨ Features
@@ -29,7 +127,7 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 
 ### 📚 Dokumentation
 
-- Hinzufügen der [Darstellung](docs/images/Bum_Network_policies.jpg) der
+- Hinzufügen der [Darstellung](docs/images/Bum_Network_Policies.jpg) der
   Network-Policy-Struktur. (!256, !263)
 - Aktualisierung der Dokumentation auf eine "stable" Version. (!264)
 - Beispiele zur Installation mit Nutzung von einer OCI-Registry hinzugefügt.
@@ -429,7 +527,7 @@ Sie befinden sich weiterhin in Arbeit und Review.
   [`towncrier`](https://github.com/twisted/towncrier). (!63, !64)
 - Umsetzung von DVS Vorgaben für den ClamAV-Schadcodescanner. (!66)
 - Konfiguration zur Härtung des Redis-Images gemäß
-  [Bitnami-Empfehlungen](https://docs.bitnami.com/kubernetes/infrastructure/redis/administration/configure-kernel-settings/).
+  [Bitnami-Empfehlungen](https://github.com/bitnami/charts/tree/main/bitnami/redis/#host-kernel-settings).
   (!67)
 - Auslagern des Skriptes zum Erstellen der `docs/standard_values.md` in eine
   separate Datei. (!68)

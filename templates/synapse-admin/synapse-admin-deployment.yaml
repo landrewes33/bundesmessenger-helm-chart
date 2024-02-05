@@ -24,7 +24,7 @@ spec:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
     spec:
-      serviceAccountName: {{ .Release.Name }}
+      serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       securityContext:
         {{- $.Values.synapse_admin.podSecurityContext | toYaml | nindent 8 }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
@@ -58,6 +58,10 @@ spec:
           - name: nginx-conf
             mountPath: /etc/nginx/nginx.conf
             subPath: nginx.conf
+            readOnly: true            
+          - name: nginx-conf-d
+            mountPath: /etc/nginx/conf.d
+            readOnly: true
           {{- with .Values.synapse_admin.extraVolumeMounts }}
           {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -69,7 +73,10 @@ spec:
           medium: Memory
       - name: nginx-conf
         configMap:
-          name: nginx-default-conf
+          name: nginx-conf-default
+      - name: nginx-conf-d
+        configMap:
+          name: nginx-conf-d
       - name: site
         configMap:
           name: {{ $adminName }}

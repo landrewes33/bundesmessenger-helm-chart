@@ -19,13 +19,14 @@ data:
       server_name _;
 
       root {{ .Values.wellknown.htdocsPath }};
-
       # livenessProbe auf /status, logging deaktiviert
       location /status {
         return 200;
         access_log off;
       }
       location /_matrix/cmaintenance {
+        # X-Header for CORS-Policy
+        include /etc/nginx/conf.d/cors_headers.conf;
         add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization";
         add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
         add_header Access-Control-Allow-Origin "*";
@@ -33,6 +34,8 @@ data:
         rewrite ^/_matrix/cmaintenance /maintenance.json break;
       }
       location /_matrix/cconfig/style.json {
+        # X-Header for CORS-Policy
+        include /etc/nginx/conf.d/cors_headers.conf;
         add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization";
         add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
         add_header Access-Control-Allow-Origin "*";

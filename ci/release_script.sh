@@ -162,7 +162,7 @@ read -p "Done, push the branch \"$branchprefix/v$nextVersion\" (yes/no) default 
 
 if [ ${doPush:-yes} = "yes" ]; then
   printf "Pushing branch \"$branchprefix/v$nextVersion\".\n"
-  git push origin "$branchprefix/v$nextVersion"
+  git push -u origin "$branchprefix/v$nextVersion"
 else
     printf "Not pushing, do not forget to push manually!\n"
 fi

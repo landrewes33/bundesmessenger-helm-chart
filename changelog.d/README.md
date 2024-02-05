@@ -17,6 +17,8 @@ Um einen Changelog-Eintrag zu erstellen, legen Sie eine neue Datei im Verzeichni
 `changelog.d` mit dem Namen im Format `MR-Nummer.Typ` an.
 Der Typ kann einer der folgenden sein:
 
+- `notes` (Für explizite Hinweise zur Version (Release Notes).
+Diese sollte immer nur zusätzlich zu einem normalen Changelog-Eintrag erstellt werden)
 - `feature`
 - `bugfix`
 - `doc` (für Aktualisierungen von Dokumentation)

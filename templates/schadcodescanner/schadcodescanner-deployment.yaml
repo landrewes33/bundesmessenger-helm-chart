@@ -24,10 +24,10 @@ spec:
         {{- include "matrix-synapse.selectorLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/schadcodescanner-configuration.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/schadcodescanner/schadcodescanner-configuration.yaml") . | sha256sum }}
     spec:
     {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
-      serviceAccountName: {{ .Release.Name }}
+      serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       securityContext:
         {{- $config.podSecurityContext | toYaml | nindent 8 }}
       initContainers:
@@ -53,11 +53,9 @@ spec:
         imagePullPolicy: "{{ $config.clamavImage.pullPolicy | default  "IfNotPresent" }}"
         securityContext:
           {{- $config.clamavSecurityContext | default "" | toYaml | nindent 10 }}
-        {{- if .Values.schadcodescanner.extraEnv }}
+        {{- with $config.extraEnv }}
         env:
-          {{- with .Values.schadcodescanner.extraEnv }}
-              {{- . | toYaml | nindent 12 }}
-          {{- end }}
+          {{- . | toYaml | nindent 10 }}
         {{- end }}
         resources:
           {{- toYaml $config.resourcesClamav | nindent 10 }}

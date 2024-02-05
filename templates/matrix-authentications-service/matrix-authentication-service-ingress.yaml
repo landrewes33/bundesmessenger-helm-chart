@@ -1,0 +1,71 @@
+{{- if and .Values.ingress.enabled .Values.mas.enabled }}
+{{- $masName := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-authentication-service") -}}
+{{- $masUri := include "matrix-synapse.masUri" . -}}
+{{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
+{{- if $v1Ingress -}}
+apiVersion: networking.k8s.io/v1
+{{- else -}}
+apiVersion: networking.k8s.io/v1beta1
+{{- end }}
+kind: Ingress
+metadata:
+  name: {{ $masName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+{{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+{{- end }}
+{{- if .Values.ingress.tls }}
+  tls:
+  {{- range .Values.ingress.tls }}
+    {{- if has $masUri .hosts }}
+    - hosts:
+      {{- range .hosts }}
+        - {{ . | quote }}
+      {{- end }}
+      {{- if .secretName }}
+      secretName: {{ .secretName }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+  rules:
+    - host: {{ $masUri | quote }}
+      http:
+        paths:
+  {{- range .Values.mas.masPaths }}
+    {{- if $.Values.ingress.traefikPaths }}
+          - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
+            backend:
+      {{- if $v1Ingress }}
+              service:
+                name: {{ $masName }}
+                port:
+                  number: 8080
+            pathType: ImplementationSpecific
+      {{- else }}
+              serviceName: {{ $masName}}
+              servicePort: 8080
+      {{- end }}
+    {{- else }}
+          - path: {{ . | quote }}
+            backend:
+      {{- if $v1Ingress }}
+              service:
+                name: {{ $masName }}
+                port:
+                  number: 8080
+            pathType: ImplementationSpecific
+      {{- else }}
+              serviceName: {{ $masName }}
+              servicePort: 8080
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}

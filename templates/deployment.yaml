@@ -7,16 +7,6 @@
 {{- end -}}
 {{- $userconfigname :=  printf "%s-%s" (include "matrix-synapse.fullname" .) "users" }}
 {{- $adminconfigname := printf "%s-%s" (include "matrix-synapse.fullname" .) "admins" }}
-
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  labels:
-  {{- include "matrix-synapse.labels" . | nindent 4 }}
-  name: {{ .Release.Name }}
-  namespace: {{ .Release.Namespace }}
-
 ---
 # Server: {{ required "A valid serverName is required" .Values.serverName }}
 apiVersion: apps/v1
@@ -51,7 +41,7 @@ spec:
         {{- . | toYaml | nindent 8 }}
         {{- end }}
     spec:
-      serviceAccountName: {{ $.Release.Name }}
+      serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.synapse.podSecurityContext | nindent 8 }}
@@ -163,8 +153,6 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /synapse/config
-            - name: scripts
-              mountPath: /opt/k8s-synapse
             - name: tmpconf
               mountPath: /synapse/config/conf.d
             - name: secrets
@@ -188,10 +176,6 @@ spec:
         - name: config
           configMap:
             name: {{ include "matrix-synapse.fullname" . }}
-        - name: scripts
-          configMap:
-            name: {{ include "matrix-synapse.fullname" . }}-scripts
-            defaultMode: 0755
         - name: secrets
           secret:
             secretName: {{ include "matrix-synapse.fullname" . }}

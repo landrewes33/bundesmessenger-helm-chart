@@ -24,12 +24,12 @@ spec:
         {{- include "matrix-synapse.selectorLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/contentscanner-configuration.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/matrix-content-scanner/contentscanner-configuration.yaml") . | sha256sum }}
     spec:
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       securityContext:
         {{- $config.podSecurityContext | toYaml | nindent 8 }}
-      serviceAccountName: {{ .Release.Name }}
+      serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       containers:
       - name: {{ $name }}
         image: "{{ $config.image.repository }}:{{ $config.image.tag }}"

@@ -6,6 +6,7 @@ Expand the name of the chart.
 {{- .Values.nameOverride | default .Chart.Name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+
 {{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
@@ -21,6 +22,18 @@ If release name contains chart name it will be used as a full name.
 {{- else -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "matrix-synapse.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (include "matrix-synapse.fullname" .) .Values.serviceAccount.name }}
+{{- else -}}
+    {{/* Default name is ".Release.Name" and not "default" due to DVC requirements. */}}
+    {{ default .Release.Name .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
 
@@ -308,3 +321,71 @@ Check networkpolicy requirements TBD CHECK POSTGRES
     {{- required "A host from the external redis instance (externalRedis.host) is required." .Values.externalRedis.host -}}
   {{- end }}
 {{- end }}
+
+{{/*
+Set MAS postgresql username
+*/}}
+{{- define "matrix-synapse.maspostgresql.username" -}}
+  {{- if .Values.mas.enabled -}}
+{{- .Values.mas.postgresql.username | default "mas-synapse" }}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Set MAS postgresql password
+*/}}
+{{- define "matrix-synapse.maspostgresql.password" -}}
+  {{- if .Values.mas.enabled -}}
+{{- .Values.mas.postgresql.password | default "mas-synapse" }}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Set MAS postgresql database
+*/}}
+{{- define "matrix-synapse.maspostgresql.database" -}}
+  {{- if .Values.mas.enabled -}}
+{{- .Values.mas.postgresql.database | default "mas-synapse" }}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Set MAS postgres host
+*/}}
+{{- define "matrix-synapse.maspostgresql.host" -}}
+  {{- if .Values.mas.enabled -}}
+{{- .Values.mas.postgresql.host | default ( include "matrix-synapse.postgresql.host" . ) -}}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Set MAS postgresql sslmode
+*/}}
+{{- define "matrix-synapse.maspostgresql.sslmode" -}}
+  {{- if .Values.mas.enabled -}}
+{{- .Values.mas.postgresql.sslmode | default "prefer" }}
+  {{- end -}}
+{{- end -}}
+
+
+{{/*
+Set MAS postgresql extra args
+Refer to https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+for a list of options that can be passed.
+*/}}
+{{- define "matrix-synapse.maspostgresql.extraArgs" -}}
+  {{- if .Values.mas.enabled -}}
+    {{- with .Values.mas.postgresql.extraArgs }}
+{{- . | toYaml }}
+    {{- end }}
+  {{- end -}}
+{{- end -}}
+
+{{/*
+Set MAS default uri
+*/}}
+{{- define "matrix-synapse.masUri" -}}
+  {{- if .Values.mas.enabled -}}
+{{- .Values.mas.uri | default ( .Values.publicServerName | default .Values.serverName ) -}}
+  {{- end -}}
+{{- end -}}

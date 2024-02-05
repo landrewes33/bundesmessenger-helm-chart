@@ -39,12 +39,12 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print .Template.BasePath "/well-known-config.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/well-known/well-known-config.yaml") . | sha256sum }}
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
     spec:
-      serviceAccountName: {{ $.Release.Name }}
+      serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.wellknown.podSecurityContext | nindent 8 }}
@@ -68,10 +68,10 @@ spec:
               port: http
             periodSeconds: 10
           volumeMounts:
-            - mountPath: /etc/nginx/nginx.conf
-              name: nginx-conf
-              readOnly: true
+            - name: nginx-conf
+              mountPath: /etc/nginx/nginx.conf
               subPath: nginx.conf
+              readOnly: true
             - mountPath: /etc/nginx/sites-enabled/default.conf
               name: site
               readOnly: true
@@ -89,7 +89,7 @@ spec:
       volumes:
         - name: nginx-conf
           configMap:
-            name: nginx-default-conf
+            name: nginx-conf-default
         - name: files
           configMap:
             name: {{ $wkName }}

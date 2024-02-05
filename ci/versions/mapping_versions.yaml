@@ -26,6 +26,8 @@
   app: Synapse
 - path: synapse_admin.image
   app: Synapse-Admin
+- path: mas.image
+  app: Matrix-Authentication-Service
 - path: postgresql.image
   app: internalPostgresql
 - path: tests.image

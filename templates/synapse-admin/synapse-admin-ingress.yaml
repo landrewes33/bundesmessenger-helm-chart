@@ -1,0 +1,55 @@
+{{- if and .Values.ingress.enabled .Values.synapse_admin.enabled -}}
+{{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
+{{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
+{{- $adminWebGui := include "synapse-admin.host" . -}}
+
+  {{- if $v1Ingress -}}
+apiVersion: networking.k8s.io/v1
+  {{- else -}}
+apiVersion: networking.k8s.io/v1beta1
+  {{- end }}
+kind: Ingress
+metadata:
+  name: {{ $adminName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+      {{- if has $adminWebGui .hosts }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+        {{- if .secretName }}
+      secretName: {{ .secretName }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ $adminWebGui | quote }}
+      http:
+        paths:
+          - path: /
+            backend:
+          {{- if $v1Ingress }}
+              service:
+                name: {{ $adminName }}
+                port:
+                  number: 8080
+            pathType: Prefix
+          {{- else }}
+              serviceName: {{ $adminName }}
+              servicePort: 8080
+          {{- end }}
+{{- end }}

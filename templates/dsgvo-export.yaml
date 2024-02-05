@@ -1,0 +1,98 @@
+{{- if semverCompare ">=1.21.0" .Capabilities.KubeVersion.Version -}}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "dsgvo-exporter") -}}
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+rules:
+- apiGroups: ["apps", ""]
+  resources: ["deployments", "statefulsets"]
+  verbs: ["get"]
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["create", "get", "update", "patch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ $name }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+subjects:
+- kind: ServiceAccount
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ $name }}
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: dsgvo-exporter-job
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: "0 0 * * 0"
+  suspend: true  # Schedule wird hiermit deaktiviert, schedule ist aber Pflicht.
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "matrix-synapse.labels" . | nindent 12 }}
+            app.kubernetes.io/component: dsgvo-exporter-cronjob
+            to-apiserver: allowed
+        spec:
+        {{- include "matrix-synapse.imagePullSecrets" . | nindent 10 }}
+          serviceAccountName: {{ $name }}
+          containers:
+            - name: dsgvo-exporter
+              image: "{{ .Values.signingkey.job.publishImage.repository }}:{{ .Values.signingkey.job.publishImage.tag | default "latest" }}"
+              command:
+                - sh
+                - -c
+                - |
+                  export user=$(echo ${DSGVO_DUMP_USER%%':'*} | tr -d "@")
+                  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "matrix-synapse.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=synapse" -o jsonpath="{.items[0].metadata.name}")
+                  kubectl exec --namespace {{ .Release.Namespace }} $POD_NAME -- python3 -m synapse.app.admin_cmd -c /synapse/config/homeserver.yaml -c /synapse/config/conf.d/ export-data $DSGVO_DUMP_USER --output-directory /tmp/dsgvo-export/$user
+                  kubectl cp --namespace {{ .Release.Namespace }} $POD_NAME:/tmp/dsgvo-export/$user /opt/dsgvo-export/$user
+                  kubectl exec --namespace {{ .Release.Namespace }} $POD_NAME -- rm -rf /tmp/dsgvo-export/$user
+              env:
+                - name: DSGVO_DUMP_USER
+                  valueFrom:
+                    secretKeyRef:
+                      name: dsgvo-dump-user
+                      key: user
+              volumeMounts:
+                - name: dsgvo-export
+                  mountPath: /opt/dsgvo-export
+              securityContext:
+                readOnlyRootFilesystem: true
+          volumes:
+            - name: dsgvo-export
+              persistentVolumeClaim:
+                claimName: dsgvo-export
+          restartPolicy: Never
+{{- end -}}
