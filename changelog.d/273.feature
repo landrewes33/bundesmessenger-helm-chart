@@ -1,1 +1,0 @@
-Ermöglichen der Konfiguration (`postgresql.containerPorts.postgresql`) des Container Port im PostgreSQL-Bitnami-Chart.
