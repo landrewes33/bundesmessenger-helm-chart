@@ -7,6 +7,12 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.6.1 (2024-02-13)
+
+### 🐛 Bugfixes
+
+- Korrektur des CSP Header `from-ancestor` von `none` zu `self`. (!312)
+
 ## BundesMessenger Helm Chart 1.6.0 (2024-02-05)
 
 ### ⚠️ Versionshinweise
