@@ -1622,7 +1622,7 @@ mas:
   image:
     repository: ghcr.io/matrix-org/matrix-authentication-service
     # Tag mit "-debug" um shell zu haben
-    tag: 0.7-debug
+    tag: 0.8-debug
     pullPolicy: IfNotPresent
 
   # -- (string) URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider
