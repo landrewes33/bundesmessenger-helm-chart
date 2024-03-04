@@ -1,0 +1,50 @@
+{{- if and .Values.monitoring.enabled .Values.sygnal.enabled }}
+{{- $monitoringService := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-sygnal-metrics") -}}
+{{- $component := "matrix-sygnal" -}}
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ $monitoringService }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    {{- with .Values.monitoring.labels }}
+    {{- . | toYaml | nindent 4 }}
+    {{- end }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  jobLabel: app.kubernetes.io/component
+  selector:
+    matchExpressions:
+    - key: app.kubernetes.io/component
+      operator: In
+      values:
+      - {{ $component }}
+  namespaceSelector:
+    matchNames:
+    - {{ .Release.Namespace }}
+  podMetricsEndpoints:
+  - port: metrics
+    path: /
+    interval: 15s
+    relabelings:
+    # remove "matrix-" from job label
+    - action: replace
+      sourceLabels: [job]
+      targetLabel: job
+      regex: ^matrix-(.*)$
+      replacement: ${1}
+    # set "instance" - feature if there are multiple instances
+    # - action: replace
+    #   sourceLabels: [pod]
+    #   targetLabel: instance
+    # set "instance"
+    - action: replace
+      replacement: {{ .Release.Namespace }}
+      targetLabel: instance
+    # keep only needed labels ("^__.*__$" is needed by prometheus operator)
+    - action: labelkeep
+      regex: instance|job|^__.*__$
+{{- end }}

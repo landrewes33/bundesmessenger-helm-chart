@@ -21,7 +21,6 @@ spec:
     metadata:
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
-        {{- include "matrix-synapse.monitoringLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/matrix-authentications-service/matrix-authentication-service-configuration.yaml") . | sha256sum }}
