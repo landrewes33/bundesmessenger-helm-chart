@@ -10,7 +10,6 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    {{- include "matrix-synapse.monitoringLabels" . | nindent 4 }}
     {{- with .Values.monitoring.labels }}
     {{- . | toYaml | nindent 4 }}
     {{- end }}
@@ -33,12 +32,6 @@ spec:
       sourceLabels: [pod]
       targetLabel: index
       regex: .*-(\d+)$
-      replacement: ${1}
-    # remove "matrix-" from job label (for sygnal)
-    - action: replace
-      sourceLabels: [job]
-      targetLabel: job
-      regex: ^matrix-(.*)$
       replacement: ${1}
     # set "instance"
     - action: replace
