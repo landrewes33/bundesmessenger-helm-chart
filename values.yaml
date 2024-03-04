@@ -1944,7 +1944,7 @@ synapse_admin:
   # -- (map) Konfiguration des Image vom Modul
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse-admin
-    tag: 0.8.7-jammy-production
+    tag: 0.9.1-jammy-production
     pullPolicy: IfNotPresent
 
   ## Ressourcen Konfiguration für Synapse-Admin Server.
