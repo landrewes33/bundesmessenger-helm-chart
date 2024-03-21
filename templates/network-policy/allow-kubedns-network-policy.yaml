@@ -19,5 +19,5 @@ spec:
             - key: k8s-app
               operator: In
               values:
-                - kube-dns
+                - {{ .Values.networkpolicies.dnsLabel }}
 {{- end }}
