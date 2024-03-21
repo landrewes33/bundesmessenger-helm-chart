@@ -2149,6 +2149,8 @@ networkpolicies:
   # - "192.168.10.0/24:8765"
   # - "10.10.0.0/16:5000"
   fwProxyList: []
+  # -- (string) Label zur Identifikation der DNS-Pods der Infrastruktur.
+  dnsLabel: "kube-dns"
   # -- (string) Hierbei handelt es sich um den Namespace indem ein Ingress Controller gehostet wird.
   # Aktuell wird nur eine Architektur mit einem L7 Ingress Controller unterstützt.
   # Absolut notwendig für die Network-Policies
