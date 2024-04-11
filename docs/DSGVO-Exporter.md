@@ -4,6 +4,9 @@ Um auf Nachfragen von Nutzern Daten DSGVO-konform zu exportieren und diese dem
 Nutzer zur Verfügung zu stellen, wird der `dsgvo-exporter-job` als Cronjob
 zur Verfügung gestellt.
 
+Die benötigten Komponenten müssen initial in der `values.yaml` aktiviert werden:
+`additionalConfig.dsgvoExport.enabled: true`
+
 Dieser kann über 2 Wege ausgelöst werden:
 
   1. ~~im Synapse-Admin (muss noch inkludiert werden ):

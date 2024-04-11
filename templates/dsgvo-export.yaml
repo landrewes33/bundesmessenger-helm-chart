@@ -1,3 +1,4 @@
+{{- if .Values.additionalConfig.dsgvoExport.enabled -}}
 {{- if semverCompare ">=1.21.0" .Capabilities.KubeVersion.Version -}}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "dsgvo-exporter") -}}
 
@@ -96,3 +97,4 @@ spec:
                 claimName: dsgvo-export
           restartPolicy: Never
 {{- end -}}
+{{- end }}

@@ -2058,6 +2058,11 @@ webclient:
 
 additionalConfig:
 
+  dsgvoExport:
+    # -- (bool) Fügt Volume und suspended Cronjob hinzu um Benutzer zu exportieren.
+    # Weiteres siehe ./docs/DSGVO-Exporter.md
+    enabled: false
+
   locationSharing:
     # -- (bool) Aktivierung und Konfiguration von Standort teilen (location sharing) in den Clients
     # Führt zur Konfiguration der /.well-known/client und /_matrix/cconfig/style.json
