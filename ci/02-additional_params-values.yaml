@@ -71,3 +71,7 @@ demomode:
 
 mas:
   enabled: true
+
+additionalConfig:
+  dsgvoExport:
+    enabled: true
