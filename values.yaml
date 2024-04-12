@@ -2013,7 +2013,7 @@ webclient:
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.15.0-jammy-production
+    tag: 2.16.0-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
