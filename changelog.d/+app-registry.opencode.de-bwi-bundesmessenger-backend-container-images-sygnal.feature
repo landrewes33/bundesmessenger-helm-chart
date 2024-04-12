@@ -1,1 +1,1 @@
-Image `registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal` auf Version `0.14.0` aktualisiert.
+Image `registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal` auf Version `0.14.1` aktualisiert.
