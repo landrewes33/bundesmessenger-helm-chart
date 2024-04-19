@@ -530,7 +530,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L207">config.logLevel</a></div>
       </td>
       <td>string</td>
-      <td>Das Loglevel für Synapse und alle `loggers` Module. Mit Ausnahme von `synapse.storage.SQL`, welches aus Sicherheitsgründen zusätzlich geändert werden muss. Dokumentation: https://matrix-org.github.io/synapse/latest/structured_logging.html</td>
+      <td>Das Loglevel für Synapse und alle `loggers` Module. Mit Ausnahme von `synapse.storage.SQL`, welches aus Sicherheitsgründen zusätzlich geändert werden muss. Dokumentation: https://element-hq.github.io/synapse/latest/structured_logging.html</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 "INFO"
@@ -556,7 +556,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L218">config.extraLoggers</a></div>
       </td>
       <td>object</td>
-      <td>Geben Sie hier zusätzliche Logger-Konfigurationen an. Achtung: Wenn `synapse.storage.SQL`auf `level: DEBUG` erhöht wird, werden alle SQL-Abfragen protokolliert. Diese enthalten sensible Informationen wie z.B. Zugriffstoken. Ref: https://matrix-org.github.io/synapse/latest/structured_logging.html</td>
+      <td>Geben Sie hier zusätzliche Logger-Konfigurationen an. Achtung: Wenn `synapse.storage.SQL`auf `level: DEBUG` erhöht wird, werden alle SQL-Abfragen protokolliert. Diese enthalten sensible Informationen wie z.B. Zugriffstoken. Ref: https://element-hq.github.io/synapse/latest/structured_logging.html</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 {
@@ -681,7 +681,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L268">extraConfig</a></div>
       </td>
       <td>object</td>
-      <td>Beliebige weitere Synapse-Konfiguration Vorkonfiguriert nach Best Practise BWI GmbH: Ref: https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html</td>
+      <td>Beliebige weitere Synapse-Konfiguration Vorkonfiguriert nach Best Practise BWI GmbH: Ref: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 {
@@ -1246,7 +1246,7 @@ false
         <div style="max-width: 150px;"><a href="../values.yaml#L366">extraConfig.stats.enabled</a></div>
       </td>
       <td>bool</td>
-      <td>Schalte Nutzer- und Raumstatistiken ein, eingeschaltet Beachten Sie, dass das Deaktivieren dazu führen kann, dass bestimmte Funktionen (z. B. das Raumverzeichnis) nicht korrekt funktionieren. Details: https://matrix-org.github.io/synapse/latest/room_and_user_statistics.html</td>
+      <td>Schalte Nutzer- und Raumstatistiken ein, eingeschaltet Beachten Sie, dass das Deaktivieren dazu führen kann, dass bestimmte Funktionen (z. B. das Raumverzeichnis) nicht korrekt funktionieren. Details: https://element-hq.github.io/synapse/latest/room_and_user_statistics.html</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 true
@@ -1324,7 +1324,7 @@ true
         <div style="max-width: 150px;"><a href="../values.yaml#L395">extraSecrets</a></div>
       </td>
       <td>map</td>
-      <td>Geben Sie hier eine beliebige - geheime - Synapse-Konfiguration an; Diese Werte werden in Secrets anstelle von Configmaps gespeichert Ref: https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html Beispiel:  password_config:    pepper: ""</td>
+      <td>Geben Sie hier eine beliebige - geheime - Synapse-Konfiguration an; Diese Werte werden in Secrets anstelle von Configmaps gespeichert Ref: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html Beispiel:  password_config:    pepper: ""</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 {}
@@ -1389,7 +1389,7 @@ wird nachfolgend einzeln aufgeschlüsselt
         <div style="max-width: 150px;"><a href="../values.yaml#L432">synapse.extraEnv</a></div>
       </td>
       <td>list</td>
-      <td>Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind. Dies ist unter anderem für die Nutzung eines ausgehenden Proxies (https://matrix-org.github.io/synapse/latest/setup/forward_proxy.html) notwendig. Achtung: U.U. sind die gleichen Einstellungen zusätzlich unter "workers.default" bzw. für den Sygnal selbst zu konfigurieren. Der Sygnal muss in der "no_proxy" Ausnahme enthalten sein, da Synapse ihn sonst versucht via Proxy zu erreichen. Für die BuM Apps ist dies "push-local". Beispiel:  - name: LD_PRELOAD    value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2  - name: SYNAPSE_CACHE_FACTOR    value: "2"  - name: http_proxy    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"  - name: https_proxy    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"  - name: no_proxy    value: "*.cluster.local,push-local"</td>
+      <td>Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind. Dies ist unter anderem für die Nutzung eines ausgehenden Proxies (https://element-hq.github.io/synapse/latest/setup/forward_proxy.html) notwendig. Achtung: U.U. sind die gleichen Einstellungen zusätzlich unter "workers.default" bzw. für den Sygnal selbst zu konfigurieren. Der Sygnal muss in der "no_proxy" Ausnahme enthalten sein, da Synapse ihn sonst versucht via Proxy zu erreichen. Für die BuM Apps ist dies "push-local". Beispiel:  - name: LD_PRELOAD    value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2  - name: SYNAPSE_CACHE_FACTOR    value: "2"  - name: http_proxy    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"  - name: https_proxy    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"  - name: no_proxy    value: "*.cluster.local,push-local"</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 []
@@ -1658,7 +1658,7 @@ wird nachfolgend einzeln aufgeschlüsselt
         <div style="max-width: 150px;"><a href="../values.yaml#L575">workers.default.replicaCount</a></div>
       </td>
       <td>int</td>
-      <td>DEFAULT Die Anzahl der Worker-Replikate. Beachten Sie, dass einige Worker eine besondere Behandlung erfordern. Siehe dazu die Dokumentation: https://matrix-org.github.io/synapse/latest/workers.html</td>
+      <td>DEFAULT Die Anzahl der Worker-Replikate. Beachten Sie, dass einige Worker eine besondere Behandlung erfordern. Siehe dazu die Dokumentation: https://element-hq.github.io/synapse/latest/workers.html</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 1
@@ -2081,7 +2081,7 @@ werden in der values.yaml gesetzt und können dort eingesehen werden
         <div style="max-width: 150px;"><a href="../values.yaml#L842">workers.generic_worker.autoscaling.enabled</a></div>
       </td>
       <td>bool</td>
-      <td>schalte das HPA für die Container ein. Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden. Hinweis: Kann für alle spezifischen Worker benutzt werden. Eine Ausnahme besteht für Stream Writer Worker mit "listeners: [replication]". https://matrix-org.github.io/synapse/latest/workers.html#stream-writers Auf Grund der Synapse und HPA Architektur ist dies nicht möglich. Wenn diese Worker genutzt werden, wird empfohlen die Anzahl der worker manuell via "replicaCount" zu konfigurieren.</td>
+      <td>schalte das HPA für die Container ein. Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden. Hinweis: Kann für alle spezifischen Worker benutzt werden. Eine Ausnahme besteht für Stream Writer Worker mit "listeners: [replication]". https://element-hq.github.io/synapse/latest/workers.html#stream-writers Auf Grund der Synapse und HPA Architektur ist dies nicht möglich. Wenn diese Worker genutzt werden, wird empfohlen die Anzahl der worker manuell via "replicaCount" zu konfigurieren.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 false
@@ -3535,7 +3535,7 @@ WIRD NICHT EMPFOHLEN!!
         <div style="max-width: 150px;"><a href="../values.yaml#L1369">postgresql.extraArgs</a></div>
       </td>
       <td>list</td>
-      <td>Zusätzliche Argumente für die Datenbankverbindung ref: https://matrix-org.github.io/synapse/latest/postgres.html#synapse-config</td>
+      <td>Zusätzliche Argumente für die Datenbankverbindung ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 {}
@@ -3635,7 +3635,7 @@ WIRD NICHT EMPFOHLEN!!
         <div style="max-width: 150px;"><a href="../values.yaml#L1397">externalPostgresql.extraArgs</a></div>
       </td>
       <td>list</td>
-      <td>Zusätzliche Argumente für die Datenbankverbindung ref: https://matrix-org.github.io/synapse/latest/postgres.html#synapse-config</td>
+      <td>Zusätzliche Argumente für die Datenbankverbindung ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
 {}

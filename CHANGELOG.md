@@ -172,16 +172,16 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
   auf Version `1.28.2` aktualisiert.
   (!de-bwi-bundesmessenger-backend-container-images-kubectl)
 - Konfiguration
-  [`forget_rooms_on_leave`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#forget_rooms_on_leave)
+  [`forget_rooms_on_leave`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#forget_rooms_on_leave)
   für [Synapse
   1.84.0](https://github.com/matrix-org/synapse/releases/tag/v1.84.0)
   und
-  [`forgotten_room_retention_period`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#forgotten_room_retention_period)
+  [`forgotten_room_retention_period`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#forgotten_room_retention_period)
   für [Synapse
   1.93.0](https://github.com/matrix-org/synapse/releases/tag/v1.93.0)
   hinzugefügt. (!136)
 - Konfiguration
-  [`prevent_media_downloads_from`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#prevent_media_downloads_from)
+  [`prevent_media_downloads_from`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#prevent_media_downloads_from)
   für [Synapse
   1.84.0](https://github.com/matrix-org/synapse/releases/tag/v1.84.0)
   hinzugefügt. (!137)
@@ -286,9 +286,9 @@ Sie befinden sich weiterhin in Arbeit und Review.
 - Hinzufügen von CORS Headern als default in die Ingress-Konfiguration. (!135)
 - Definition von Standardwerten für den Upload von Medien in Synapse
   ([`max_upload_size:
-  50M`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#max_upload_size)
+  50M`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#max_upload_size)
   und [`max_avatar_size:
-  5M`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#max_avatar_size)).
+  5M`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#max_avatar_size)).
   (!140)
 - Erweiterung der `ScanFileTypes` des C-ICAP-Services für PDF und weiteren
   Media-Support. (!141)
@@ -358,7 +358,7 @@ Sie befinden sich weiterhin in Arbeit und Review.
 
 - Konfiguration `generic` für Worker entfernt. Alle Worker sind [Synapse
   Generic
-  Worker](https://matrix-org.github.io/synapse/latest/workers.html#synapseappgeneric_worker).
+  Worker](https://element-hq.github.io/synapse/latest/workers.html#synapseappgeneric_worker).
   (!121)
 - Hinzufügen von SonarQube zur CI-Pipeline. (!138)
 - Release Script zur Verbesserung des Release-Prozesses hinzugefügt. (!147,
