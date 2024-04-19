@@ -22,7 +22,7 @@ description:
       Dieses Repository stellt ein [Helm Chart](https://helm.sh/) zur
       automatisierten Bereitstellung eines Backends bzw. Infrastruktur für die
       Nutzung mit dem BundesMessenger Client zur Verfügung. Hauptbestandteil ist
-      der [Synapse Server](https://github.com/matrix-org/synapse), Dieser ist
+      der [Synapse Server](https://github.com/element-hq/synapse), Dieser ist
       eine Matrix homeserver Implementierung in Python auf Basis des [Matrix
       Protokolls](https://matrix.org/).
     shortDescription: BundesMessenger Backend

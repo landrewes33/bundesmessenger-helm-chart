@@ -7,7 +7,7 @@
 Nach der Installation sind in der Umgebung keine Benutzer vorhanden. Mindestens
 der erste Benutzer muss per Kommandozeile angelegt werden. Weitere Benutzer lassen
 sich im Anschluss auch per
-[Admin API](https://matrix-org.github.io/synapse/latest/admin_api/user_admin_api.html#create-or-modify-account)
+[Admin API](https://element-hq.github.io/synapse/latest/admin_api/user_admin_api.html#create-or-modify-account)
 (z.B. mit `curl`) oder der Administrationsoberfläche
 [Synapse-Admin](https://github.com/Awesome-Technologies/synapse-admin) anlegen.
 

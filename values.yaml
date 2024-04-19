@@ -63,7 +63,7 @@ adminAPIServerName: ""
 
 ## Monitoring mit Prometheus
 ## Grafana-Dashboards
-##   Synapse: https://github.com/matrix-org/synapse/blob/develop/contrib/grafana/synapse.json
+##   Synapse: https://github.com/element-hq/synapse/blob/develop/contrib/grafana/synapse.json
 ##   Sygnal: https://github.com/matrix-org/sygnal/blob/main/contrib/grafana/Sygnal.json
 monitoring:
   # -- (bool) Aktivieren des Monitorings für Synapse-Dienste in Prometheus
@@ -185,7 +185,7 @@ signingkey:
 # -- (bool) Schaltet alle internen IP-Adressevergaben auf IPv4-only
 # Wenn `true` sind alle Listener und Anbindungspunkte `0.0.0.0`,
 # wenn `false` sind einige Listener bzw. Anbindungspunkte `::` (IPv6)
-# Derzeit wird nur reine IPv4 (https://github.com/matrix-org/synapse/issues/13107)
+# Derzeit wird nur reine IPv4 (https://github.com/element-hq/synapse/issues/13107)
 # oder Dual-Stack Umgebungen unterstützt, keine reine IPv6 Umgebung.
 # @default -- false
 ipv4Only: true
@@ -193,7 +193,7 @@ ipv4Only: true
 ## Matrix-Konfigurationswerte, die sich auf andere Teile des Charts auswirken.
 ## Jeden Wert, der nicht von diesem Block behandelt wird, sollten Sie stattdessen in
 ## im Abschnitt `extraConfig` unten einstellen.
-## Ref: https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html
+## Ref: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
 ##
 config:
   # -- (string) Die öffentlich zugängliche URL für die Synapse-Instanz
@@ -203,18 +203,18 @@ config:
 
   # -- (string) Das Loglevel für Synapse und alle `loggers` Module.
   # Mit Ausnahme von `synapse.storage.SQL`, welches aus Sicherheitsgründen zusätzlich geändert werden muss.
-  # Dokumentation: https://matrix-org.github.io/synapse/latest/structured_logging.html
+  # Dokumentation: https://element-hq.github.io/synapse/latest/structured_logging.html
   logLevel: INFO
 
   ## Logging
   # use TerseJsonFormatter structured logging
-  # Dokumentation: https://matrix-org.github.io/synapse/latest/structured_logging.html
+  # Dokumentation: https://element-hq.github.io/synapse/latest/structured_logging.html
   useStructuredLogging: false
 
   # -- (object) Geben Sie hier zusätzliche Logger-Konfigurationen an.
   # Achtung: Wenn `synapse.storage.SQL`auf `level: DEBUG` erhöht wird, werden alle SQL-Abfragen protokolliert.
   # Diese enthalten sensible Informationen wie z.B. Zugriffstoken.
-  # Ref: https://matrix-org.github.io/synapse/latest/structured_logging.html
+  # Ref: https://element-hq.github.io/synapse/latest/structured_logging.html
   extraLoggers:
     synapse.storage.SQL:
       level: WARNING
@@ -264,7 +264,7 @@ config:
 
 # -- (object) Beliebige weitere Synapse-Konfiguration
 # Vorkonfiguriert nach Best Practise BWI GmbH:
-# Ref: https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html
+# Ref: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
 extraConfig:
   # old_signing_keys:
   #   "ed25519:id": { key: "base64string", expired_ts: 123456789123 }
@@ -362,7 +362,7 @@ extraConfig:
     # -- (bool) Schalte Nutzer- und Raumstatistiken ein, eingeschaltet
     # Beachten Sie, dass das Deaktivieren dazu führen kann, dass bestimmte Funktionen
     # (z. B. das Raumverzeichnis) nicht korrekt funktionieren.
-    # Details: https://matrix-org.github.io/synapse/latest/room_and_user_statistics.html
+    # Details: https://element-hq.github.io/synapse/latest/room_and_user_statistics.html
     enabled: true
   # -- (bool) Raumsuche, eingeschaltet
   enable_room_list_search: true
@@ -388,7 +388,7 @@ extraConfig:
 
 # -- (map) Geben Sie hier eine beliebige - geheime - Synapse-Konfiguration an;
 # Diese Werte werden in Secrets anstelle von Configmaps gespeichert
-# Ref: https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html
+# Ref: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
 # Beispiel:
 #  password_config:
 #    pepper: ""
@@ -413,7 +413,7 @@ synapse:
 
   # -- (list) Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind.
   # Dies ist unter anderem für die Nutzung eines ausgehenden Proxies
-  # (https://matrix-org.github.io/synapse/latest/setup/forward_proxy.html) notwendig.
+  # (https://element-hq.github.io/synapse/latest/setup/forward_proxy.html) notwendig.
   # Achtung: U.U. sind die gleichen Einstellungen zusätzlich unter "workers.default"
   # bzw. für den Sygnal selbst zu konfigurieren.
   # Der Sygnal muss in der "no_proxy" Ausnahme enthalten sein, da Synapse
@@ -562,7 +562,7 @@ synapse:
 ## die nützlich sind für die Handhabung von Hochlast-Einsätzen bzw. Hochverfügbarkeitseinsätzen.
 ##
 ## Weitere Informationen finden Sie unter
-## https://matrix-org.github.io/synapse/latest/workers.html
+## https://element-hq.github.io/synapse/latest/workers.html
 ##
 workers:
 
@@ -571,7 +571,7 @@ workers:
   default:
     # -- (int) DEFAULT Die Anzahl der Worker-Replikate.
     # Beachten Sie, dass einige Worker eine besondere Behandlung erfordern.
-    # Siehe dazu die Dokumentation: https://matrix-org.github.io/synapse/latest/workers.html
+    # Siehe dazu die Dokumentation: https://element-hq.github.io/synapse/latest/workers.html
     replicaCount: 1
 
     strategy:
@@ -777,7 +777,7 @@ workers:
       - "/_matrix/client/(r0|v3|unstable)/user_directory/search$"
 
       ## Worker event streams, deaktiviert!
-      ## See https://matrix-org.github.io/synapse/latest/workers.html#stream-writers
+      ## See https://element-hq.github.io/synapse/latest/workers.html#stream-writers
       ## auskommentiert, da nicht auf generic worker sondern zum master
 
       ## The typing event stream
@@ -836,7 +836,7 @@ workers:
       # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden.
       # Hinweis: Kann für alle spezifischen Worker benutzt werden.
       # Eine Ausnahme besteht für Stream Writer Worker mit "listeners: [replication]".
-      # https://matrix-org.github.io/synapse/latest/workers.html#stream-writers
+      # https://element-hq.github.io/synapse/latest/workers.html#stream-writers
       # Auf Grund der Synapse und HPA Architektur ist dies nicht möglich. Wenn diese Worker genutzt werden,
       # wird empfohlen die Anzahl der worker manuell via "replicaCount" zu konfigurieren.
       enabled: false
@@ -852,7 +852,7 @@ workers:
   ## Um den allgemeinen Worker in spezifische Belange aufzuteilen - zum Beispiel den Empfang von Föderationstransaktionen;
   ## Hinweis: Diese Worker sollten eingehenden Datenverkehr basierend auf der Quell-IP routen lassen, was
   ## noch als TODO offen ist.
-  ## https://matrix-org.github.io/synapse/latest/workers.html#load-balancing
+  ## https://element-hq.github.io/synapse/latest/workers.html#load-balancing
 
   federation_reader:
     # -- (bool) Aktiviere spez. Worker für Föderationsanfragen
@@ -1365,7 +1365,7 @@ postgresql:
         memory: 256Mi
 
   # -- (list) Zusätzliche Argumente für die Datenbankverbindung
-  # ref: https://matrix-org.github.io/synapse/latest/postgres.html#synapse-config
+  # ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
   extraArgs: {}
 
 # -- (map) Ein extern konfigurierter Postgres-Server, der für die Datenbank von Synapse verwendet wird.
@@ -1393,7 +1393,7 @@ externalPostgresql:
   # sslmode: prefer
 
   # -- (list) Zusätzliche Argumente für die Datenbankverbindung
-  # ref: https://matrix-org.github.io/synapse/latest/postgres.html#synapse-config
+  # ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
   extraArgs: {}
 
 
