@@ -11,6 +11,19 @@ spec:
     - Egress
   egress:
     - to:
+    {{- if .Values.networkpolicies.egressIpBlock }}
+      {{- with .Values.networkpolicies.egressIpBlock }}
+      - ipBlock:
+        {{ if contains ":" . }}
+        cidr: {{ (split ":" .) | first }}
+      ports:
+      - protocol: TCP
+        port: {{ (split ":" .) | last }}
+        {{- else }}
+        cidr: .
+        {{- end }}
+      {{- end }}
+    {{- else }}
       - namespaceSelector:
           matchLabels:
             kubernetes.io/metadata.name: kube-system
@@ -20,4 +33,5 @@ spec:
               operator: In
               values:
                 - {{ .Values.networkpolicies.dnsLabel }}
+      {{- end }}
 {{- end }}
