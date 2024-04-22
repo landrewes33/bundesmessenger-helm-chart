@@ -108,6 +108,11 @@ signingkey:
   ##
   ## Sollte nach dem initialen Durchlauf deaktiviert werden, um Upgrades zu beschleunigen.
 
+  serviceAccount:
+    create: true
+    # -- (string) Name des ServiceAccounts für den signingkey-job.
+    # name: non-default-signingkeyjob-name
+
   job:
     # -- (bool) Mit dem Job wird zur Installation ein Signierschlüssel erzeugt.
     # Nach der Erstellung des Keys oder bei manueller Einbindung eines Keys (`extraConfig.old_signing_keys`)
@@ -2063,6 +2068,11 @@ additionalConfig:
     # Weiteres siehe ./docs/DSGVO-Exporter.md
     enabled: false
 
+    serviceAccount:
+      create: true
+      # -- (string) Name des ServiceAccounts für den dsgo-exporter-job.
+      # name: non-default-dsgvo-exporter-name
+
   locationSharing:
     # -- (bool) Aktivierung und Konfiguration von Standort teilen (location sharing) in den Clients
     # Führt zur Konfiguration der /.well-known/client und /_matrix/cconfig/style.json
@@ -2221,6 +2231,11 @@ demomode:
   # -- (boolean) Aktivieren des Demoworkflows für Kubernetes ab v1.21.0
   # Achtung: Der Demomodus setzt per CronJob die Datenbank regelmäßig zurück.
   enabled: false
+
+  serviceAccount:
+    create: true
+  # -- (string) Name des ServiceAccounts für den demomode-job.
+  # name: non-default-demomode-name
 
   # -- (string) Auswahl des Demomodus
   # Folgende Möglichkeiten:
