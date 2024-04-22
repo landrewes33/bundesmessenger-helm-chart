@@ -1,1 +1,0 @@
-Hinzufügen der Option `networkpolicies.egressIpBlock` um mit IP-Ranges DNS und Kube-APIs zu arbeiten, statt mit Pod-Labels im Egress.

@@ -1,1 +1,0 @@
-Ermöglicht das Aktivieren und Deaktivieren der Komponenten für den DSGVO Exporter (`additionalConfig.dsgvoExport.enabled`). Aktuell ist im Standard der Exporter deaktiviert. Das aus früheren Deployments verbleibende PVC im Status "pending" kann manuell gelöscht werden.
