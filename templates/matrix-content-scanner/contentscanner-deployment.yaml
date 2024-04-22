@@ -53,6 +53,8 @@ spec:
             port: contentscanner
         volumeMounts:
           - name: scannerconfig
+            mountPath: /data
+          - name: scannerconfig
             mountPath: /config
           - name: temp
             mountPath: /tmp
