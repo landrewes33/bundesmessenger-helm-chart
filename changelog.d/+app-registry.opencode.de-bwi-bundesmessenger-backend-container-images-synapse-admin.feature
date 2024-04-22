@@ -1,1 +1,0 @@
-Image `registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse-admin` auf Version `0.9.1` aktualisiert.
