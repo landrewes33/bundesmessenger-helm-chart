@@ -1,0 +1,1 @@
+Angelehnt an [!251 in v1.6.0](#bundesmessenger-helm-chart-160-2024-02-05) werden weitere ServiceAccounts konfigurierbar gemacht.

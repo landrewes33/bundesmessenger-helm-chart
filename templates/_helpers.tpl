@@ -76,6 +76,42 @@ Get the correct image tag name
 {{- end -}}
 
 {{/*
+Create the name of the service account to use in signingkey job (pre-install)
+*/}}
+{{- define "matrix-synapse.signingkeyServiceAccountName" -}}
+{{- if .Values.signingkey.serviceAccount.create -}}
+    {{ default (include "matrix-synapse.externalname" (dict "global" . "external" "signingkey-job")) .Values.signingkey.serviceAccount.name }}
+{{- else -}}
+    {{/* Default name is ".Release.Name"-"signingkey-job" */}}
+    {{ default (include "matrix-synapse.externalname" (dict "global" . "external" "signingkey-job")) .Values.signingkey.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the name of the service account to use in demomode job (if enabled)
+*/}}
+{{- define "matrix-synapse.demomodeServiceAccountName" -}}
+{{- if .Values.demomode.serviceAccount.create -}}
+    {{ default (include "matrix-synapse.externalname" (dict "global" . "external" "demomode")) .Values.demomode.serviceAccount.name }}
+{{- else -}}
+    {{/* Default name is ".Release.Name"-"demomode" */}}
+    {{ default (include "matrix-synapse.externalname" (dict "global" . "external" "demomode")) .Values.demomode.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create the name of the service account to use in dsgvo-exporter job (if enabled)
+*/}}
+{{- define "matrix-synapse.dsgvoExportServiceAccountName" -}}
+{{- if .Values.additionalConfig.dsgvoExport.serviceAccount.create -}}
+    {{ default (include "matrix-synapse.externalname" (dict "global" . "external" "dsgvo-exporter")) .Values.additionalConfig.dsgvoExport.serviceAccount.name }}
+{{- else -}}
+    {{/* Default name is ".Release.Name"-"dsgvo-exporter" */}}
+    {{ default (include "matrix-synapse.externalname" (dict "global" . "external" "dsgvo-exporter")) .Values.additionalConfig.dsgvoExport.serviceAccount.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Common labels
 */}}
 {{- define "matrix-synapse.labels" -}}
@@ -110,18 +146,12 @@ matrix-synapse: monitoring
 Pull secrets
 */}}
 {{- define "matrix-synapse.imagePullSecrets" -}}
-{{- if or .Values.image.pullSecrets .Values.wellknown.image.pullSecrets .Values.volumePermissions.pullSecrets }}
+  {{- if or .Values.image.pullSecrets .Values.wellknown.image.pullSecrets .Values.volumePermissions.pullSecrets }}
 imagePullSecrets:
-{{- with .Values.image.pullSecrets }}
-  {{- . | toYaml | nindent 2 }}
-{{- end }}
-{{- with .Values.wellknown.image.pullSecrets }}
-  {{- . | toYaml | nindent 2 }}
-{{- end }}
-{{- with .Values.volumePermissions.image.pullSecrets }}
-  {{- . | toYaml | nindent 2 }}
-{{- end }}
-{{- end -}}
+    {{- with uniq (concat ( .Values.image.pullSecrets .Values.wellknown.image.pullSecrets .Values.volumePermissions.image.pullSecrets )) }}
+      {{- . | toYaml | nindent 2 }}
+    {{- end }}
+  {{- end -}}
 {{- end -}}
 
 {{/*
