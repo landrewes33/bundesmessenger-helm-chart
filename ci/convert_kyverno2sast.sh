@@ -35,7 +35,7 @@ severities='[.] |
         "severity_" + (.policy // "Unknown") + "=" + .severity
     ) | join(" ") | sub("-","_")
 '
-export $(yq eval-all "${severities}" rl-kyverno/policies/*.yaml)
+export $(yq eval-all "${severities}" richtlinien-umsetzung-kyverno/policies/*.yaml)
 
 
 # build SAST report

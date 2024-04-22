@@ -3,6 +3,8 @@
 # Script to help creating a release
 # skopeo (not more) and yq are required in PATH.
 
+set -e
+
 scriptDir=$(dirname $(readlink -f "${BASH_SOURCE:-$0}"))
 chart_file=$scriptDir/../Chart.yaml
 

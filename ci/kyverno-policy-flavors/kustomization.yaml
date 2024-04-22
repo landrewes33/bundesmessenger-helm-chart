@@ -1,5 +1,5 @@
 resources:
-- ../../rl-kyverno/policies
+- ../../richtlinien-umsetzung-kyverno/policies
 
 patches:
 - path: disable-require-unique-uid-per-workload.yaml

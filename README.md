@@ -23,7 +23,7 @@ zum BundesMessenger. Allgemeine Informationen zum Projekt befinden sich im
 Dieses Repository stellt ein [Helm Chart](https://helm.sh/) zur automatisierten
 Bereitstellung eines Backends bzw. Infrastruktur für die Nutzung mit dem
 BundesMessenger Client zur Verfügung. Hauptbestandteil ist der
-[Synapse](https://github.com/matrix-org/synapse) Server, Dieser ist eine
+[Synapse](https://github.com/element-hq/synapse) Server, Dieser ist eine
 Matrix homeserver Implementierung in Python auf Basis des
 [Matrix Protokolls](https://matrix.org).
 
@@ -118,7 +118,7 @@ dem sog. "homeserver" anzumelden.
 
 ## Delegation
 
-Die [Delegation](https://matrix-org.github.io/synapse/latest/delegate.html#delegation-of-incoming-federation-traffic)
+Die [Delegation](https://element-hq.github.io/synapse/latest/delegate.html#delegation-of-incoming-federation-traffic)
 ist insbesondere im Kontext der Kommunikation in der Föderation wichtig.
 Im Normalfall würde man erwarten, dass ein Benutzer `@benutzer:example.com`
 auch auf dem Server `example.com` erreichbar ist. Das muss jedoch nicht
@@ -131,7 +131,7 @@ oder Intranet auf einem anderen DNS-Namen (Domain) erreichbar ist
 
 Es gibt zwei Arten der Delegation:
 
-1. [.well-known Seite](https://matrix-org.github.io/synapse/latest/delegate.html#well-known-delegation)
+1. [.well-known Seite](https://element-hq.github.io/synapse/latest/delegate.html#well-known-delegation)
 
     Die Domain, die einen Matrix-Server delegiert (`example.com`), muss unter
     der URL `https://example.com/.well-known/matrix/server` eine JSON-Datei
@@ -144,7 +144,7 @@ Es gibt zwei Arten der Delegation:
     }
     ```
 
-1. [DNS SRV-Eintrag](https://matrix-org.github.io/synapse/latest/delegate.html#srv-dns-record-delegation)
+1. [DNS SRV-Eintrag](https://element-hq.github.io/synapse/latest/delegate.html#srv-dns-record-delegation)
 
     Mit Hilfe eines SRV-Eintrages wird auf den Matrix-Server verwiesen.
 
@@ -160,8 +160,8 @@ Es gibt zwei Arten der Delegation:
 Für mehr Informationen nutzen Sie die öffentlich erreichbaren Dokumentationen:
 
 - [Prozess zur Ermittlung des Kommunikationspartners / Discovery](https://spec.matrix.org/latest/server-server-api/#resolving-server-names)
-- [Delegation](https://matrix-org.github.io/synapse/latest/delegate.html)
-- [Federation](https://matrix-org.github.io/synapse/latest/federate.html)
+- [Delegation](https://element-hq.github.io/synapse/latest/delegate.html)
+- [Federation](https://element-hq.github.io/synapse/latest/federate.html)
 
 # Installation
 
@@ -250,7 +250,7 @@ Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
   Beispielen `bundesmessenger`. Alternativ die Installation des Helm Charts aus
   dem Dateisystem (z.B. `./bundesmessenger/`) oder der OpenCoDE OCI-Registry.
 - ([Sub-)Domains mit dazugehörigen TLS-Zertifikaten](./docs/requirements_poc.md#hostnamendns)
-  ([Sicherheitshinweis](https://github.com/matrix-org/synapse/blob/develop/README.rst#security-note))
+  ([Sicherheitshinweis](https://github.com/element-hq/synapse/blob/develop/README.rst#security-note))
   - Eine (Sub-)Domain für den Applikationsserver z.B.: `matrix.example.com`
   (Parameter `serverName` bzw. `publicServerName`)
   - Eine (Sub-)Domain für den WebClient z.B. `app.example.com`, besser `app.example.net`

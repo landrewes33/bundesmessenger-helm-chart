@@ -7,6 +7,64 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.7.0 (2024-04-22)
+
+### ✨ Features
+
+- Hinzufügen eines DNS-Label-Schalters für Network-Policies. (!332)
+- Ermöglicht das Aktivieren und Deaktivieren der Komponenten für den DSGVO
+  Exporter (`additionalConfig.dsgvoExport.enabled`). Aktuell ist im Standard
+  der Exporter deaktiviert. Das aus früheren Deployments verbleibende PVC im
+  Status "pending" kann manuell gelöscht werden. (!344)
+- Angelehnt an [!251 in v1.6.0](#bundesmessenger-helm-chart-160-2024-02-05)
+  werden weitere ServiceAccounts konfigurierbar gemacht. (!346)
+- Hinzufügen der Option `networkpolicies.egressIpBlock` um mit IP-Ranges DNS
+  und Kube-APIs zu arbeiten, statt mit Pod-Labels im Egress. (!356)
+- Image `bwi/bundesmessenger/backend/container-images/synapse` auf Version
+  `1.103.0` aktualisiert.
+- Image `ghcr.io/matrix-org/matrix-authentication-service` auf Version `0.8`
+  aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web`
+  auf Version `2.16.0` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl`
+  auf Version `1.29.3` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal`
+  auf Version `0.14.1` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse-admin`
+  auf Version `0.9.1` aktualisiert.
+
+### 📚 Dokumentation
+
+- Aktualisierung der Links auf das umgezogene [Synapse
+  Projekt](https://github.com/element-hq/synapse) auf Github. (!275)
+
+### 📝 Weitere Änderungen
+
+- Das Monitoring bzw. die PodMonitore überarbeitet und Monitoring für
+  Matrix-Authentication-Service hinzugefügt. (!310)
+- Anpassung der Einbindung der Konfigurationsdateien für die Refaktorisierung
+  des Matrix-Content-Scanner-Containers. (!318)
+- Umstellung auf das neue Projekt [Richtlinien-Umsetzung
+  Kyverno](https://gitlab.opencode.de/ig-bvc/policy-entwicklung/richtlinien-umsetzung-kyverno)
+  der [IG BvC](https://wikijs.opencode.de/de/Organisationen/IG_BvC). (!326)
+- Management der Updates von `kindest/node` mit Renovate. (!336)
+- Verschieben des DSGVO-Jobs in einen eigenen Unterordner für bessere
+  Übersicht. (!353)
+- `alpine/helm` in der CI-Pipeline auf Version `3.14.4` aktualisiert.
+- `docker.io/aquasec/trivy` in der CI-Pipeline auf Version `0.50.1`
+  aktualisiert.
+- `docker` in der CI-Pipeline auf Version `26` aktualisiert.
+- `jnorwood/helm-docs` in der CI-Pipeline auf Version `v1.13.1` aktualisiert.
+- `kubernetes-sigs/kind` in der CI-Pipeline auf Version `v0.22.0` aktualisiert.
+- `kubernetes-sigs/kustomize` in der CI-Pipeline auf Version `5.4.1`
+  aktualisiert.
+- `registry.gitlab.com/gitlab-org/release-cli` in der CI-Pipeline auf Version
+  `v0.17.0` aktualisiert.
+
 ## BundesMessenger Helm Chart 1.6.1 (2024-02-13)
 
 ### 🐛 Bugfixes
@@ -172,16 +230,16 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
   auf Version `1.28.2` aktualisiert.
   (!de-bwi-bundesmessenger-backend-container-images-kubectl)
 - Konfiguration
-  [`forget_rooms_on_leave`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#forget_rooms_on_leave)
+  [`forget_rooms_on_leave`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#forget_rooms_on_leave)
   für [Synapse
   1.84.0](https://github.com/matrix-org/synapse/releases/tag/v1.84.0)
   und
-  [`forgotten_room_retention_period`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#forgotten_room_retention_period)
+  [`forgotten_room_retention_period`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#forgotten_room_retention_period)
   für [Synapse
   1.93.0](https://github.com/matrix-org/synapse/releases/tag/v1.93.0)
   hinzugefügt. (!136)
 - Konfiguration
-  [`prevent_media_downloads_from`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#prevent_media_downloads_from)
+  [`prevent_media_downloads_from`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#prevent_media_downloads_from)
   für [Synapse
   1.84.0](https://github.com/matrix-org/synapse/releases/tag/v1.84.0)
   hinzugefügt. (!137)
@@ -286,9 +344,9 @@ Sie befinden sich weiterhin in Arbeit und Review.
 - Hinzufügen von CORS Headern als default in die Ingress-Konfiguration. (!135)
 - Definition von Standardwerten für den Upload von Medien in Synapse
   ([`max_upload_size:
-  50M`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#max_upload_size)
+  50M`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#max_upload_size)
   und [`max_avatar_size:
-  5M`](https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html#max_avatar_size)).
+  5M`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#max_avatar_size)).
   (!140)
 - Erweiterung der `ScanFileTypes` des C-ICAP-Services für PDF und weiteren
   Media-Support. (!141)
@@ -358,7 +416,7 @@ Sie befinden sich weiterhin in Arbeit und Review.
 
 - Konfiguration `generic` für Worker entfernt. Alle Worker sind [Synapse
   Generic
-  Worker](https://matrix-org.github.io/synapse/latest/workers.html#synapseappgeneric_worker).
+  Worker](https://element-hq.github.io/synapse/latest/workers.html#synapseappgeneric_worker).
   (!121)
 - Hinzufügen von SonarQube zur CI-Pipeline. (!138)
 - Release Script zur Verbesserung des Release-Prozesses hinzugefügt. (!147,

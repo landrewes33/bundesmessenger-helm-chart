@@ -1,10 +1,12 @@
+{{- if .Values.additionalConfig.dsgvoExport.enabled -}}
 {{- if semverCompare ">=1.21.0" .Capabilities.KubeVersion.Version -}}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "dsgvo-exporter") -}}
 
+{{ if .Values.additionalConfig.dsgvoExport.serviceAccount.create }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ $name }}
+  name: {{ include "matrix-synapse.dsgvoExportServiceAccountName" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
@@ -13,7 +15,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ $name }}
+  name: {{ include "matrix-synapse.dsgvoExportServiceAccountName" . }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 rules:
@@ -34,18 +36,18 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ $name }}
+  name: {{ include "matrix-synapse.dsgvoExportServiceAccountName" . }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 subjects:
 - kind: ServiceAccount
-  name: {{ $name }}
+  name: {{ include "matrix-synapse.dsgvoExportServiceAccountName" . }}
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: {{ $name }}
+  name: {{ include "matrix-synapse.dsgvoExportServiceAccountName" . }}
   apiGroup: rbac.authorization.k8s.io
-
+{{ end }}
 ---
 apiVersion: batch/v1
 kind: CronJob
@@ -66,7 +68,7 @@ spec:
             to-apiserver: allowed
         spec:
         {{- include "matrix-synapse.imagePullSecrets" . | nindent 10 }}
-          serviceAccountName: {{ $name }}
+          serviceAccountName: {{ include "matrix-synapse.dsgvoExportServiceAccountName" . }}
           containers:
             - name: dsgvo-exporter
               image: "{{ .Values.signingkey.job.publishImage.repository }}:{{ .Values.signingkey.job.publishImage.tag | default "latest" }}"
@@ -96,3 +98,4 @@ spec:
                 claimName: dsgvo-export
           restartPolicy: Never
 {{- end -}}
+{{- end }}

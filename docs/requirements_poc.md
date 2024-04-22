@@ -141,7 +141,7 @@ Sicherheitsinfrastruktur freigegeben werden:
 
 Die Installation erfordert, dass Sie eine PostgreSQL-Datenbank mit einem
 `locale` von `C` und `encoding` `UTF8` eingerichtet haben.
-Siehe [Synapse Dokumentation](https://matrix-org.github.io/synapse/latest/postgres.html#set-up-database)
+Siehe [Synapse Dokumentation](https://element-hq.github.io/synapse/latest/postgres.html#set-up-database)
 für weitere Details.
 
 Wenn Sie diese bereitgestellt haben, notieren Sie sich bitte den

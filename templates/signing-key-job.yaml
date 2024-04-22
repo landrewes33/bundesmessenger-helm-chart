@@ -21,11 +21,14 @@ metadata:
   {{- end }}
 data:
 {{ (.Files.Glob "scripts/*.sh").AsConfig | indent 2 }}
+
+{{ if .Values.signingkey.serviceAccount.create }}
+
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ $name }}
+  name: {{ include "matrix-synapse.signingkeyServiceAccountName" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
@@ -39,7 +42,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ $name }}
+  name: {{ include "matrix-synapse.signingkeyServiceAccountName" . }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
@@ -64,7 +67,7 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: {{ $name }}
+  name: {{ include "matrix-synapse.signingkeyServiceAccountName" . }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: signingkey-job
@@ -76,11 +79,12 @@ metadata:
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: {{ $name }}
+  name: {{ include "matrix-synapse.signingkeyServiceAccountName" . }}
 subjects:
   - kind: ServiceAccount
-    name: {{ $name }}
+    name: {{ include "matrix-synapse.signingkeyServiceAccountName" . }}
     namespace: {{ .Release.Namespace }}
+{{ end }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -112,7 +116,7 @@ spec:
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.signingkey.podSecurityContext | nindent 8 }}
-      serviceAccountName: {{ $name }}
+      serviceAccountName: {{ include "matrix-synapse.signingkeyServiceAccountName" . }}
       containers:
         - command:
             - sh
@@ -179,7 +183,7 @@ spec:
               name: matrix-synapse-keys
               readOnly: true
       restartPolicy: Never
-      serviceAccount: {{ $name }}
+      serviceAccount: {{ include "matrix-synapse.signingkeyServiceAccountName" . }}
       volumes:
         - name: scripts
           configMap:
@@ -192,6 +196,7 @@ spec:
   completions: 1
   backoffLimit: 1
 {{- end }}
+
 # Create secret if signing key job is enabled, or if we're running in ArgoCD and we don't have an existing secret
 {{- if or .Values.signingkey.job.enabled (and (not .Values.signingkey.existingSecret) $insideArgoCD) }}
 ---

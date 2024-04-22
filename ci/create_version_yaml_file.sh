@@ -6,6 +6,8 @@
 # Parameters:
 # - $1: version number to set (file: ci/versions/v"version".yaml)
 
+set -e
+
 if [ "$#" -ne 1 ]
 then
   echo "Incorrect number of arguments"

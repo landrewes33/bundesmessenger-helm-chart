@@ -10,7 +10,6 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
-    {{- include "matrix-synapse.monitoringLabels" . | nindent 4 }}
     {{- with .Values.monitoring.labels }}
     {{- . | toYaml | nindent 4 }}
     {{- end }}
@@ -34,12 +33,6 @@ spec:
       targetLabel: index
       regex: .*-(\d+)$
       replacement: ${1}
-    # remove "matrix-" from job label (for sygnal)
-    - action: replace
-      sourceLabels: [job]
-      targetLabel: job
-      regex: ^matrix-(.*)$
-      replacement: ${1}
     # set "instance"
     - action: replace
       replacement: {{ .Release.Namespace }}
@@ -61,7 +54,7 @@ metadata:
     {{- end }}
     app.kubernetes.io/component: {{ $component }}
 spec:
-  # https://github.com/matrix-org/synapse/blob/develop/contrib/prometheus/synapse-v2.rules
+  # https://github.com/element-hq/synapse/blob/develop/contrib/prometheus/synapse-v2.rules
   groups:
   - name: synapse
     rules:
