@@ -2164,6 +2164,12 @@ networkpolicies:
   # - "192.168.10.0/24:8765"
   # - "10.10.0.0/16:5000"
   fwProxyList: []
+  # -- (list) IP-Range(s) der DNS-Resolver bzw. Admin-API; CIDR-Schreibweise!
+  # Angaben mit Port werden als Zielport mit Protokoll TCP übernommen.
+  # Bsp:
+  # - "192.168.2.0/24"
+  # - "10.20.2.0/24:53"
+  egressIpBlock: []
   # -- (string) Label zur Identifikation der DNS-Pods der Infrastruktur.
   dnsLabel: "kube-dns"
   # -- (string) Hierbei handelt es sich um den Namespace indem ein Ingress Controller gehostet wird.
