@@ -7,6 +7,29 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.7.1 (2024-04-25)
+
+### ⚠️ Versionshinweise
+
+- Dieses Release ist ein Security Release für Synapse. Synapse wird auf Version
+  [`v1.105.1`](https://github.com/element-hq/synapse/releases/tag/v1.105.1)
+  aktualisiert.
+  Es wird empfohlen ein Upgrade von einer Synapse Version größer oder gleich
+  `v1.100.0` durchzuführen. D.h. dass vorher ein Upgrade auf die Helm Chart
+  Version `1.7.0` empfohlen wird.
+
+  Betroffen sind Benutzer, die öffentlicher Föderation aktiviert haben.
+  Links zu den CVE-Beschreibungen:
+  [GHSA-3h7q-rfh9-xm4v](https://github.com/element-hq/synapse/security/advisories/GHSA-3h7q-rfh9-xm4v)
+  /
+  [CVE-2024-31208](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2024-31208)
+  (!synapse)
+
+### ✨ Features
+
+- Image `bwi/bundesmessenger/backend/container-images/synapse` auf Version
+  `1.105.1` aktualisiert.
+
 ## BundesMessenger Helm Chart 1.7.0 (2024-04-22)
 
 ### ✨ Features
