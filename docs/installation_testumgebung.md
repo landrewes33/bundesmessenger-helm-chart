@@ -63,8 +63,6 @@ Konfiguration des Cert Manager.
 
 - `letsencrypt-staging` für Tests und Let's Encrypt Test-Zertifikate
 - `letsencrypt-prod` für gültige Let's Encrypt Test-Zertifikate
-- `selfsigned-cluster-issuer` für die Nutzung von
-[Self-Signed Zertifikaten](https://cert-manager.io/docs/configuration/selfsigned/)
 
 ```yaml
 # certmanager-ClusterIssuer.yaml
@@ -110,13 +108,6 @@ spec:
         ingress:
           class: nginx
 
----
-apiVersion: cert-manager.io/v1
-kind: ClusterIssuer
-metadata:
-  name: selfsigned-cluster-issuer
-spec:
-  selfSigned: {}
 ```
 
 Einspielen der Konfiguration mit:
@@ -126,6 +117,11 @@ kubectl apply -f certmanager-ClusterIssuer.yaml
 ```
 
 Das Überprüfen der `ClusterIssuer` ist mit `kubectl get clusterissuer` möglich.
+
+#### Localhost Selfsigned Cert Manager Setup
+
+Ausführliche Schritt-für-Schritt-Anleitung der Einrichtung eines BundesMessenger
+Selfsigned Cert Manager Setup auf Localhost findet sich [hier](simple-selfsigned-setup.md).
 
 ### BundesMessenger
 
