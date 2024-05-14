@@ -148,7 +148,7 @@ Pull secrets
 {{- define "matrix-synapse.imagePullSecrets" -}}
   {{- if or .Values.image.pullSecrets .Values.wellknown.image.pullSecrets .Values.volumePermissions.pullSecrets }}
 imagePullSecrets:
-    {{- with uniq (concat ( .Values.image.pullSecrets .Values.wellknown.image.pullSecrets .Values.volumePermissions.image.pullSecrets )) }}
+    {{- with uniq (concat .Values.image.pullSecrets .Values.wellknown.image.pullSecrets .Values.volumePermissions.image.pullSecrets ) }}
       {{- . | toYaml | nindent 2 }}
     {{- end }}
   {{- end -}}
