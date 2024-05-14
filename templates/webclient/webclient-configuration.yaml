@@ -31,7 +31,7 @@ data:
         "BwiFeature.hideOSMLink": true
       },
       {{- end }}
-      "permalink_prefix": "{{- printf "https://%s/latest" (.Values.publicServerName | default .Values.serverName) }}",
+      "permalink_prefix": "{{- printf "https://%s" .Values.webclient.uri }}",
       "content_scanner": {
         "enabled": true
       }
