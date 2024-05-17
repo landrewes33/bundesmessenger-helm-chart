@@ -1,0 +1,4 @@
+Die Sygnal (Push-Server) Konfiguration wurde vereinfacht. Das betrifft Betreiber, die Push für iOS benutzen.
+Der Schalter `sygnal.ios_push.enabled` entfällt und wird automatisch berechnet wenn `ioskey_filename` konfiguriert ist.
+Zusätzlich wurde die Ebene `ios_push` entfernt. Beispiel: Aus `sygnal.ios_push.ioskey_filename` wird `sygnal.ioskey_filename`.
+Nutzer die bereits eine `pusher-values.yaml` erhalten haben, müssen diese mit einer neuen Version austauschen.

@@ -1115,19 +1115,30 @@ sygnal:
   #      keyfile: /de.opencode.dvs.ios.p8
   apps: {}
 
-  ios_push:
-    # -- (bool) iOS-Push Schalter
-    # Wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden, sonst schlägt das Modul fehl.
-    # Hierdurch wird der unten angegebene ioskey geladen.
-    enabled: false
+  # -- (string) iOS-Key Dateiname
+  # Wenn iOS Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
+  # Bei Nutzung von iOS-Pushservice, muss Key mit angegeben werden. Weiteres siehe README.md
+  # Durch Filename-Vergabe wird der unten angegebene ioskey geladen.
+  # Beispiel:
+  # ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus der APNS-Sektion
+  # der vorhergehenden Apps-Konfiguration übereinstimmen!
+  ioskey_filename: ""
+  # -- (string) iOS-Key Datei-Inhalt
+  # Beispiel:
+  # ioskey_keyvalue: 'HIER KÖNNTE IHR KEY STEHEN'
+  ioskey_keyvalue: ""
 
-    # -- (map) iOS-Key Konfiguration
-    # bei Nutzung von iOS-Pushservice, muss Key mit angeben werden. Weiteres siehe README.md
-    # Beispiel:
-    #  ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus dem APN-File übereinstimmen!
-    #  ioskey_keyvalue: 'HIER KÖNNTE IHR KEY IN STEHEN'
-    ioskey_filename: ""
-    ioskey_keyvalue: ""
+  # -- (string) FCM-Key Dateiname
+  # bei Nutzung von FCM-Pushservice, muss Key mit angegeben werden. Weiteres siehe README.md
+  # Wenn FCM Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
+  # Durch Filename-Vergabe wird der unten angegebene FCM-Service-Account-File geladen
+  # Beispiel:
+  #    fcmkey_filename: de.opencode.dvs.bundesmessenger.json <<-- muss zwingend mit dem service_account_file-Dateinamen
+  # aus der gcm-Sektion der vorhergehenden Apps-Konfiguration übereinstimmen!
+  fcmkey_filename: ""
+  # -- (string) FCM-Key Service Account File Inhalt
+  #    fcmkey_keyvalue: 'HIER KÖNNTE IHR SERVICE ACCOUNT FILE INHALT STEHEN'
+  fcmkey_keyvalue: {}
 
 
 ######################################################################################
