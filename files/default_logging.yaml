@@ -1,0 +1,31 @@
+# Prometheus HTTP requests
+synapse.access.http.9090:
+  level: WARNING
+synapse.handlers.typing:
+  level: WARNING
+synapse.handlers.room_list:
+  level: WARNING
+synapse.handlers_e2e_keys:
+  level: WARNING
+synapse.logging.context:
+  level: ERROR
+synapse.metrics._gc:
+  level: WARNING
+synapse.replication.http.send_events:
+  level: WARNING
+synapse.replication.tcp.client:
+  level: WARNING
+synapse.replication.tcp.resource:
+  level: WARNING
+synapse.state:
+  level: WARNING
+synapse.storage.SQL:
+  level: WARNING
+synapse.storage.databases.main.metrics:
+  level: WARNING
+synapse.storage.databases.main.event_push_actions:
+  level: WARNING
+synapse.util.caches.lrucache:
+  level: WARNING
+synapse.util.caches.response_cache:
+  level: WARNING

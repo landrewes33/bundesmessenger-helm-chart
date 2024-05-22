@@ -206,10 +206,20 @@ config:
   # Beispiel:
   # publicBaseurl: "https://matrix.example.com"
 
-  # -- (string) Das Loglevel für Synapse und alle `loggers` Module.
-  # Mit Ausnahme von `synapse.storage.SQL`, welches aus Sicherheitsgründen zusätzlich geändert werden muss.
+  # -- (string) Das Loglevel für Synapse.
+  # Wenn das komplette Logging z.B. für Debugging verändert werden soll,
+  # muss useRecommendedLogging auf false gesetzt werden.
+  # Achtung: Es wird empfohlen, wenn das logLevel auf DEBUG erhöht wird,
+  # das Logging für `synapse.storage.SQL` via extraLoggers zu reduzieren, da sonst
+  # alle SQL-Abfragen protokolliert werden. Diese enthalten sensible Informationen wie z.B. Zugriffstoken.
   # Dokumentation: https://element-hq.github.io/synapse/latest/structured_logging.html
   logLevel: INFO
+
+
+  # -- (bool) Aktiviert eine Standardkonfiguration für das Logging um unnötige Details nicht zu erfassen.
+  # Die Deaktivierung ist nötig, wenn z.B. das logLevel für alles auf DEBUG erhöht werden soll.
+  # Die Einstellungen befinden sich in der Datei /files/default_logging.yaml
+  useRecommendedLogging: true
 
   ## Logging
   # use TerseJsonFormatter structured logging
@@ -217,12 +227,13 @@ config:
   useStructuredLogging: false
 
   # -- (object) Geben Sie hier zusätzliche Logger-Konfigurationen an.
-  # Achtung: Wenn `synapse.storage.SQL`auf `level: DEBUG` erhöht wird, werden alle SQL-Abfragen protokolliert.
-  # Diese enthalten sensible Informationen wie z.B. Zugriffstoken.
   # Ref: https://element-hq.github.io/synapse/latest/structured_logging.html
-  extraLoggers:
-    synapse.storage.SQL:
-      level: WARNING
+  # Diese Konfiguration wird mit dem useRecommendedLogging zusammengeführt, wobei
+  # extraLoggers die höhere Priorität hat und bei Bedarf die Standardkonfiguration überschreibt.
+  # Beispiel:
+  # synapse.storage.SQL:
+  #   level: WARNING
+  extraLoggers: {}
 
   # -- (bool) Erfassung Nutzungsstatistiken (Hostname, Synapse-Version und -Uptime, total_users usw.) an die Entwickler melden
   reportStats: false

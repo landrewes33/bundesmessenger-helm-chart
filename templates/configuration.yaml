@@ -1,3 +1,8 @@
+{{-  $recommendedLogging := (dict) -}}
+{{- if .Values.config.useRecommendedLogging -}}
+  {{- $recommendedLogging = .Files.Get "files/default_logging.yaml" | fromYaml -}}
+{{- end }}
+
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -24,8 +29,10 @@ data:
       synapse:
         level: {{ .Values.config.logLevel | default "INFO" }}
 
-      {{- with .Values.config.extraLoggers -}}
-        {{ . | toYaml | nindent 6 }}
+      {{- /* empty value creates an failing "{}" */}}
+      {{- if or .Values.config.extraLoggers $recommendedLogging -}}
+        {{- /* first value has higher priority in merge */}}
+        {{- merge (dict) .Values.config.extraLoggers $recommendedLogging | toYaml | nindent 6 }}
       {{- end }}
 
     root:
