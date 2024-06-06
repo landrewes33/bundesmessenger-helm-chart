@@ -150,6 +150,7 @@ signingkey:
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   podSecurityContext:
     runAsUser: 2666
+    fsGroup: 2666
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
   securityContext:
@@ -471,6 +472,8 @@ synapse:
   # sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist.
   # Beachten Sie, dass eine Änderung dieser Einstellung auch die Verwendung der volumePermission
   # Hilfsprogramm verwenden müssen, abhängig von Ihrem Speicher.
+  # weitere Beispiele:
+  #  fsGroupChangePolicy: Always
   podSecurityContext:
     runAsNonRoot: true
     fsGroup: 2666
@@ -996,13 +999,10 @@ persistence:
 volumePermissions:
   # -- (bool) Aktivieren des Init-Containers zur Rechtekorrektur,
   # um die Rechte auf dem Volume für Media anzupassen
-  # Notwendig für policy 'require-uid-greater-2000'
-  enabled: true
+  enabled: false
   # -- (int) Nutzer-ID
-  # Notwendig für policy 'require-uid-greater-2000'
   uid: 2666
-  # -- (int) Nutzer-ID
-  # Notwendig für policy 'require-uid-greater-2000'
+  # -- (int) Gruppen-ID
   gid: 2666
   # -- (map) SecurityContext für den Init-Container
   securityContext:
