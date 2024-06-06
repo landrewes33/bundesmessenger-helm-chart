@@ -45,7 +45,7 @@ spec:
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.synapse.podSecurityContext | nindent 8 }}
-    {{- if $needsVolumePermissions }}
+    {{- if and $needsVolumePermissions (not (hasKey .Values.synapse.podSecurityContext "fsGroup" )) }}
       initContainers:
         - name: volume-permissions
           command:
