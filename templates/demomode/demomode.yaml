@@ -99,7 +99,7 @@ data:
 {{- else if eq .Values.demomode.mode "federation" }}
     echo "TBD"
 {{- else }}
-{{/* fallback auf complete */}}
+{{- /* fallback auf complete */}}
     POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "matrix-synapse.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=synapse" -o jsonpath="{.items[0].metadata.name}")
     kubectl exec --namespace {{ .Release.Namespace }} $POD_NAME -- /script/set-demo-complete-script.sh
 {{- end }}
@@ -138,11 +138,11 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   schedule: "{{ .Values.demomode.interval | default "0 0 31 12 0" }}"
-    {{- if not ( eq .Values.demomode.mode "defined" ) }} 
+    {{- if not ( eq .Values.demomode.mode "defined" ) }}
   suspend: true # Schedule wird hiermit deaktiviert, schedule ist aber Pflicht.
-    {{- else }} 
-  suspend: false 
-    {{- end }} 
+    {{- else }}
+  suspend: false
+    {{- end }}
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
