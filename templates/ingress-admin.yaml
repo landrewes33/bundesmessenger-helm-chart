@@ -53,7 +53,7 @@ spec:
       {{- if $.Values.mas.enabled }}
         {{- range $csPath := $csPaths }}
           {{- range $path := $.Values.mas.paths }}
-            {{/* csPath starts with path, path from MAS has more priority */}}
+            {{- /* csPath starts with path, path from MAS has more priority */}}
             {{- if hasPrefix $path $csPath }}
               {{- $csPaths = without $csPaths $csPath }}
             {{- end }}

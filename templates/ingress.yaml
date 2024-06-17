@@ -71,7 +71,7 @@ spec:
               {{- if $.Values.mas.enabled }}
                 {{- range $csPath := $csPaths }}
                   {{- range $path := $.Values.mas.paths }}
-                    {{/* csPath starts with path, path from MAS has more priority */}}
+                    {{- /* csPath starts with path, path from MAS has more priority */}}
                     {{- if hasPrefix $path $csPath }}
                       {{- $csPaths = without $csPaths $csPath }}
                     {{- end }}
@@ -79,7 +79,7 @@ spec:
                 {{- end }}
               {{- end }}
               {{- range $csPaths }}
-                {{/* do not include if path is "/_synapse/admin"
+                {{- /* do not include if path is "/_synapse/admin"
                 admin API has its own config file "ingress-admin.yaml" */}}
                 {{- if (not ( contains "/_synapse/admin" . )) }}
                   {{- if $.Values.ingress.traefikPaths }}
@@ -172,7 +172,7 @@ spec:
           {{- end }}
         {{- end }}
 
-        {{/* map paths like login to mas instead of Synapse  */}}
+        {{- /* map paths like login to mas instead of Synapse */}}
         {{- if $.Values.mas.enabled }}
           {{- range $.Values.mas.paths }}
             {{- if $.Values.ingress.traefikPaths }}
@@ -204,7 +204,7 @@ spec:
             {{- end }}
           {{- end }}
         {{- end }}
-        
+
         {{- if has . $wkHosts }}
           {{- if $.Values.wellknown.enabled }}
           - path: "/.well-known/matrix"
