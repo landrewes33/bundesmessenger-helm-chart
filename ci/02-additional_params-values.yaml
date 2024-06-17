@@ -4,6 +4,10 @@ adminAPIServerName: admin-api.example.org
 dataPrivacyUrl: example.com/privacy
 imprintUrl: example.com/imprint
 
+image:
+  pullSecrets:
+    - name: test-secret
+
 monitoring:
   enabled: true
   labels:
