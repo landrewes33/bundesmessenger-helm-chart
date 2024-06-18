@@ -209,5 +209,5 @@ data:
     {{- with $extraConfig }}
 
     ## Extra config ##
-    {{ . | toYaml | nindent 4 }}
+      {{ . | toYaml | nindent 4 }}
     {{- end }}

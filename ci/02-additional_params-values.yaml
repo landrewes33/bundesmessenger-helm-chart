@@ -13,6 +13,10 @@ synapse:
   annotations:
     test-annotation: synapse
 
+extraConfig:
+  federation_custom_ca_list:
+    - /SECRETNAME1/myCA1.pem
+
 workers:
   default:
     annotations:
