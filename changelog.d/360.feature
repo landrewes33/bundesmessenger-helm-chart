@@ -1,1 +1,0 @@
-Entfernen User-Settings und setzen von `fsGroup` in der Schadcodescanner-Konfiguration. Contributed by Dimitri Schwarz (dimitri.schwarz@muenchen.de).

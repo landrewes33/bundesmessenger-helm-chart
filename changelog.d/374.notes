@@ -1,3 +1,0 @@
-Wenn das Passwort ein `/` enthält, wird es von `sed` als Regex-Trennzeichen interpretiert und verursacht Probleme.
-Wenn das Passwort ein `&` enthält, ersetzt `sed` es durch die Eingabezeichenfolge.
-Etwas wie `passw&ord` wird zu `passw@@POSTGRES_PASSWORD@@ord`.
