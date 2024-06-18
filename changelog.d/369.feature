@@ -1,1 +1,0 @@
-Support für FCM Google Push API im Synapse als Ersatz für GCM hinzugefügt.

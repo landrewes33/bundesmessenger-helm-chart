@@ -1,1 +1,0 @@
-Nutzung von fsGroup zum setzen der Permissions auf Dateien-Ebene.

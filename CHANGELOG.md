@@ -7,6 +7,71 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.8.0 (2024-06-18)
+
+### ⚠️ Versionshinweise
+
+- Die Sygnal (Push-Server) Konfiguration wurde vereinfacht. Das betrifft
+  Betreiber, die Push für iOS benutzen.
+  Der Schalter `sygnal.ios_push.enabled` entfällt und wird automatisch
+  berechnet wenn `ioskey_filename` konfiguriert ist.
+  Zusätzlich wurde die Ebene `ios_push` entfernt. Beispiel: Aus
+  `sygnal.ios_push.ioskey_filename` wird `sygnal.ioskey_filename`.
+  Nutzer die bereits eine `pusher-values.yaml` erhalten haben, müssen diese mit
+  einer neuen Version austauschen. (!369)
+- Wenn das Passwort ein `/` enthält, wird es von `sed` als Regex-Trennzeichen
+  interpretiert und verursacht Probleme.
+  Wenn das Passwort ein `&` enthält, ersetzt `sed` es durch die
+  Eingabezeichenfolge.
+  Etwas wie `passw&ord` wird zu `passw@@POSTGRES_PASSWORD@@ord`. (!374)
+
+### ✨ Features
+
+- Hinzufügen einer föderationsspezifischen Konfigurationsektion inklusive
+  Zertifikate für private Föderation. (!345)
+- Entfernen User-Settings und setzen von `fsGroup` in der
+  Schadcodescanner-Konfiguration. Contributed by Dimitri Schwarz
+  (dimitri.schwarz@muenchen.de). (!360)
+- Nutzung von fsGroup zum setzen der Permissions auf Dateien-Ebene. (!361)
+- Support für FCM Google Push API im Synapse als Ersatz für GCM hinzugefügt.
+  (!369)
+- Escape von Sonderzeichen in Postgres- und Redis-Passwörtern um
+  Missinterpretation von `sed` zu verhindern. (!374)
+
+### 🐛 Bugfixes
+
+- Behebt eine falsche `permalink_prefix` Konfiguration des Webclients. (!371)
+- Fix für Helper-Funktion von `matrix-synapse.imagePullSecrets`. Contributed by
+  Thomas Brodersen. (!372, !402)
+
+### 📚 Dokumentation
+
+- Hinzufügen einer [Dokumentation für selbsterstellte
+  Zertifikate](https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/blob/main/docs/simple-selfsigned-setup.md).
+  (!351)
+- Hinzufügen von Beschreibungen der Abschnitte in standard_values.md. (!385)
+- Hinzufügen von Hinweis und aktuelle Empfehlung für Inaktivität für den
+  Matrix-Authentication-Service (MAS). (!387)
+
+### 📝 Weitere Änderungen
+
+- Reduzierung des standardmäßigen Loggings von Synapse. (!333)
+- Behebt einen Fehler in Kommentaren, der zu Leerzeilen im Template führt.
+  (!401)
+- `alpine/helm` in der CI-Pipeline auf Version `3.15.2` aktualisiert.
+- `alpine` in der CI-Pipeline auf Version `3.20` aktualisiert.
+- `docker.io/aquasec/trivy` in der CI-Pipeline auf Version `0.52.2`
+  aktualisiert.
+- `kindest/node` in der CI-Pipeline auf aktuelles Patch-Level aktualisiert.
+- `kubernetes-sigs/kind` in der CI-Pipeline auf Version `v0.23.0` aktualisiert.
+- `kubernetes-sigs/kustomize` in der CI-Pipeline auf Version `5.4.2`
+  aktualisiert.
+- `kyverno/kyverno` in der CI-Pipeline auf Version `v1.12.3` aktualisiert.
+- `registry.gitlab.com/gitlab-org/release-cli` in der CI-Pipeline auf Version
+  `v0.18.0` aktualisiert.
+- `sonarsource/sonar-scanner-cli` in der CI-Pipeline auf Version `10.0`
+  aktualisiert.
+
 ## BundesMessenger Helm Chart 1.7.1 (2024-04-25)
 
 ### ⚠️ Versionshinweise
