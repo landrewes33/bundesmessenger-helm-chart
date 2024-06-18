@@ -1,6 +1,11 @@
 {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (or .Values.persistence.enabled .Values.persistence.existingClaim) }}
 {{- $default := .Values.workers.default }}
 {{- $releaseName := .Release.Name }}
+{{- $uniqCaSecrets := list }}
+{{- range .Values.extraConfig.federation_custom_ca_list }}
+  {{- /* extract secret name from cert path - between first both slashes, put them in a list and make it unique */}}
+  {{- $uniqCaSecrets = uniq (append $uniqCaSecrets (split "/" . )._1) -}}
+{{- end }}
 {{- range $worker, $config := .Values.workers }}
 {{- if $config.enabled }}
 {{- $name := $worker | replace "_" "-" }}
@@ -193,6 +198,10 @@ spec:
             - mountPath: /tmp/
               name: tempdir
           {{- end }}
+          {{- range $uniqCaSecrets }}
+            - name: {{ printf "fed_ca_%s" .  }}
+              mountPath: /{{ . }}
+          {{- end }}
           {{- with $config.volumeMounts | default $default.volumeMounts }}
             {{ . | toYaml | nindent 12 }}
           {{- end }}
@@ -230,6 +239,11 @@ spec:
         - name: tmpconf
           emptyDir:
             sizeLimit: 10Mi
+      {{- range $uniqCaSecrets }}
+        - name: {{ printf "fed_ca_%s" .  }}
+          secret:
+            secretName: {{ . }}
+      {{- end }}
         - name: tempdir
           emptyDir:
             {{- if regexMatch $name "media-repository" }}

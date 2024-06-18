@@ -266,18 +266,23 @@ config:
   # -- (string) Hinweis: Es wird dringend empfohlen, diesen Wert auf einen secure value (secret) zu setzen.
   macaroonSecretKey: ""
 
-  # -- (map) Eine Gruppe von vertrauenswürdigen Servern, die zu kontaktieren sind,
-  # wenn ein anderer Server nicht auf eine Signierschlüssel-Anfrage antwortet.
-  trustedKeyServers:
-    - server_name: matrix.org
-  #   verify_keys:
-  #     "ed25519:auto": "Noi6WqcDj0QmPxCNQqgezwTlBKrfqehY1u2FyWP9uYw"
-
   # -- (list) Extra listener
   extraListeners: []
   #  - port: 9000
   #    bind_addresses: ['::']
   #    type: manhole
+########################################
+## Konfigurationen für Föderation
+########################################
+  # -- (map) Eine Gruppe von vertrauenswürdigen Servern, die zu kontaktieren sind,
+  # wenn ein anderer Server nicht auf eine Signierschlüssel-Anfrage antwortet.
+  # @default -- empty Array, da so nur bekannte Server direkt angefragt werden,
+  # oder das Event verfällt; Beispiel:
+  # - server_name: matrix.org
+  #   verify_keys:
+  #     "ed25519:auto": "Noi6WqcDj0QmPxCNQqgezwTlBKrfqehY1u2FyWP9uYw"
+  trustedKeyServers: []
+
 
 # -- (object) Beliebige weitere Synapse-Konfiguration
 # Vorkonfiguriert nach Best Practise BWI GmbH:
@@ -308,8 +313,6 @@ extraConfig:
   include_profile_data_on_invite: true
   # -- (bool) Öffentliche Räume ohne Login/Authentifizierung, abgeschaltet!
   allow_public_rooms_without_auth: false
-  # -- (bool) öffentliche Räume über Föderation erlauben, abgeschaltet
-  allow_public_rooms_over_federation: false
   # -- (bool) Einladung die von unpriviligierten Nutzern stammen blocken, abgeschaltet
   block_non_admin_invites: false
   # -- (list) IP-Whitelist für Föderation und Push-Services zwingend benötigt
@@ -389,7 +392,14 @@ extraConfig:
     # Die einzelnen Server verfolgen Ereignisse und melden
     # sie an einen zentralen Server - im Fall von Synapse: Jaeger.
     enabled: false
-  # -- (list) Whitelist (Matrix-Server-Namen) für Föderation
+  # -- (bool) dynamisches Vorschaubild, eingeschaltet
+  dynamic_thumbnails: true
+########################################
+## Konfigurationen für Föderation
+########################################
+  # -- (bool) öffentliche Räume über Föderation erlauben, abgeschaltet
+  allow_public_rooms_over_federation: false
+  # -- (list) Allowlist (Matrix-Server-Namen) für Föderation
   federation_domain_whitelist: []
   #  - poc1.dvs.example.com
   #  - poc2.dvs.example.com
@@ -400,8 +410,60 @@ extraConfig:
   #  - poc1.dvs.example.com
   #  - poc2.dvs.example.com
   #  - poc3.dvs.example.com
-  # -- (bool) dynamisches Vorschaubild, eingeschaltet
-  dynamic_thumbnails: true
+  # -- (list) Liste der CA-Files im PEM-Format für die föderierten Instanzen.
+  # Diese müssen als Secret im Namespace des Deployments vorliegen,
+  # da sie im Synapse-Container gemountet werden.
+  # Hinweis: Stellen Sie sicher, dass Sie eine PEM-Datei verwenden, die die
+  # vollständige Zertifikatskette einschließlich aller Zwischenzertifikate
+  # enthält (wenn Sie beispielsweise certbot verwenden, verwenden Sie
+  # fullchain.pem als Ihr Zertifikat, nicht cert.pem).
+  # Der Pfad wird durch Secretname und Zertifikatsname(inklusive ".pem"-Endung)
+  # angegeben
+  # Aus dem Pfad wird der Name des Secrets abgeleitet. Bei dem angegebenen Zertifikat
+  # "/SECRETNAME1/myCA1.pem" muss sich im Secret "SECRETNAME1" die Datei "myCA1.pem"
+  # befinden. Sie müssen das Secret manuell selbst vorab anlegen.
+  federation_custom_ca_list: []
+  # - /SECRETNAME1/myCA1.pem
+  # - /SECRETNAME1/myCA2.pem
+  # - /SECRETNAME2/myCA3.pem
+  # Definiert einige Unteroptionen im Zusammenhang mit der Föderation
+  federation:
+    # Die folgenden Optionen beziehen sich auf die Konfiguration der Timeout- und
+    # Wiederholungslogik für eine Föderations-Anfrage, unabhängig von den anderen Anfragen.
+    # Der Algorithmus mit kurzer Wiederholung (short-retry) wird verwendet,
+    # wenn etwas oder jemand auf eine Antwort auf die Anfrage wartet,
+    # während der Algorithmus mit langer Wiederholung (long-retry) für Anfragen
+    # verwendet wird, die im Hintergrund ausgeführt werden,
+    # wie z. B. das Senden einer Föderationstransaktion.
+    # -- (string) Timeout für die Föderation-Anfragen
+    # @default -- 60s
+    client_timeout: 60s
+    # -- (string) maximale Verzögerung, die für den short-retry verwendet werden soll
+    # @default -- 2s
+    max_short_retry_delay: 2s
+    # -- (string) maximale Verzögerung, die für den long-retry verwendet werden soll
+    # @default -- 60s
+    max_long_retry_delay: 60s
+    # -- (int) maximale Anzahl von Wiederholungsversuchen für den short-retry
+    # @default -- 3
+    max_short_retries: 3
+    # -- (int) maximale Anzahl von Wiederholungsversuchen für den long-retry
+    # @default -- 10
+    max_long_retries: 10
+    # Die folgenden Optionen steuern die Wiederholungslogik bei der
+    # Kommunikation mit einem bestimmten Homeserver.
+    # Im Gegensatz zu den vorherigen Konfigurationsoptionen gelten diese
+    # Werte für alle Anforderungen für ein bestimmtes Ziel und der Status des
+    # Backoffs wird in der Datenbank gespeichert.
+    # -- (string) Der anfängliche Backoff (Interval), nach erstem Fehlschlag
+    # @default -- 10m
+    destination_min_retry_interval: 10m
+    # -- (string) Multiplier für wiederholende Fehler zum anfängliche Backoff (Interval)
+    # @default -- 2
+    destination_retry_multiplier: 2
+    # -- (string) Eine Kappungsgrenze (Limit) des Backoff (Interval)
+    # @default -- 1w
+    destination_max_retry_interval: 1w
 
 # -- (map) Geben Sie hier eine beliebige - geheime - Synapse-Konfiguration an;
 # Diese Werte werden in Secrets anstelle von Configmaps gespeichert

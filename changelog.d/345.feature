@@ -1,0 +1,1 @@
+Hinzufügen einer föderationsspezifischen Konfigurationsektion inklusive Zertifikate für private Föderation.
