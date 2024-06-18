@@ -150,6 +150,7 @@ signingkey:
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   podSecurityContext:
     runAsUser: 2666
+    fsGroup: 2666
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
   securityContext:
@@ -206,10 +207,20 @@ config:
   # Beispiel:
   # publicBaseurl: "https://matrix.example.com"
 
-  # -- (string) Das Loglevel für Synapse und alle `loggers` Module.
-  # Mit Ausnahme von `synapse.storage.SQL`, welches aus Sicherheitsgründen zusätzlich geändert werden muss.
+  # -- (string) Das Loglevel für Synapse.
+  # Wenn das komplette Logging z.B. für Debugging verändert werden soll,
+  # muss useRecommendedLogging auf false gesetzt werden.
+  # Achtung: Es wird empfohlen, wenn das logLevel auf DEBUG erhöht wird,
+  # das Logging für `synapse.storage.SQL` via extraLoggers zu reduzieren, da sonst
+  # alle SQL-Abfragen protokolliert werden. Diese enthalten sensible Informationen wie z.B. Zugriffstoken.
   # Dokumentation: https://element-hq.github.io/synapse/latest/structured_logging.html
   logLevel: INFO
+
+
+  # -- (bool) Aktiviert eine Standardkonfiguration für das Logging um unnötige Details nicht zu erfassen.
+  # Die Deaktivierung ist nötig, wenn z.B. das logLevel für alles auf DEBUG erhöht werden soll.
+  # Die Einstellungen befinden sich in der Datei /files/default_logging.yaml
+  useRecommendedLogging: true
 
   ## Logging
   # use TerseJsonFormatter structured logging
@@ -217,12 +228,13 @@ config:
   useStructuredLogging: false
 
   # -- (object) Geben Sie hier zusätzliche Logger-Konfigurationen an.
-  # Achtung: Wenn `synapse.storage.SQL`auf `level: DEBUG` erhöht wird, werden alle SQL-Abfragen protokolliert.
-  # Diese enthalten sensible Informationen wie z.B. Zugriffstoken.
   # Ref: https://element-hq.github.io/synapse/latest/structured_logging.html
-  extraLoggers:
-    synapse.storage.SQL:
-      level: WARNING
+  # Diese Konfiguration wird mit dem useRecommendedLogging zusammengeführt, wobei
+  # extraLoggers die höhere Priorität hat und bei Bedarf die Standardkonfiguration überschreibt.
+  # Beispiel:
+  # synapse.storage.SQL:
+  #   level: WARNING
+  extraLoggers: {}
 
   # -- (bool) Erfassung Nutzungsstatistiken (Hostname, Synapse-Version und -Uptime, total_users usw.) an die Entwickler melden
   reportStats: false
@@ -254,18 +266,23 @@ config:
   # -- (string) Hinweis: Es wird dringend empfohlen, diesen Wert auf einen secure value (secret) zu setzen.
   macaroonSecretKey: ""
 
-  # -- (map) Eine Gruppe von vertrauenswürdigen Servern, die zu kontaktieren sind,
-  # wenn ein anderer Server nicht auf eine Signierschlüssel-Anfrage antwortet.
-  trustedKeyServers:
-    - server_name: matrix.org
-  #   verify_keys:
-  #     "ed25519:auto": "Noi6WqcDj0QmPxCNQqgezwTlBKrfqehY1u2FyWP9uYw"
-
   # -- (list) Extra listener
   extraListeners: []
   #  - port: 9000
   #    bind_addresses: ['::']
   #    type: manhole
+########################################
+## Konfigurationen für Föderation
+########################################
+  # -- (map) Eine Gruppe von vertrauenswürdigen Servern, die zu kontaktieren sind,
+  # wenn ein anderer Server nicht auf eine Signierschlüssel-Anfrage antwortet.
+  # @default -- empty Array, da so nur bekannte Server direkt angefragt werden,
+  # oder das Event verfällt; Beispiel:
+  # - server_name: matrix.org
+  #   verify_keys:
+  #     "ed25519:auto": "Noi6WqcDj0QmPxCNQqgezwTlBKrfqehY1u2FyWP9uYw"
+  trustedKeyServers: []
+
 
 # -- (object) Beliebige weitere Synapse-Konfiguration
 # Vorkonfiguriert nach Best Practise BWI GmbH:
@@ -296,8 +313,6 @@ extraConfig:
   include_profile_data_on_invite: true
   # -- (bool) Öffentliche Räume ohne Login/Authentifizierung, abgeschaltet!
   allow_public_rooms_without_auth: false
-  # -- (bool) öffentliche Räume über Föderation erlauben, abgeschaltet
-  allow_public_rooms_over_federation: false
   # -- (bool) Einladung die von unpriviligierten Nutzern stammen blocken, abgeschaltet
   block_non_admin_invites: false
   # -- (list) IP-Whitelist für Föderation und Push-Services zwingend benötigt
@@ -377,7 +392,14 @@ extraConfig:
     # Die einzelnen Server verfolgen Ereignisse und melden
     # sie an einen zentralen Server - im Fall von Synapse: Jaeger.
     enabled: false
-  # -- (list) Whitelist (Matrix-Server-Namen) für Föderation
+  # -- (bool) dynamisches Vorschaubild, eingeschaltet
+  dynamic_thumbnails: true
+########################################
+## Konfigurationen für Föderation
+########################################
+  # -- (bool) öffentliche Räume über Föderation erlauben, abgeschaltet
+  allow_public_rooms_over_federation: false
+  # -- (list) Allowlist (Matrix-Server-Namen) für Föderation
   federation_domain_whitelist: []
   #  - poc1.dvs.example.com
   #  - poc2.dvs.example.com
@@ -388,8 +410,60 @@ extraConfig:
   #  - poc1.dvs.example.com
   #  - poc2.dvs.example.com
   #  - poc3.dvs.example.com
-  # -- (bool) dynamisches Vorschaubild, eingeschaltet
-  dynamic_thumbnails: true
+  # -- (list) Liste der CA-Files im PEM-Format für die föderierten Instanzen.
+  # Diese müssen als Secret im Namespace des Deployments vorliegen,
+  # da sie im Synapse-Container gemountet werden.
+  # Hinweis: Stellen Sie sicher, dass Sie eine PEM-Datei verwenden, die die
+  # vollständige Zertifikatskette einschließlich aller Zwischenzertifikate
+  # enthält (wenn Sie beispielsweise certbot verwenden, verwenden Sie
+  # fullchain.pem als Ihr Zertifikat, nicht cert.pem).
+  # Der Pfad wird durch Secretname und Zertifikatsname(inklusive ".pem"-Endung)
+  # angegeben
+  # Aus dem Pfad wird der Name des Secrets abgeleitet. Bei dem angegebenen Zertifikat
+  # "/SECRETNAME1/myCA1.pem" muss sich im Secret "SECRETNAME1" die Datei "myCA1.pem"
+  # befinden. Sie müssen das Secret manuell selbst vorab anlegen.
+  federation_custom_ca_list: []
+  # - /SECRETNAME1/myCA1.pem
+  # - /SECRETNAME1/myCA2.pem
+  # - /SECRETNAME2/myCA3.pem
+  # Definiert einige Unteroptionen im Zusammenhang mit der Föderation
+  federation:
+    # Die folgenden Optionen beziehen sich auf die Konfiguration der Timeout- und
+    # Wiederholungslogik für eine Föderations-Anfrage, unabhängig von den anderen Anfragen.
+    # Der Algorithmus mit kurzer Wiederholung (short-retry) wird verwendet,
+    # wenn etwas oder jemand auf eine Antwort auf die Anfrage wartet,
+    # während der Algorithmus mit langer Wiederholung (long-retry) für Anfragen
+    # verwendet wird, die im Hintergrund ausgeführt werden,
+    # wie z. B. das Senden einer Föderationstransaktion.
+    # -- (string) Timeout für die Föderation-Anfragen
+    # @default -- 60s
+    client_timeout: 60s
+    # -- (string) maximale Verzögerung, die für den short-retry verwendet werden soll
+    # @default -- 2s
+    max_short_retry_delay: 2s
+    # -- (string) maximale Verzögerung, die für den long-retry verwendet werden soll
+    # @default -- 60s
+    max_long_retry_delay: 60s
+    # -- (int) maximale Anzahl von Wiederholungsversuchen für den short-retry
+    # @default -- 3
+    max_short_retries: 3
+    # -- (int) maximale Anzahl von Wiederholungsversuchen für den long-retry
+    # @default -- 10
+    max_long_retries: 10
+    # Die folgenden Optionen steuern die Wiederholungslogik bei der
+    # Kommunikation mit einem bestimmten Homeserver.
+    # Im Gegensatz zu den vorherigen Konfigurationsoptionen gelten diese
+    # Werte für alle Anforderungen für ein bestimmtes Ziel und der Status des
+    # Backoffs wird in der Datenbank gespeichert.
+    # -- (string) Der anfängliche Backoff (Interval), nach erstem Fehlschlag
+    # @default -- 10m
+    destination_min_retry_interval: 10m
+    # -- (string) Multiplier für wiederholende Fehler zum anfängliche Backoff (Interval)
+    # @default -- 2
+    destination_retry_multiplier: 2
+    # -- (string) Eine Kappungsgrenze (Limit) des Backoff (Interval)
+    # @default -- 1w
+    destination_max_retry_interval: 1w
 
 # -- (map) Geben Sie hier eine beliebige - geheime - Synapse-Konfiguration an;
 # Diese Werte werden in Secrets anstelle von Configmaps gespeichert
@@ -460,6 +534,8 @@ synapse:
   # sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist.
   # Beachten Sie, dass eine Änderung dieser Einstellung auch die Verwendung der volumePermission
   # Hilfsprogramm verwenden müssen, abhängig von Ihrem Speicher.
+  # weitere Beispiele:
+  #  fsGroupChangePolicy: Always
   podSecurityContext:
     runAsNonRoot: true
     fsGroup: 2666
@@ -985,13 +1061,10 @@ persistence:
 volumePermissions:
   # -- (bool) Aktivieren des Init-Containers zur Rechtekorrektur,
   # um die Rechte auf dem Volume für Media anzupassen
-  # Notwendig für policy 'require-uid-greater-2000'
-  enabled: true
+  enabled: false
   # -- (int) Nutzer-ID
-  # Notwendig für policy 'require-uid-greater-2000'
   uid: 2666
-  # -- (int) Nutzer-ID
-  # Notwendig für policy 'require-uid-greater-2000'
+  # -- (int) Gruppen-ID
   gid: 2666
   # -- (map) SecurityContext für den Init-Container
   securityContext:
@@ -1115,19 +1188,30 @@ sygnal:
   #      keyfile: /de.opencode.dvs.ios.p8
   apps: {}
 
-  ios_push:
-    # -- (bool) iOS-Push Schalter
-    # Wenn iOS Push mit genutzt wird, muss hier der Schalter dafür auf true gesetzt werden, sonst schlägt das Modul fehl.
-    # Hierdurch wird der unten angegebene ioskey geladen.
-    enabled: false
+  # -- (string) iOS-Key Dateiname
+  # Wenn iOS Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
+  # Bei Nutzung von iOS-Pushservice, muss Key mit angegeben werden. Weiteres siehe README.md
+  # Durch Filename-Vergabe wird der unten angegebene ioskey geladen.
+  # Beispiel:
+  # ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus der APNS-Sektion
+  # der vorhergehenden Apps-Konfiguration übereinstimmen!
+  ioskey_filename: ""
+  # -- (string) iOS-Key Datei-Inhalt
+  # Beispiel:
+  # ioskey_keyvalue: 'HIER KÖNNTE IHR KEY STEHEN'
+  ioskey_keyvalue: ""
 
-    # -- (map) iOS-Key Konfiguration
-    # bei Nutzung von iOS-Pushservice, muss Key mit angeben werden. Weiteres siehe README.md
-    # Beispiel:
-    #  ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus dem APN-File übereinstimmen!
-    #  ioskey_keyvalue: 'HIER KÖNNTE IHR KEY IN STEHEN'
-    ioskey_filename: ""
-    ioskey_keyvalue: ""
+  # -- (string) FCM-Key Dateiname
+  # bei Nutzung von FCM-Pushservice, muss Key mit angegeben werden. Weiteres siehe README.md
+  # Wenn FCM Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
+  # Durch Filename-Vergabe wird der unten angegebene FCM-Service-Account-File geladen
+  # Beispiel:
+  #    fcmkey_filename: de.opencode.dvs.bundesmessenger.json <<-- muss zwingend mit dem service_account_file-Dateinamen
+  # aus der gcm-Sektion der vorhergehenden Apps-Konfiguration übereinstimmen!
+  fcmkey_filename: ""
+  # -- (string) FCM-Key Service Account File Inhalt
+  #    fcmkey_keyvalue: 'HIER KÖNNTE IHR SERVICE ACCOUNT FILE INHALT STEHEN'
+  fcmkey_keyvalue: {}
 
 
 ######################################################################################
@@ -1911,10 +1995,9 @@ schadcodescanner:
       memory: 50Mi
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
-  # weitere Möglichkeiten:
-  #  fsGroup: 1001
   podSecurityContext:
     runAsNonRoot: true
+    fsGroup: 1111
 
   # -- (map) Konfiguration für die ClamAV-Container-Sicherheitsrichtlinie
   # weitere Möglichkeiten:

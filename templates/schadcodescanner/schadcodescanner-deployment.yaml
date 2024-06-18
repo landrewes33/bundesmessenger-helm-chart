@@ -30,23 +30,6 @@ spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       securityContext:
         {{- $config.podSecurityContext | toYaml | nindent 8 }}
-      initContainers:
-      - name: clamav-permissions
-        image: "{{ $.Values.volumePermissions.image.repository }}:{{ $.Values.volumePermissions.image.tag }}"
-        imagePullPolicy: "{{ $.Values.volumePermissions.image.pullPolicy | default  "IfNotPresent" }}"
-        volumeMounts:
-          - name: signatures
-            mountPath: /clamav/database
-        command:
-          - sh
-          - -c
-          - |
-            chown {{ $config.clamavSecurityContext.runAsUser | default "1111" }}:{{ $config.clamavSecurityContext.runAsGroup | default "1111" }}  -R /clamav/database;
-        securityContext:
-          runAsNonRoot: false
-          runAsUser: 0
-        resources:
-          {{- $.Values.volumePermissions.resources | toYaml | nindent 10 }}
       containers:
       - name: clamav
         image: "{{ $config.clamavImage.repository }}:{{ $config.clamavImage.tag }}"

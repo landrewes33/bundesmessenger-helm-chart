@@ -1,7 +1,7 @@
-{{- if $.Values.sygnal.enabled }}
-{{- if $.Values.sygnal.ios_push.enabled }}
-{{- $iosKey := $.Values.sygnal.ios_push.ioskey_filename | required "sygnal.ios_push.ioskey_filename ist notwendig für den Sygnal Push Service für iOS." }}
+{{- if .Values.sygnal.enabled }}
 
+{{- if .Values.sygnal.ioskey_filename }}
+  {{- $iosKey := .Values.sygnal.ioskey_filename }}
 ---
 apiVersion: v1
 kind: Secret
@@ -9,10 +9,27 @@ metadata:
   annotations:
     helm.sh/resource-policy: keep
   name: ioskey
+  namespace: {{ .Release.Namespace }}
 data:
-  {{ $iosKey }}: {{ required "Es ist der Schlüsselinhalt mit anzugeben unter sygnal.ios_push.ioskey_keyvalue" $.Values.sygnal.ios_push.ioskey_keyvalue | toYaml | quote }}
+  {{ $iosKey }}: {{ required "Es ist der Schlüsselinhalt mit anzugeben unter sygnal.ioskey_keyvalue" .Values.sygnal.ioskey_keyvalue | toYaml | quote }}
 
-{{ end  }}
+{{ end }}
+
+{{- if .Values.sygnal.fcmkey_filename }}
+  {{ $fcmKey := .Values.sygnal.fcmkey_filename }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  annotations:
+    helm.sh/resource-policy: keep
+  name: fcmkey
+  namespace: {{ .Release.Namespace }}
+stringData:
+  {{ $fcmKey }}: |
+{{ required "Es ist der Schlüsselinhalt mit anzugeben unter sygnal.fcmkey_keyvalue" .Values.sygnal.fcmkey_keyvalue | toPrettyJson | indent 4 }}
+{{ end }}
+
 ---
 apiVersion: v1
 kind: Secret

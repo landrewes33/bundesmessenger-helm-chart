@@ -13,7 +13,6 @@ data:
   c-icap.conf: |
     PidFile /run/c-icap/c-icap.pid
     CommandsSocket /run/c-icap/c-icap.ctl
-    User cicap
     Timeout 300
     MaxKeepAliveRequests 100
     KeepAliveTimeout 600
@@ -77,7 +76,6 @@ data:
     LogFile /dev/stdout
     DatabaseDirectory /clamav/database
     LocalSocket /run/clamav/clamd.sock
-    User clamav
     ExitOnOOM yes
     Foreground yes
     MaxScanSize {{.Values.schadcodescanner.limits.scanSize}}M
@@ -105,7 +103,7 @@ data:
     NotifyClamd /clamav/config/clamd.conf
     Checks 24
     LogSyslog no
-    DatabaseOwner root
+    DatabaseOwner clamav
     DatabaseMirror database.clamav.net
     {{- range $mirror := .Values.schadcodescanner.freshclam.mirrors }}
     PrivateMirror {{ $mirror }}

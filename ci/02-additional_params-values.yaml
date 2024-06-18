@@ -4,6 +4,10 @@ adminAPIServerName: admin-api.example.org
 dataPrivacyUrl: example.com/privacy
 imprintUrl: example.com/imprint
 
+image:
+  pullSecrets:
+    - name: test-secret
+
 monitoring:
   enabled: true
   labels:
@@ -12,6 +16,10 @@ monitoring:
 synapse:
   annotations:
     test-annotation: synapse
+
+extraConfig:
+  federation_custom_ca_list:
+    - /SECRETNAME1/myCA1.pem
 
 workers:
   default:
@@ -43,10 +51,23 @@ schadcodescanner:
 
 sygnal:
   enabled: true
+  fcmkey_filename: bum.json
+  fcmkey_keyvalue:
+    type: "service_account"
+    project_id: "dummy"
+  ioskey_filename: AuthKey.p8
+  ioskey_keyvalue: "TFMwdExTMUNSVWRKVGlCUVVrbFdRVlJGSUV0c2Rmc2QK"
   apps:
     de.opencode.dvs.gcm:
       type: gcm
       api_key: example-value
+      service_account_file: /bum.json
+    de.opencode.dvs.ios:
+      type: apns
+      keyfile: /AuthKey.p8
+      key_id: example
+      team_id: example
+      topic: example
 
 wellknown:
   enabled: true

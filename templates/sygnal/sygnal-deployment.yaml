@@ -64,10 +64,18 @@ spec:
             - name: config
               mountPath: /sygnal.yaml
               subPath: sygnal.yaml
-            {{- if .Values.sygnal.ios_push.enabled }}
+              readOnly: true
+            {{- if .Values.sygnal.fcmkey_filename }}
+            - name: fcmkey
+              mountPath: /{{ .Values.sygnal.fcmkey_filename }}
+              subPath: {{ .Values.sygnal.fcmkey_filename }}
+              readOnly: true
+            {{ end }}
+            {{- if .Values.sygnal.ioskey_filename }}
             - name: ioskey
-              mountPath: /{{ .Values.sygnal.ios_push.ioskey_filename }}
-              subPath: {{ .Values.sygnal.ios_push.ioskey_filename }}
+              mountPath: /{{ .Values.sygnal.ioskey_filename }}
+              subPath: {{ .Values.sygnal.ioskey_filename }}
+              readOnly: true
             {{ end }}
             - mountPath: /tmp
               name: sygnal-tmp
@@ -77,9 +85,16 @@ spec:
         - name: config
           secret:
             secretName: matrix-sygnal
+        {{- if .Values.sygnal.fcmkey_filename }}
+        - name: fcmkey
+          secret:
+            secretName: fcmkey
+        {{ end }}
+        {{- if .Values.sygnal.ioskey_filename }}
         - name: ioskey
           secret:
             secretName: ioskey
+        {{ end }}
         - name: sygnal-tmp
           emptyDir:
             sizeLimit: 10Mi

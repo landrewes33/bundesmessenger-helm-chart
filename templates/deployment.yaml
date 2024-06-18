@@ -7,6 +7,11 @@
 {{- end -}}
 {{- $userconfigname :=  printf "%s-%s" (include "matrix-synapse.fullname" .) "users" }}
 {{- $adminconfigname := printf "%s-%s" (include "matrix-synapse.fullname" .) "admins" }}
+{{- $uniqCaSecrets := list }}
+{{- range .Values.extraConfig.federation_custom_ca_list }}
+  {{- /* extract secret name from cert path - between first both slashes, put them in a list and make it unique */}}
+  {{- $uniqCaSecrets = uniq (append $uniqCaSecrets (split "/" . )._1) -}}
+{{- end }}
 ---
 # Server: {{ required "A valid serverName is required" .Values.serverName }}
 apiVersion: apps/v1
@@ -45,7 +50,7 @@ spec:
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.synapse.podSecurityContext | nindent 8 }}
-    {{- if $needsVolumePermissions }}
+    {{- if and $needsVolumePermissions (not (hasKey .Values.synapse.podSecurityContext "fsGroup" )) }}
       initContainers:
         - name: volume-permissions
           command:
@@ -69,6 +74,8 @@ spec:
             - sh
             - -c
             - |
+              export POSTGRES_PASSWORD=$(echo "${POSTGRES_PASSWORD:-}" | sed 's/\//\\\//g' | sed 's/\&/\\\&/g') && \
+              export REDIS_PASSWORD=$(echo "${REDIS_PASSWORD:-}" | sed 's/\//\\\//g' | sed 's/\&/\\\&/g') && \
               cat /synapse/secrets/*.yaml | \
                 sed -e "s/@@POSTGRES_PASSWORD@@/${POSTGRES_PASSWORD:-}/" \
                     -e "s/@@REDIS_PASSWORD@@/${REDIS_PASSWORD:-}/" \
@@ -163,6 +170,10 @@ spec:
               mountPath: /synapse/data
             - name: tmpdir
               mountPath: /tmp
+          {{- range $uniqCaSecrets }}
+            - name: {{ printf "fed_ca_%s" .  }}
+              mountPath: /{{ . }}
+          {{- end }}
           {{- if .Values.demomode.enabled }}
             - name: demoscript
               mountPath: /script
@@ -185,6 +196,11 @@ spec:
             items:
               - key: {{ .Values.signingkey.existingSecretKey | default "signing.key" | quote }}
                 path: signing.key
+          {{- range $uniqCaSecrets }}
+        - name: {{ printf "fed_ca_%s" .  }}
+          secret:
+            secretName: {{ . }}
+          {{- end }}
         - name: tmpconf
           emptyDir:
             sizeLimit: 10Mi
