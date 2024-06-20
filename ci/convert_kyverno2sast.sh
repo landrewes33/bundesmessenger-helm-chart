@@ -7,8 +7,9 @@
 # - $1: Path to input file / Kyverno Report
 # - $2: Path to output file / JSON Gitlab SAST Report
 
-export time=$(date -u +'%FT%T')
-export kyverno_version=$(kyverno version | yq '.Version')
+time=$(date -u +'%FT%T')
+kyverno_version=$(kyverno version | yq '.Version')
+export time kyverno_version
 
 # get attributes/annotations/labels from policies
 # because this information are not part of the kyverno report
@@ -35,10 +36,13 @@ severities='[.] |
         "severity_" + (.policy // "Unknown") + "=" + .severity
     ) | join(" ") | sub("-","_")
 '
-export $(yq eval-all "${severities}" richtlinien-umsetzung-kyverno/policies/*.yaml)
+serverity_envs=$(yq eval-all "$severities" richtlinien-umsetzung-kyverno/policies/*.yaml)
+# shellcheck disable=SC2086
+export ${serverity_envs?}
 
 
 # build SAST report
+# shellcheck disable=SC2016
 query='.results |
     map(select(.result != "pass" and .result != "skip")) |
     map(
@@ -76,16 +80,16 @@ query='.results |
            "scanner":{
                 "id":"kyverno",
                 "name":"Kyverno",
-                "version":env(kyverno_version),
+                "version":strenv(kyverno_version),
                 "vendor":{"name":"Kyverno"},
                 "url":"https://kyverno.io/"
             },
-            "start_time":env(time),
-            "end_time":env(time),
+            "start_time":strenv(time),
+            "end_time":strenv(time),
             "status":"success",
             "type":"sast"
         },
         "vulnerabilities":.
     }
 '
-yq "${query}" $1 -o=json > $2
+yq "$query" "$1" -o=json > "$2"
