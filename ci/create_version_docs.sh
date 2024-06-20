@@ -8,53 +8,55 @@
 
 set -e
 
-if [ "$#" -ne 1 ]
-then
+if [ "$#" -ne 1 ]; then
   echo "Incorrect number of arguments"
   exit 1
 fi
 
 version=$1
-scriptDir=$(dirname $(readlink -f "${BASH_SOURCE:-$0}"))
+scriptDir=$(readlink -f "$0" | xargs dirname)
 
 docs_output_file=$scriptDir/../docs/versions/v$version.md
-version_content=$(yq '.[]' $scriptDir/versions/v$version.yaml)
+version_content=$(yq '.[]' "$scriptDir/versions/v$version.yaml")
 
-
-# generate docs
 echo "Generate doc \"$docs_output_file\""
+{
+  echo "# Abhängigkeiten BundesMessenger Helm Chart $version ($(echo "$version_content" | yq '.date'))"
+  echo
+  echo "## Container Images"
+  echo
+  echo "| Name | Image | Tag |"
+  echo "|---------|---------|---------|"
+  echo "$version_content" | yq '
+    .images |
+    map(
+      "| " +
+      .name +
+      " | " +
+      .image +
+      " | " +
+      (.tag // "") +
+      " |"
+    ) |
+    join("\n")
+  '
 
-echo "# Abhängigkeiten BundesMessenger Helm Chart $version ($(echo "$version_content" | yq '.date'))\n" > $docs_output_file
-
-echo "## Container Images\n" >> $docs_output_file
-echo "| Name | Image | Tag |\n|---------|---------|---------|" >> $docs_output_file
-echo "$version_content" | yq '
-  .images |
-  map(
-    "| " +
-    .name +
-    " | " +
-    .image +
-    " | " +
-    (.tag // "") +
-    " |"
-  ) |
-  join("\n")
-' >> $docs_output_file
-
-echo "" >> $docs_output_file
-echo "## Helm Charts\n" >> $docs_output_file
-echo "| Name | Version | Repository |\n|---------|---------|---------|" >> $docs_output_file
-echo "$version_content" | yq '
-  .helm |
-  map(
-    "| " +
-    .name +
-    " | " +
-    (.version // "") +
-    " | " +
-    .repository +
-    " |"
-  ) |
-  join("\n")
-' >> $docs_output_file
+  echo
+  echo "## Helm Charts"
+  echo
+  echo "| Name | Version | Repository |"
+  echo "|---------|---------|---------|"
+  echo "$version_content" | yq '
+    .helm |
+    map(
+      "| " +
+      .name +
+      " | " +
+      (.version // "") +
+      " | " +
+      .repository +
+      " |"
+    ) |
+    join("\n")
+  '
+} > "$docs_output_file"
