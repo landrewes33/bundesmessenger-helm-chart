@@ -2167,7 +2167,7 @@ additionalConfig:
     # Diese URL wird via /.well-known/matrix/client an die Clients übergeben um die Informationen
     # über den Karten-Server zu erhalten. Wenn der Wert nicht gesetzt ist, wird dem Client die
     # Konfiguration aus `map_style_config` übergeben.
-    map_style_url: null
+    map_style_url: ""
 
     # -- (object) Konfiguration für den Client mit den Informationen über den Tiles Server.
     # Wenn `map_style_url` konfiguriert ist, wird diese Angabe ignoriert.
