@@ -1,0 +1,1 @@
+Korrektur der leeren Variable `federation_custom_ca_list` bei der Auswertung. Contributed by Christoph Wirsing (c.wirsing@cwms.de).
