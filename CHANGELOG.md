@@ -7,6 +7,13 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.8.1 (2024-06-25)
+
+### 🐛 Bugfixes
+
+- Korrektur der leeren Variable `federation_custom_ca_list` bei der Auswertung.
+  Contributed by Christoph Wirsing (c.wirsing@cwms.de). (!410)
+
 ## BundesMessenger Helm Chart 1.8.0 (2024-06-18)
 
 ### ⚠️ Versionshinweise
