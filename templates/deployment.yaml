@@ -171,7 +171,7 @@ spec:
             - name: tmpdir
               mountPath: /tmp
           {{- range $uniqCaSecrets }}
-            - name: {{ printf "fed_ca_%s" .  }}
+            - name: {{ printf "fed-ca-%s" .  }}
               mountPath: /{{ . }}
           {{- end }}
           {{- if .Values.demomode.enabled }}
@@ -197,7 +197,7 @@ spec:
               - key: {{ .Values.signingkey.existingSecretKey | default "signing.key" | quote }}
                 path: signing.key
           {{- range $uniqCaSecrets }}
-        - name: {{ printf "fed_ca_%s" .  }}
+        - name: {{ printf "fed-ca-%s" .  }}
           secret:
             secretName: {{ . }}
           {{- end }}

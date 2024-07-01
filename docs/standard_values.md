@@ -5601,7 +5601,7 @@ true
       <td>Link zur Style Map für den Tiles Server (https://docs.mapbox.com/style-spec/guides/) Diese URL wird via /.well-known/matrix/client an die Clients übergeben um die Informationen über den Karten-Server zu erhalten. Wenn der Wert nicht gesetzt ist, wird dem Client die Konfiguration aus `map_style_config` übergeben.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-null
+""
 </pre>
 </div>
       </td>
