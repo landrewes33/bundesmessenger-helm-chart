@@ -2757,6 +2757,7 @@ false
 </table>
 
 ### Konfiguration für Sygnal
+Reference: https://github.com/matrix-org/sygnal
 
 <table>
   <thead>
@@ -3049,6 +3050,9 @@ false
 </table>
 
 ### Konfiguration für Well-Known-Server
+Dies wird einen NginX-Server einrichten, der auf alle
+/.well-known/matrix/server Anfragen antwortet, um den Verbund zu ermöglichen, ohne
+Hinzufügen von SRV-Einträgen zu DNS.
 
 <table>
   <thead>
@@ -3267,6 +3271,9 @@ true
 </table>
 
 ### Konfiguration für ConfigurationHub-Server
+Dies wird einen NginX-Server einrichten, der notwendige
+Dateien zur Konfiguration und Information der Clients ausliefert
+und die nicht zum Matrix / Synapse-Server gehören
 
 <table>
   <thead>
@@ -3459,6 +3466,9 @@ true
 </table>
 
 ### Konfiguration für Postgres Server
+Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht,
+Wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie
+enabled auf false setzen und den externalPostgresql-Block konfigurieren.
 
 <table>
   <thead>
@@ -3798,6 +3808,9 @@ WIRD NICHT EMPFOHLEN!!
 </table>
 
 ### Konfiguration für Redis Server
+Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
+Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
+false setzen und den externalRedis-Block konfigurieren.
 
 <table>
   <thead>
@@ -4041,6 +4054,10 @@ false
 </table>
 
 ### Konfiguration für Ingress
+Die K8s Ingress-Konfiguration wird sehr häufig verwendet, um
+das gesamte Routing einzurichten, das für die Verwendung mit einer gesplitteten Synapse-Instanz erforderlich ist.
+Wenn Sie keinen Ingress-kompatiblen K8s-Ingress verwenden, müssen Sie
+stattdessen Ihr eigenes Routing einrichten.
 
 <table>
   <thead>
@@ -4231,6 +4248,10 @@ true
 </table>
 
 ### Konfiguration für Matrix-Authentication-Service
+Achtung: Der MAS ist "work in progress" bzw. experimentell, siehe: docs/matrix-authentication-service.md
+Wenn der matrix-authentication-service Pod nicht startet, befinden sich
+die relevanten Fehlermeldungen meist im initContainer "initconfig".
+Reference: https://github.com/matrix-org/matrix-authentication-service
 
 <table>
   <thead>
@@ -5545,6 +5566,12 @@ false
 </table>
 
 ### zusätzliche Konfigurationen für den BundesMessenger
+Konfigurationen, die übergreifend sind und nicht nur eine einzelne Komponenten betreffen.
+Die Abschnitte `config` und `extraConfig` betreffen Einstellungen, die direkt in die
+Konfiguration von Synapse eingehen. Die Abschnitte `wellknown` oder `webclient` betreffen
+bevorzugt diese Komponenten direkt. Die Einstellungen, die hier statt finden,
+greifen komponentenübergreifend, z.B. alle Clients (auch die mobilen Apps)
+und nicht nur den Webclient.
 
 <table>
   <thead>
@@ -5601,7 +5628,7 @@ true
       <td>Link zur Style Map für den Tiles Server (https://docs.mapbox.com/style-spec/guides/) Diese URL wird via /.well-known/matrix/client an die Clients übergeben um die Informationen über den Karten-Server zu erhalten. Wenn der Wert nicht gesetzt ist, wird dem Client die Konfiguration aus `map_style_config` übergeben.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-null
+""
 </pre>
 </div>
       </td>
