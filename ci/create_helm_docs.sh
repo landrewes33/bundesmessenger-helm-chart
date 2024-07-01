@@ -4,10 +4,10 @@
 # Splits `values.yaml` in multiple parts and merges the results.
 # helm-docs is required in PATH.
 
-${HELM_DOCS_OUTPUT_FILE:=docs/standard_values.md}
-${HELM_DOCS_TEMPLATE_HEADER:=ci/header.md.gotmpl}
-${HELM_DOCS_TEMPLATE_VALUES:=ci/values.md.gotmpl}
-${HELM_DOCS_TEMPLATE_FOOTER:=ci/footer.md.gotmpl}
+: "${HELM_DOCS_OUTPUT_FILE:=docs/standard_values.md}"
+: "${HELM_DOCS_TEMPLATE_HEADER:=ci/header.md.gotmpl}"
+: "${HELM_DOCS_TEMPLATE_VALUES:=ci/values.md.gotmpl}"
+: "${HELM_DOCS_TEMPLATE_FOOTER:=ci/footer.md.gotmpl}"
 
 INPUT_FILE=values.yaml
 NEEDLE="##[[:space:]][[:space:]][[:space:]][[:space:]][[:space:]][[:space:]][[:space:]][[:space:]][[:space:]][[:space:]]"
@@ -33,7 +33,7 @@ for file in ./tmp/splitfile_*; do
         # Text of the section headline
         headline=$(sed "s/^${NEEDLE}//;q" "$file")
         # All double hash comments immediately following the headline
-        description=$(sed '1,2d;s/^## //;t;Q' "$file")
+        description=$(sed '1,2d;s/^## //;t;x;q' "$file")
         description=${description:+$description$NEWLINE}
 
         # add lines to correct the line numbers in values.yaml
