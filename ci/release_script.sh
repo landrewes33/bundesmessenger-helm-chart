@@ -91,7 +91,7 @@ nextVersion="${major}.${minor}.${patch}"
 
 printf "\n"
 while true; do
-    printf "Please confirm if calculated verion \"%s\" is correct? (yes/no) " "nextVersion" >&2
+    printf "Please confirm if calculated version \"%s\" is correct? (yes/no) " "$nextVersion" >&2
     read -r yn
     case $yn in
         [Yy]* ) break;;
