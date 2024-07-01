@@ -199,7 +199,7 @@ spec:
               name: tempdir
           {{- end }}
           {{- range $uniqCaSecrets }}
-            - name: {{ printf "fed_ca_%s" .  }}
+            - name: {{ printf "fed-ca-%s" .  }}
               mountPath: /{{ . }}
           {{- end }}
           {{- with $config.volumeMounts | default $default.volumeMounts }}
@@ -240,7 +240,7 @@ spec:
           emptyDir:
             sizeLimit: 10Mi
       {{- range $uniqCaSecrets }}
-        - name: {{ printf "fed_ca_%s" .  }}
+        - name: {{ printf "fed-ca-%s" .  }}
           secret:
             secretName: {{ . }}
       {{- end }}
