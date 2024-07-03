@@ -1113,7 +1113,7 @@ sygnal:
   # -- (maps) Image/Repo-Konfiguration von Sygnal
   image:
     repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal
-    tag: 0.14.1-jammy-production
+    tag: 0.14.3-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (string) Proxy, falls benötigt um die Push-Services zu erreichen.
