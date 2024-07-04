@@ -1,6 +1,6 @@
 # Matrix-Authentication-Service
 
-| :warning:  Aktuell sind die Clients noch nicht mit dem Matrix-Authentication-Service (MAS) vollständig kompatibel. Nutzung wird unsererseits nicht empfohlen. Sollte sich der Zustand ändern, werden wir dies mitteilen. |
+| :warning:  Aktuell sind die Clients noch nicht mit dem Matrix-Authentication-Service (MAS) vollständig kompatibel. Nutzung wird unsererseits nicht empfohlen. Sollte sich der Zustand ändern, werden wir dies mitteilen. Hingegen voll von Synapse unterstützt ist die reine [Anmeldung mit SSO](#anmeldung-via-single-sign-on-sso). |
 | --- |
 
 | :warning: Wichtig: Der Matrix-Authentication-Service (MAS) ist "work in progress" und hat den Status experimentell. Die Migration von einer bestehenden Synapse Installation zum MAS ist noch nicht Bestandteil. Daher kann der MAS derzeit nur für neue Installationen genutzt werden. Eine Migration wird in Zukunft jedoch erforderlich sein. |
@@ -67,6 +67,26 @@ Helm-Chart vorgenommen werden.
 
 Es ist empfohlen für jegliche Kommunikation zum MAS ein SSL-Zertifikat
 zu hinterlegen.
+
+## Anmeldung via Single Sign On (SSO)
+
+Der MAS hat das ambitionierte Ziel, die Nutzerverwaltung vollständig von Matrix
+loszulösen und sie stattdessen über OIDC bereitzustellen [[MSC 3861]].
+Demgegenüber steht die Nutzung von OIDC zur bloßen Nutzerauthorisierung (SSO).
+Diese ist bereits jetzt vollständig von Synapse und den Clients unterstützt.
+
+Im BundesMessenger kann SSO aktiviert werden, indem seine Helm-Konfiguration
+unter [`extraConfig`][bum-extra-config] um den Synapse-Schlüssel
+[`oidc_providers`][synapse-config-oidc-providers] ergänzt wird. Informationen zu
+den benötigten Werten und umfangreiche Beispiele finden sich in der
+[Synapse-Dokumentation zu OIDC][synapse-oidc].
+
+[MSC 3861]: <https://github.com/matrix-org/matrix-spec-proposals/pull/3861>
+[bum-extra-config]:
+    <https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/blob/main/values.yaml#L290>
+[synapse-oidc]: <https://element-hq.github.io/synapse/latest/openid.html>
+[synapse-config-oidc-providers]:
+    <https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#oidc_providers>
 
 ## Weiterführende Links
 
