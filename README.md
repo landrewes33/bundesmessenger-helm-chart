@@ -464,6 +464,7 @@ auch Hinweise zu den einzelnen zusätzlichen Diensten:
 - [Sygnal (Push-Service)](./docs/sygnal_push.md)
 - [Synapse Module](./docs/synapse_modules.md)
 - [Matrix-Authentication-Service](./docs/matrix-authentication-service.md)
+- [Monitoring mit Grafana](./docs/Monitoring-mit-Grafana.md)
 
 # Kontakt und Austausch
 

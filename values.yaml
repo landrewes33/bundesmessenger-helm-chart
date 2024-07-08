@@ -62,9 +62,8 @@ imprintUrl: ""
 adminAPIServerName: ""
 
 ## Monitoring mit Prometheus
-## Grafana-Dashboards
-##   Synapse: https://github.com/element-hq/synapse/blob/develop/contrib/grafana/synapse.json
-##   Sygnal: https://github.com/matrix-org/sygnal/blob/main/contrib/grafana/Sygnal.json
+## Detaillierte Beschreibung mit Grafana-Dashboards in der Dokumentation,
+## siehe [Monitoring mit Grafana](/docs/Monitoring-mit-Grafana.md).
 monitoring:
   # -- (bool) Aktivieren des Monitorings für Synapse-Dienste in Prometheus
   # @default -- false
