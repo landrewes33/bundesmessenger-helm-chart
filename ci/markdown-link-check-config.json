@@ -8,6 +8,10 @@
     {
       "_comment": "It is a repo. Returns always 403.",
       "pattern": "^https://charts.bitnami.com/"
+    },
+    {
+      "_comment": "It’s a localhost address",
+      "pattern": "^https?://localhost"
     }
   ]
 }
