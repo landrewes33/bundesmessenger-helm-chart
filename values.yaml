@@ -1871,6 +1871,7 @@ contentscanner:
   podSecurityContext:
     runAsGroup: 1334
     runAsUser: 1334
+    fsGroup: 1334
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
   # weitere Möglichkeiten:
