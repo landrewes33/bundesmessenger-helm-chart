@@ -38,3 +38,4 @@ towncrier.toml
 pusher-values.yaml
 /docs/images/*.vsdx
 /docs/images/*.jpg
+/docs/images/*.png
