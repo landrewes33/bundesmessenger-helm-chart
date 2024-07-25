@@ -52,7 +52,7 @@ spec:
               mountPath: /mas/config
             - name: tmpdir
               mountPath: /tmp
-          image: "{{ .Values.mas.image.repository }}:{{ .Values.mas.image.tag }}"
+          image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
           imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.mas.securityContext | nindent 12 }}
@@ -64,7 +64,7 @@ spec:
             - -c
             - |
                 mas-cli server --config=/mas/config/config.yaml
-          image: "{{ .Values.mas.image.repository }}:{{ .Values.mas.image.tag }}"
+          image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
           imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.mas.securityContext | nindent 12 }}

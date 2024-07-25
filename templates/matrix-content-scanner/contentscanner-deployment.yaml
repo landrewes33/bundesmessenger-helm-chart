@@ -32,7 +32,7 @@ spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       containers:
       - name: {{ $name }}
-        image: "{{ $config.image.repository }}:{{ $config.image.tag }}"
+        image: "{{ printf "%s/%s:%s" $config.image.registry $config.image.repository $config.image.tag }}"
         imagePullPolicy: "{{ $config.image.pullPolicy }}"
         securityContext:
           {{- $config.securityContext | toYaml | nindent 10 }}

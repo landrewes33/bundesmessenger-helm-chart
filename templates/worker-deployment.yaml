@@ -63,7 +63,7 @@ spec:
             - -c
             - |
               chown {{ $.Values.volumePermissions.uid }}:{{ $.Values.volumePermissions.gid }} -R /synapse/data;
-          image: "{{ $.Values.volumePermissions.image.repository }}:{{ $.Values.volumePermissions.image.tag }}"
+          image: "{{ printf "%s/%s:%s" $.Values.volumePermissions.image.registry $.Values.volumePermissions.image.repository $.Values.volumePermissions.image.tag }}"
           imagePullPolicy: {{ $.Values.volumePermissions.image.pullPolicy }}
           securityContext:
           {{- $.Values.volumePermissions.securityContext | default $default.securityContext | toYaml | nindent 12 }}
@@ -80,7 +80,7 @@ spec:
             - -c
             - |
               cat /tmp/{{ $name }}.worker | sed "s/@@HOSTNAME@@/${HOSTNAME}/" > /synapse/config/{{ $name }}.worker
-          image: "{{ $.Values.image.repository }}:{{ include "matrix-synapse.imageTag" $ }}"
+          image: "{{ printf "%s/%s:%s" $.Values.image.registry $.Values.image.repository ( include "matrix-synapse.imageTag" $ )}}"
           volumeMounts:
           - mountPath: "/tmp/"
             name: temp-worker-config
@@ -144,7 +144,7 @@ spec:
           {{- end }}
           securityContext:
             {{- $config.securityContext | default $default.securityContext | toYaml | nindent 12 }}
-          image: "{{ $.Values.image.repository }}:{{ include "matrix-synapse.imageTag" $ }}"
+          image: "{{ printf "%s/%s:%s" $.Values.image.registry $.Values.image.repository ( include "matrix-synapse.imageTag" $ )}}"
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           ports:
             - name: metrics
