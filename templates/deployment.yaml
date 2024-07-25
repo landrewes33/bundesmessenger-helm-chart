@@ -58,8 +58,8 @@ spec:
             - -c
             - |
               chown {{ .Values.volumePermissions.uid }}:{{ .Values.volumePermissions.gid }} -R /synapse/data
-          image: "{{ .Values.volumePermissions.image.repository }}:{{ .Values.volumePermissions.image.tag }}"
-          imagePullPolicy: {{ $.Values.volumePermissions.image.pullPolicy }}
+          image: "{{ printf "%s/%s:%s" .Values.volumePermissions.image.registry .Values.volumePermissions.image.repository .Values.volumePermissions.image.tag }}"
+          imagePullPolicy: {{ .Values.volumePermissions.image.pullPolicy }}
           resources:
             {{- toYaml .Values.volumePermissions.resources | nindent 12 }}
           securityContext:
@@ -131,7 +131,7 @@ spec:
           {{- with .Values.synapse.extraEnv }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.image.repository }}:{{ include "matrix-synapse.imageTag" . }}"
+          image: "{{ printf "%s/%s:%s" .Values.image.registry .Values.image.repository ( include "matrix-synapse.imageTag" . )}}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.synapse.securityContext | nindent 12 }}

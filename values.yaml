@@ -3,9 +3,10 @@
 ##          Konfiguration für Synapse
 ######################################################################################
 image:
+  registry: registry.opencode.de
   # -- (string) Repository/Image Konfiguration, für Synapse und Workernodes.
   # ursprünglich: "repository: matrixdotorg/synapse"
-  repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse
+  repository: bwi/bundesmessenger/backend/container-images/synapse
 
   # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
   # @default -- wird im Chart.yaml gesetzt
@@ -125,11 +126,12 @@ signingkey:
     annotations: {}
 
     generateImage:
+      registry: registry.opencode.de
       # -- (string) Repository/Image Konfiguration für Synapse-signing-key-job. Es wird dringend
       # empfohlen, dass die gleiche Konfiguration wie vom Synapse bzw. den Workernodes genutzt wird.
       # ursprünglich: "repository: matrixdotorg/synapse"
       # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen (empfohlen)
-      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse
+      repository: bwi/bundesmessenger/backend/container-images/synapse
       # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
       # @default -- wird im Chart.yaml gesetzt
       # tag: ""
@@ -138,7 +140,8 @@ signingkey:
     # -- (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.
     # finaler Tag kann sich noch ändern
     publishImage:
-      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl
+      registry: registry.opencode.de
+      repository: bwi/bundesmessenger/backend/container-images/kubectl
       tag: 1.30.2-jammy-production
       pullPolicy: IfNotPresent
 
@@ -1071,8 +1074,9 @@ volumePermissions:
     runAsUser: 0
 
   image:
+    registry: registry.opencode.de
     # -- (string) das Repository für das zu nutzende Image zur Rechtebereinigung
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/ubuntu
+    repository: bwi/bundesmessenger/backend/container-images/ubuntu
     # -- (string) das Tag für das zu nutzende Image zur Rechtebereinigung
     # Hinweis: noch kein finaler Tag, build version 10 als Alternative zu latest
     tag: latest-jammy-production
@@ -1111,7 +1115,8 @@ sygnal:
   enabled: false
   # -- (maps) Image/Repo-Konfiguration von Sygnal
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/sygnal
     tag: 0.14.3-jammy-production
     pullPolicy: IfNotPresent
 
@@ -1266,7 +1271,8 @@ wellknown:
   # pullSecrets:
   #   - myRegistryKeySecretName
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/nginx
     tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
 
@@ -1334,7 +1340,8 @@ confighub:
   # pullSecrets:
   #   - myRegistryKeySecretName
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/nginx
     tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
 
@@ -1708,7 +1715,8 @@ mas:
   enabled: false
   # -- (object) Konfiguration des Image/Repository
   image:
-    repository: ghcr.io/matrix-org/matrix-authentication-service
+    registry: ghcr.io
+    repository: matrix-org/matrix-authentication-service
     # Tag mit "-debug" um shell zu haben
     tag: 0.8-debug
     pullPolicy: IfNotPresent
@@ -1847,7 +1855,8 @@ contentscanner:
   enabled: false
   # -- (map) Konfiguration des Image/Repository
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/matrix-content-scanner
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/matrix-content-scanner
     tag: 1.0.6-jammy-production
     pullPolicy: IfNotPresent
 
@@ -1892,12 +1901,14 @@ schadcodescanner:
   enabled: false
   # -- (map) Konfiguration des ClamAV-Image/Repository
   clamavImage:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/clamav
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/clamav
     tag: 0.103.9_dfsg-0ubuntu0.22.04.1-jammy-production
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
   icapImage:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/icap
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/icap
     tag: 1_0.5.6-2build1-jammy-production
     pullPolicy: IfNotPresent
     # -- (map) Konfiguration des persistenten Speichers für ClamAV
@@ -2031,7 +2042,8 @@ synapse_admin:
   uri: ""
   # -- (map) Konfiguration des Image vom Modul
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse-admin
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/synapse-admin
     tag: 0.9.1-jammy-production
     pullPolicy: IfNotPresent
 
@@ -2100,7 +2112,8 @@ webclient:
   uri: ""
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
     tag: 2.18.0-jammy-production
     pullPolicy: IfNotPresent
 
@@ -2278,7 +2291,8 @@ networkpolicies:
 tests:
   # -- (map) Konfiguration für das Image der Tests
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/wget
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/wget
     tag: 1.21.2-jammy-production
     pullPolicy: IfNotPresent
 

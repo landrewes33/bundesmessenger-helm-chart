@@ -71,7 +71,7 @@ spec:
           serviceAccountName: {{ include "matrix-synapse.dsgvoExportServiceAccountName" . }}
           containers:
             - name: dsgvo-exporter
-              image: "{{ .Values.signingkey.job.publishImage.repository }}:{{ .Values.signingkey.job.publishImage.tag | default "latest" }}"
+              image: "{{ printf "%s/%s:%s" .Values.signingkey.job.publishImage.registry .Values.signingkey.job.publishImage.repository (.Values.signingkey.job.publishImage.tag | default "latest") }}"
               command:
                 - sh
                 - -c

@@ -50,7 +50,7 @@ spec:
         {{- toYaml .Values.wellknown.podSecurityContext | nindent 8 }}
       containers:
         - name: nginx
-          image: "{{ .Values.wellknown.image.repository }}:{{ .Values.wellknown.image.tag }}"
+          image: "{{ printf "%s/%s:%s" .Values.wellknown.image.registry .Values.wellknown.image.repository .Values.wellknown.image.tag }}"
           imagePullPolicy: {{ .Values.wellknown.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.wellknown.securityContext | nindent 12 }}

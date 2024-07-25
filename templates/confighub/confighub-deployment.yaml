@@ -51,7 +51,7 @@ spec:
         {{- toYaml .Values.confighub.podSecurityContext | nindent 8 }}
       containers:
         - name: nginx
-          image: "{{ .Values.confighub.image.repository }}:{{ .Values.confighub.image.tag }}"
+          image: "{{ printf "%s/%s:%s" .Values.confighub.image.registry .Values.confighub.image.repository .Values.confighub.image.tag  }}"
           imagePullPolicy: {{ .Values.confighub.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.confighub.securityContext | nindent 12 }}
