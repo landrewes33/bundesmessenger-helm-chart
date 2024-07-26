@@ -52,6 +52,9 @@ spec:
               mountPath: /mas/config
             - name: tmpdir
               mountPath: /tmp
+          {{- with .Values.mas.extraVolumeMounts }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
           imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
           securityContext:
@@ -119,6 +122,9 @@ spec:
           emptyDir:
             sizeLimit: 10Mi
             medium: Memory
+      {{- with .Values.mas.extraVolumes }}
+        {{- . | toYaml | nindent 8 }}
+      {{- end }}
 
 ---
 apiVersion: v1

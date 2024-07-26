@@ -1782,6 +1782,21 @@ mas:
     # Default transport: don't send any emails
     transport: blackhole
 
+  # -- (list) Zusätzliche in den MAS zu mountende Datenträger (Volumes)
+  # Beispiel:
+  #  - name: oauth2
+  #    configMap:
+  #      name: oauth
+  extraVolumes: []
+
+  # -- (list) Zusätzliche in den MAS zu mountende Datenträgerpfade (Volumes)
+  # Beispiel:
+  #  - name: oauth2
+  #    mountPath: /etc/ssl/certs/
+  #    subMountPath: oauthprovider.crt
+  #    readOnly: true
+  extraVolumeMounts: []
+
   # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie, Synapse wird immer als
   # sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist.
   # Beachten Sie, dass eine Änderung dieser Einstellung auch die Verwendung der volumePermission

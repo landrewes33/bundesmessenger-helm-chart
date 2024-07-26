@@ -1,0 +1,1 @@
+Ermöglicht dem MAS zusätzliche Volumes und Zertifikate mit `.Values.mas.extraVolumes` und `.Values.mas.extraVolumeMounts` zu präsentieren.
