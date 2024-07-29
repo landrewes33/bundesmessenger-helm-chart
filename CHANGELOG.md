@@ -7,6 +7,18 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.8.2 (2024-07-29)
+
+### ✨ Features
+
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal`
+  auf Version `0.14.3` aktualisiert.
+
+### 🐛 Bugfixes
+
+- Korrektur der Einbindung von Föderationszertifikaten. (!411)
+
 ## BundesMessenger Helm Chart 1.8.1 (2024-06-25)
 
 ### 🐛 Bugfixes
