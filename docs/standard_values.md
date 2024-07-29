@@ -1,6 +1,6 @@
 # bundesmessenger
 
-![Version: 1.8.1](https://img.shields.io/badge/Version-1.8.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.105.1](https://img.shields.io/badge/AppVersion-1.105.1-informational?style=flat-square)
+![Version: 1.8.2](https://img.shields.io/badge/Version-1.8.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.105.1](https://img.shields.io/badge/AppVersion-1.105.1-informational?style=flat-square)
 
 BWI Matrix BundesMessenger
 
@@ -2790,7 +2790,7 @@ false
 {
   "pullPolicy": "IfNotPresent",
   "repository": "registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal",
-  "tag": "0.14.1-jammy-production"
+  "tag": "0.14.3-jammy-production"
 }
 </pre>
 </div>
@@ -5601,7 +5601,7 @@ true
       <td>Link zur Style Map für den Tiles Server (https://docs.mapbox.com/style-spec/guides/) Diese URL wird via /.well-known/matrix/client an die Clients übergeben um die Informationen über den Karten-Server zu erhalten. Wenn der Wert nicht gesetzt ist, wird dem Client die Konfiguration aus `map_style_config` übergeben.</td>
       <td>
         <div style="max-width: 300px;"><pre lang="json">
-""
+null
 </pre>
 </div>
       </td>
