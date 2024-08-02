@@ -1,0 +1,1 @@
+Behebt das Ignorieren der Konfiguration von `externalRedis.password`, wenn eine externe Redis Datenbank genutzt wird.
