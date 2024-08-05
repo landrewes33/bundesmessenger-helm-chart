@@ -974,7 +974,6 @@ workers:
   pusher:
     # -- (bool) Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen.
     # (pusher-worker -> Sygnal -> Push-Provider (Apple od. Google))
-    # Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden
     # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
     enabled: false
 
