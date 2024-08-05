@@ -1,0 +1,1 @@
+Konfiguration des Workers `federation_sender`, sodass er auch den ausgehenden Verkehr sendet ([`outbound_federation_restricted_to`](https://element-hq.github.io/synapse/v1.109/usage/configuration/config_documentation.html#outbound_federation_restricted_to)).
