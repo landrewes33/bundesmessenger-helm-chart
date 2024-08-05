@@ -983,9 +983,12 @@ workers:
     enabled: false
 
   federation_sender:
-    # -- (bool) Dieser Worker sendet Verbundverkehrs (federation traffic)
-    # an andere Matrix-Server.
+    # -- (bool) Dieser Worker verarbeitet den zu sendenden Verbundverkehr (federation traffic)
+    # an andere Matrix-Server. Wenn dieser Worker aktiviert wird, ist er zusätzlich für den
+    # ausgehenden Netzwerkverkehr verantwortlich. (Synapse Einstellung: `outbound_federation_restricted_to`)
+    # Hinweis: Es gibt auch weitere Prozesse die nach extern kommunizieren, wie z.B. Media-Worker.
     enabled: false
+    listeners: [replication]
 
   media_repository:
     # -- (bool) Aktivieren des Media-Worker
