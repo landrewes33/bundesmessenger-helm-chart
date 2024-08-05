@@ -126,8 +126,8 @@ stringData:
     # Default is unspecified.
     #
     ##proxy:
-    {{- if $.Values.sygnal.proxy }}
-    proxy: {{ $.Values.sygnal.proxy | quote }}
+    {{- if .Values.sygnal.proxy }}
+    proxy: {{ .Values.sygnal.proxy | quote }}
     {{- end }}
     ## Metrics #
     #
@@ -186,7 +186,7 @@ stringData:
     ############################# Apps - Config ###########################
     #######################################################################
     apps:
-    {{- $apps := $.Values.sygnal.apps | required "Es müssen Daten für die Push-Notifications hinterlegt werden!" -}}
+    {{- $apps := .Values.sygnal.apps | required "Es müssen Daten für die Push-Notifications hinterlegt werden!" -}}
     {{- with $apps }}
     ## APPs aus value ##
       {{ . | toYaml | nindent 6 }}
