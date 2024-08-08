@@ -184,11 +184,6 @@ data:
       - {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-{{ $i }}
       {{- end }}
 
-    outbound_federation_restricted_to:
-      {{- range $i, $e := until ($config.replicaCount | default $default.replicaCount | int) }}
-      - {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-{{ $i }}
-      {{- end }}
-
         {{- else if or (eq $worker "media_repository") (eq ($config.app | default "") "media_repository") }}
     # For media_repository worker
     enable_media_repo: false
@@ -218,14 +213,14 @@ data:
       {{ $_ := unset $extraConfig "federation_custom_ca_list" }}
     {{- else }}
     {{- /* Korrektur von manuellen Fehlern, falls unterschiedliche Einträge mit und ohne
-    führenden "/" in federation_custom_ca_list hinterlegt wurde.
+    führenden "/" in federation_custom_ca_list hinterlegt wurde. 
     So findet auch Synapse die korrekten Mounts. */}}
       {{- $caList := list }}
       {{- range .Values.extraConfig.federation_custom_ca_list }}
         {{- $caList = printf "/%s" ( trimPrefix "/" . ) | append $caList }}
       {{- end }}
       {{ $caDict := dict "federation_custom_ca_list" ($caList) }}
-      {{ $extraConfig := mustMergeOverwrite $extraConfig $caDict }}
+      {{ $extraConfig := mustMergeOverwrite $extraConfig $caDict }} 
     {{- end }}
 
     {{- with $extraConfig }}
