@@ -331,6 +331,9 @@ extraConfig:
     search_all_users: true
   # -- (bool) Nur Raummitglieder können einen Alias für einen Raum konfigurieren.
   require_membership_for_aliases: true
+  # -- (string) Meldet und löscht alle Geräte, auf die länger als die angegebene Zeitspanne
+  # nicht zugegriffen wurde.
+  delete_stale_devices_after: 90d
   # -- (string) Maximale Speicherzeit für IPs von Nutzern
   user_ips_max_age: 28d
   # -- (bool) Benutzer vergessen Räume beim Verlassen automatisch.
