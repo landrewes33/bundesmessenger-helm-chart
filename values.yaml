@@ -1626,21 +1626,21 @@ ingress:
 
   # -- (list) Hosts, die der Ingress-Konfiguration für die Verarbeitung von
   # Client-to-Server-API-Anfragepfade hinzugefügt werden sollen.
-  # Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
+  # Hinweis: serverName bzw. publicServerName wird einbezogen, wenn includeServerName gesetzt ist. (default)
   # Beispiel:
   #  - matrix.example.com
   csHosts: []
 
   # -- (list) Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung von
   # Server-zu-Server-API-Anfragen hinzugefügt werden sollen.
-  # Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
+  # Hinweis: serverName bzw. publicServerName wird einbezogen, wenn includeServerName gesetzt ist. (default)
   # Beispiel:
   #  - example.com
   hosts: []
 
   # -- (list) Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung von
   # wellknown-Anfragen hinzugefügt werden sollen.
-  # Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
+  # Hinweis: serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
   # Beispiel:
   #  - example.com
   wkHosts: []
@@ -1682,8 +1682,9 @@ ingress:
   # -- (bool) Soll der `/_synapse`-Pfad im Ingress enthalten sein, werden die Client-APIs unter diesem Pfad bereitgestellt.
   includeUnderscoreSynapse: true
 
-  # -- (bool) Sollte `config.serverName` in die Liste der Eingangspfade aufgenommen werden,
-  # kann auf `false` gesetzt werden, wenn die Hauptdomäne auf irgendeine externe Weise verwaltet wird
+  # -- (bool) Nimmt `serverName` bzw. `publicServerName` in die Liste der Domains
+  # für den Ingress mit auf.
+  # Kann auf `false` gesetzt werden, wenn die Hauptdomäne auf irgendeine externe Weise verwaltet wird.
   includeServerName: true
 
   # -- (list) TLS-Konfiguration für Ingress Konfiguration
