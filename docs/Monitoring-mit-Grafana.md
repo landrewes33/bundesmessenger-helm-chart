@@ -58,7 +58,17 @@ Installation abgeschlossen.
 ## Zugriff auf Grafana
 
 Grafana ist ein Visualisierungswerkzeug für Echtzeitdaten mit einer
-Web-Oberfläche. Um Zugriff auf Grafana zu bekommen, kann die
+Web-Oberfläche. Der Zugriff kann entweder über
+
+- [Portweiterleitung aus Kubernetes](#interne-nutzung-mit-portweiterleitung-aus-kubernetes)
+oder
+- durch [Nutzung des Ingress](#allgemeine-nutzung-über-einen-ingress)
+
+erfolgen.
+
+### Interne Nutzung mit Portweiterleitung aus Kubernetes
+
+Um Zugriff auf Grafana zu bekommen, kann die
 Portweiterleitungsfunktion von Kubernetes für den Grafana-Pod verwendet werden:
 
 ```sh
@@ -72,15 +82,44 @@ Benutzer `admin` mit dem Passwort `prom-operator`.
 
 ![Grafana Anmeldemaske „Welcome to Grafana“](images/grafana-login.png)
 
+### Allgemeine Nutzung über einen Ingress
+
+Grafana kann für den direkten Zugriff mit dem Ingress konfiguriert werden.
+Hierfür müssen bei der [Installation oder einem Upgrade](#installation)
+die notwendigen Parameter gesetzt werden. Bei der Installation kann
+die Konfiguration durch die Erweiterung des Installationsbefehls um
+`-f grafana-config.yaml` gesetzt werden.
+
+Die Konfiguration ist entsprechend den eigenen Anforderungen anzupassen.
+
+```yaml
+# grafana-config.yaml
+---
+grafana:
+  enabled: true
+  adminPassword: "<DeinPasswort>"
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    hosts:
+    - dashboard.example.com
+    tls:
+      - secretName: cert-dashboard.example.com
+        hosts:
+        - dashboard.example.com
+```
+
 ## Grafana Dashboards
 
 Um die Echtzeitdaten der verschiedenen BundesMessenger-Komponenten zu
 visualisieren, müssen in Grafana *Dashboards* angelegt werden. Für manche
 Komponenten existieren bereits vorgefertigte Dashboard-Beschreibungen:
 
-- Synapse  
+- Synapse
   https://raw.githubusercontent.com/element-hq/synapse/master/contrib/grafana/synapse.json
-- Sygnal  
+- Sygnal
   https://raw.githubusercontent.com/matrix-org/sygnal/main/contrib/grafana/Sygnal.json
 
 Beim Importieren eines Dashboards nach Grafana kann der Inhalt der JSON-Datei
