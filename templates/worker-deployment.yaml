@@ -29,7 +29,7 @@ spec:
   replicas: {{ $replicaSize }}
   updateStrategy:
     type: RollingUpdate
-  serviceName: "matrix-synapse"
+  serviceName: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}
   selector:
     matchLabels:
       {{- include "matrix-synapse.selectorLabels" $ | nindent 6 }}
