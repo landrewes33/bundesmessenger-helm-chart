@@ -56,7 +56,7 @@ spec:
       securityContext:
         {{- $config.podSecurityContext | default $default.podSecurityContext | toYaml | nindent 8 }}
       initContainers:
-      {{- if and $needsVolumePermissions (not (hasKey ($config.podSecurityContext | default $default.podSecurityContext)  "fsGroup" )) (eq $name "media-repository") }}
+      {{- if and $needsVolumePermissions (not (hasKey ($config.podSecurityContext | default $default.podSecurityContext) "fsGroup" )) (eq $name "media-repository") }}
         - name: volume-permissions
           command:
             - sh

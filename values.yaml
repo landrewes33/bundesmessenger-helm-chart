@@ -703,11 +703,11 @@ workers:
 
     # -- (map) Informationen zum Pod-Sicherheitskontext, die den Worker-Pods mitgeteilt werden sollen.
     # DEFAULT gilt für alle Synapse-Worker-Container.
-    # Beispiele:
-    #   fsGroup: 2666
-    #   runAsGroup: 2666
-    #   runAsUser: 2666
-    podSecurityContext: {}
+    podSecurityContext:
+      runAsNonRoot: true
+      fsGroup: 2666
+      runAsGroup: 2666
+      runAsUser: 2666
 
     # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
     # DEFAULT gilt für alle Synapse-Worker-Container.
