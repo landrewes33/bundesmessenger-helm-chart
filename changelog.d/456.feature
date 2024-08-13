@@ -1,0 +1,1 @@
+Konfiguration ([`delete_stale_devices_after`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#delete_stale_devices_after)) zum Löschen alter Sitzungen und Geräte nach 90 Tagen hinzugefügt.
