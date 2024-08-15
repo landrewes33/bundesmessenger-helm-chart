@@ -1001,6 +1001,7 @@ workers:
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     csPaths:
       - "/_matrix/media/"
+      - "/_matrix/client/v1/media/"
       - "/_synapse/admin/v1/purge_media_cache$"
       - "/_synapse/admin/v1/room/.*/media"
       - "/_synapse/admin/v1/user/.*/media"
@@ -1011,6 +1012,7 @@ workers:
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     paths:
       - "/_matrix/media/"
+      - "/_matrix/federation/v1/media/"
     resources:
       limits:
         # -- (string) Rechenressourcengrenzen, die auf den media_repository-Container anzuwenden sind.
