@@ -94,5 +94,8 @@ mas:
   enabled: true
 
 additionalConfig:
+  verifyJWT:
+    - Token1
+    - Token2
   dsgvoExport:
     enabled: true

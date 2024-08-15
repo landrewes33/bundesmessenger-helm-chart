@@ -1,0 +1,1 @@
+Konfiguration `additionalConfig.verifyJWT` und Endpunkt `/_bum/configure/v1/verify` zur Verifizierung für die Clients hinzugefügt.
