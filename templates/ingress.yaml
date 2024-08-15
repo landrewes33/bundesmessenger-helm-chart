@@ -259,6 +259,13 @@ spec:
               serviceName: {{ $chubName }}
               servicePort: 80
           {{- end }}
+          - path: /_bum/configure/v1/verify
+            backend:
+              service:
+                name: {{ $chubName }}
+                port:
+                  number: 80
+            pathType: Prefix
         {{- end }}
 
         {{- if or (has . $csHosts) (has . $s2sHosts) }}

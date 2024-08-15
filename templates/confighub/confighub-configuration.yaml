@@ -42,6 +42,13 @@ data:
         add_header Content-Type application/json;
         rewrite ^/_matrix/cconfig/style.json /style.json break;
       }
+      location /_bum/configure/v1/verify {
+        include /etc/nginx/conf.d/cors_headers.conf;
+        add_header Content-Type application/json;
+        return 200 '
+          {{- toPrettyJson ( .Values.additionalConfig.verifyJWT | default list ) | nindent 8 }}
+        ';
+      }
     }
   style.json: |
     {{- if .Values.additionalConfig.locationSharing.map_style_config }}

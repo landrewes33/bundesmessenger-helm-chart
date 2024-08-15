@@ -2177,6 +2177,10 @@ webclient:
 
 additionalConfig:
 
+  # -- (list) Liste an JWT, die dem Client bereit gestellt werden, um die Infrastruktur
+  # als legitim auszuweisen. Diese werden via `<public_baseurl>/_bum/configure/v1/verify`
+  verifyJWT: []
+
   dsgvoExport:
     # -- (bool) Fügt Volume und suspended Cronjob hinzu um Benutzer zu exportieren.
     # Weiteres siehe ./docs/DSGVO-Exporter.md
