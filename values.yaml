@@ -1866,13 +1866,39 @@ mas:
 
 
 ######################################################################################
-##          Konfiguration für Matrix-Content-Scanner
+##          Konfiguration für Matrix-Content-Scanner (MCS)
 ######################################################################################
 
 contentscanner:
   # -- (bool) Aktivieren des Matrix-Content-Scanner
   # Mittelsmann zwischen AV und Matrix-Synapse
   enabled: false
+
+  # -- (list) Zusätzliche in den Matrix-Content-Scanner zu mountende Datenträger (Volumes)
+  # Beispiel:
+  #  - name: custom-scanscript
+  #    configMap:
+  #      name: custom-scanscript
+  #      defaultMode: 0755
+  #      items:
+  #      - key: script.sh
+  #        path: script.sh
+  extraVolumes: []
+
+  # -- (list) Zusätzliche in den Matrix-Content-Scanner zu mountende Datenträgerpfade (Volumes)
+  # Beispiel:
+  #  - name: custom-scanscript
+  #    mountPath: /opt/custom/
+  #    subMountPath: script.sh
+  #    readOnly: true
+  extraVolumeMounts: []
+
+  # (string) Names und Pfad des Scriptes welches zum Scannen ausgeführt wird.
+  # Das Script muss in der ConfigMap `contentscanner.existingConfigmap` enthalten sein.
+  # Wenn kein Schadcode gefunden wurde, muss das Script den Exit-Code 0 zurück geben.
+  # siehe: https://github.com/element-hq/matrix-content-scanner-python/blob/da1783c6bce638c3f616fb061425520fc19863a6/config.sample.yaml#L22-L26
+  scanScript: "/opt/scanner.sh"
+
   # -- (map) Konfiguration des Image/Repository
   image:
     registry: registry.opencode.de

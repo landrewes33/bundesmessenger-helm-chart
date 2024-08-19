@@ -23,7 +23,7 @@ data:
     # The script to run to scan a file. This script will be called with a path to the
     # downloaded file as its only argument, e.g. "./example.sh /temp/foo.bar/my_file".
     # Required.
-        script: '/opt/scanner.sh'
+        script: '{{ .Values.contentscanner.scanScript }}'
 
         # The temporary directory to use
         temp_directory: '/tmp'
@@ -173,5 +173,12 @@ data:
       rm ${1}-response;
       exit 1
     fi
+
+  scanner_bypass.sh: |
+    #!/bin/bash
+    # This is an example script to run when a file is scanned.
+    # Caution this script always returns 0 and bypasses the virus scanner.
+    # Only use this if you know what you are doing.
+    exit 0
 
 {{- end }}
