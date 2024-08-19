@@ -68,3 +68,5 @@ Eine Detailbeschreibung der einzelnen Network Policies ist hier zu finden:
 ist eine Kommunikation vom Ingress zu den CertManager Pods im BundeMessenger Namespace
 aktuell nicht möglich. Die default Deny All Policy verbietet dies.
 Hierfür muss aktuell eine eigene Network Policy erstellt werden.
+
+Details sind beim [CertManager beschrieben](https://cert-manager.io/docs/installation/best-practice/#network-requirements-and-network-policy).
