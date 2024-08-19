@@ -256,7 +256,7 @@ Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
   - Eine (Sub-)Domain für den WebClient z.B. `app.example.com`, besser `app.example.net`
   - Eine (Sub-)Domain für die Administrationsoberfläche um den Zugriff zu separieren
   bzw. die Admin-Schnittstelle vor öffentlichen Zugriff zu schützen (Parameter `synapse_admin.uri`)
-- [Kubernetes](https://kubernetes.io/) 1.23+
+- [Kubernetes](https://kubernetes.io/) 1.25+
 - [Helm](https://helm.sh/) 3.11+
 - Ingress Controller (NginX) im Cluster installiert
 - vorgelagerte Loadbalancer und vorkonfigurierte Firewalls, um den Service
