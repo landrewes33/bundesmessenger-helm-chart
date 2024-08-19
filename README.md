@@ -191,7 +191,7 @@ Chart Museum Repository beschrieben.
 Mit dem Repository (Chart Museum) kann sich mit dem folgenden Befehl verbunden werden:
 
 ```console
-helm repo add bundesmessenger https://gitlab.opencode.de/api/v4/projects/560/packages/helm/beta
+helm repo add bundesmessenger https://gitlab.opencode.de/api/v4/projects/560/packages/helm/stable
 ```
 
 Alternativ steht das Helm-Chart auch in der OCI-Registry zur Verfügung.

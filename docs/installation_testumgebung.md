@@ -194,7 +194,7 @@ Installation des BundesMessenger auf dem Kubernetes Cluster:
   helm upgrade --install demo1 bundesmessenger \
     --namespace bum --create-namespace \
     -f bum-configuration.yaml -f bum-tls.yaml \
-    --repo https://gitlab.opencode.de/api/v4/projects/560/packages/helm/beta
+    --repo https://gitlab.opencode.de/api/v4/projects/560/packages/helm/stable
   ```
 
 - OCI-Registry
