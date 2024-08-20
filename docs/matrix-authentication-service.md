@@ -68,6 +68,30 @@ Helm-Chart vorgenommen werden.
 Es ist empfohlen für jegliche Kommunikation zum MAS ein SSL-Zertifikat
 zu hinterlegen.
 
+## Erstellen von Benutzern
+
+Der MAS hat seine eigene Kommandozeile zum anlegen von Benutzern.
+Diese werden im MAS benötigt, wenn die Authentifizierung nicht an einen weiteren
+Authentifizierungsprovider delegiert werden soll, sondern lokal
+am MAS mit Benutzername und Passwort erfolgt.
+Es wird zum aktuellen Zeitpunkt empfohlen direkt eine E-Mailadresse mit anzugeben,
+da die Option `mas.account.email_change_allowed: false` eine initial fehlende
+Adresse zwar anmahnt und den Benutzer später daraufhin weist, aber keine Änderung
+daran zulässt (auch kein hinzufügen, siehe [MAS#3112](https://github.com/matrix-org/matrix-authentication-service/issues/3112)
+und [MAS#1505](https://github.com/matrix-org/matrix-authentication-service/issues/1505)).
+
+Ohne Benutzerinteraktion
+
+```console
+mas-cli manage -c /mas/config/config.yaml register-user nutzer --password SuperSicheresPasswort --admin --yes -e nutzer@example.com
+```
+
+Interaktiv
+
+```console
+mas-cli manage -c /mas/config/config.yaml register-user nutzer
+```
+
 ## Anmeldung via Single Sign On (SSO)
 
 Der MAS hat das ambitionierte Ziel, die Nutzerverwaltung vollständig von Matrix

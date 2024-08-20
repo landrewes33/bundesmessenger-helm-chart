@@ -37,10 +37,7 @@ spec:
             - -c
             - |
                 mas-cli config generate -o /tmp/tmpconf.yaml && sed -i '1,/transport/d;/passwords/,$d' /tmp/tmpconf.yaml
-                mas-cli config dump --config=/tmp/tmpconf.yaml --config=/mas/config/conf.d/config.yaml --config=/mas/config/conf.d/mas-secret.yaml > /mas/config/config.yaml
-                mas-cli config check --config=/mas/config/config.yaml
-                mas-cli database migrate --config=/mas/config/config.yaml
-                mas-cli config sync --prune --config=/mas/config/config.yaml
+                mas-cli config dump --config=/tmp/tmpconf.yaml --config=/mas/config/conf.d/config.yaml --config=/mas/config/conf.d/mas-secret.yaml -o /mas/config/config.yaml
           volumeMounts:
             - name: config
               mountPath: /mas/config/conf.d/config.yaml
@@ -61,12 +58,7 @@ spec:
             {{- toYaml .Values.mas.securityContext | nindent 12 }}
       containers:
         - name: {{ $component }}
-          ## command: [ "mas-cli", "server", "--config=/mas/config/config.yaml" ]
-          command:
-            - sh
-            - -c
-            - |
-                mas-cli server --config=/mas/config/config.yaml
+          command: ["mas-cli", "server", "--config=/mas/config/config.yaml"]
           image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
           imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
           securityContext:
@@ -86,9 +78,9 @@ spec:
           readinessProbe:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          {{- if .Values.mas.startupProbe }}
+          {{- with .Values.mas.startupProbe }}
           startupProbe:
-              {{- .Values.mas.startupProbe | toYaml | nindent 12 }}
+            {{- . | toYaml | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: tmpconf
@@ -108,6 +100,9 @@ spec:
         - name: config
           configMap:
             name: {{ $name }}
+            items:
+              - key: config.yaml
+                path: config.yaml
         - name: secrets
           secret:
             secretName: {{ $name }}

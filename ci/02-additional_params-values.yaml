@@ -92,6 +92,41 @@ demomode:
 
 mas:
   enabled: true
+  # upstream_oauth2_provider:
+  #     - id: 01HFRQFT5QFMJFGF01P7JAV2ME
+  #       human_name: Authentik
+  #       issuer: "https://<authentik-domain>/application/o/<app-slug>/" # TO BE FILLED
+  #       client_id: "<client-id>" # TO BE FILLED
+  #       client_secret: "<client-secret>" # TO BE FILLED
+  #       scope: "openid profile email"
+  #       claims_imports:
+  #         localpart:
+  #           action: require
+  #           template: "{{ user.preferred_username }}"
+  #         displayname:
+  #           action: suggest
+  #           template: "{{ user.name }}"
+  #         email:
+  #           action: suggest
+  #           template: "{{ user.email }}"
+  #           set_email_verification: always
+  #     - id: "01HFS67GJ145HCM9ZASYS9DC3J"
+  #       issuer: "https://gitlab.com"
+  #       human_name: "GitLab"
+  #       brand_name: "gitlab"
+  #       token_endpoint_auth_method: "client_secret_post"
+  #       client_id: "<client-id>" # TO BE FILLED
+  #       client_secret: "<client-secret>" # TO BE FILLED
+  #       scope: "openid profile email"
+  #       claims_imports:
+  #         displayname:
+  #           action: suggest
+  #           template: "{{ user.name }}"
+  #         localpart:
+  #           action: ignore
+  #         email:
+  #           action: suggest
+  #           template: "{{ user.email }}"
 
 additionalConfig:
   verifyJWT:

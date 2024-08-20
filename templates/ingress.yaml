@@ -172,7 +172,7 @@ spec:
         {{- end }}
 
         {{- /* map paths like login to mas instead of Synapse */}}
-        {{- if $.Values.mas.enabled }}
+        {{- if and (has . $csHosts) $.Values.mas.enabled }}
           {{- range $.Values.mas.paths }}
             {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
