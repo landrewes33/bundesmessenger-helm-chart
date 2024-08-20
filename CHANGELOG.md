@@ -70,7 +70,7 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 - Korrektur der Standardkonfiguration von
   `additionalConfig.locationSharing.map_style_url`. (!408)
 - Behebt das Ignorieren der Konfiguration von `externalRedis.password`, wenn
-  eine externe Redis Datenbank genutzt wird. (!447)
+  eine externe Redis Datenbank genutzt wird. Contributed by Simon Haas (@simonhaas:matrix.org). (!447)
 - Erweiterung der `fsGroup` Konfiguration (aus !361) zum Setzen der Permissions
   auf Dateien-Ebene für Worker. (!453)
 - Behebt Probleme mit der DNS-Auflösung von Worker Pods durch einen falsch
