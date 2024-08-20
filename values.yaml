@@ -1723,7 +1723,7 @@ mas:
     registry: ghcr.io
     repository: matrix-org/matrix-authentication-service
     # Tag mit "-debug" um shell zu haben
-    tag: 0.8-debug
+    tag: 0.10.0-debug
     pullPolicy: IfNotPresent
 
   # -- (string) URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider
@@ -1732,7 +1732,7 @@ mas:
   uri: ""
   # -- (object) Zugangsdaten für die benötigte PostreSQL-Datenbank.
   # Diese wird nicht automatisch angelegt und muss bereit gestellt werden.
-  # https://matrix-org.github.io/matrix-authentication-service/setup/database.htmlpostgre#set-up-a-database
+  # https://matrix-org.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
   postgresql:
     database: mas_synapse
     username: massynapse
@@ -1761,12 +1761,53 @@ mas:
   # der Authentifizierung. Die Angaben werden automatisch in die Konfiguration unter
   # `upstream_oauth2.providers` bereit gestellt.
   # https://matrix-org.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
-  # https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#upstream_oauth2
+  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#upstream_oauth2
   upstream_oauth2_provider: []
+
+  # -- (list) OIDC Clients, die zusätzlich zum Synypase Client konfiguriert werden.
+  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#clients
+  clients: []
+
+  # -- (object)
+  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#passwords
+  passwords:
+    # Whether to enable the password database.
+    # If disabled, users will only be able to log in using upstream OIDC providers
+    enabled: true
+
+    # List of password hashing schemes being used
+    # /!\ Only change this if you know what you're doing
+    # TODO: document this section better
+    schemes:
+      - version: 1
+        algorithm: argon2id
+
+  # -- (object)
+  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#account
+  account:
+    # -- (bool) Whether users are allowed to change their email addresses. default: true
+    email_change_allowed: false
+
+    # -- (bool) Whether users are allowed to change their display names. default: true
+    # This should be in sync with the policy in the homeserver configuration.
+    displayname_change_allowed: false
+
+    # -- (bool) Whether to enable self-service password registration. default: false
+    # This has no effect if password login is disabled.
+    password_registration_enabled: false
+
+    # -- (bool) Whether users are allowed to change their passwords. default: true
+    # This has no effect if password login is disabled.
+    password_change_allowed: true
+
+    # -- (bool) Whether email-based password recovery is enabled. default: false
+    # This has no effect if password login is disabled.
+    password_recovery_enabled: false
+
 
   # -- (object) Zusätzliche Policy Konfiguration für MAS.
   # Die Angaben werden automatisch in die Konfiguration unter `policy.data` bereit gestellt.
-  # https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#policy
+  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#policy
   policy:
     admin_users: []
 
@@ -1781,8 +1822,56 @@ mas:
       # -- (bool) require at least one number in a password. default: false
       require_number: true
 
+   # -- (object)
+   # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting
+  rate_limiting:
+    # Limits how many account recovery attempts are allowed.
+    # These limits can protect against e-mail spam.
+    #
+    # Note: these limit also apply to recovery e-mail re-sends.
+    account_recovery:
+      # Controls how many account recovery attempts are permitted
+      # based on source IP address.
+      per_ip:
+        burst: 3
+        per_second: 0.0008
+
+      # Controls how many account recovery attempts are permitted
+      # based on the e-mail address that is being used for recovery.
+      per_address:
+        burst: 3
+        per_second: 0.0002
+
+    # Limits how many login attempts are allowed.
+    #
+    # Note: these limit also applies to password checks when a user attempts to
+    # change their own password.
+    login:
+      # Controls how many login attempts are permitted
+      # based on source IP address.
+      # This can protect against brute force login attempts.
+      per_ip:
+        burst: 3
+        per_second: 0.05
+
+      # Controls how many login attempts are permitted
+      # based on the account that is being attempted to be logged into.
+      # This can protect against a distributed brute force attack
+      # but should be set high enough to prevent someone's account being
+      # casually locked out.
+      per_account:
+        burst: 1800
+        per_second: 0.5
+
+    # Limits how many registrations attempts are allowed,
+    # based on source IP address.
+    # This limit can protect against e-mail spam and against people registering too many accounts.
+    registration:
+      burst: 3
+      per_second: 0.0008
+
   # -- (object) Zusätzliche E-Mail Konfiguration für MAS.
-  # https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#email
+  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#email
   email:
     # Default transport: don't send any emails
     transport: blackhole

@@ -77,18 +77,6 @@ data:
         # Whether to enable the PROXY protocol on the listener
         proxy_protocol: false
 
-    passwords:
-      # Whether to enable the password database.
-      # If disabled, users will only be able to log in using upstream OIDC providers
-      enabled: true
-
-      # List of password hashing schemes being used
-      # /!\ Only change this if you know what you're doing
-      # TODO: document this section better
-      schemes:
-        - version: 1
-          algorithm: argon2id
-
     templates:
       # From where to load the templates
       # This is relative to the current working directory, *not* the config file
@@ -114,11 +102,29 @@ data:
         # This requires mounting the `prometheus` resource to an HTTP listener
         exporter: prometheus
 
+    {{- with .Values.mas.passwords }}
+
+    passwords:
+      {{- . | toYaml | nindent 6 }}
+    {{- end }}
+
+    {{- with .Values.mas.account }}
+
+    account:
+      {{- . | toYaml | nindent 6 }}
+    {{- end }}
+
     {{- with .Values.mas.policy }}
 
     policy:
       data:
         {{- . | toYaml | nindent 8 }}
+    {{- end }}
+
+    {{- with .Values.mas.rate_limiting }}
+
+    rate_limiting:
+      {{- . | toYaml | nindent 6 }}
     {{- end }}
 
 {{- end }}
