@@ -11,11 +11,11 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 
 ### ⚠️ Versionshinweise
 
-- Bisher waren die Angaben der Images nicht einheitlich gehandhabt.
-  Ein Teil der Images war nur durch die Angabe `repository` und einige durch
-  die getrennte Angabe von `registry` und `repository`.
-  In diesem Release haben wir das für alle Images einheitlich mit den Werten
-  `registry` und `repository` umgesetzt. (!433)
+- Bisher wurden die Angaben der Images nicht einheitlich gehandhabt.
+  Ein Teil der Images wurde nur durch die Angabe `repository` und ein weiterer Teil
+  durch die getrennte Angabe von `registry` und `repository` definiert.
+  In diesem Release haben wir die Konfiguration für alle Images einheitlich mit
+  den Werten `registry` und `repository` umgesetzt. (!433)
 - Durch die Korrektur von `spec.serviceName` im `StatefulSet` der Worker kommt
   es bei einem Upgrade zu folgenden Fehler:
   `Forbidden: updates to statefulset spec for fields other than 'replicas',
@@ -84,7 +84,7 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 
 - Dokumentieren des Monitorings mit Grafana. (!413)
 - Dokumentieren von Single Sign On (SSO) ohne den MAS. (!424)
-- Entfernung des überholten Hinweises, dass es es nur einen `pusher`-Worker
+- Entfernung des überholten Hinweises, dass es nur einen `pusher`-Worker
   geben kann. (!450)
 - Aktualisierung der Sygnal Push Dokumentation für die FCM API v1. (!451)
 - Hinweis zur Kompatibilität vom CertManager zu den Network Policies ergänzt.
@@ -97,7 +97,7 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 
 - Anpassung des Matrix-Authentication-Service an das aktuelle Release
   `v0.10.0`. (!311)
-- In der CI Pipeline werden die Images mehr aus den Proxy Caches geladen.
+- In der CI Pipeline werden die Images aus den Proxy Caches geladen.
   (!400)
 - Einbinden von ShellCheck in die CI und Anpassung der Skripte. (!405, !409,
   !414)
