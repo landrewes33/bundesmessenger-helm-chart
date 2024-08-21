@@ -1,0 +1,21 @@
+{{- if .Values.sygnal.enabled }}
+{{- $component := "matrix-sygnal" -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: "push-local"
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  selector:
+    {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+  type: ClusterIP
+  ports:
+    - name: sygnal-port
+      port: 80
+      targetPort: 5000
+{{- end }}
