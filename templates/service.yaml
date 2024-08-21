@@ -36,7 +36,6 @@ spec:
 {{- range $worker, $config := .Values.workers }}
   {{- if and $config.enabled $config.listeners }}
     {{- $name := $worker | replace "_" "-" }}
-    {{- $release := $.Release.Name }}
 ---
 apiVersion: v1
 kind: Service
@@ -62,22 +61,4 @@ spec:
     {{- include "matrix-synapse.selectorLabels" $ | nindent 4 }}
     app.kubernetes.io/component: {{ $name }}
   {{- end }}
-{{- end }}
-
-{{- if .Values.sygnal.enabled }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: "push-local"
-  labels:
-    app.kubernetes.io/component: matrix-sygnal
-spec:
-  selector:
-    app.kubernetes.io/component: matrix-sygnal
-  type: ClusterIP
-  ports:
-    - name: sygnal-port
-      port: 80
-      targetPort: 5000
 {{- end }}
