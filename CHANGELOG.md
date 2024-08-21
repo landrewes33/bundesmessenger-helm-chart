@@ -78,7 +78,8 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 - Netzwerkrichtlinie für den ausgehenden Verkehr für Föderationen ergänzt.
   (!460)
 - Behebt einen Fehler bei dem der `publicServerName` im Ingress nicht die
-  Endpunkte für die Föderation erhält. (!462)
+  Endpunkte für die Föderation erhält. Contributed by Dimitri Schwarz
+  (dimitri.schwarz@muenchen.de) & Jakob-Tobias Winter (@wintix:matrix.org) (!462)
 
 ### 📚 Dokumentation
 
