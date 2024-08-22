@@ -205,12 +205,23 @@ data:
       {{ $passwordDict := dict "password_config" (dict "enabled" false) }}
       {{ $extraConfig := mergeOverwrite $extraConfig $passwordDict }}
     {{- end -}}
+
     {{- /* Entfernen von per default leeren Variable aus ExtraConfig Dictionary
     Synapse does not starts when federation_custom_ca_list is empty.
     https://helm.sh/docs/chart_template_guide/function_list/#unset */}}
     {{- if not .Values.extraConfig.federation_custom_ca_list }}
       {{ $_ := unset $extraConfig "federation_custom_ca_list" }}
-    {{- end -}}
+    {{- else }}
+    {{- /* Korrektur von manuellen Fehlern, falls unterschiedliche Einträge mit und ohne
+    führenden "/" in federation_custom_ca_list hinterlegt wurde. 
+    So findet auch Synapse die korrekten Mounts. */}}
+      {{- $caList := list }}
+      {{- range .Values.extraConfig.federation_custom_ca_list }}
+        {{- $caList = printf "/%s" ( trimPrefix "/" . ) | append $caList }}
+      {{- end }}
+      {{ $caDict := dict "federation_custom_ca_list" ($caList) }}
+      {{ $extraConfig := mustMergeOverwrite $extraConfig $caDict }} 
+    {{- end }}
 
     {{- with $extraConfig }}
 

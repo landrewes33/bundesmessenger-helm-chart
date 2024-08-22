@@ -5,11 +5,11 @@
 
 set -e
 
-scriptDir=$(dirname $(readlink -f "${BASH_SOURCE:-$0}"))
+scriptDir=$(readlink -f "$0" | xargs dirname)
 chart_file=$scriptDir/../Chart.yaml
 
 cur_git_tag_version=$(git describe --tags --abbrev=0 | cut -c2-)
-chart_version=$(grep "^version:" $chart_file | cut -d' ' -f2-)
+chart_version=$(grep "^version:" "$chart_file" | cut -d' ' -f2-)
 
 printf "\n================================================================================\n"
 printf "|                    Welcome to the release script!                            |\n"
@@ -56,8 +56,8 @@ git pull
 
 printf "\n================================================================================\n"
 printf "Check current version:\n"
-printf "  Helm Chart: $chart_version\n"
-printf "  Git Tag:    $cur_git_tag_version\n"
+printf "  Helm Chart: %s\n" "$chart_version"
+printf "  Git Tag:    %s\n" "$cur_git_tag_version"
 
 if [ "$chart_version" = "$cur_git_tag_version" ]; then
     printf "\nVersions are synchron.\n"
@@ -69,13 +69,14 @@ printf "\n======================================================================
 printf "Choose next version\n"
 
 RE='[^0-9]*\([0-9]*\)[.]\([0-9]*\)[.]\([0-9]*\)\([0-9A-Za-z-]*\)'
-major=$(echo $cur_git_tag_version | sed -e "s#$RE#\1#")
-minor=$(echo $cur_git_tag_version | sed -e "s#$RE#\2#")
-patch=$(echo $cur_git_tag_version | sed -e "s#$RE#\3#")
+major=$(echo "$cur_git_tag_version" | sed -e "s#$RE#\1#")
+minor=$(echo "$cur_git_tag_version" | sed -e "s#$RE#\2#")
+patch=$(echo "$cur_git_tag_version" | sed -e "s#$RE#\3#")
 
 printf "\n"
 while true; do
-    read -p "Next version level: major (1), minor (2) or patch (3)? " yn
+    printf "Next version level: major (1), minor (2) or patch (3)? " >&2
+    read -r yn
     case $yn in
         [1]* ) major=$((major + 1)); minor=0; patch=0; branchprefix="release";source="develop"; break;;
         [2]* ) minor=$((minor + 1)); patch=0; branchprefix="release";source="develop"; break;;
@@ -90,7 +91,8 @@ nextVersion="${major}.${minor}.${patch}"
 
 printf "\n"
 while true; do
-    read -p "Please confirm if calculated verion \"${nextVersion}\" is correct? (yes/no) " yn
+    printf "Please confirm if calculated version \"%s\" is correct? (yes/no) " "$nextVersion" >&2
+    read -r yn
     case $yn in
         [Yy]* ) break;;
         [Nn]* ) exit;;
@@ -99,9 +101,9 @@ while true; do
 done
 
 printf "\n================================================================================\n"
-printf "Starting the release ${nextVersion}\n"
+printf "Starting the release %s\n" "$nextVersion"
 
-git checkout -b "$branchprefix/v$nextVersion" $source
+git checkout -b "$branchprefix/v$nextVersion" "$source"
 
 ret=$?
 if [ $ret -ne 0 ]; then
@@ -111,11 +113,11 @@ if [ $ret -ne 0 ]; then
 fi
 
 printf "\n================================================================================\n"
-printf "Create config YAML (ci/versions/v${nextVersion}.yaml)\n"
+printf "Create config YAML (ci/versions/v%s.yaml)\n" "$nextVersion"
 
 # new_config_file=$scriptDir/versions/v${nextVersion}.yaml
 
-$scriptDir/create_version_yaml_file.sh $nextVersion
+"$scriptDir/create_version_yaml_file.sh" "$nextVersion"
 
 printf "\n================================================================================\n"
 printf "Update Helm Chart\n"
@@ -138,56 +140,63 @@ printf "Update Helm Chart\n"
 # printf "\nSet image tags in values.yaml\n"
 # $scriptDir/update_images_in_chart.sh $nextVersion
 
-printf "\nCreate docs (docs/versions/v${nextVersion}.md)\n"
-$scriptDir/create_version_docs.sh $nextVersion
+printf "\nCreate docs (docs/versions/v%s.md)\n" "$nextVersion"
+"$scriptDir/create_version_docs.sh" "$nextVersion"
 
 printf "\nUpdate Chart.yaml\n"
 # synapse_version=$(yq '.[].images[] | select(.name == "Synapse") | .version' $new_config_file)
-yq '(
-        .version = "'$nextVersion'"
-    )' $chart_file | diff -B $chart_file - | patch $chart_file -
+yq "(
+    .version = \"$nextVersion\"
+)" "$chart_file" | diff -B "$chart_file" - | patch "$chart_file" -
 # keep blank lines in YAML: https://github.com/mikefarah/yq/issues/515#issuecomment-1113420114
 
 printf "\n================================================================================\n"
 printf "Commit\n"
 
 git add --no-all \
-    $chart_file \
-    $scriptDir/../changelog.d/* \
-    $scriptDir/versions/v${nextVersion}.yaml \
-    $scriptDir/../docs/versions/v${nextVersion}.md
+    "$chart_file" \
+    "$scriptDir/../changelog.d/"* \
+    "$scriptDir/versions/v${nextVersion}.yaml" \
+    "$scriptDir/../docs/versions/v${nextVersion}.md"
 git commit -a -m "Setting version for the release ${nextVersion}"
 
 printf "\n================================================================================\n"
-read -p "Done, push the branch \"$branchprefix/v$nextVersion\" (yes/no) default to yes? " doPush
+printf "Done, push the branch \"%s/v%s\" (yes/no) default to yes? " "$branchprefix" "$nextVersion" >&2
+read -r doPush
 #doPush=${doPush:-yes}
 
-if [ ${doPush:-yes} = "yes" ]; then
-  printf "Pushing branch \"$branchprefix/v$nextVersion\".\n"
-  git push -u origin "$branchprefix/v$nextVersion"
+if [ "${doPush:-yes}" = "yes" ]; then
+    printf "Pushing branch \"%s/v%s\".\n" "$branchprefix" "$nextVersion"
+    git push -u origin "$branchprefix/v$nextVersion"
 else
     printf "Not pushing, do not forget to push manually!\n"
 fi
 
 
 printf "\n================================================================================\n"
-read -p "Cherry pick or add other commits." yn
+printf "Cherry pick or add other commits. " >&2
+read -r yn
 
 printf "\n================================================================================\n"
-read -p "Create CHANGELOG and review it." yn
+printf "Create CHANGELOG and review it. " >&2
+read -r yn
 # ToDo: optional here with towncrier
 
 printf "\n================================================================================\n"
-read -p "Merge branch into main and push." yn
+printf "Merge branch into main and push. " >&2
+read -r yn
 
 printf "\n================================================================================\n"
-read -p "Check CI pipeline for tagging and mirroring." yn
+printf "Check CI pipeline for tagging and mirroring. " >&2
+read -r yn
 
 printf "\n================================================================================\n"
-read -p "Merge branch main back into develop and push." yn
+printf "Merge branch main back into develop and push. " >&2
+read -r yn
 
 printf "\n================================================================================\n"
-read -p "Delete release branch." yn
+printf "Delete release branch. " >&2
+read -r yn
 
 printf "\n================================================================================\n"
 printf "Done!\n"

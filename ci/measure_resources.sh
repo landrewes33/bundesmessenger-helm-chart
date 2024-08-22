@@ -26,7 +26,7 @@ for minmax in $resources_minmax; do
     for kind in $resources_kind; do
 
         printf '%s' "$minmax $kind"
-        res=$(yq -N '..| .resources? | select(has("'$minmax'")) | .'$minmax'.'$kind'| select (.)' $1)
+        res=$(yq -N "..| .resources? | select(has(\"$minmax\")) | .$minmax.$kind| select (.)" "$1")
 
         # debug, print list of definitions
         # printf '\n%s' $res
@@ -34,10 +34,10 @@ for minmax in $resources_minmax; do
         tot=0
         for i in $res; do
             if expr "$i" : ".*m" > /dev/null || expr "$i" : ".*Mi" > /dev/null ; then
-                i=$(echo $i | sed 's/[^0-9]*//g')
+                i=$(echo "$i" | sed 's/[^0-9]*//g')
                 tot=$(( tot + i ))
             elif  expr "$i" : ".*Gi" > /dev/null ; then
-                i=$(echo $i | sed 's/[^0-9]*//g')
+                i=$(echo "$i" | sed 's/[^0-9]*//g')
                 tot=$(( tot + i*1000 ))
             else
                 tot=$(( tot + i*1000 ))

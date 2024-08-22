@@ -29,8 +29,8 @@ spec:
         {{- toYaml .Values.webclient.podSecurityContext | nindent 8 }}
       initContainers:
       - name: config-build
-        image: "{{ $.Values.webclient.image.repository }}:{{  $.Values.webclient.image.tag }}"
-        imagePullPolicy: {{ $.Values.webclient.image.pullPolicy }}
+        image: "{{ printf "%s/%s:%s" .Values.webclient.image.registry .Values.webclient.image.repository .Values.webclient.image.tag }}"
+        imagePullPolicy: {{ .Values.webclient.image.pullPolicy }}
         securityContext:
           {{- toYaml .Values.webclient.securityContext | nindent 10 }}
         resources:
@@ -50,8 +50,8 @@ spec:
             subPath: temp.json
       containers:
       - name: element
-        image: "{{ $.Values.webclient.image.repository }}:{{  $.Values.webclient.image.tag }}"
-        imagePullPolicy: {{ $.Values.webclient.image.pullPolicy }}
+        image: "{{ printf "%s/%s:%s" .Values.webclient.image.registry .Values.webclient.image.repository .Values.webclient.image.tag }}"
+        imagePullPolicy: {{ .Values.webclient.image.pullPolicy }}
         securityContext:
           {{- toYaml .Values.webclient.securityContext | nindent 10 }}
         resources:

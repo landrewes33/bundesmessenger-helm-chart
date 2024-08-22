@@ -61,3 +61,12 @@ nicht unterstützt.
 
 Eine Detailbeschreibung der einzelnen Network Policies ist hier zu finden:
 [Network Policies Detailbeschreibungen](network_policies_detailbeschreibung.md)
+
+## CertManager und Network Policies
+
+:pushpin: Wenn die Network Polcies aktiviert sind `networkpolicies.enabled: true`,
+ist eine Kommunikation vom Ingress zu den CertManager Pods im BundeMessenger Namespace
+aktuell nicht möglich. Die default Deny All Policy verbietet dies.
+Hierfür muss aktuell eine eigene Network Policy erstellt werden.
+
+Details sind beim [CertManager beschrieben](https://cert-manager.io/docs/installation/best-practice/#network-requirements-and-network-policy).

@@ -22,7 +22,6 @@ mit Hilfe von Terraform am Beispiel der IONOS Cloud.](./installation_k8s_ionos.m
   - [Cert Manager](#cert-manager)
   - [BundesMessenger](#bundesmessenger)
 - [Monitoring](#monitoring)
-  - [kube-prometheus-stack](#kube-prometheus-stack)
 
 ## Installation
 
@@ -195,7 +194,7 @@ Installation des BundesMessenger auf dem Kubernetes Cluster:
   helm upgrade --install demo1 bundesmessenger \
     --namespace bum --create-namespace \
     -f bum-configuration.yaml -f bum-tls.yaml \
-    --repo https://gitlab.opencode.de/api/v4/projects/560/packages/helm/beta
+    --repo https://gitlab.opencode.de/api/v4/projects/560/packages/helm/stable
   ```
 
 - OCI-Registry
@@ -208,20 +207,6 @@ Installation des BundesMessenger auf dem Kubernetes Cluster:
 
 ## Monitoring
 
-Das Monitoring ist kein Bestandteil der BundesMessenger Demo und dient
-nur der Vollständigkeit.
-U.U. ist das Monitoring auch bereits Bestandteil des Services Ihres K8s-Providers.
-
-### kube-prometheus-stack
-
-Installation des
-[kube-prometheus-stack](https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack#kube-prometheus-stack)
-um Performance Kennzahlen zu erhalten.
-
-```shell
-helm upgrade --install kube-prometheus-stack kube-prometheus-stack \
-  --repo https://prometheus-community.github.io/helm-charts \
-  --namespace monitoring --create-namespace
-```
-
-[Informationen zu möglichen Alternativen](https://github.com/prometheus-operator/prometheus-operator#prometheus-operator-vs-kube-prometheus-vs-community-helm-chart)
+Die Echtzeitüberwachung ist kein Bestandteil der BundesMessenger-Testumgebung,
+kann jedoch leicht integriert werden. Informationen zur Einrichtung sind unter
+[Monitoring mit Grafana](./Monitoring-mit-Grafana.md) zu finden.

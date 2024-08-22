@@ -4,7 +4,7 @@
 {{- $uniqCaSecrets := list }}
 {{- range .Values.extraConfig.federation_custom_ca_list }}
   {{- /* extract secret name from cert path - between first both slashes, put them in a list and make it unique */}}
-  {{- $uniqCaSecrets = uniq (append $uniqCaSecrets (split "/" . )._1) -}}
+  {{- $uniqCaSecrets = uniq (append $uniqCaSecrets (split "/" ( trimPrefix "/" . ))._0) }}
 {{- end }}
 {{- range $worker, $config := .Values.workers }}
 {{- if $config.enabled }}
@@ -29,7 +29,7 @@ spec:
   replicas: {{ $replicaSize }}
   updateStrategy:
     type: RollingUpdate
-  serviceName: "matrix-synapse"
+  serviceName: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}
   selector:
     matchLabels:
       {{- include "matrix-synapse.selectorLabels" $ | nindent 6 }}
@@ -56,14 +56,14 @@ spec:
       securityContext:
         {{- $config.podSecurityContext | default $default.podSecurityContext | toYaml | nindent 8 }}
       initContainers:
-      {{- if and $needsVolumePermissions (not (hasKey ($config.podSecurityContext | default $default.podSecurityContext)  "fsGroup" )) (eq $name "media-repository") }}
+      {{- if and $needsVolumePermissions (not (hasKey ($config.podSecurityContext | default $default.podSecurityContext) "fsGroup" )) (eq $name "media-repository") }}
         - name: volume-permissions
           command:
             - sh
             - -c
             - |
               chown {{ $.Values.volumePermissions.uid }}:{{ $.Values.volumePermissions.gid }} -R /synapse/data;
-          image: "{{ $.Values.volumePermissions.image.repository }}:{{ $.Values.volumePermissions.image.tag }}"
+          image: "{{ printf "%s/%s:%s" $.Values.volumePermissions.image.registry $.Values.volumePermissions.image.repository $.Values.volumePermissions.image.tag }}"
           imagePullPolicy: {{ $.Values.volumePermissions.image.pullPolicy }}
           securityContext:
           {{- $.Values.volumePermissions.securityContext | default $default.securityContext | toYaml | nindent 12 }}
@@ -80,7 +80,7 @@ spec:
             - -c
             - |
               cat /tmp/{{ $name }}.worker | sed "s/@@HOSTNAME@@/${HOSTNAME}/" > /synapse/config/{{ $name }}.worker
-          image: "{{ $.Values.image.repository }}:{{ include "matrix-synapse.imageTag" $ }}"
+          image: "{{ printf "%s/%s:%s" $.Values.image.registry $.Values.image.repository ( include "matrix-synapse.imageTag" $ )}}"
           volumeMounts:
           - mountPath: "/tmp/"
             name: temp-worker-config
@@ -144,7 +144,7 @@ spec:
           {{- end }}
           securityContext:
             {{- $config.securityContext | default $default.securityContext | toYaml | nindent 12 }}
-          image: "{{ $.Values.image.repository }}:{{ include "matrix-synapse.imageTag" $ }}"
+          image: "{{ printf "%s/%s:%s" $.Values.image.registry $.Values.image.repository ( include "matrix-synapse.imageTag" $ )}}"
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           ports:
             - name: metrics

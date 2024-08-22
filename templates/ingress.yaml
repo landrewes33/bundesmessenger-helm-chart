@@ -5,7 +5,6 @@
 {{- $chubName := include "matrix-synapse.externalname" (dict "global" . "external" "confighub-nginx") -}}
 {{- $masName := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-authentication-service") -}}
 {{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
-{{- $schadcodescan := $.Values.contentscanner.enabled -}}
 {{- $matrixUri := .Values.publicServerName | default .Values.serverName }}
 {{- if $v1Ingress -}}
 apiVersion: networking.k8s.io/v1
@@ -47,7 +46,7 @@ spec:
   {{- end }}
   {{- $s2sHosts := .Values.ingress.hosts }}
   {{- if .Values.ingress.includeServerName }}
-    {{- $s2sHosts = concat (list .Values.serverName) $s2sHosts }}
+    {{- $s2sHosts = concat (list (.Values.publicServerName | default .Values.serverName)) $s2sHosts }}
   {{- end }}
   {{- $wkHosts := .Values.ingress.wkHosts }}
   {{- if .Values.ingress.includeServerName }}
@@ -157,7 +156,7 @@ spec:
         {{- end }}
         {{- end }}
 
-        {{- if $schadcodescan }}
+        {{- if and (has . $csHosts) $.Values.contentscanner.enabled }}
           - path: /_matrix/media_proxy/unstable/
             backend:
           {{- if $v1Ingress }}
@@ -173,7 +172,7 @@ spec:
         {{- end }}
 
         {{- /* map paths like login to mas instead of Synapse */}}
-        {{- if $.Values.mas.enabled }}
+        {{- if and (has . $csHosts) $.Values.mas.enabled }}
           {{- range $.Values.mas.paths }}
             {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
@@ -260,6 +259,13 @@ spec:
               serviceName: {{ $chubName }}
               servicePort: 80
           {{- end }}
+          - path: /_bum/configure/v1/verify
+            backend:
+              service:
+                name: {{ $chubName }}
+                port:
+                  number: 80
+            pathType: Prefix
         {{- end }}
 
         {{- if or (has . $csHosts) (has . $s2sHosts) }}

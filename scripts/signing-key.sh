@@ -6,8 +6,7 @@ check_key() {
   set +e
 
   echo "Checking for existing signing key..."
-  key="$(kubectl get secret "$SECRET_NAME" -o jsonpath="{.data['signing\.key']}" 2> /dev/null)"
-  [ $? -ne 0 ] && return 1
+  key="$(kubectl get secret "$SECRET_NAME" -o jsonpath="{.data['signing\.key']}" 2> /dev/null)" && return 1
   [ -z "$key" ] && return 2
   return 0
 }

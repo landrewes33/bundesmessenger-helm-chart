@@ -94,6 +94,11 @@ spec:
         - protcoll: TCP
           port: {{ (split ":" . )._1 | quote }}
       {{- end }}
+    {{- else }}
+    {{- /* Federation traffic to internet if no proxy is given */}}
+    - to:
+      - ipBlock:
+          cidr: 0.0.0.0/0
     {{- end }}
 ---
 apiVersion: networking.k8s.io/v1

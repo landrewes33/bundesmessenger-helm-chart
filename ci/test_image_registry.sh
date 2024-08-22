@@ -12,13 +12,13 @@ then
   exit 1
 fi
 
-images=$(yq -N '..|.image?|select(.)' $1 | sort -u)
+images=$(yq -N '..|.image?|select(.)' "$1" | sort -u)
 
 success=0
 error=0
 for item in $images; do
-    printf "Image: $item\n"
-    if $(skopeo inspect "docker://$item" > /dev/null 2>&1); then
+    printf "Image: %s\n" "$item"
+    if skopeo inspect "docker://$item" > /dev/null 2>&1; then
         printf "\033[0;32m✅ Verfügbar\033[0m\n"
         success=$((success+1))
     else
@@ -29,8 +29,8 @@ for item in $images; do
 done
 
 printf "\033[1;35mZusammenfassung\033[0m\n"
-printf "\033[0;32m✅ Verfügbar: $success\033[0m\n"
-printf "\033[0;31m❌ Fehler: $error\033[0m\n"
+printf "\033[0;32m✅ Verfügbar: %s\033[0m\n" "$success"
+printf "\033[0;31m❌ Fehler: %s\033[0m\n" "$error"
 
 if [ "$error" -ne 0 ]; then
     printf "\033[31m❌ Mindestens ein Image wurde nicht gefunden.\033[39m\n"

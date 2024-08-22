@@ -191,7 +191,7 @@ Chart Museum Repository beschrieben.
 Mit dem Repository (Chart Museum) kann sich mit dem folgenden Befehl verbunden werden:
 
 ```console
-helm repo add bundesmessenger https://gitlab.opencode.de/api/v4/projects/560/packages/helm/beta
+helm repo add bundesmessenger https://gitlab.opencode.de/api/v4/projects/560/packages/helm/stable
 ```
 
 Alternativ steht das Helm-Chart auch in der OCI-Registry zur Verfügung.
@@ -256,7 +256,7 @@ Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
   - Eine (Sub-)Domain für den WebClient z.B. `app.example.com`, besser `app.example.net`
   - Eine (Sub-)Domain für die Administrationsoberfläche um den Zugriff zu separieren
   bzw. die Admin-Schnittstelle vor öffentlichen Zugriff zu schützen (Parameter `synapse_admin.uri`)
-- [Kubernetes](https://kubernetes.io/) 1.23+
+- [Kubernetes](https://kubernetes.io/) 1.25+
 - [Helm](https://helm.sh/) 3.11+
 - Ingress Controller (NginX) im Cluster installiert
 - vorgelagerte Loadbalancer und vorkonfigurierte Firewalls, um den Service
@@ -464,6 +464,7 @@ auch Hinweise zu den einzelnen zusätzlichen Diensten:
 - [Sygnal (Push-Service)](./docs/sygnal_push.md)
 - [Synapse Module](./docs/synapse_modules.md)
 - [Matrix-Authentication-Service](./docs/matrix-authentication-service.md)
+- [Monitoring mit Grafana](./docs/Monitoring-mit-Grafana.md)
 
 # Kontakt und Austausch
 

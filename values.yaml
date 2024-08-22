@@ -3,9 +3,10 @@
 ##          Konfiguration für Synapse
 ######################################################################################
 image:
+  registry: registry.opencode.de
   # -- (string) Repository/Image Konfiguration, für Synapse und Workernodes.
   # ursprünglich: "repository: matrixdotorg/synapse"
-  repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse
+  repository: bwi/bundesmessenger/backend/container-images/synapse
 
   # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
   # @default -- wird im Chart.yaml gesetzt
@@ -62,9 +63,8 @@ imprintUrl: ""
 adminAPIServerName: ""
 
 ## Monitoring mit Prometheus
-## Grafana-Dashboards
-##   Synapse: https://github.com/element-hq/synapse/blob/develop/contrib/grafana/synapse.json
-##   Sygnal: https://github.com/matrix-org/sygnal/blob/main/contrib/grafana/Sygnal.json
+## Detaillierte Beschreibung mit Grafana-Dashboards in der Dokumentation,
+## siehe [Monitoring mit Grafana](/docs/Monitoring-mit-Grafana.md).
 monitoring:
   # -- (bool) Aktivieren des Monitorings für Synapse-Dienste in Prometheus
   # @default -- false
@@ -126,11 +126,12 @@ signingkey:
     annotations: {}
 
     generateImage:
+      registry: registry.opencode.de
       # -- (string) Repository/Image Konfiguration für Synapse-signing-key-job. Es wird dringend
       # empfohlen, dass die gleiche Konfiguration wie vom Synapse bzw. den Workernodes genutzt wird.
       # ursprünglich: "repository: matrixdotorg/synapse"
       # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen (empfohlen)
-      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse
+      repository: bwi/bundesmessenger/backend/container-images/synapse
       # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
       # @default -- wird im Chart.yaml gesetzt
       # tag: ""
@@ -139,8 +140,9 @@ signingkey:
     # -- (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.
     # finaler Tag kann sich noch ändern
     publishImage:
-      repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl
-      tag: 1.29.3-jammy-production
+      registry: registry.opencode.de
+      repository: bwi/bundesmessenger/backend/container-images/kubectl
+      tag: 1.30.2-jammy-production
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
@@ -329,6 +331,9 @@ extraConfig:
     search_all_users: true
   # -- (bool) Nur Raummitglieder können einen Alias für einen Raum konfigurieren.
   require_membership_for_aliases: true
+  # -- (string) Meldet und löscht alle Geräte, auf die länger als die angegebene Zeitspanne
+  # nicht zugegriffen wurde.
+  delete_stale_devices_after: 90d
   # -- (string) Maximale Speicherzeit für IPs von Nutzern
   user_ips_max_age: 28d
   # -- (bool) Benutzer vergessen Räume beim Verlassen automatisch.
@@ -701,11 +706,11 @@ workers:
 
     # -- (map) Informationen zum Pod-Sicherheitskontext, die den Worker-Pods mitgeteilt werden sollen.
     # DEFAULT gilt für alle Synapse-Worker-Container.
-    # Beispiele:
-    #   fsGroup: 2666
-    #   runAsGroup: 2666
-    #   runAsUser: 2666
-    podSecurityContext: {}
+    podSecurityContext:
+      runAsNonRoot: true
+      fsGroup: 2666
+      runAsGroup: 2666
+      runAsUser: 2666
 
     # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
     # DEFAULT gilt für alle Synapse-Worker-Container.
@@ -972,7 +977,6 @@ workers:
   pusher:
     # -- (bool) Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen.
     # (pusher-worker -> Sygnal -> Push-Provider (Apple od. Google))
-    # Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden
     # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
     enabled: false
 
@@ -997,6 +1001,7 @@ workers:
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     csPaths:
       - "/_matrix/media/"
+      - "/_matrix/client/v1/media/"
       - "/_synapse/admin/v1/purge_media_cache$"
       - "/_synapse/admin/v1/room/.*/media"
       - "/_synapse/admin/v1/user/.*/media"
@@ -1007,6 +1012,7 @@ workers:
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     paths:
       - "/_matrix/media/"
+      - "/_matrix/federation/v1/media/"
     resources:
       limits:
         # -- (string) Rechenressourcengrenzen, die auf den media_repository-Container anzuwenden sind.
@@ -1072,8 +1078,9 @@ volumePermissions:
     runAsUser: 0
 
   image:
+    registry: registry.opencode.de
     # -- (string) das Repository für das zu nutzende Image zur Rechtebereinigung
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/ubuntu
+    repository: bwi/bundesmessenger/backend/container-images/ubuntu
     # -- (string) das Tag für das zu nutzende Image zur Rechtebereinigung
     # Hinweis: noch kein finaler Tag, build version 10 als Alternative zu latest
     tag: latest-jammy-production
@@ -1112,7 +1119,8 @@ sygnal:
   enabled: false
   # -- (maps) Image/Repo-Konfiguration von Sygnal
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/sygnal
     tag: 0.14.3-jammy-production
     pullPolicy: IfNotPresent
 
@@ -1190,19 +1198,19 @@ sygnal:
 
   # -- (string) iOS-Key Dateiname
   # Wenn iOS Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
-  # Bei Nutzung von iOS-Pushservice, muss Key mit angegeben werden. Weiteres siehe README.md
+  # Bei Nutzung von iOS-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
   # Durch Filename-Vergabe wird der unten angegebene ioskey geladen.
   # Beispiel:
   # ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus der APNS-Sektion
   # der vorhergehenden Apps-Konfiguration übereinstimmen!
   ioskey_filename: ""
-  # -- (string) iOS-Key Datei-Inhalt
+  # -- (string) iOS-Key Datei-Inhalt. Die Zeichenkette muss in Base64 kodiert sein.
   # Beispiel:
   # ioskey_keyvalue: 'HIER KÖNNTE IHR KEY STEHEN'
   ioskey_keyvalue: ""
 
   # -- (string) FCM-Key Dateiname
-  # bei Nutzung von FCM-Pushservice, muss Key mit angegeben werden. Weiteres siehe README.md
+  # bei Nutzung von FCM-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
   # Wenn FCM Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
   # Durch Filename-Vergabe wird der unten angegebene FCM-Service-Account-File geladen
   # Beispiel:
@@ -1267,7 +1275,8 @@ wellknown:
   # pullSecrets:
   #   - myRegistryKeySecretName
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/nginx
     tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
 
@@ -1335,7 +1344,8 @@ confighub:
   # pullSecrets:
   #   - myRegistryKeySecretName
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/nginx
     tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
 
@@ -1618,21 +1628,21 @@ ingress:
 
   # -- (list) Hosts, die der Ingress-Konfiguration für die Verarbeitung von
   # Client-to-Server-API-Anfragepfade hinzugefügt werden sollen.
-  # Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
+  # Hinweis: serverName bzw. publicServerName wird einbezogen, wenn includeServerName gesetzt ist. (default)
   # Beispiel:
   #  - matrix.example.com
   csHosts: []
 
   # -- (list) Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung von
   # Server-zu-Server-API-Anfragen hinzugefügt werden sollen.
-  # Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
+  # Hinweis: serverName bzw. publicServerName wird einbezogen, wenn includeServerName gesetzt ist. (default)
   # Beispiel:
   #  - example.com
   hosts: []
 
   # -- (list) Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung von
   # wellknown-Anfragen hinzugefügt werden sollen.
-  # Hinweis: config.serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
+  # Hinweis: serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
   # Beispiel:
   #  - example.com
   wkHosts: []
@@ -1674,8 +1684,9 @@ ingress:
   # -- (bool) Soll der `/_synapse`-Pfad im Ingress enthalten sein, werden die Client-APIs unter diesem Pfad bereitgestellt.
   includeUnderscoreSynapse: true
 
-  # -- (bool) Sollte `config.serverName` in die Liste der Eingangspfade aufgenommen werden,
-  # kann auf `false` gesetzt werden, wenn die Hauptdomäne auf irgendeine externe Weise verwaltet wird
+  # -- (bool) Nimmt `serverName` bzw. `publicServerName` in die Liste der Domains
+  # für den Ingress mit auf.
+  # Kann auf `false` gesetzt werden, wenn die Hauptdomäne auf irgendeine externe Weise verwaltet wird.
   includeServerName: true
 
   # -- (list) TLS-Konfiguration für Ingress Konfiguration
@@ -1709,9 +1720,10 @@ mas:
   enabled: false
   # -- (object) Konfiguration des Image/Repository
   image:
-    repository: ghcr.io/matrix-org/matrix-authentication-service
+    registry: ghcr.io
+    repository: matrix-org/matrix-authentication-service
     # Tag mit "-debug" um shell zu haben
-    tag: 0.8-debug
+    tag: 0.10.0-debug
     pullPolicy: IfNotPresent
 
   # -- (string) URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider
@@ -1720,7 +1732,7 @@ mas:
   uri: ""
   # -- (object) Zugangsdaten für die benötigte PostreSQL-Datenbank.
   # Diese wird nicht automatisch angelegt und muss bereit gestellt werden.
-  # https://matrix-org.github.io/matrix-authentication-service/setup/database.htmlpostgre#set-up-a-database
+  # https://matrix-org.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
   postgresql:
     database: mas_synapse
     username: massynapse
@@ -1749,12 +1761,53 @@ mas:
   # der Authentifizierung. Die Angaben werden automatisch in die Konfiguration unter
   # `upstream_oauth2.providers` bereit gestellt.
   # https://matrix-org.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
-  # https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#upstream_oauth2
+  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#upstream_oauth2
   upstream_oauth2_provider: []
+
+  # -- (list) OIDC Clients, die zusätzlich zum Synypase Client konfiguriert werden.
+  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#clients
+  clients: []
+
+  # -- (object)
+  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#passwords
+  passwords:
+    # Whether to enable the password database.
+    # If disabled, users will only be able to log in using upstream OIDC providers
+    enabled: true
+
+    # List of password hashing schemes being used
+    # /!\ Only change this if you know what you're doing
+    # TODO: document this section better
+    schemes:
+      - version: 1
+        algorithm: argon2id
+
+  # -- (object)
+  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#account
+  account:
+    # -- (bool) Whether users are allowed to change their email addresses. default: true
+    email_change_allowed: false
+
+    # -- (bool) Whether users are allowed to change their display names. default: true
+    # This should be in sync with the policy in the homeserver configuration.
+    displayname_change_allowed: false
+
+    # -- (bool) Whether to enable self-service password registration. default: false
+    # This has no effect if password login is disabled.
+    password_registration_enabled: false
+
+    # -- (bool) Whether users are allowed to change their passwords. default: true
+    # This has no effect if password login is disabled.
+    password_change_allowed: true
+
+    # -- (bool) Whether email-based password recovery is enabled. default: false
+    # This has no effect if password login is disabled.
+    password_recovery_enabled: false
+
 
   # -- (object) Zusätzliche Policy Konfiguration für MAS.
   # Die Angaben werden automatisch in die Konfiguration unter `policy.data` bereit gestellt.
-  # https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#policy
+  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#policy
   policy:
     admin_users: []
 
@@ -1769,11 +1822,74 @@ mas:
       # -- (bool) require at least one number in a password. default: false
       require_number: true
 
+   # -- (object)
+   # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting
+  rate_limiting:
+    # Limits how many account recovery attempts are allowed.
+    # These limits can protect against e-mail spam.
+    #
+    # Note: these limit also apply to recovery e-mail re-sends.
+    account_recovery:
+      # Controls how many account recovery attempts are permitted
+      # based on source IP address.
+      per_ip:
+        burst: 3
+        per_second: 0.0008
+
+      # Controls how many account recovery attempts are permitted
+      # based on the e-mail address that is being used for recovery.
+      per_address:
+        burst: 3
+        per_second: 0.0002
+
+    # Limits how many login attempts are allowed.
+    #
+    # Note: these limit also applies to password checks when a user attempts to
+    # change their own password.
+    login:
+      # Controls how many login attempts are permitted
+      # based on source IP address.
+      # This can protect against brute force login attempts.
+      per_ip:
+        burst: 3
+        per_second: 0.05
+
+      # Controls how many login attempts are permitted
+      # based on the account that is being attempted to be logged into.
+      # This can protect against a distributed brute force attack
+      # but should be set high enough to prevent someone's account being
+      # casually locked out.
+      per_account:
+        burst: 1800
+        per_second: 0.5
+
+    # Limits how many registrations attempts are allowed,
+    # based on source IP address.
+    # This limit can protect against e-mail spam and against people registering too many accounts.
+    registration:
+      burst: 3
+      per_second: 0.0008
+
   # -- (object) Zusätzliche E-Mail Konfiguration für MAS.
-  # https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#email
+  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#email
   email:
     # Default transport: don't send any emails
     transport: blackhole
+
+  # -- (list) Zusätzliche in den MAS zu mountende Datenträger (Volumes)
+  # Beispiel:
+  #  - name: oauth2
+  #    configMap:
+  #      name: oauth
+  extraVolumes: []
+
+  # -- (list) Zusätzliche in den MAS zu mountende Datenträgerpfade (Volumes)
+  # Beispiel:
+  #  - name: oauth2
+  #    mountPath: /etc/ssl/certs/
+  #    subMountPath: oauthprovider.crt
+  #    readOnly: true
+  extraVolumeMounts: []
 
   # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie, Synapse wird immer als
   # sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist.
@@ -1839,17 +1955,44 @@ mas:
 
 
 ######################################################################################
-##          Konfiguration für Matrix-Content-Scanner
+##          Konfiguration für Matrix-Content-Scanner (MCS)
 ######################################################################################
 
 contentscanner:
   # -- (bool) Aktivieren des Matrix-Content-Scanner
   # Mittelsmann zwischen AV und Matrix-Synapse
   enabled: false
+
+  # -- (list) Zusätzliche in den Matrix-Content-Scanner zu mountende Datenträger (Volumes)
+  # Beispiel:
+  #  - name: custom-scanscript
+  #    configMap:
+  #      name: custom-scanscript
+  #      defaultMode: 0755
+  #      items:
+  #      - key: script.sh
+  #        path: script.sh
+  extraVolumes: []
+
+  # -- (list) Zusätzliche in den Matrix-Content-Scanner zu mountende Datenträgerpfade (Volumes)
+  # Beispiel:
+  #  - name: custom-scanscript
+  #    mountPath: /opt/custom/
+  #    subMountPath: script.sh
+  #    readOnly: true
+  extraVolumeMounts: []
+
+  # (string) Names und Pfad des Scriptes welches zum Scannen ausgeführt wird.
+  # Das Script muss in der ConfigMap `contentscanner.existingConfigmap` enthalten sein.
+  # Wenn kein Schadcode gefunden wurde, muss das Script den Exit-Code 0 zurück geben.
+  # siehe: https://github.com/element-hq/matrix-content-scanner-python/blob/da1783c6bce638c3f616fb061425520fc19863a6/config.sample.yaml#L22-L26
+  scanScript: "/opt/scanner.sh"
+
   # -- (map) Konfiguration des Image/Repository
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/matrix-content-scanner
-    tag: 1.0.5-jammy-production
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/matrix-content-scanner
+    tag: 1.0.6-jammy-production
     pullPolicy: IfNotPresent
 
   replicaCount: 1
@@ -1872,6 +2015,7 @@ contentscanner:
   podSecurityContext:
     runAsGroup: 1334
     runAsUser: 1334
+    fsGroup: 1334
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
   # weitere Möglichkeiten:
@@ -1892,12 +2036,14 @@ schadcodescanner:
   enabled: false
   # -- (map) Konfiguration des ClamAV-Image/Repository
   clamavImage:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/clamav
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/clamav
     tag: 0.103.9_dfsg-0ubuntu0.22.04.1-jammy-production
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
   icapImage:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/icap
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/icap
     tag: 1_0.5.6-2build1-jammy-production
     pullPolicy: IfNotPresent
     # -- (map) Konfiguration des persistenten Speichers für ClamAV
@@ -2031,7 +2177,8 @@ synapse_admin:
   uri: ""
   # -- (map) Konfiguration des Image vom Modul
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse-admin
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/synapse-admin
     tag: 0.9.1-jammy-production
     pullPolicy: IfNotPresent
 
@@ -2100,8 +2247,9 @@ webclient:
   uri: ""
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.16.0-jammy-production
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
+    tag: 2.18.0-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
@@ -2146,6 +2294,10 @@ webclient:
 
 additionalConfig:
 
+  # -- (list) Liste an JWT, die dem Client bereit gestellt werden, um die Infrastruktur
+  # als legitim auszuweisen. Diese werden via `<public_baseurl>/_bum/configure/v1/verify`
+  verifyJWT: []
+
   dsgvoExport:
     # -- (bool) Fügt Volume und suspended Cronjob hinzu um Benutzer zu exportieren.
     # Weiteres siehe ./docs/DSGVO-Exporter.md
@@ -2167,7 +2319,7 @@ additionalConfig:
     # Diese URL wird via /.well-known/matrix/client an die Clients übergeben um die Informationen
     # über den Karten-Server zu erhalten. Wenn der Wert nicht gesetzt ist, wird dem Client die
     # Konfiguration aus `map_style_config` übergeben.
-    map_style_url: null
+    map_style_url: ""
 
     # -- (object) Konfiguration für den Client mit den Informationen über den Tiles Server.
     # Wenn `map_style_url` konfiguriert ist, wird diese Angabe ignoriert.
@@ -2278,7 +2430,8 @@ networkpolicies:
 tests:
   # -- (map) Konfiguration für das Image der Tests
   image:
-    repository: registry.opencode.de/bwi/bundesmessenger/backend/container-images/wget
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/wget
     tag: 1.21.2-jammy-production
     pullPolicy: IfNotPresent
 

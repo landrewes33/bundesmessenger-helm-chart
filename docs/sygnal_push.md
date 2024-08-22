@@ -1,23 +1,24 @@
 # Push-Service mit Sygnal
 
 Um diesen Dienst nutzen zu können, muss der Matrix-Dienst mit der öffentlichen
-(bzw. closed network) erreichbaren URL des Matrix-Servers bei der BWI GmbH registiert
+(bzw. closed network) erreichbaren URL des Matrix-Servers bei der BWI GmbH registriert
 und freigeschaltet sein.
 Dadurch erhalten Sie von uns die entsprechende Konfiguration,
 mit der Sie den Dienst aktivieren und nutzen können.
 
-Den Nutzern werden damit Benachrichtungen bei neuen ungelesenen Nachrichten
+Den Nutzern werden damit Benachrichtigungen bei neuen ungelesenen Nachrichten
 auf den mobilen Apps angezeigt.
 
-<!-- markdownlint-disable MD036 -->
-_Quelle: https://github.com/matrix-org/sygnal_
-<!-- markdownlint-enable MD036 -->
+- Quelle: https://github.com/matrix-org/sygnal
+- Beispielkonfiguration: https://github.com/matrix-org/sygnal/blob/main/sygnal.yaml.sample
 
 ## App-Typen
 
-Es gibt zwei unterstützte App-Typen:
+Sygnal unterstützt Push-Benachrichtigungen über den
+[Apple Push Notification Service (APNS)](#apple-ios-apns)
+und über das [Firebase Cloud Messaging (FCM)](#google-android-gcm) von Google.
 
-### apns
+### Apple iOS (`apns`)
 
 Damit werden Push-Benachrichtigungen an iOS-Apps über den
 Apple Push Notification Service (APNS) gesendet.
@@ -46,42 +47,40 @@ Für beide Typen wird zusätzlich optional akzeptiert:
   `apns-push-type`-Header an APNs gesendet wird. Wenn er nicht angegeben wird,
   wird der Header nicht gesendet.
 
-### gcm
+Das `keyfile` wird durch die Parameter `ioskey_filename` und `ioskey_keyvalue` in
+die Infrastruktur eingebunden. `ioskey_filename` definiert den Dateinamen, der
+mit der Angabe unter `keyfile` korrelieren muss und `ioskey_keyvalue`
+entspricht dem Inhalt der Datei und ist Base64 kodiert.
 
-Diese Funktion sendet Nachrichten über Google/Firebase Cloud Messaging
-(GCM/FCM) und kann daher verwendet werden, um Benachrichtigungen an
-Android-Anwendungen zu übermitteln. Der Parameter `api_key` muss den
-`Server-Schlüssel` enthalten, der von der Firebase-Konsole unter
-`https://console.firebase.google.com/project/<PROJEKTNAME>/settings/cloudmessaging/`
-abgerufen werden kann.
+### Google Android (`gcm`)
+
+Diese Funktion sendet Nachrichten über (Google) Firebase Cloud Messaging
+(FCM, ehemals GCM) und kann verwendet werden, um Benachrichtigungen an
+Android-Anwendungen zu übermitteln.
+
+- Der Parameter `api_version` muss `v1` enthalten
+- Der Parameter `project_id` muss die `Projekt-ID` enthalten, die von der
+  Firebase-Konsole unter folgender Adresse abgerufen werden kann:
+  `https://console.cloud.google.com/project/<PROJECT NAME>/settings/general/`
+- Der Parameter `service_account_file`, der den Pfad zur Dienstkontodatei enthält,
+  die in der Firebase-Konsole unter folgender Adresse abgerufen werden kann:
+  `https://console.firebase.google.com/project/<PROJECT NAME>/settings/serviceaccounts/adminsdk`
+
+Das `service_account_file` wird durch die Parameter `fcmkey_filename` und
+`fcmkey_keyvalue` in die Infrastruktur eingebunden. `fcmkey_filename` definiert
+den Dateinamen, der mit der Angabe unter `service_account_file` korrelieren muss
+und `fcmkey_keyvalue` entspricht dem Inhalt der Datei (YAML-Dictionary).
 
 ## Verwendung eines HTTP-Proxys für ausgehenden Datenverkehr
 
 Sygnal erkennt standardmäßig beim Start automatisch eine
 `HTTPS_PROXY`-Umgebungsvariable.
-
 Wenn eine solche vorhanden ist, wird sie für den ausgehenden Datenverkehr zu
-APNs und GCM/FCM verwendet.
+APNS und FCM verwendet.
 
 Derzeit werden nur HTTP-Proxys mit der CONNECT-Methode unterstützt. (Sowohl
-APNs als auch FCM verwenden HTTPS-Verkehr, der in einem CONNECT-Tunnel
+APNS als auch FCM verwenden HTTPS-Verkehr, der in einem CONNECT-Tunnel
 getunnelt wird).
 
-Wenn Sie möchten, können Sie stattdessen einen HTTP-CONNECT-Proxy in der Datei
-`sygnal.yaml` konfigurieren.
-
-## Konfiguration der Pusher-Daten
-
-Die folgenden Parameter können im Wörterbuch `data` angegeben werden, das bei
-der Konfiguration des Pusher über `POST /_matrix/client/v3/pushers/set`
-angegeben wird:
-
-`default_payload`: ein Wörterbuch, das die grundlegende Nutzlast definiert,
-die an den Benachrichtigungsdienst gesendet wird. Sygnal fügt die für das
-Push-Ereignis spezifischen Informationen in dieses Wörterbuch ein. Wenn es
-nicht gesetzt ist, wird das leere Wörterbuch verwendet.
-
-Dies kann für Clients nützlich sein, um Standard-Push-Payload-Inhalte
-festzulegen. So haben iOS-Clients beispielsweise die Freiheit,
-stille/veränderbare Benachrichtigungen zu verwenden und können einige
-Standardfelder für Warnungen/Töne/Badges festlegen.
+Alternativ kann der Proxy direkt in der Konfiguration über den Schalter `proxy`
+angegeben werden.

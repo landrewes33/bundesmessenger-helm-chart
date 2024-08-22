@@ -32,7 +32,7 @@ spec:
         {{- $config.podSecurityContext | toYaml | nindent 8 }}
       containers:
       - name: clamav
-        image: "{{ $config.clamavImage.repository }}:{{ $config.clamavImage.tag }}"
+        image: "{{ printf "%s/%s:%s" $config.clamavImage.registry $config.clamavImage.repository $config.clamavImage.tag }}"
         imagePullPolicy: "{{ $config.clamavImage.pullPolicy | default  "IfNotPresent" }}"
         securityContext:
           {{- $config.clamavSecurityContext | default "" | toYaml | nindent 10 }}
@@ -80,7 +80,7 @@ spec:
               - '-c'
               - /clamav/config/clamdcheck.conf
       - name: c-icap-server
-        image: "{{ $config.icapImage.repository }}:{{ $config.icapImage.tag }}"
+        image: "{{ printf "%s/%s:%s" $config.icapImage.registry $config.icapImage.repository $config.icapImage.tag }}"
         imagePullPolicy: "{{ $config.icapImage.pullPolicy | default  "IfNotPresent" }}"
         securityContext:
           {{- $config.icapSecurityContext | default "" | toYaml | nindent 10 }}
