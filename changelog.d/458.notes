@@ -1,6 +1,0 @@
-Durch die Korrektur von `spec.serviceName` im `StatefulSet` der Worker kommt es bei einem Upgrade zu folgenden Fehler:
-`Forbidden: updates to statefulset spec for fields other than 'replicas', 'ordinals', 'template', 'updateStrategy',
-'persistentVolumeClaimRetentionPolicy' and 'minReadySeconds' are forbidden`.
-Die betroffenen `StatefulSet` müssen vor dem Upgrade manuell gelöscht werden. Das betrifft alle konfigurierten Worker.
-Im Standardfall sind es `<Release.Name>-generic-worker` und `<Release.Name>-media-repository`.
-Beispiel: `kubectl delete statefulsets <Release.Name>-generic-worker -n <Release.Namespace>`.

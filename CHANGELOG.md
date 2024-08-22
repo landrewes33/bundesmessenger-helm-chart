@@ -7,6 +7,143 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.9.0 (2024-08-22)
+
+### ⚠️ Versionshinweise
+
+- Bisher wurden die Angaben der Images nicht einheitlich gehandhabt.
+  Ein Teil der Images wurde nur durch die Angabe `repository` und ein weiterer Teil
+  durch die getrennte Angabe von `registry` und `repository` definiert.
+  In diesem Release haben wir die Konfiguration für alle Images einheitlich mit
+  den Werten `registry` und `repository` umgesetzt. (!433)
+- Durch die Korrektur von `spec.serviceName` im `StatefulSet` der Worker kommt
+  es bei einem Upgrade zu folgenden Fehler:
+  `Forbidden: updates to statefulset spec for fields other than 'replicas',
+  'ordinals', 'template', 'updateStrategy',
+  'persistentVolumeClaimRetentionPolicy' and 'minReadySeconds' are forbidden`.
+  Die betroffenen `StatefulSet` müssen vor dem Upgrade manuell gelöscht werden.
+  Das betrifft alle konfigurierten Worker.
+  Im Standardfall sind es `<Release.Name>-generic-worker` und
+  `<Release.Name>-media-repository`.
+  Beispiel: `kubectl delete statefulsets <Release.Name>-generic-worker -n
+  <Release.Namespace>`. (!458)
+- Wir haben den Kanal der Veröffentlichung des Helm Charts in dem Gitlab Helm
+  Repository
+  von `beta` auf `stable` aktualisiert. D.h., dass sich die URL von
+
+  - `https://gitlab.opencode.de/api/v4/projects/560/packages/helm/beta` zu
+  - `https://gitlab.opencode.de/api/v4/projects/560/packages/helm/stable`
+
+  ändert.
+
+  Nicht betroffen sind Benutzer, die die OCI-Registry benutzen. Diese bleibt
+  unverändert bei
+`oci://registry.opencode.de/bwi/bundesmessenger/backend/helm-chart/bundesmessenger`.
+  (!465)
+
+### ✨ Features
+
+- Konfiguration `additionalConfig.verifyJWT` und Endpunkt
+  `/_bum/configure/v1/verify` zur Verifizierung für die Clients hinzugefügt.
+  (!437)
+- Ermöglicht dem MAS zusätzliche Volumes und Zertifikate mit
+  `.Values.mas.extraVolumes` und `.Values.mas.extraVolumeMounts` zu
+  präsentieren. (!441)
+- Erlaubt das Konfigurieren eines eigenen Scan-Skriptes
+  (`contentscanner.scanScript`) für dem Matrix-Content-Scanner um nicht den
+  ClamAV Scanner nutzen zu müssen. (!444)
+- Konfiguration
+  ([`delete_stale_devices_after`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#delete_stale_devices_after))
+  zum Löschen alter Sitzungen und Geräte nach 90 Tagen hinzugefügt. (!456)
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web`
+  auf Version `2.18.0` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl`
+  auf Version `1.30.2` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/matrix-content-scanner`
+  auf Version `1.0.6` aktualisiert.
+
+### 🐛 Bugfixes
+
+- Korrektur der Standardkonfiguration von
+  `additionalConfig.locationSharing.map_style_url`. (!408)
+- Behebt das Ignorieren der Konfiguration von `externalRedis.password`, wenn
+  eine externe Redis Datenbank genutzt wird.
+  Contributed by Simon Haas (@simonhaas:matrix.org). (!447)
+- Erweiterung der `fsGroup` Konfiguration (aus !361) zum Setzen der Permissions
+  auf Dateien-Ebene für Worker. (!453)
+- Behebt Probleme mit der DNS-Auflösung von Worker Pods durch einen falsch
+  konfigurierten `spec.serviceName` im `StatefulSet`. (!458)
+- Netzwerkrichtlinie für den ausgehenden Verkehr für Föderationen ergänzt.
+  (!460)
+- Behebt einen Fehler bei dem der `publicServerName` im Ingress nicht die
+  Endpunkte für die Föderation erhält. Contributed by Dimitri Schwarz
+  (dimitri.schwarz@muenchen.de) & Jakob-Tobias Winter (@wintix:matrix.org) (!462)
+
+### 📚 Dokumentation
+
+- Dokumentieren des Monitorings mit Grafana. (!413)
+- Dokumentieren von Single Sign On (SSO) ohne den MAS. (!424)
+- Entfernung des überholten Hinweises, dass es nur einen `pusher`-Worker
+  geben kann. (!450)
+- Aktualisierung der Sygnal Push Dokumentation für die FCM API v1. (!451)
+- Hinweis zur Kompatibilität vom CertManager zu den Network Policies ergänzt.
+  (!454, !471)
+- Dokumentation der Benutzung von Grafana mit Hilfe des Ingress ergänzt. (!457)
+- Informationen zur Konfiguration und Nutzung von Application Services
+  hinzugefügt. (!467)
+
+### 📝 Weitere Änderungen
+
+- Anpassung des Matrix-Authentication-Service an das aktuelle Release
+  `v0.10.0`. (!311)
+- In der CI Pipeline werden die Images aus den Proxy Caches geladen.
+  (!400)
+- Einbinden von ShellCheck in die CI und Anpassung der Skripte. (!405, !409,
+  !414)
+- Zugangsdaten für Firebase via Pusher-values aktualisiert. (!428, !432)
+- Einheitliche Umsetzung getrennter Angaben von `registry` und `repository` für
+  alle Definitionen der Images. (!433)
+- Hinzufügen der `fsGroup` Konfiguration für den Matrix-Content-Scanner (MCS).
+  (!434)
+- Verbesserter Umgang mit den Pfadangaben bei eingebundenen Zertifikaten für
+  Synapse. (!436)
+- Aktualisierung von `.helmignore` um Bilder aus dem Deployment zu halten.
+  (!438)
+- Automatisches Upgrade der Renovate Konfiguration. (!445)
+- Alte Hinweise zur Migration von Bitnami PostgreSQL Zugangsdaten entfernt.
+  (!446)
+- Wechsel des genutzten Kanals (channel) der Gitlab Helm Repository von `beta`
+  zu `stable`. (!465)
+- Neue
+  [HTTP-Medien-Endpunkte](https://matrix.org/docs/spec-guides/authed-media-servers/)
+  für [Matrix 1.11](https://spec.matrix.org/v1.11/client-server-api/)
+  und [MSC3916](https://github.com/matrix-org/matrix-spec-proposals/pull/3916)
+  hinzugefügt. (!466)
+- Sygnal Service in eigene Template Datei verschoben. (!473)
+- `ghcr.io/renovatebot/renovate` in der CI-Pipeline auf Version `38`
+  aktualisiert.
+- `kindest/node` in der CI-Pipeline auf aktuelles Patch-Level aktualisiert.
+- `kubernetes-sigs/kind` in der CI-Pipeline auf Version `v0.24.0` aktualisiert.
+- `kubernetes-sigs/kustomize` in der CI-Pipeline auf Version `5.4.3`
+  aktualisiert.
+- `kyverno/kyverno` in der CI-Pipeline auf Version `v1.12.5` aktualisiert.
+- `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
+  `v0.76.0` aktualisiert.
+- `registry-1.docker.io/alpine/helm` in der CI-Pipeline auf Version `3.15.4`
+  aktualisiert.
+- `registry-1.docker.io/aquasec/trivy` in der CI-Pipeline auf Version `0.54.1`
+  aktualisiert.
+- `registry-1.docker.io/jnorwood/helm-docs` in der CI-Pipeline auf Version
+  `v1.14.2` aktualisiert.
+- `registry-1.docker.io/library/docker` in der CI-Pipeline auf Version `27`
+  aktualisiert.
+- `registry-1.docker.io/sonarsource/sonar-scanner-cli` in der CI-Pipeline auf
+  Version `11.0` aktualisiert.
+- `towncrier` in der CI-Pipeline auf Version `24.7.1` aktualisiert.
+
 ## BundesMessenger Helm Chart 1.8.2 (2024-07-29)
 
 ### ✨ Features
