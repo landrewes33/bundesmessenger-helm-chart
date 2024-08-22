@@ -1,1 +1,0 @@
-Behebt Probleme mit der DNS-Auflösung von Worker Pods durch einen falsch konfigurierten `spec.serviceName` im `StatefulSet`.

@@ -1,1 +1,0 @@
-Image `registry.opencode.de/bwi/bundesmessenger/backend/container-images/matrix-content-scanner` auf Version `1.0.6` aktualisiert.

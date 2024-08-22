@@ -1,1 +1,0 @@
-Behebt einen Fehler bei dem der `publicServerName` im Ingress nicht die Endpunkte für die Föderation erhält.

@@ -1,1 +1,0 @@
-Erlaubt das Konfigurieren eines eigenen Scan-Skriptes (`contentscanner.scanScript`) für dem Matrix-Content-Scanner um nicht den ClamAV Scanner nutzen zu müssen.

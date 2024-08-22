@@ -1,1 +1,0 @@
-Erweiterung der `fsGroup` Konfiguration (aus !361) zum Setzen der Permissions auf Dateien-Ebene für Worker.

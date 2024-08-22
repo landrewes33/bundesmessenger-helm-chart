@@ -1,3 +1,0 @@
-Bisher waren die Angaben der Images nicht einheitlich gehandhabt.
-Ein Teil der Images war nur durch die Angabe `repository` und einige durch die getrennte Angabe von `registry` und `repository`.
-In diesem Release haben wir das für alle Images einheitlich mit den Werten `registry` und `repository` umgesetzt.
