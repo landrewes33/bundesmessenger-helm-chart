@@ -465,6 +465,7 @@ auch Hinweise zu den einzelnen zusätzlichen Diensten:
 - [Synapse Module](./docs/synapse_modules.md)
 - [Matrix-Authentication-Service](./docs/matrix-authentication-service.md)
 - [Monitoring mit Grafana](./docs/Monitoring-mit-Grafana.md)
+- [Föderation](./docs/federation.md)
 
 # Kontakt und Austausch
 
