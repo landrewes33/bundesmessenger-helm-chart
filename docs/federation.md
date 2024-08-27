@@ -58,6 +58,40 @@ Neben der "normalen" Kommunikation zwischen den Matrix-Servern, werden noch:
 
 durchgeführt.
 
+### Selbstsignierte Zertifikate und private Certificate Authorities (CA)
+
+Innerhalb privater Föderationen kann es vorkommen, den Netzwerkverkehr über
+selbstsignierte Zertifikate oder Zertifikate aus privaten selbsterstellten
+Root-CAs abzusichern.
+
+Dafür bietet das Helm Chart die Möglichkeit, die Zertifikate im PEM Format
+der Gegenseite einzubinden. Dieses Verfahren nimmt dem Synapse allerdings die
+vom Betriebssystem bereitgestellten Zertifikate (siehe [Synapse Dokumentation](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#federation_custom_ca_list)).
+
+Dieses Verfahren übergibt dem Synapse die zu vertrauenden Zertifikate und deren
+eventuell verwendeten privaten Root-CAs für den verschlüsselten Verbindungsaufbau
+innerhalb einer privaten Föderation. Ein Hinzufügen in den
+vorhandenen Zertifikatsspeicher des Betriebssystems des Hosts, auf dem
+der entsprechende Container laufen soll, stellt eine höhere Komplexität dar.
+
+Die Variable `extraConfig.federation_custom_ca_list` wird als Liste
+geführt und die Einträge bauen sich nach der folgenden Struktur auf:
+
+```yaml
+extraConfig:
+  federation_custom_ca_list:
+    - /Secret/Zertifikatsdatei
+```
+
+Der führende `/` und die Angabe einer Zertifikatsdatei ist optional,
+das Secret muss an dieser Stelle aber korrekt übergeben werden.
+
+Es kann somit in einem Secret mehrere Zertifikatsdateien an den Synapse
+gegeben werden.
+
+Die Aktualisierung und Überwachung der Aktualität der Zertifikate im PEM Format
+obliegen dem verantwortlichen Administrator.
+
 ## Weiterführende Themen
 
 - [Aufbau von Benutzernamen](../README.md#benutzernamen)
