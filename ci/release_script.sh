@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # Script to help creating a release
-# skopeo (not more) and yq are required in PATH.
+# git and yq are required in PATH.
 
 set -e
 
@@ -25,14 +25,6 @@ if [ $ret -ne 0 ]; then
     printf "Fatal: git is not installed in the environment.\n"
     envError=1
 fi
-
-# # skopeo
-# skopeo --version
-# ret=$?
-# if [ $ret -ne 0 ]; then
-#     printf "Fatal: skopeo is not installed in the environment.\n"
-#     envError=1
-# fi
 
 # yq
 yq --version
@@ -121,21 +113,6 @@ printf "Create config YAML (ci/versions/v%s.yaml)\n" "$nextVersion"
 
 printf "\n================================================================================\n"
 printf "Update Helm Chart\n"
-
-# printf "\n"
-# while true; do
-#     read -p "Would you like update used images/tag? (ask/auto/no) " yn
-#     case $yn in
-#         ask* )
-#             $scriptDir/get_newest_image_tags.sh -f $nextVersion -t ask
-#             break;;
-#         auto* )
-#             $scriptDir/get_newest_image_tags.sh -f $nextVersion -t update
-#             break;;
-#         [Nn]* ) break;;
-#         * ) echo "Please answer yes or no.";;
-#     esac
-# done
 
 # printf "\nSet image tags in values.yaml\n"
 # $scriptDir/update_images_in_chart.sh $nextVersion
