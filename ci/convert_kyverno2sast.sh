@@ -7,6 +7,12 @@
 # - $1: Path to input file / Kyverno Report
 # - $2: Path to output file / JSON Gitlab SAST Report
 
+if [ "$#" -ne 2 ]
+then
+  echo "Incorrect number of arguments"
+  exit 1
+fi
+
 time=$(date -u +'%FT%T')
 kyverno_version=$(kyverno version | yq '.Version')
 export time kyverno_version

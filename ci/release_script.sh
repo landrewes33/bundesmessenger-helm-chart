@@ -163,7 +163,6 @@ git commit -a -m "Setting version for the release ${nextVersion}"
 printf "\n================================================================================\n"
 printf "Done, push the branch \"%s/v%s\" (yes/no) default to yes? " "$branchprefix" "$nextVersion" >&2
 read -r doPush
-#doPush=${doPush:-yes}
 
 if [ "${doPush:-yes}" = "yes" ]; then
     printf "Pushing branch \"%s/v%s\".\n" "$branchprefix" "$nextVersion"
