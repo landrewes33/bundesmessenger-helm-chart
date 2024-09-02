@@ -1,14 +1,9 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "matrix-synapse.fullname" . -}}
-{{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 {{- $masName := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-authentication-service") -}}
 {{- $adminUri := .Values.adminAPIServerName | required "A valid URI for the synapse Admin API (adminAPIServerName) is required." -}}
 
-  {{- if $v1Ingress -}}
 apiVersion: networking.k8s.io/v1
-  {{- else -}}
-apiVersion: networking.k8s.io/v1beta1
-  {{- end }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}-admin
@@ -64,29 +59,19 @@ spec:
         {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
             backend:
-          {{- if $v1Ingress }}
               service:
                 name: {{ $service }}
                 port:
                   number: 8083
             pathType: ImplementationSpecific
-          {{- else }}
-              serviceName: {{ $service }}
-              servicePort: 8083
-          {{- end }}
         {{- else }}
           - path: {{ . | quote }}
             backend:
-          {{- if $v1Ingress }}
               service:
                 name: {{ $service }}
                 port:
                   number: 8083
             pathType: ImplementationSpecific
-          {{- else }}
-              serviceName: {{ $service }}
-              servicePort: 8083
-          {{- end }}
         {{- end }}
       {{- end }}
     {{- end }}
@@ -97,56 +82,36 @@ spec:
       {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
             backend:
-              {{- if $v1Ingress }}
               service:
                 name: {{ $masName }}
                 port:
                   number: 8080
             pathType: ImplementationSpecific
-              {{- else }}
-              serviceName: {{ $masName }}
-              servicePort: 8080
-              {{- end }}
             {{- else }}
           - path: {{ . | quote }}
             backend:
-              {{- if $v1Ingress }}
               service:
                 name: {{ $masName }}
                 port:
                   number: 8080
             pathType: ImplementationSpecific
-              {{- else }}
-              serviceName: {{ $masName }}
-              servicePort: 8080
-              {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}
 
           - path: /_synapse
             backend:
-  {{- if $v1Ingress }}
               service:
                 name: {{ $fullName }}
                 port:
                   number: {{ $.Values.service.port }}
             pathType: Prefix
-  {{- else }}
-              serviceName: {{ $fullName }}
-              servicePort: {{ $.Values.service.port }}
-  {{- end }}
 
           - path: /_matrix
             backend:
-  {{- if $v1Ingress }}
               service:
                 name: {{ $fullName }}
                 port:
                   number: {{ $.Values.service.port }}
             pathType: Prefix
-  {{- else }}
-              serviceName: {{ $fullName }}
-              servicePort: {{ $.Values.service.port }}
-  {{- end }}
 {{- end }}

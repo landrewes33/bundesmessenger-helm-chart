@@ -153,9 +153,9 @@ spec:
           readinessProbe:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          {{- if .Values.synapse.startupProbe }}
+          {{- with .Values.synapse.startupProbe }}
           startupProbe:
-              {{- .Values.synapse.startupProbe | toYaml | nindent 12 }}
+            {{- . | toYaml | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: config

@@ -668,11 +668,6 @@ workers:
       # den einzelnen vorherigen Container beenden, so dass der neue, ankommende Container sich mit dem PV verbinden kann
       type: RollingUpdate
 
-    # -- (string)  Ein spezifischer Name für diesen Worker, kann nicht global gesetzt werden.
-    # Beachten Sie, dass dies nur gesetzt werden kann, wenn replicaCount 1 ist.
-    # (wird in den Worker überschrieben, ist hier nur aus historischen Gründen noch enthalten)
-    name: nil
-
     # -- (object) Zusätzliche Konfiguration für die Worker.
     extraConfig: {}
 
