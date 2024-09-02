@@ -39,7 +39,7 @@ if [ ${envError} -eq 1 ]; then
 fi
 
 printf "\n================================================================================\n"
-printf "Ensuring main and develop branches are up to date...\n"
+printf "Ensuring \"main\" and \"develop\" branches are up to date...\n"
 
 git checkout main
 git pull
@@ -67,7 +67,7 @@ patch=$(echo "$cur_git_tag_version" | sed -e "s#$RE#\3#")
 
 printf "\n"
 while true; do
-    printf "Next version level: major (1), minor (2) or patch (3)? " >&2
+    printf "Next version level: major (1), minor (2) or patch (3)? "
     read -r yn
     case $yn in
         [1]* ) major=$((major + 1)); minor=0; patch=0; branchprefix="release";source="develop"; break;;
@@ -83,7 +83,7 @@ nextVersion="${major}.${minor}.${patch}"
 
 printf "\n"
 while true; do
-    printf "Please confirm if calculated version \"%s\" is correct? (yes/no) " "$nextVersion" >&2
+    printf "Please confirm if calculated version \"%s\" is correct? (yes/no) " "$nextVersion"
     read -r yn
     case $yn in
         [Yy]* ) break;;
@@ -138,7 +138,7 @@ git add --no-all \
 git commit -a -m "Setting version for the release ${nextVersion}"
 
 printf "\n================================================================================\n"
-printf "Done, push the branch \"%s/v%s\" (yes/no) default to yes? " "$branchprefix" "$nextVersion" >&2
+printf "Done, push the branch \"%s/v%s\"? (YES/no) " "$branchprefix" "$nextVersion"
 read -r doPush
 
 if [ "${doPush:-yes}" = "yes" ]; then
@@ -150,28 +150,48 @@ fi
 
 
 printf "\n================================================================================\n"
-printf "Cherry pick or add other commits. " >&2
+printf "Cherry pick or add other commits now. Done? "
 read -r yn
 
 printf "\n================================================================================\n"
-printf "Create CHANGELOG and review it. " >&2
+printf "CI pipeline updates helm-docs (\"✍ helm-docs\") and add a commit.\n"
+printf "It needs some time… Did it finish? (enter) "
+read -r yn
+
+printf "\n================================================================================\n"
+printf "Create CHANGELOG and review it.\n"
+printf "The simplest way is to manually trigger the CI pipeline \"📰❗ towncrier-create-changelog\".\n" >&2
+printf "Is the CHANGELOG free of mistakes? (enter) "
 read -r yn
 # ToDo: optional here with towncrier
 
 printf "\n================================================================================\n"
-printf "Merge branch into main and push. " >&2
+printf "Pull branch branch from Gitlab.\n"
+printf "Make sure that all commits have been pulled from Gitlab.\n"
+printf "Manual commands:\n"
+printf "\"git checkout %s/v%s\"\n" "$branchprefix" "$nextVersion"
+printf "\"git pull\" "
 read -r yn
 
 printf "\n================================================================================\n"
-printf "Check CI pipeline for tagging and mirroring. " >&2
+printf "Merge branch into main and push.\n"
+printf "Manual command: \"git merge --no-ff main\" "
 read -r yn
 
 printf "\n================================================================================\n"
-printf "Merge branch main back into develop and push. " >&2
+printf "Check CI pipeline for tagging and mirroring. "
 read -r yn
 
 printf "\n================================================================================\n"
-printf "Delete release branch. " >&2
+printf "Merge branch \"main\" back into \"develop\" and push.\n"
+printf "Manual commands:\n"
+printf "\"git checkout develop\"\n"
+printf "\"git merge --no-ff main\" "
+read -r yn
+
+printf "\n================================================================================\n"
+printf "Delete release branch.\n"
+printf "Manual command: \"git branch -d %s/v%s\" " "$branchprefix" "$nextVersion"
 read -r yn
 
 printf "\n================================================================================\n"
