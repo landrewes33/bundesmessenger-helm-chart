@@ -2,13 +2,8 @@
 {{- $webclientUri := .Values.webclient.uri | required "webclient.uri is required." -}}
 {{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
 {{- $component := "webclient" -}}
-{{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 
-{{- if $v1Ingress -}}
 apiVersion: networking.k8s.io/v1
-{{- else -}}
-apiVersion: networking.k8s.io/v1beta1
-{{- end }}
 kind: Ingress
 metadata:
   name: {{ $webclientName }}
@@ -43,14 +38,9 @@ spec:
         paths:
           - path: /
             backend:
-            {{- if $v1Ingress }}
               service:
                 name: {{ $webclientName }}
                 port:
                   number: 8080
             pathType: Prefix
-            {{- else }}
-              serviceName: {{ $webclientName }}
-              servicePort: 8080
-            {{- end }}
 {{- end }}

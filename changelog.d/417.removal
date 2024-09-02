@@ -1,0 +1,1 @@
+Entfernen von `workers.default.name` und der Ingress Konfiguration als Beta (`networking.k8s.io/v1beta1`).
