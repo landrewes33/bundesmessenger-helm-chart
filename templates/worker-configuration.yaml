@@ -13,6 +13,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ $wkName }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 data:

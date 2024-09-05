@@ -6,6 +6,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   {{- if .Values.schadcodescanner.persistence.enabled }}
