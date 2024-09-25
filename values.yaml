@@ -142,7 +142,7 @@ signingkey:
     publishImage:
       registry: registry.opencode.de
       repository: bwi/bundesmessenger/backend/container-images/kubectl
-      tag: 1.30.2-jammy-production
+      tag: 1.31.0-jammy-production
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
