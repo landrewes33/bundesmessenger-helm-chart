@@ -1710,7 +1710,7 @@ ingress:
 ## Achtung: Der MAS ist "work in progress" bzw. experimentell, siehe: docs/matrix-authentication-service.md
 ## Wenn der matrix-authentication-service Pod nicht startet, befinden sich
 ## die relevanten Fehlermeldungen meist im initContainer "initconfig".
-## Reference: https://github.com/matrix-org/matrix-authentication-service
+## Reference: https://github.com/element-hq/matrix-authentication-service
 
 mas:
   # -- (boolean) Aktivieren des Matrix-Authentication-Service
@@ -1718,9 +1718,9 @@ mas:
   # -- (object) Konfiguration des Image/Repository
   image:
     registry: ghcr.io
-    repository: matrix-org/matrix-authentication-service
+    repository: element-hq/matrix-authentication-service
     # Tag mit "-debug" um shell zu haben
-    tag: 0.11.0-debug
+    tag: 0.12.0-debug
     pullPolicy: IfNotPresent
 
   # -- (string) URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider
