@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.synapse_admin.enabled }}
 {{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
 {{- $component := "synapse-admin" -}}

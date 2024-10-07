@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (or .Values.persistence.enabled .Values.persistence.existingClaim) (not .Values.workers.media_repository.enabled ) }}
 {{- if (and .Values.postgresql.enabled (and (not .Values.postgresql.auth.password) (not .Values.postgresql.auth.existingSecret))) -}}
   {{- fail "You must specify a static postgres password or existing secret if using the included postgres chart" -}}

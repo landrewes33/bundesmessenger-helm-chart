@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.

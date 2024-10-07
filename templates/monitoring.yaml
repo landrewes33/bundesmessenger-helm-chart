@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2023–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.monitoring.enabled }}
 {{- $monitoringService := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-metrics") -}}
 {{- $component := "synapse-metrics" -}}

@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if and ( .Files.Get "scripts/users.csv") ( .Values.demomode.enabled | default false ) }}
 ---
 apiVersion: v1

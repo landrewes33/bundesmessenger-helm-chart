@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.additionalConfig.dsgvoExport.enabled -}}
 {{- if semverCompare ">=1.21.0" .Capabilities.KubeVersion.Version -}}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "dsgvo-exporter") -}}

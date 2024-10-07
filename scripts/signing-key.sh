@@ -1,5 +1,6 @@
 #!/bin/sh
-
+# SPDX-FileCopyrightText: 2022–2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
 set -eu
 
 check_key() {
