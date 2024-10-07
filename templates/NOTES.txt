@@ -49,6 +49,10 @@ Gehen Sie sicher, dass {{  include "matrix-synapse.dsgvoExportServiceAccountName
 Die TURN-Konfigurationsoptionen `config.turnUris` und `config.turnSecret` sind abgekündigt. Nutzen Sie stattdessen `extraConfig`.
 {{- end }}
 
+{{- if not .Values.redis.auth.enabled }}
+Ungesicherte Verbindungen zu Redis werden bald nicht mehr unterstützt. Setzen Sie `redis.auth.enabled: true`.
+{{- end }}
+
 
 {{- if .Values.config.enableRegistration }}
 Sie können sich nun an Ihrer BundesMessenger Installation mit jedem kompatiblen
