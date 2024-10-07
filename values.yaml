@@ -1499,8 +1499,11 @@ externalPostgresql:
 ##          Konfiguration für Redis Server
 ######################################################################################
 ## Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
-## Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
-## false setzen und den externalRedis-Block konfigurieren.
+## Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie
+## `redis.enabled: false` und konfigurieren den `externalRedis`-Block.
+##
+## Die Konfiguration des Kernelparameters `transparent_hugepage` wird im
+## Dokument docs/redis_sysctl_tuning.md beschrieben.
 
 redis:
   image:
@@ -1520,30 +1523,6 @@ redis:
     password: synapse
     existingSecret: ""
     existingSecretPasswordKey: redis-password
-
-  # -- (map) Konfiguration zur Härtung des InitContainers des Redis-Images
-  # (https://github.com/bitnami/charts/tree/main/bitnami/redis/#host-kernel-settings)
-  sysctl:
-    enabled: true
-    image:
-      registry: registry.opencode.de
-      repository: bwi/bundesmessenger/backend/container-images/ubuntu
-      tag: latest-jammy-production
-      pullPolicy: IfNotPresent
-      # pullSecrets: ["myRegistryKeySecretName"]
-    mountHostSys: true
-    resources:
-      limits:
-        cpu: 400m
-        memory: 512Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
-    command:
-      - /bin/sh
-      - -c
-      - |-
-        echo never > /host-sys/kernel/mm/transparent_hugepage/enabled
 
   # -- (string) Form der Architektur des Deployments
   architecture: standalone
