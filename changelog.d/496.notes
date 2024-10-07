@@ -1,0 +1,5 @@
+Das mit dem BundesMessenger ausgelieferte PostgreSQL Subchart ist auf Version 15
+angehoben. Die damit standardmäßig ausgelieferte PostgreSQL-Version ist nun
+Version 16. Um auf eine neue Hauptversion von PostgreSQL zu wechseln, ist ein
+Migrationsschritt erforderlich; ein solcher wird beispielhaft unter
+[PostgreSQL-Upgrade](./docs/PostgreSQL-Upgrade.md) detailliert.
