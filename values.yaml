@@ -1406,7 +1406,7 @@ postgresql:
   image:
     registry: docker.io
     repository: bitnami/postgresql
-    tag: "14"
+    tag: "16"
     # pullSecrets: ["myRegistryKeySecretName"]
 
   auth:
