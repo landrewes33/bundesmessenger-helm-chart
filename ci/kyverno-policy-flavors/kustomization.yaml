@@ -22,8 +22,8 @@ patches:
 
 # Ursache für redis `initContainers.name: init-sysctl`
 # Der Befehl benötigt zur Härtung diese Rechte
-- path: exclude-redis-label.yaml
-  target:
-    version: v1
-    kind: ClusterPolicy
-    name: disallow-privileged-containers
+# - path: exclude-redis-label.yaml
+#   target:
+#     version: v1
+#     kind: ClusterPolicy
+#     name: disallow-privileged-containers

@@ -18,8 +18,6 @@
   app: Nginx
 - path: redis.image
   app: Redis
-- path: redis.sysctl.image
-  app: Basis
 - path: sygnal.image
   app: Sygnal
 - path: image
