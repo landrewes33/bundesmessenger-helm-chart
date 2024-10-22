@@ -42,6 +42,8 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configuration.yaml") $ | sha256sum }}
         checksum/worker-config: {{ include (print $.Template.BasePath "/worker-configuration.yaml") $ | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") $ | sha256sum }}
+        checksum/signing-key-job: {{ include (print $.Template.BasePath "/signing-key-job.yaml") $ | sha256sum }} 
+        checksum/ca-secrets: {{ print $uniqCaSecrets | sha256sum }}
       {{- with ($config.annotations | default $default.annotations) }}
         {{- . | toYaml | nindent 8 }}
       {{- end }}
