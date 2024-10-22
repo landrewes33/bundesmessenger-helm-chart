@@ -56,26 +56,16 @@ spec:
         volumeMounts:
           - name: scannerconfig
             mountPath: /data
-            readOnly: true
-          - name: scannerconfig
-            mountPath: /config
-            readOnly: true
           - name: temp
             mountPath: /tmp
           - name: crypto
             mountPath: /crypto
           - name: scannerscript
             mountPath: /opt
-            readOnly: true
-          - name: conftmp
-            mountPath: /home/contentscanner/matrix-content-scanner/config/
         {{- with .Values.contentscanner.extraVolumeMounts }}
           {{- . | toYaml | nindent 10 }}
         {{- end }}
       volumes:
-        - name: conftmp
-          emptyDir:
-            sizeLimit: 5Mi
         - name: temp
           emptyDir:
             sizeLimit: {{ mulf .Values.schadcodescanner.limits.scanSize 5 }}M
