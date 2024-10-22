@@ -96,6 +96,24 @@ serviceAccount:
 # kann hier aber erzwungen werden.
 # argoCD: true
 
+# Standardwerte für alle Pods.
+# Alle `podSecurityContext`-Schlüssel in dieser Datei verwenden die Werte aus
+# dem hier definierten YAML-Anchor.
+x-defaultPodSecurityContext: &defaultPodSecurityContext
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# Standardwerte für alle Container.
+# Alle `securityContext`-Schlüssel in dieser Datei verwenden die Werte aus dem
+# hier definierten YAML-Anchor.
+x-defaultSecurityContext: &defaultSecurityContext
+  capabilities:
+    drop:
+      - ALL
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+
 ## Die Quelle des von Synapse im Verbund verwendeten Signierschlüssels.
 ##
 signingkey:
@@ -153,13 +171,13 @@ signingkey:
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsUser: 2666
     fsGroup: 2666
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
     runAsUser: 2666
 
   ## Bereitschaftscheck
@@ -546,7 +564,7 @@ synapse:
   # weitere Beispiele:
   #  fsGroupChangePolicy: Always
   podSecurityContext:
-    runAsNonRoot: true
+    <<: *defaultPodSecurityContext
     fsGroup: 2666
     runAsGroup: 2666
     runAsUser: 2666
@@ -554,12 +572,8 @@ synapse:
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie, siehe oben
   # podSecurityContext für weitere relevante Informationen.
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
     runAsUser: 2666
-  #  capabilities:
-  #    drop:
-  #    - ALL
 
   # Begrenzungen und Anforderungen für CPU-Ressourcen werden in CPU-Einheiten gemessen.
   # In Kubernetes entspricht eine CPU-Einheit einem physischen CPU-Kern oder einem virtuellen Kern,
@@ -706,23 +720,15 @@ workers:
     # -- (map) Informationen zum Pod-Sicherheitskontext, die den Worker-Pods mitgeteilt werden sollen.
     # DEFAULT gilt für alle Synapse-Worker-Container.
     podSecurityContext:
-      runAsNonRoot: true
+      <<: *defaultPodSecurityContext
       fsGroup: 2666
       runAsGroup: 2666
       runAsUser: 2666
 
     # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
     # DEFAULT gilt für alle Synapse-Worker-Container.
-    # Beispiele:
-    #   readOnlyRootFilesystem: true
-    #   runAsNonRoot: true
-    #   runAsUser: 2666
-    #   capabilities:
-    #     drop:
-    #       - ALL
     securityContext:
-      readOnlyRootFilesystem: true
-      runAsNonRoot: true
+      <<: *defaultSecurityContext
       runAsUser: 2666
 
     resources:
@@ -1132,24 +1138,20 @@ sygnal:
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
   # weitere Beispiele:
-  #  runAsNonRoot: true
   #  fsGroup: 27
   #  runAsGroup: 2000
   #  runAsUser: 2000
   #  sysctls:
   #    - name: net.ipv4.ip_unprivileged_port_start
   #      value: "80"
-  podSecurityContext: {}
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
   # weitere Beispiele:
-  #  capabilities:
-  #    drop:
-  #    - ALL
-  #  readOnlyRootFilesystem: true
-  #  runAsNonRoot: true
   #  runAsUser: 2111
   securityContext:
-    readOnlyRootFilesystem: true
+    <<: *defaultSecurityContext
 
   ## Ressource Konfiguration für Sygnal Server.
   resources:
@@ -1283,17 +1285,13 @@ wellknown:
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsGroup: 1001
     runAsUser: 1001
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
-  # weitere Möglichkeiten:
-  #  capabilities:
-  #    drop:
-  #    - ALL
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
 
   ## Ressource Konfiguration für well-known server.
   resources:
@@ -1352,17 +1350,13 @@ confighub:
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsGroup: 1001
     runAsUser: 1001
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
-  # weitere Möglichkeiten:
-  #  capabilities:
-  #    drop:
-  #    - ALL
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
 
   ## Ressource Konfiguration für confighub.
   resources:
@@ -1874,7 +1868,7 @@ mas:
   # Beachten Sie, dass eine Änderung dieser Einstellung auch die Verwendung der volumePermission
   # Hilfsprogramm verwenden müssen, abhängig von Ihrem Speicher.
   podSecurityContext:
-    runAsNonRoot: true
+    <<: *defaultPodSecurityContext
     fsGroup: 1007
     runAsGroup: 1007
     runAsUser: 1007
@@ -1882,12 +1876,8 @@ mas:
   # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie, siehe oben
   # podSecurityContext für weitere relevante Informationen.
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
     runAsUser: 1007
-  #  capabilities:
-  #    drop:
-  #    - ALL
 
   resources:
     limits:
@@ -1991,18 +1981,14 @@ contentscanner:
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsGroup: 1334
     runAsUser: 1334
     fsGroup: 1334
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
-  # weitere Möglichkeiten:
-  #  capabilities:
-  #    drop:
-  #    - ALL
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
 
 
 ######################################################################################
@@ -2120,15 +2106,12 @@ schadcodescanner:
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   podSecurityContext:
-    runAsNonRoot: true
+    <<: *defaultPodSecurityContext
     fsGroup: 1111
 
   # -- (map) Konfiguration für die ClamAV-Container-Sicherheitsrichtlinie
-  # weitere Möglichkeiten:
-  #  capabilities:
-  #    drop:
-  #    - ALL
   clamavSecurityContext:
+    <<: *defaultSecurityContext
     runAsUser: 1111
     runAsGroup: 1111
     readOnlyRootFilesystem: true
@@ -2139,6 +2122,7 @@ schadcodescanner:
   #    drop:
   #    - ALL
   icapSecurityContext:
+    <<: *defaultSecurityContext
     runAsUser: 1112
     runAsGroup: 1112
     readOnlyRootFilesystem: true
@@ -2175,19 +2159,14 @@ synapse_admin:
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
-  # weitere Beispiele:
-  #  runAsNonRoot: true
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsGroup: 1001
     runAsUser: 1001
+
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des Containers
-  # weitere Beispiele:
-  #   runAsNonRoot: true
-  #   readOnlyRootFilesystem: true
-  #   runAsUser: 2010
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
 
     ## Configuration for mounting additional volumes into the application container.
     ## AKTUELL in Prüfung:
@@ -2234,17 +2213,13 @@ webclient:
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsGroup: 1001
     runAsUser: 1001
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
-  # weitere Möglichkeiten:
-  #  capabilities:
-  #    drop:
-  #    - ALL
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
 
   ## Ressource Konfiguration für webclient-server.
   resources:
@@ -2419,13 +2394,13 @@ tests:
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsUser: 1001
     runAsGroup: 1001
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
     runAsUser: 1001
     runAsGroup: 1001
 
