@@ -34,7 +34,10 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configuration.yaml") . | sha256sum }}
+        checksum/demomode: {{ include (print $.Template.BasePath "/demomode/demomode.yaml") . | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        checksum/signing-key-job: {{ include (print $.Template.BasePath "/signing-key-job.yaml") . | sha256sum }}
+        checksum/ca-secrets: {{ print $uniqCaSecrets | sha256sum }}
         {{- with .Values.synapse.annotations }}
         {{- . | toYaml | nindent 8 }}
         {{- end }}
