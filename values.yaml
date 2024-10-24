@@ -1706,6 +1706,7 @@ mas:
   # Diese wird nicht automatisch angelegt und muss bereit gestellt werden.
   # https://matrix-org.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
   postgresql:
+    port: 5432
     database: mas_synapse
     username: massynapse
     password: mas-synapse
