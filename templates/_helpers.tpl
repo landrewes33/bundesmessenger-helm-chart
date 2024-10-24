@@ -388,6 +388,17 @@ Set MAS postgres host
 {{- end -}}
 
 {{/*
+MAS PostgreSQL port.
+
+Defaults to `matrix-synapse.postgresql.port`.
+*/}}
+{{- define "matrix-synapse.maspostgresql.port" -}}
+{{- if .Values.mas.enabled -}}
+  {{- .Values.mas.postgresql.port | default (include "matrix-synapse.postgresql.port" .) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Set MAS postgresql sslmode
 */}}
 {{- define "matrix-synapse.maspostgresql.sslmode" -}}
