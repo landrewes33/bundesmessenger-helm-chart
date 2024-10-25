@@ -3,3 +3,5 @@ angehoben. Die damit standardmäßig ausgelieferte PostgreSQL-Version ist nun
 Version 16. Um auf eine neue Hauptversion von PostgreSQL zu wechseln, ist ein
 Migrationsschritt erforderlich; ein solcher wird beispielhaft unter
 [PostgreSQL-Upgrade](./docs/PostgreSQL-Upgrade.md) detailliert.
+Alternativ kann die verwendete PostgreSQL Version manuell mit
+`postgresql.image.tag: 14` auf dem alten Stand fixiert werden.
