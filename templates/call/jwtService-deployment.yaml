@@ -1,0 +1,109 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if .Values.call.enabled }}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "call-jwt-service") -}}
+{{- $component := "call-jwt-service" -}}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  replicas: {{ .Values.call.jwtService.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "matrix-synapse.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: {{ $component }}
+  template:
+    metadata:
+      annotations:
+        checksum/secrets: {{ include (print $.Template.BasePath "/call/jwtService-secrets.yaml") . | sha256sum }}
+      labels:
+        {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: {{ $component }}
+    spec:
+      serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
+      securityContext:
+        {{- toYaml .Values.call.jwtService.podSecurityContext | nindent 8 }}
+      containers:
+        - name: lk-jwt-service
+          env:
+            - name: LIVEKIT_URL
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.call.existingSecret }}
+                  name: {{ .Values.call.existingSecret }}
+                  key: {{ .Values.call.secretKeys.livekitUrl | default "livekit-url" }}
+                  {{- else }}
+                  name: {{ $name }}
+                  key: livekit-url
+                  {{- end }}
+            - name: LIVEKIT_KEY
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.call.existingSecret }}
+                  name: {{ .Values.call.existingSecret }}
+                  key: {{ .Values.call.secretKeys.livekitKey | default "livekit-key" }}
+                  {{- else }}
+                  name: {{ $name }}
+                  key: livekit-key
+                  {{- end }}
+            - name: LIVEKIT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  {{- if .Values.call.existingSecret }}
+                  name: {{ .Values.call.existingSecret }}
+                  key: {{ .Values.call.secretKeys.livekitSecret | default "livekit-secret" }}
+                  {{- else }}
+                  name: {{ $name }}
+                  key: livekit-secret
+                  {{- end }}
+          {{- with .Values.call.jwtService.extraEnv }}
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
+          image: "{{ printf "%s/%s:%s" .Values.call.jwtService.image.registry .Values.call.jwtService.image.repository .Values.call.jwtService.image.tag  }}"
+          imagePullPolicy: {{ .Values.call.jwtService.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.call.jwtService.securityContext | nindent 12 }}
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 30
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          resources:
+            {{- toYaml .Values.call.jwtService.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 10Mi
+            medium: Memory
+    {{- with .Values.call.jwtService.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.call.jwtService.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.call.jwtService.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+{{- end }}

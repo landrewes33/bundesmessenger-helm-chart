@@ -2251,6 +2251,23 @@ call:
   enabled: false
   # -- (string) URL für den Call, zwingend notwendig
   uri: ""
+
+  # -- (object) Konfiguration mit denen der LiveKit Server erreicht werden kann.
+  # Key und Secret müssen mit den Angabe im LiveKit Server überein stimmen.
+  livekit:
+    url: "wss://livekit.example.com"
+    key: "devkey"
+    secret: "secret"
+
+  # -- (string) Bestehendes Secret das anstelle statischer Angaben verwendet wird
+  existingSecret: ""
+  # -- (object) Namen der Schlüssel in dem existingSecret.
+  # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
+  secretKeys:
+    livekitUrl: livekit-url
+    livekitKey: livekit-key
+    livekitSecret: livekit-secret
+
   # -- (object) Konfiguration für Client vom BundesMessenger-Call
   client:
     image:
@@ -2281,6 +2298,56 @@ call:
         cpu: 50m
         # -- (string) Anforderungen an RAM Ressourcen, die auf den BundesMessenger-Call anzuwenden sind.
         memory: 45Mi
+
+  # -- (object) Konfiguration für das Image vom LiveKit JWT Service
+  jwtService:
+    image:
+      registry: ghcr.io
+      repository: element-hq/lk-jwt-service
+      tag: sha-4a29504
+      pullPolicy: IfNotPresent
+
+    # -- (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+    # Beispiel:
+    # - name: NO_PROXY
+    #   value: "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"
+    # - name: HTTPS_PROXY
+    #   value: "https://proxyuser@proxyserver:proxyport"
+    # - name: HTTP_PROXY
+    #   value: "http://proxyuser@proxyserver:proxyport"
+    extraEnv: []
+
+    # -- (object) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+    podSecurityContext:
+      <<: *defaultPodSecurityContext
+      runAsGroup: 1021
+      runAsUser: 1021
+
+    # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie
+    securityContext:
+      <<: *defaultSecurityContext
+
+    ## Ressource Konfiguration für LiveKit-JWT-Server.
+    resources:
+      limits:
+        # -- (string) Rechenressourcengrenzen, die auf den LiveKit-JWT-Server anzuwenden sind.
+        cpu: 100m
+        # -- (string) RAM Ressourcengrenzen, die auf den LiveKit-JWT-Server anzuwenden sind.
+        memory: 50Mi
+      requests:
+        # -- (string) Anforderungen an Rechenressourcen, die auf den LiveKit-JWT-Server anzuwenden sind.
+        cpu: 50m
+        # -- (string) Anforderungen an RAM Ressourcen, die auf den LiveKit-JWT-Server anzuwenden sind.
+        memory: 25Mi
+
+    # -- (object) Node Selektor Konfiguration für den Container.
+    nodeSelector: {}
+
+    # -- (list) Tolerations/Tains Konfiguration für den Container.
+    tolerations: []
+
+    # -- (object) Affinitäts-Konfiguration für den Container.
+    affinity: {}
 
 
 ######################################################################################

@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2023–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2024 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.call.enabled }}
 {{- $callName := include "matrix-synapse.externalname" (dict "global" . "external" "call") -}}
@@ -27,6 +27,9 @@ data:
       "bwi_features": {
         "embedded_only": true,
         "hide_unwanted_settings": true
+      },
+      "livekit": {
+        "livekit_service_url": "{{- printf "https://%s" ( .Values.call.uri ) }}"
       }
     }
 

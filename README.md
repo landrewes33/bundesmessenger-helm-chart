@@ -464,6 +464,8 @@ auch Hinweise zu den einzelnen zusätzlichen Diensten:
 - [BundesMessenger WebClient](./docs/webclient.md)
 - [Synapse Admin](./docs/synapse_admin.md)
 - [Sygnal (Push-Service)](./docs/sygnal_push.md)
+- [Huddle Meetings / Call](./docs/huddle_meetings.md)
+- [LiveKit Server / WebRTC Server](./docs/livekit_server.md)
 - [Synapse Module](./docs/synapse_modules.md)
 - [Matrix-Authentication-Service](./docs/matrix-authentication-service.md)
 - [Monitoring mit Grafana](./docs/Monitoring-mit-Grafana.md)

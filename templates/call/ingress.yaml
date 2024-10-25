@@ -3,6 +3,7 @@
 {{- if and .Values.ingress.enabled .Values.call.enabled }}
 {{- $callUri := .Values.call.uri | required "call.uri is required." -}}
 {{- $callName := include "matrix-synapse.externalname" (dict "global" . "external" "call") -}}
+{{- $jwtServiceame := include "matrix-synapse.externalname" (dict "global" . "external" "call-jwt-service") -}}
 {{- $component := "call" -}}
 
 apiVersion: networking.k8s.io/v1
@@ -43,6 +44,13 @@ spec:
             backend:
               service:
                 name: {{ $callName }}
+                port:
+                  number: 8080
+            pathType: Prefix
+          - path: "/sfu/get"
+            backend:
+              service:
+                name: {{ $jwtServiceame }}
                 port:
                   number: 8080
             pathType: Prefix

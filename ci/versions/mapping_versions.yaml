@@ -4,6 +4,8 @@
   app: Webclient
 - path: call.client.image
   app: Call
+- path: call.jwtService.image
+  app: LiveKit-JWT-Service
 - path: schadcodescanner.clamavImage
   app: ClamAV
 - path: schadcodescanner.icapImage
