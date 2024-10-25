@@ -2,6 +2,8 @@
   app: Basis
 - path: webclient.image
   app: Webclient
+- path: call.client.image
+  app: Call
 - path: schadcodescanner.clamavImage
   app: ClamAV
 - path: schadcodescanner.icapImage

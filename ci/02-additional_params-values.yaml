@@ -43,6 +43,10 @@ webclient:
   enabled: true
   uri: web.example.org
 
+call:
+  enabled: true
+  uri: call.example.org
+
 contentscanner:
   enabled: true
 
