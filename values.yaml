@@ -2207,7 +2207,7 @@ webclient:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.18.0-jammy-production
+    tag: 2.21.0-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
