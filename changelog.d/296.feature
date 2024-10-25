@@ -1,0 +1,1 @@
+Dokumentation und [LiveKit JWT Service](https://github.com/element-hq/lk-jwt-service) zum Testen von Huddles hinzugefügt.

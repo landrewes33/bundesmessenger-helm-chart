@@ -1,0 +1,25 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if .Values.call.enabled }}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "call-jwt-service") -}}
+{{- $component := "call-jwt-service" -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+{{- end }}
