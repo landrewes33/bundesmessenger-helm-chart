@@ -74,6 +74,7 @@ damit ein Deployment möglich und erfolgreich ist.
 | `schadcodescanner.freshclam.mirrors` | eigener lokaler privater Mirror, da Zugriff auf Internet nicht möglich | Hier kann und muss eine Liste von privaten Mirrors für den eingesetzten ClamAV Updater freshclam hinterlegt werden, wenn ein Zugriff auf den offiziellen Server unter database.clamav.net nicht möglich ist. |
 | `synapse_admin.uri` | `synapse_admin.enabled: true` | Wenn der Synapse-Admin genutzt werden soll, kann eine sich von `adminAPIServerName` unterscheidende URL konfiguriert werden (empfohlen). |
 | `webclient.uri` | `webclient.enabled: true` | Wenn der Webclient genutzt werden will, muss eine entsprechende URL für die WebGUI konfiguriert werden. |
+| `call.uri` | `call.enabled: true` | Wenn der Call Client genutzt werden will, muss eine entsprechende URL für die WebGUI konfiguriert werden. |
 | `displayName` | `webclient.enabled: true` | Der Anzeigename des Messengers im Webclient. Default: `Messenger deiner Organisation`. |
 
 ## Hostnamen/DNS
@@ -82,9 +83,10 @@ Sie benötigen Hostnamen inkl. DNS-Auflösung für die folgenden Infrastrukturko
 
 | Komponente | Status | Parameter | Bemerkung |
 | ------ | ------ | ------ | ------ |
-| Synapse | erforderlich und verpflichtend | `adminAPIServerName` | Für die Trennung der Admin-API von Synapse und dem öffentlich zugänglichen Endpunkt des Synapse. |
-| [WebClient](webclient.md) | optional, aber empfohlen | `webclient.uri` | Kann aktiviert werden mit `webclient.enabled=true`. <br /> Der inkludierte gehärtete WebClient des BundesMessenger wird hauptsächlich für den "internen" Gebrauch ausgelegt und per Browser aufgerufen. <br /> Für die externe Nutzung von Clients über mobile Endgeräte stehen die Apps des BundesMessengers zur Verfügung. |
 | Synapse | erforderlich | `serverName` bzw. `publicServerName` | |
+| Synapse | erforderlich | `adminAPIServerName` | Für die Trennung der Admin-API von Synapse und dem öffentlich zugänglichen Endpunkt des Synapse. |
+| [WebClient](webclient.md) | optional, aber empfohlen | `webclient.uri` | Kann aktiviert werden mit `webclient.enabled=true`. <br /> Der inkludierte gehärtete WebClient des BundesMessenger wird hauptsächlich für den "internen" Gebrauch ausgelegt und per Browser aufgerufen. <br /> Für die externe Nutzung von Clients über mobile Endgeräte stehen die Apps des BundesMessengers zur Verfügung. |
+| Call | optional bei Nutzung von Call | `call.uri` | Kann aktiviert werden mit `call.enabled=true`. <br /> Der inkludierte Call Client des BundesMessenger wird in den WebClient integriert und über diese URL nicht direkt aufgerufen. |
 | [Synapse-Admin](synapse_admin.md) | optional, aber empfohlen | `synapse_admin.uri` | Empfohlen für eine Erreichbarkeit nur von intern, `.local`-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :smiley:<br />Kann aktiviert werden mit `synapse_admin.enabled=true`. |
 | Monitoring | empfohlen | tbd | ToDo |
 
