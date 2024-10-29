@@ -17,6 +17,11 @@ FILENAME="$1"
 echo "Processing file: $FILENAME"
 
 STARTYEAR=$(git log --follow --format=%as "$FILENAME" | tail -n 1 | grep -o ^....)
+# Use earlier start date from file, if already there
+STARTYEAR_FILE=$(sed -n '/SPDX-FileCopyrightText:.*BWI GmbH/ {s/.*SPDX-FileCopyrightText:[^0-9]*//;s/[^0-9].*//;p}' "$FILENAME")
+if [ -n "$STARTYEAR_FILE" ] && [ "$STARTYEAR_FILE" -lt "$STARTYEAR" ]; then
+    STARTYEAR=$STARTYEAR_FILE
+fi
 ENDYEAR=$(git log --follow --format=%as "$FILENAME" | head -n 1 | grep -o ^....)
 if [ "$STARTYEAR" = "$ENDYEAR" ]; then
     COPYRIGHTYEARS="$STARTYEAR"
