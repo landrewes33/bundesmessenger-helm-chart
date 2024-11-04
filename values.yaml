@@ -2363,7 +2363,7 @@ call:
 additionalConfig:
 
   # -- (list) Liste an JWT, die dem Client bereit gestellt werden, um die Infrastruktur
-  # als legitim auszuweisen. Diese werden via `<public_baseurl>/_bum/configure/v1/verify`
+  # als legitim auszuweisen. Diese werden via `<public_baseurl>/_bum/client/v1/verify`
   verifyJWT: []
 
   dsgvoExport:
