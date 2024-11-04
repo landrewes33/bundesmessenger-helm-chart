@@ -202,7 +202,7 @@ spec:
                 port:
                   number: 80
             pathType: Prefix
-          - path: /_bum/configure/v1/verify
+          - path: /_bum/client/v1/verify
             backend:
               service:
                 name: {{ $chubName }}
