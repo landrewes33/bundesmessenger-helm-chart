@@ -1,1 +1,0 @@
-Abkündigung der Unterstützung nicht gesicherter Verbindungen zu Redis. Das betrifft nur Installationen, die manuell `redis.auth.enabled: false` konfiguriert haben.

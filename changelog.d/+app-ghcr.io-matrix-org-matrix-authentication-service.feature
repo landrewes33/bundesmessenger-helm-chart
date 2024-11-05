@@ -1,1 +1,0 @@
-Image `ghcr.io/matrix-org/matrix-authentication-service` auf Version `0.11.0` aktualisiert.

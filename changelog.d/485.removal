@@ -1,1 +1,0 @@
-Altes und nicht benötigtes Script `ci/get_newest_image_tags.sh` entfernt. Diese Funktion wird von Renovate übernommen.
