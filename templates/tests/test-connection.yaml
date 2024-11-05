@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- define "test-connection-image" -}}
 - name: test-connection
   image: "{{ printf "%s/%s:%s" .global.Values.tests.image.registry .global.Values.tests.image.repository .global.Values.tests.image.tag }}"
@@ -27,6 +29,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ include "matrix-synapse.fullname" . }}-test-connection"
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
@@ -50,6 +53,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") }}-server-test-connection"
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
@@ -71,6 +75,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") }}-client-test-connection"
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
@@ -95,6 +100,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ include "matrix-synapse.externalname" (dict "global" . "external" "webclient") }}-test-connection"
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
@@ -119,6 +125,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") }}-test-connection"
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:
@@ -143,6 +150,7 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ include "matrix-synapse.externalname" (dict "global" . "external" "matrix-content-scanner") }}-test-connection"
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
   annotations:

@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.additionalConfig.dsgvoExport.enabled -}}
 {{- if semverCompare ">=1.21.0" .Capabilities.KubeVersion.Version -}}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "dsgvo-exporter") -}}
@@ -16,6 +18,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ include "matrix-synapse.dsgvoExportServiceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 rules:
@@ -37,6 +40,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ include "matrix-synapse.dsgvoExportServiceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 subjects:

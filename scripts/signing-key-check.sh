@@ -1,4 +1,7 @@
 #!/bin/sh
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+#
 # Das Script dient zur Fake-Überwachung vom signing-key-job
 
 # Überprüfen der Anzahl der übergebenen Parameter

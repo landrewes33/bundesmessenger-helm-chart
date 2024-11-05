@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.webclient.enabled }}
 {{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
 {{- $displayName := .Values.webclient.displayName | default "Messenger deiner Organisation" }}
@@ -9,6 +11,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ $webclientName }}-tempconf
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ $webclientName }}
@@ -24,11 +27,22 @@ data:
       "enable_presence_by_hs_url": {
         "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}": {{ .Values.extraConfig.presence.enabled | default false }}
       },
+      {{- if .Values.call.enabled }}
+      "element_call": {
+        "url": "{{- printf "https://%s" .Values.call.uri }}",
+        "use_exclusively": true,
+        "participant_limit": 5,
+        "brand": "BundesMessenger Call"
+      },
+      {{- end -}}
       {{- if .Values.additionalConfig.locationSharing.enabled }}
       "bwi_setting_defaults": {
         "BwiFeature.locationShareTypesEnabled": ["Pin"],
         "BwiFeature.disableGeolocation": false,
         "BwiFeature.hideOSMLink": true
+      },
+      "features": {
+        "feature_group_calls": true
       },
       {{- end }}
       "permalink_prefix": "{{- printf "https://%s" .Values.webclient.uri }}",
@@ -42,6 +56,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ $webclientName }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ $webclientName }}
@@ -70,7 +85,7 @@ data:
       #
       # include snippets/snakeoil.conf;
 
-      root /usr/share/nginx/html/;
+      root /app/;
 
       # Add index.php to the list if you are using PHP
       index index.html index.htm index.nginx-debian.html;

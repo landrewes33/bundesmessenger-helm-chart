@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (or .Values.persistence.enabled .Values.persistence.existingClaim) (not .Values.workers.media_repository.enabled ) }}
 {{- if (and .Values.postgresql.enabled (and (not .Values.postgresql.auth.password) (not .Values.postgresql.auth.existingSecret))) -}}
   {{- fail "You must specify a static postgres password or existing secret if using the included postgres chart" -}}
@@ -34,7 +36,10 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configuration.yaml") . | sha256sum }}
+        checksum/demomode: {{ include (print $.Template.BasePath "/demomode/demomode.yaml") . | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        checksum/signing-key-job: {{ include (print $.Template.BasePath "/signing-key-job.yaml") . | sha256sum }}
+        checksum/ca-secrets: {{ print $uniqCaSecrets | sha256sum }}
         {{- with .Values.synapse.annotations }}
         {{- . | toYaml | nindent 8 }}
         {{- end }}
@@ -153,9 +158,9 @@ spec:
           readinessProbe:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          {{- if .Values.synapse.startupProbe }}
+          {{- with .Values.synapse.startupProbe }}
           startupProbe:
-              {{- .Values.synapse.startupProbe | toYaml | nindent 12 }}
+            {{- . | toYaml | nindent 12 }}
           {{- end }}
           volumeMounts:
             - name: config

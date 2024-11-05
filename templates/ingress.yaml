@@ -1,16 +1,14 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "matrix-synapse.fullname" . -}}
 {{- $scannerName := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-content-scanner") -}}
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") -}}
 {{- $chubName := include "matrix-synapse.externalname" (dict "global" . "external" "confighub-nginx") -}}
 {{- $masName := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-authentication-service") -}}
-{{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 {{- $matrixUri := .Values.publicServerName | default .Values.serverName }}
-{{- if $v1Ingress -}}
+
 apiVersion: networking.k8s.io/v1
-{{- else -}}
-apiVersion: networking.k8s.io/v1beta1
-{{- end }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}
@@ -84,29 +82,19 @@ spec:
                   {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
             backend:
-                  {{- if $v1Ingress }}
               service:
                 name: {{ $service }}
                 port:
                   number: 8083
             pathType: ImplementationSpecific
-                  {{- else }}
-              serviceName: {{ $service }}
-              servicePort: 8083
-                  {{- end }}
                 {{- else }}
           - path: {{ . | quote }}
             backend:
-                  {{- if $v1Ingress }}
               service:
                 name: {{ $service }}
                 port:
                   number: 8083
             pathType: ImplementationSpecific
-                  {{- else }}
-              serviceName: {{ $service }}
-              servicePort: 8083
-                  {{- end }}
                 {{- end }}
               {{- end }}
             {{- end }}
@@ -116,29 +104,19 @@ spec:
                 {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
             backend:
-                  {{- if $v1Ingress }}
               service:
                 name: {{ $service }}
                 port:
                   number: 8083
             pathType: ImplementationSpecific
-                  {{- else }}
-              serviceName: {{ $service }}
-              servicePort: 8083
-                  {{- end }}
                 {{- else }}
           - path: {{ . | quote }}
             backend:
-                  {{- if $v1Ingress }}
               service:
                 name: {{ $service }}
                 port:
                   number: 8083
             pathType: ImplementationSpecific
-                  {{- else }}
-              serviceName: {{ $service }}
-              servicePort: 8083
-                  {{- end }}
                 {{- end }}
               {{- end }}
             {{- end }}
@@ -159,16 +137,11 @@ spec:
         {{- if and (has . $csHosts) $.Values.contentscanner.enabled }}
           - path: /_matrix/media_proxy/unstable/
             backend:
-          {{- if $v1Ingress }}
               service:
                 name: {{ $scannerName }}
                 port:
                   number: 8080
             pathType: Prefix
-          {{- else }}
-              serviceName: {{ $scannerName }}
-              servicePort: 8080
-          {{- end }}
         {{- end }}
 
         {{- /* map paths like login to mas instead of Synapse */}}
@@ -177,29 +150,19 @@ spec:
             {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
             backend:
-              {{- if $v1Ingress }}
               service:
                 name: {{ $masName }}
                 port:
                   number: 8080
             pathType: ImplementationSpecific
-              {{- else }}
-              serviceName: {{ $masName }}
-              servicePort: 8080
-              {{- end }}
             {{- else }}
           - path: {{ . | quote }}
             backend:
-              {{- if $v1Ingress }}
               service:
                 name: {{ $masName }}
                 port:
                   number: 8080
             pathType: ImplementationSpecific
-              {{- else }}
-              serviceName: {{ $masName }}
-              servicePort: 8080
-              {{- end }}
             {{- end }}
           {{- end }}
         {{- end }}
@@ -208,58 +171,38 @@ spec:
           {{- if $.Values.wellknown.enabled }}
           - path: "/.well-known/matrix"
             backend:
-            {{- if $v1Ingress }}
               service:
                 name: {{ $wkName }}
                 port:
                   number: 80
             pathType: ImplementationSpecific
-            {{- else }}
-              serviceName: {{ $wkName }}
-              servicePort: 80
-            {{- end }}
           {{- else }}
           - path: "/.well-known/matrix"
             backend:
-            {{- if $v1Ingress }}
               service:
                 name: {{ $fullName }}
                 port:
                   number: {{ $.Values.service.port }}
             pathType: ImplementationSpecific
-            {{- else }}
-              serviceName: {{ $fullName }}
-              servicePort: {{ $.Values.service.port }}
-            {{- end }}
           {{- end }}
         {{- end }}
 
         {{- if and (has . $csHosts) ($.Values.confighub.enabled) }}
           - path: /_matrix/cmaintenance
             backend:
-          {{- if $v1Ingress }}
               service:
                 name: {{ $chubName }}
                 port:
                   number: 80
             pathType: Prefix
-          {{- else }}
-              serviceName: {{ $chubName }}
-              servicePort: 80
-          {{- end }}
           - path: /_matrix/cconfig
             backend:
-          {{- if $v1Ingress }}
               service:
                 name: {{ $chubName }}
                 port:
                   number: 80
             pathType: Prefix
-          {{- else }}
-              serviceName: {{ $chubName }}
-              servicePort: 80
-          {{- end }}
-          - path: /_bum/configure/v1/verify
+          - path: /_bum/client/v1/verify
             backend:
               service:
                 name: {{ $chubName }}
@@ -271,31 +214,21 @@ spec:
         {{- if or (has . $csHosts) (has . $s2sHosts) }}
           - path: /_matrix
             backend:
-          {{- if $v1Ingress }}
               service:
                 name: {{ $fullName }}
                 port:
                   number: {{ $.Values.service.port }}
             pathType: Prefix
-          {{- else }}
-              serviceName: {{ $fullName }}
-              servicePort: {{ $.Values.service.port }}
-          {{- end }}
         {{- end }}
 
         {{- if and (has . $csHosts) $.Values.ingress.includeUnderscoreSynapse }}
           - path: /_synapse/client
             backend:
-          {{- if $v1Ingress }}
               service:
                 name: {{ $fullName }}
                 port:
                   number: {{ $.Values.service.port }}
             pathType: Prefix
-          {{- else }}
-              serviceName: {{ $fullName }}
-              servicePort: {{ $.Values.service.port }}
-          {{- end }}
         {{- end }}
   {{- end }}
 {{- end }}

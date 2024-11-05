@@ -2,6 +2,10 @@
   app: Basis
 - path: webclient.image
   app: Webclient
+- path: call.client.image
+  app: Call
+- path: call.jwtService.image
+  app: LiveKit-JWT-Service
 - path: schadcodescanner.clamavImage
   app: ClamAV
 - path: schadcodescanner.icapImage
@@ -18,8 +22,6 @@
   app: Nginx
 - path: redis.image
   app: Redis
-- path: redis.sysctl.image
-  app: Basis
 - path: sygnal.image
   app: Sygnal
 - path: image

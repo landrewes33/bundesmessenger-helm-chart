@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.confighub.enabled }}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "confighub-nginx") -}}
 {{- $component := "confighub-nginx" -}}
@@ -41,6 +43,7 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/confighub/confighub-configuration.yaml") . | sha256sum }}
+        checksum/config-nginx: {{ include (print $.Template.BasePath "/nginx-conf.yaml") . | sha256sum }}
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}

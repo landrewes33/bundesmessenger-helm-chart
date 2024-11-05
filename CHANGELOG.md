@@ -7,6 +7,107 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.10.0 (2024-11-05)
+
+### ⚠️ Versionshinweise
+
+- Das mit dem BundesMessenger ausgelieferte PostgreSQL Subchart ist auf Version
+  15
+  angehoben. Die damit standardmäßig ausgelieferte PostgreSQL-Version ist nun
+  Version 16. Um auf eine neue Hauptversion von PostgreSQL zu wechseln, ist ein
+  Migrationsschritt erforderlich; ein solcher wird beispielhaft unter
+  [PostgreSQL-Upgrade](./docs/PostgreSQL-Upgrade.md) detailliert.
+  Alternativ kann die verwendete PostgreSQL Version manuell mit
+  `postgresql.image.tag: 14` auf dem alten Stand fixiert werden. (!496)
+
+### ✨ Features
+
+- BundesMessenger Call als Beta Version zum Testen der Infrastruktur und des
+  SFU-Stacks hinzugefügt. (!167)
+- Dokumentation und [LiveKit JWT
+  Service](https://github.com/element-hq/lk-jwt-service) zum Testen von Huddles
+  hinzugefügt. (!296)
+- Die SecurityContext-Standardkonfigurationen erfüllen nun höhere Anforderungen
+  zur Einhaltung von DVS-Vorgaben. (!492)
+- Image `ghcr.io/matrix-org/matrix-authentication-service` auf Version `0.11.0`
+  aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web`
+  auf Version `2.21.0` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl`
+  auf Version `1.31.2` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/matrix-content-scanner`
+  auf Version `1.1.0` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal`
+  auf Version `0.15.1` aktualisiert.
+
+### 🐛 Bugfixes
+
+- Verbessere die Zuverlässigkeit mit der Deployments Änderungen an der
+  Konfiguration laden. (!505)
+- MAS benutzt nun einen eigenen Datenbank-Port. (!519)
+- Anpassung des Webserver Root-Verzeichnis vom Webclient. (!528)
+- Korrektur der falsch konfigurierten und noch nicht genutzten URL für die
+  Verifizierung der Clients. (!536)
+
+### 📚 Dokumentation
+
+- Dokumentieren des Upgrades auf eine neue PostgreSQL-Hauptversion. (!429)
+- Dokumentation in eigener Seite zur Föderation und Proxies ergänzt. (!461)
+- Hinzufügen einer Erklärung für selbstsignierte Zertifikate bei privaten
+  Föderationen. (!479)
+- Aktualisierung der internen Release-Dokumentation. (!483)
+- Aktualisierung der `publiccode.yml`. (!484)
+
+### 📝 Weitere Änderungen
+
+- Anpassung des Mountpfads vom Matrix-Content-Scanner. (!355)
+- Push Informationen für BundesMessengerX ergänzt. (!463)
+- Eine manuelle Pipeline zum Spiegeln des Repos nach OpenCoDE hinzugefügt.
+  (!475)
+- Überprüfung von der Anzahl an Parametern in `convert_kyverno2sast.sh`. (!482)
+- CI-Lint um die Namespaces von Kubernetes-Ressourcen einheitlich zu halten.
+  (!487)
+- Hebe die Version des Bitnami PostgreSQL Subcharts von 12 auf 15 an. (!496,
+  !534)
+- Upgrade der Helm-Subcharts auf neuste Nebenversionen. (!497)
+- Hinzufügen von SPDX Lizenz- und Urheberrechtsinformationen auf Dateiebene.
+  (!504, !535)
+- Nutzung des matrix-authentication-service aus dem [neuen Repository von
+  Element](https://github.com/element-hq/matrix-authentication-service). (!509)
+- `git-mirror` in der CI-Pipeline auf Version `v1.6.0` aktualisiert.
+- `kubernetes-sigs/kustomize` in der CI-Pipeline auf Version `5.5.0`
+  aktualisiert.
+- `kyverno/kyverno` in der CI-Pipeline auf Version `v1.13.0` aktualisiert.
+- `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
+  `v0.78.0` aktualisiert.
+- `registry-1.docker.io/alpine/helm` in der CI-Pipeline auf Version `3.16.2`
+  aktualisiert.
+- `registry-1.docker.io/aquasec/trivy` in der CI-Pipeline auf Version `0.57.0`
+  aktualisiert.
+- `registry-1.docker.io/library/python` in der CI-Pipeline auf Version `3.13`
+  aktualisiert.
+- `registry-1.docker.io/sonarsource/sonar-scanner-cli` in der CI-Pipeline auf
+  Version `11.1` aktualisiert.
+- `registry.gitlab.com/gitlab-org/release-cli` in der CI-Pipeline auf Version
+  `v0.19.0` aktualisiert.
+- `towncrier` in der CI-Pipeline auf Version `24.8.0` aktualisiert.
+
+### 🦖 Abkündigungen und Bereinigungen
+
+- Entfernen von `workers.default.name` und der Ingress Konfiguration als Beta
+  (`networking.k8s.io/v1beta1`). (!417)
+- Altes und nicht benötigtes Script `ci/get_newest_image_tags.sh` entfernt.
+  Diese Funktion wird von Renovate übernommen. (!481, !485)
+- Verwende für `redis.sysctl` die Bitnami Standardkonfiguration. (!493, !517)
+- Abkündigung der TURN-Konfigurationsoptionen. (!498)
+- Abkündigung der Unterstützung nicht gesicherter Verbindungen zu Redis. Das
+  betrifft nur Installationen, die manuell `redis.auth.enabled: false`
+  konfiguriert haben. (!506)
+
 ## BundesMessenger Helm Chart 1.9.0 (2024-08-22)
 
 ### ⚠️ Versionshinweise

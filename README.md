@@ -34,7 +34,8 @@ Weitere Komponenten, die durch das Helm Chart bereitgestellt werden:
 
 - [Synapse-Admin](https://github.com/Awesome-Technologies/synapse-admin) zur Administration
 - [Sygnal](https://github.com/matrix-org/sygnal) Push-Server für Google und Apple
-- BundesMessenger WebClient
+- [BundesMessenger WebClient](https://gitlab.opencode.de/bwi/bundesmessenger/clients/bundesmessenger-web)
+- BundesMessenger Call
 - [Redis](https://redis.io/) In-Memory Datenbank
 - [Ingress Konfiguration](https://github.com/kubernetes/ingress-nginx)
   auf Basis von Nginx
@@ -254,6 +255,7 @@ Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
   - Eine (Sub-)Domain für den Applikationsserver z.B.: `matrix.example.com`
   (Parameter `serverName` bzw. `publicServerName`)
   - Eine (Sub-)Domain für den WebClient z.B. `app.example.com`, besser `app.example.net`
+  - Eine (Sub-)Domain für den Call Client
   - Eine (Sub-)Domain für die Administrationsoberfläche um den Zugriff zu separieren
   bzw. die Admin-Schnittstelle vor öffentlichen Zugriff zu schützen (Parameter `synapse_admin.uri`)
 - [Kubernetes](https://kubernetes.io/) 1.25+
@@ -462,9 +464,12 @@ auch Hinweise zu den einzelnen zusätzlichen Diensten:
 - [BundesMessenger WebClient](./docs/webclient.md)
 - [Synapse Admin](./docs/synapse_admin.md)
 - [Sygnal (Push-Service)](./docs/sygnal_push.md)
+- [Huddle Meetings / Call](./docs/huddle_meetings.md)
+- [LiveKit Server / WebRTC Server](./docs/livekit_server.md)
 - [Synapse Module](./docs/synapse_modules.md)
 - [Matrix-Authentication-Service](./docs/matrix-authentication-service.md)
 - [Monitoring mit Grafana](./docs/Monitoring-mit-Grafana.md)
+- [Föderation](./docs/federation.md)
 
 # Kontakt und Austausch
 

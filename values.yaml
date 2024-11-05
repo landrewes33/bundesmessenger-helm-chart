@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: 2022–2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
 ---
 ######################################################################################
 ##          Konfiguration für Synapse
@@ -94,6 +96,24 @@ serviceAccount:
 # kann hier aber erzwungen werden.
 # argoCD: true
 
+# Standardwerte für alle Pods.
+# Alle `podSecurityContext`-Schlüssel in dieser Datei verwenden die Werte aus
+# dem hier definierten YAML-Anchor.
+x-defaultPodSecurityContext: &defaultPodSecurityContext
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# Standardwerte für alle Container.
+# Alle `securityContext`-Schlüssel in dieser Datei verwenden die Werte aus dem
+# hier definierten YAML-Anchor.
+x-defaultSecurityContext: &defaultSecurityContext
+  capabilities:
+    drop:
+      - ALL
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+
 ## Die Quelle des von Synapse im Verbund verwendeten Signierschlüssels.
 ##
 signingkey:
@@ -142,7 +162,7 @@ signingkey:
     publishImage:
       registry: registry.opencode.de
       repository: bwi/bundesmessenger/backend/container-images/kubectl
-      tag: 1.30.2-jammy-production
+      tag: 1.31.2-jammy-production
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
@@ -151,13 +171,13 @@ signingkey:
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsUser: 2666
     fsGroup: 2666
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
     runAsUser: 2666
 
   ## Bereitschaftscheck
@@ -253,8 +273,10 @@ config:
   # -- (list) URIs die zum Aufbau von 1:1 WebRTC Anrufe aufzubauen.
   # Beispiel:
   # turnUris: ["turn:turn.example.com:3478?transport=udp"]
+  # **ABGEKÜNDIGT**: Nutzen Sie stattdessen `extraConfig`.
   turnUris: []
   # -- (string) geheime Schlüssel für TURN-Server
+  # **ABGEKÜNDIGT**: Nutzen Sie stattdessen `extraConfig`.
   # turnSecret: ""
 
   # -- (bool) Registrierungskonfiguration, beachten Sie, dass die Registrierung mit dem
@@ -542,7 +564,7 @@ synapse:
   # weitere Beispiele:
   #  fsGroupChangePolicy: Always
   podSecurityContext:
-    runAsNonRoot: true
+    <<: *defaultPodSecurityContext
     fsGroup: 2666
     runAsGroup: 2666
     runAsUser: 2666
@@ -550,12 +572,8 @@ synapse:
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie, siehe oben
   # podSecurityContext für weitere relevante Informationen.
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
     runAsUser: 2666
-  #  capabilities:
-  #    drop:
-  #    - ALL
 
   # Begrenzungen und Anforderungen für CPU-Ressourcen werden in CPU-Einheiten gemessen.
   # In Kubernetes entspricht eine CPU-Einheit einem physischen CPU-Kern oder einem virtuellen Kern,
@@ -668,11 +686,6 @@ workers:
       # den einzelnen vorherigen Container beenden, so dass der neue, ankommende Container sich mit dem PV verbinden kann
       type: RollingUpdate
 
-    # -- (string)  Ein spezifischer Name für diesen Worker, kann nicht global gesetzt werden.
-    # Beachten Sie, dass dies nur gesetzt werden kann, wenn replicaCount 1 ist.
-    # (wird in den Worker überschrieben, ist hier nur aus historischen Gründen noch enthalten)
-    name: nil
-
     # -- (object) Zusätzliche Konfiguration für die Worker.
     extraConfig: {}
 
@@ -707,23 +720,15 @@ workers:
     # -- (map) Informationen zum Pod-Sicherheitskontext, die den Worker-Pods mitgeteilt werden sollen.
     # DEFAULT gilt für alle Synapse-Worker-Container.
     podSecurityContext:
-      runAsNonRoot: true
+      <<: *defaultPodSecurityContext
       fsGroup: 2666
       runAsGroup: 2666
       runAsUser: 2666
 
     # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
     # DEFAULT gilt für alle Synapse-Worker-Container.
-    # Beispiele:
-    #   readOnlyRootFilesystem: true
-    #   runAsNonRoot: true
-    #   runAsUser: 2666
-    #   capabilities:
-    #     drop:
-    #       - ALL
     securityContext:
-      readOnlyRootFilesystem: true
-      runAsNonRoot: true
+      <<: *defaultSecurityContext
       runAsUser: 2666
 
     resources:
@@ -1121,7 +1126,7 @@ sygnal:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/sygnal
-    tag: 0.14.3-jammy-production
+    tag: 0.15.1-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (string) Proxy, falls benötigt um die Push-Services zu erreichen.
@@ -1133,24 +1138,20 @@ sygnal:
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
   # weitere Beispiele:
-  #  runAsNonRoot: true
   #  fsGroup: 27
   #  runAsGroup: 2000
   #  runAsUser: 2000
   #  sysctls:
   #    - name: net.ipv4.ip_unprivileged_port_start
   #      value: "80"
-  podSecurityContext: {}
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
   # weitere Beispiele:
-  #  capabilities:
-  #    drop:
-  #    - ALL
-  #  readOnlyRootFilesystem: true
-  #  runAsNonRoot: true
   #  runAsUser: 2111
   securityContext:
-    readOnlyRootFilesystem: true
+    <<: *defaultSecurityContext
 
   ## Ressource Konfiguration für Sygnal Server.
   resources:
@@ -1284,17 +1285,13 @@ wellknown:
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsGroup: 1001
     runAsUser: 1001
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
-  # weitere Möglichkeiten:
-  #  capabilities:
-  #    drop:
-  #    - ALL
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
 
   ## Ressource Konfiguration für well-known server.
   resources:
@@ -1353,17 +1350,13 @@ confighub:
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsGroup: 1001
     runAsUser: 1001
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
-  # weitere Möglichkeiten:
-  #  capabilities:
-  #    drop:
-  #    - ALL
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
 
   ## Ressource Konfiguration für confighub.
   resources:
@@ -1407,7 +1400,7 @@ postgresql:
   image:
     registry: docker.io
     repository: bitnami/postgresql
-    tag: "14"
+    tag: "16"
     # pullSecrets: ["myRegistryKeySecretName"]
 
   auth:
@@ -1500,8 +1493,11 @@ externalPostgresql:
 ##          Konfiguration für Redis Server
 ######################################################################################
 ## Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
-## Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
-## false setzen und den externalRedis-Block konfigurieren.
+## Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie
+## `redis.enabled: false` und konfigurieren den `externalRedis`-Block.
+##
+## Die Konfiguration des Kernelparameters `transparent_hugepage` wird im
+## Dokument docs/redis_sysctl_tuning.md beschrieben.
 
 redis:
   image:
@@ -1521,30 +1517,6 @@ redis:
     password: synapse
     existingSecret: ""
     existingSecretPasswordKey: redis-password
-
-  # -- (map) Konfiguration zur Härtung des InitContainers des Redis-Images
-  # (https://github.com/bitnami/charts/tree/main/bitnami/redis/#host-kernel-settings)
-  sysctl:
-    enabled: true
-    image:
-      registry: registry.opencode.de
-      repository: bwi/bundesmessenger/backend/container-images/ubuntu
-      tag: latest-jammy-production
-      pullPolicy: IfNotPresent
-      # pullSecrets: ["myRegistryKeySecretName"]
-    mountHostSys: true
-    resources:
-      limits:
-        cpu: 400m
-        memory: 512Mi
-      requests:
-        cpu: 100m
-        memory: 128Mi
-    command:
-      - /bin/sh
-      - -c
-      - |-
-        echo never > /host-sys/kernel/mm/transparent_hugepage/enabled
 
   # -- (string) Form der Architektur des Deployments
   architecture: standalone
@@ -1713,7 +1685,7 @@ ingress:
 ## Achtung: Der MAS ist "work in progress" bzw. experimentell, siehe: docs/matrix-authentication-service.md
 ## Wenn der matrix-authentication-service Pod nicht startet, befinden sich
 ## die relevanten Fehlermeldungen meist im initContainer "initconfig".
-## Reference: https://github.com/matrix-org/matrix-authentication-service
+## Reference: https://github.com/element-hq/matrix-authentication-service
 
 mas:
   # -- (boolean) Aktivieren des Matrix-Authentication-Service
@@ -1721,9 +1693,9 @@ mas:
   # -- (object) Konfiguration des Image/Repository
   image:
     registry: ghcr.io
-    repository: matrix-org/matrix-authentication-service
+    repository: element-hq/matrix-authentication-service
     # Tag mit "-debug" um shell zu haben
-    tag: 0.10.0-debug
+    tag: 0.12.0-debug
     pullPolicy: IfNotPresent
 
   # -- (string) URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider
@@ -1734,6 +1706,7 @@ mas:
   # Diese wird nicht automatisch angelegt und muss bereit gestellt werden.
   # https://matrix-org.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
   postgresql:
+    port: 5432
     database: mas_synapse
     username: massynapse
     password: mas-synapse
@@ -1896,7 +1869,7 @@ mas:
   # Beachten Sie, dass eine Änderung dieser Einstellung auch die Verwendung der volumePermission
   # Hilfsprogramm verwenden müssen, abhängig von Ihrem Speicher.
   podSecurityContext:
-    runAsNonRoot: true
+    <<: *defaultPodSecurityContext
     fsGroup: 1007
     runAsGroup: 1007
     runAsUser: 1007
@@ -1904,12 +1877,8 @@ mas:
   # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie, siehe oben
   # podSecurityContext für weitere relevante Informationen.
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
     runAsUser: 1007
-  #  capabilities:
-  #    drop:
-  #    - ALL
 
   resources:
     limits:
@@ -1992,7 +1961,7 @@ contentscanner:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/matrix-content-scanner
-    tag: 1.0.6-jammy-production
+    tag: 1.1.0-jammy-production
     pullPolicy: IfNotPresent
 
   replicaCount: 1
@@ -2013,18 +1982,14 @@ contentscanner:
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsGroup: 1334
     runAsUser: 1334
     fsGroup: 1334
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
-  # weitere Möglichkeiten:
-  #  capabilities:
-  #    drop:
-  #    - ALL
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
 
 
 ######################################################################################
@@ -2142,15 +2107,12 @@ schadcodescanner:
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   podSecurityContext:
-    runAsNonRoot: true
+    <<: *defaultPodSecurityContext
     fsGroup: 1111
 
   # -- (map) Konfiguration für die ClamAV-Container-Sicherheitsrichtlinie
-  # weitere Möglichkeiten:
-  #  capabilities:
-  #    drop:
-  #    - ALL
   clamavSecurityContext:
+    <<: *defaultSecurityContext
     runAsUser: 1111
     runAsGroup: 1111
     readOnlyRootFilesystem: true
@@ -2161,6 +2123,7 @@ schadcodescanner:
   #    drop:
   #    - ALL
   icapSecurityContext:
+    <<: *defaultSecurityContext
     runAsUser: 1112
     runAsGroup: 1112
     readOnlyRootFilesystem: true
@@ -2197,19 +2160,14 @@ synapse_admin:
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
-  # weitere Beispiele:
-  #  runAsNonRoot: true
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsGroup: 1001
     runAsUser: 1001
+
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des Containers
-  # weitere Beispiele:
-  #   runAsNonRoot: true
-  #   readOnlyRootFilesystem: true
-  #   runAsUser: 2010
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
 
     ## Configuration for mounting additional volumes into the application container.
     ## AKTUELL in Prüfung:
@@ -2249,24 +2207,20 @@ webclient:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.18.0-jammy-production
+    tag: 2.21.0-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
   #  fsGroup: 1001
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsGroup: 1001
     runAsUser: 1001
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
-  # weitere Möglichkeiten:
-  #  capabilities:
-  #    drop:
-  #    - ALL
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
 
   ## Ressource Konfiguration für webclient-server.
   resources:
@@ -2283,6 +2237,120 @@ webclient:
 
 
 ######################################################################################
+##          Konfiguration für BundesMessenger-Call
+######################################################################################
+## Der BundesMessenger-Call Client ist derzeit im Beta-Status. Er ermöglicht Video-Chats.
+## Die Video-Chats funktionieren via WebRTC und LiveKit SFU.
+## Die SFU muss sperat bereit gestellt werden.
+## Der Client wird nicht mit der konfigurierten URL direkt aufgerufen, sondern
+## integriert sich in den WebClient. Die URL wird für die Integration
+## jedoch benötigt.
+
+call:
+  # -- (bool) BundesMessenger-Call im Deployment aktivieren
+  enabled: false
+  # -- (string) URL für den Call, zwingend notwendig
+  uri: ""
+
+  # -- (object) Konfiguration mit denen der LiveKit Server erreicht werden kann.
+  # Key und Secret müssen mit den Angabe im LiveKit Server überein stimmen.
+  livekit:
+    url: "wss://livekit.example.com"
+    key: "devkey"
+    secret: "secret"
+
+  # -- (string) Bestehendes Secret das anstelle statischer Angaben verwendet wird
+  existingSecret: ""
+  # -- (object) Namen der Schlüssel in dem existingSecret.
+  # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
+  secretKeys:
+    livekitUrl: livekit-url
+    livekitKey: livekit-key
+    livekitSecret: livekit-secret
+
+  # -- (object) Konfiguration für Client vom BundesMessenger-Call
+  client:
+    image:
+      registry: registry.opencode.de
+      repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-call
+      tag: 0.4.0-jammy-production
+      pullPolicy: IfNotPresent
+
+    # -- (object) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+    podSecurityContext:
+      <<: *defaultPodSecurityContext
+      runAsUser: 1001
+      runAsGroup: 1001
+
+    # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie
+    securityContext:
+      <<: *defaultSecurityContext
+
+    ## Ressource Konfiguration für BundesMessenger-Call.
+    resources:
+      limits:
+        # -- (string) Rechenressourcengrenzen, die auf den BundesMessenger-Call anzuwenden sind.
+        cpu: 100m
+        # -- (string) RAM Ressourcengrenzen, die auf den BundesMessenger-Call anzuwenden sind.
+        memory: 90Mi
+      requests:
+        # -- (string) Anforderungen an Rechenressourcen, die auf den BundesMessenger-Call anzuwenden sind.
+        cpu: 50m
+        # -- (string) Anforderungen an RAM Ressourcen, die auf den BundesMessenger-Call anzuwenden sind.
+        memory: 45Mi
+
+  # -- (object) Konfiguration für das Image vom LiveKit JWT Service
+  jwtService:
+    image:
+      registry: ghcr.io
+      repository: element-hq/lk-jwt-service
+      tag: sha-e3a1a01
+      pullPolicy: IfNotPresent
+
+    # -- (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+    # Beispiel:
+    # - name: NO_PROXY
+    #   value: "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"
+    # - name: HTTPS_PROXY
+    #   value: "https://proxyuser@proxyserver:proxyport"
+    # - name: HTTP_PROXY
+    #   value: "http://proxyuser@proxyserver:proxyport"
+    extraEnv: []
+
+    # -- (object) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+    podSecurityContext:
+      <<: *defaultPodSecurityContext
+      runAsGroup: 1021
+      runAsUser: 1021
+
+    # -- (object) Konfiguration für die Container-Sicherheitsrichtlinie
+    securityContext:
+      <<: *defaultSecurityContext
+
+    ## Ressource Konfiguration für LiveKit-JWT-Server.
+    resources:
+      limits:
+        # -- (string) Rechenressourcengrenzen, die auf den LiveKit-JWT-Server anzuwenden sind.
+        cpu: 100m
+        # -- (string) RAM Ressourcengrenzen, die auf den LiveKit-JWT-Server anzuwenden sind.
+        memory: 50Mi
+      requests:
+        # -- (string) Anforderungen an Rechenressourcen, die auf den LiveKit-JWT-Server anzuwenden sind.
+        cpu: 50m
+        # -- (string) Anforderungen an RAM Ressourcen, die auf den LiveKit-JWT-Server anzuwenden sind.
+        memory: 25Mi
+
+    # -- (object) Node Selektor Konfiguration für den Container.
+    nodeSelector: {}
+
+    # -- (list) Tolerations/Tains Konfiguration für den Container.
+    tolerations: []
+
+    # -- (object) Affinitäts-Konfiguration für den Container.
+    affinity: {}
+
+
+######################################################################################
 ##          zusätzliche Konfigurationen für den BundesMessenger
 ######################################################################################
 ## Konfigurationen, die übergreifend sind und nicht nur eine einzelne Komponenten betreffen.
@@ -2295,7 +2363,7 @@ webclient:
 additionalConfig:
 
   # -- (list) Liste an JWT, die dem Client bereit gestellt werden, um die Infrastruktur
-  # als legitim auszuweisen. Diese werden via `<public_baseurl>/_bum/configure/v1/verify`
+  # als legitim auszuweisen. Diese werden via `<public_baseurl>/_bum/client/v1/verify`
   verifyJWT: []
 
   dsgvoExport:
@@ -2441,13 +2509,13 @@ tests:
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   podSecurityContext:
+    <<: *defaultPodSecurityContext
     runAsUser: 1001
     runAsGroup: 1001
 
   # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
+    <<: *defaultSecurityContext
     runAsUser: 1001
     runAsGroup: 1001
 

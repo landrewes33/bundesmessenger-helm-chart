@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2023–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if and ( .Values.demomode.enabled | default false ) (semverCompare ">=1.21.0" .Capabilities.KubeVersion.Version) -}}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "demomode") -}}
 
@@ -17,6 +19,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{ include "matrix-synapse.demomodeServiceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 rules:
@@ -38,6 +41,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: {{ include "matrix-synapse.demomodeServiceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 subjects:

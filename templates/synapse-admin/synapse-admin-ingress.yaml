@@ -1,13 +1,10 @@
+{{/* SPDX-FileCopyrightText: 2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if and .Values.ingress.enabled .Values.synapse_admin.enabled -}}
-{{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 {{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
 {{- $adminWebGui := include "synapse-admin.host" . -}}
 
-  {{- if $v1Ingress -}}
 apiVersion: networking.k8s.io/v1
-  {{- else -}}
-apiVersion: networking.k8s.io/v1beta1
-  {{- end }}
 kind: Ingress
 metadata:
   name: {{ $adminName }}
@@ -42,14 +39,9 @@ spec:
         paths:
           - path: /
             backend:
-          {{- if $v1Ingress }}
               service:
                 name: {{ $adminName }}
                 port:
                   number: 8080
             pathType: Prefix
-          {{- else }}
-              serviceName: {{ $adminName }}
-              servicePort: 8080
-          {{- end }}
 {{- end }}

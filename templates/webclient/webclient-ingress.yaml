@@ -1,17 +1,15 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if and .Values.ingress.enabled .Values.webclient.enabled }}
 {{- $webclientUri := .Values.webclient.uri | required "webclient.uri is required." -}}
 {{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
 {{- $component := "webclient" -}}
-{{- $v1Ingress := .Capabilities.APIVersions.Has "networking.k8s.io/v1" -}}
 
-{{- if $v1Ingress -}}
 apiVersion: networking.k8s.io/v1
-{{- else -}}
-apiVersion: networking.k8s.io/v1beta1
-{{- end }}
 kind: Ingress
 metadata:
   name: {{ $webclientName }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ $component }}
@@ -43,14 +41,9 @@ spec:
         paths:
           - path: /
             backend:
-            {{- if $v1Ingress }}
               service:
                 name: {{ $webclientName }}
                 port:
                   number: 8080
             pathType: Prefix
-            {{- else }}
-              serviceName: {{ $webclientName }}
-              servicePort: 8080
-            {{- end }}
 {{- end }}

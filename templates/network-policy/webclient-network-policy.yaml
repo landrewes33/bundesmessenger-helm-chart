@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2023–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.networkpolicies.enabled }}
 {{- if .Values.webclient.enabled }}
 {{- $component := "webclient" -}}

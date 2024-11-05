@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 ** Hinweis: Das Chart benötigt einige Minuten, bitte haben Sie Geduld. **
 {{- if .Values.signingkey.job.enabled }}
 *** Schalten Sie den Signing-Key-Job nach erfolgreichem Deployment wieder ab (signingkey.job.enabled=false) ***
@@ -43,6 +45,14 @@ Gehen Sie sicher, dass {{  include "matrix-synapse.demomodeServiceAccountName" .
 
 {{- if not .Values.additionalConfig.dsgvoExport.serviceAccount.create }}
 Gehen Sie sicher, dass {{  include "matrix-synapse.dsgvoExportServiceAccountName" . }} als ServiceAccount vorhanden ist.
+{{- end }}
+
+{{- if or .Values.config.turnUris .Values.config.turnSecret }}
+Die TURN-Konfigurationsoptionen `config.turnUris` und `config.turnSecret` sind abgekündigt. Nutzen Sie stattdessen `extraConfig`.
+{{- end }}
+
+{{- if not .Values.redis.auth.enabled }}
+Ungesicherte Verbindungen zu Redis werden bald nicht mehr unterstützt. Setzen Sie `redis.auth.enabled: true`.
 {{- end }}
 
 

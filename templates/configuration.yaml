@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{-  $recommendedLogging := (dict) -}}
 {{- if .Values.config.useRecommendedLogging -}}
   {{- $recommendedLogging = .Files.Get "files/default_logging.yaml" | fromYaml -}}
@@ -8,6 +10,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: {{ include "matrix-synapse.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
 data:
@@ -205,6 +208,10 @@ data:
       {{ $passwordDict := dict "password_config" (dict "enabled" false) }}
       {{ $extraConfig := mergeOverwrite $extraConfig $passwordDict }}
     {{- end -}}
+    {{- if .Values.call.enabled -}}
+      {{ $callExpDict := dict "experimental_features" (dict "msc3266_enabled" true) }}
+      {{ $extraConfig := mergeOverwrite $extraConfig $callExpDict }}
+    {{- end -}}
 
     {{- /* Entfernen von per default leeren Variable aus ExtraConfig Dictionary
     Synapse does not starts when federation_custom_ca_list is empty.
@@ -213,14 +220,14 @@ data:
       {{ $_ := unset $extraConfig "federation_custom_ca_list" }}
     {{- else }}
     {{- /* Korrektur von manuellen Fehlern, falls unterschiedliche Einträge mit und ohne
-    führenden "/" in federation_custom_ca_list hinterlegt wurde. 
+    führenden "/" in federation_custom_ca_list hinterlegt wurde.
     So findet auch Synapse die korrekten Mounts. */}}
       {{- $caList := list }}
       {{- range .Values.extraConfig.federation_custom_ca_list }}
         {{- $caList = printf "/%s" ( trimPrefix "/" . ) | append $caList }}
       {{- end }}
       {{ $caDict := dict "federation_custom_ca_list" ($caList) }}
-      {{ $extraConfig := mustMergeOverwrite $extraConfig $caDict }} 
+      {{ $extraConfig := mustMergeOverwrite $extraConfig $caDict }}
     {{- end }}
 
     {{- with $extraConfig }}

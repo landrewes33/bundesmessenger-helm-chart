@@ -1,3 +1,5 @@
+{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
@@ -383,6 +385,17 @@ Set MAS postgres host
   {{- if .Values.mas.enabled -}}
 {{- .Values.mas.postgresql.host | default ( include "matrix-synapse.postgresql.host" . ) -}}
   {{- end -}}
+{{- end -}}
+
+{{/*
+MAS PostgreSQL port.
+
+Defaults to `matrix-synapse.postgresql.port`.
+*/}}
+{{- define "matrix-synapse.maspostgresql.port" -}}
+{{- if .Values.mas.enabled -}}
+  {{- .Values.mas.postgresql.port | default (include "matrix-synapse.postgresql.port" .) -}}
+{{- end -}}
 {{- end -}}
 
 {{/*

@@ -1,7 +1,7 @@
 ---
 apiVersion: v2
 name: bundesmessenger
-version: 1.9.0
+version: 1.10.0
 description: BWI Matrix BundesMessenger
 home: https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/
 icon: https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/raw/main/docs/images/bum_core_sw.svg
@@ -29,6 +29,6 @@ dependencies:
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: redis.enabled
   - name: postgresql
-    version: ^12.8.0
+    version: ^15.5
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: postgresql.enabled
