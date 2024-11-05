@@ -1,1 +1,0 @@
-Die SecurityContext-Standardkonfigurationen erfüllen nun höhere Anforderungen zur Einhaltung von DVS-Vorgaben.

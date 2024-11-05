@@ -1,0 +1,59 @@
+- version: 1.10.0
+  tag: v1.10.0
+  date: "2024-11-05"
+  images:
+    - name: Basis
+      image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/ubuntu
+      tag: latest-jammy-production
+    - name: Webclient
+      image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web
+      tag: 2.21.0-jammy-production
+    - name: Call
+      image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-call
+      tag: 0.4.0-jammy-production
+    - name: LiveKit-JWT-Service
+      image: ghcr.io/element-hq/lk-jwt-service
+      tag: sha-e3a1a01
+    - name: ClamAV
+      image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/clamav
+      tag: 0.103.9_dfsg-0ubuntu0.22.04.1-jammy-production
+    - name: cicap
+      image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/icap
+      tag: 1_0.5.6-2build1-jammy-production
+    - name: Matrix-Content-Scanner
+      image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/matrix-content-scanner
+      tag: 1.1.0-jammy-production
+    - name: Synapse
+      image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse
+      tag: "1.105.1-jammy-production"
+    - name: Kubectl
+      image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl
+      tag: 1.31.2-jammy-production
+    - name: Nginx
+      image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx
+      tag: 1.18.0-6ubuntu14.4-jammy-production
+    - name: Redis
+      image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/redis
+      tag: 5_6.0.16-1ubuntu1-jammy-production
+    - name: Sygnal
+      image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal
+      tag: 0.15.1-jammy-production
+    - name: Synapse-Admin
+      image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse-admin
+      tag: 0.9.1-jammy-production
+    - name: Matrix-Authentication-Service
+      image: ghcr.io/element-hq/matrix-authentication-service
+      tag: 0.12.0-debug
+    - name: internalPostgresql
+      image: docker.io/bitnami/postgresql
+      tag: "16"
+    - name: Connection-Tests
+      image: registry.opencode.de/bwi/bundesmessenger/backend/container-images/wget
+      tag: 1.21.2-jammy-production
+  helm:
+    - name: redis
+      version: ^17.14.6
+      repository: oci://registry-1.docker.io/bitnamicharts
+    - name: postgresql
+      version: ^15.5
+      repository: oci://registry-1.docker.io/bitnamicharts
