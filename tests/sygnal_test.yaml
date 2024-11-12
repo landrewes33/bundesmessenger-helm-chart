@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+templates:
+  - sygnal/sygnal-deployment.yaml
+  - sygnal/sygnal-configuration.yaml
+tests:
+  - it: ensures a Deployment if enabled
+    template: sygnal/sygnal-deployment.yaml
+    set:
+      sygnal.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: RELEASE-NAME-sygnal
+          any: true
+  - it: ensures no Deployment if disabled
+    template: sygnal/sygnal-deployment.yaml
+    set:
+      sygnal.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Deployment
+        not: true

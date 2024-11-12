@@ -25,7 +25,7 @@ spec:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/matrix-authentications-service/matrix-authentication-service-configuration.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/matrix-authentication-service/matrix-authentication-service-configuration.yaml") . | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
     spec:
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}

@@ -1,0 +1,25 @@
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+templates:
+  - confighub/confighub-deployment.yaml
+  - confighub/confighub-configuration.yaml
+  - nginx-conf.yaml
+tests:
+  - it: ensures a Deployment if enabled
+    template: confighub/confighub-deployment.yaml
+    set:
+      confighub.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: RELEASE-NAME-confighub-nginx
+          any: true
+  - it: ensures no Deployment if disabled
+    template: confighub/confighub-deployment.yaml
+    set:
+      confighub.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Deployment
+        not: true

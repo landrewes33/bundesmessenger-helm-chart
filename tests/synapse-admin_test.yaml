@@ -1,0 +1,63 @@
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+templates:
+  - synapse-admin/synapse-admin-deployment.yaml
+  - synapse-admin/synapse-admin-ingress.yaml
+set:
+  synapse_admin.uri: synapse-admin.example.org
+tests:
+  - it: ensures a Deployment if enabled
+    template: synapse-admin/synapse-admin-deployment.yaml
+    set:
+      synapse_admin.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: RELEASE-NAME-synapse-admin
+          any: true
+  - it: ensures no Deployment if disabled
+    set:
+      synapse_admin.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Deployment
+        not: true
+  - it: ensures an Ingress if (synapse_admin enabled, ingress enabled)
+    template: synapse-admin/synapse-admin-ingress.yaml
+    set:
+      synapse_admin.enabled: true
+      ingress.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Ingress
+          apiVersion: networking.k8s.io/v1
+          name: RELEASE-NAME-synapse-admin
+          any: true
+  - it: ensures no Ingress if (synapse_admin enabled, ingress disabled)
+    template: synapse-admin/synapse-admin-ingress.yaml
+    set:
+      synapse_admin.enabled: true
+      ingress.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true
+  - it: ensures no Ingress if (synapse_admin disabled, ingress enabled)
+    template: synapse-admin/synapse-admin-ingress.yaml
+    set:
+      synapse_admin.enabled: false
+      ingress.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true
+  - it: ensures no Ingress if (synapse_admin disabled, ingress disabled)
+    template: synapse-admin/synapse-admin-ingress.yaml
+    set:
+      synapse_admin.enabled: false
+      ingress.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true
