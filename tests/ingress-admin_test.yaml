@@ -1,0 +1,23 @@
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+templates:
+  - ingress-admin.yaml
+set:
+  adminAPIServerName: admin-api.example.org
+tests:
+  - it: ensures an Ingress if enabled
+    set:
+      ingress.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Ingress
+          apiVersion: networking.k8s.io/v1
+          name: RELEASE-NAME-bundesmessenger-admin
+          any: true
+  - it: ensures no Ingress if disabled
+    set:
+      ingress.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true

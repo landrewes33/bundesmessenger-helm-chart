@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+templates:
+  - deployment.yaml
+  - configuration.yaml
+  - demomode/demomode.yaml
+  - secrets.yaml
+  - signing-key-job.yaml
+tests:
+  - it: ensures a Deployment
+    template: deployment.yaml
+    set:
+      serverName: happy.place.example.org
+    asserts:
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: RELEASE-NAME-bundesmessenger
+          any: true

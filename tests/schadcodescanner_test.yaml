@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+templates:
+  - schadcodescanner/schadcodescanner-deployment.yaml
+  - schadcodescanner/schadcodescanner-configuration.yaml
+tests:
+  - it: ensures a StatefulSet if enabled
+    template: schadcodescanner/schadcodescanner-deployment.yaml
+    set:
+      schadcodescanner.enabled: true
+      contentscanner.enabled: true
+    asserts:
+      - containsDocument:
+          kind: StatefulSet
+          apiVersion: apps/v1
+          name: RELEASE-NAME-schadcodescanner
+          any: true
+  - it: ensures no StatefulSet if disabled
+    template: schadcodescanner/schadcodescanner-deployment.yaml
+    set:
+      schadcodescanner.enabled: false
+    asserts:
+      - containsDocument:
+          kind: StatefulSet
+        not: true
+  - it: requires contentscanner to be enabled
+    template: schadcodescanner/schadcodescanner-deployment.yaml
+    set:
+      schadcodescanner.enabled: true
+      contentscanner.enabled: false
+    asserts:
+      - failedTemplate: {}

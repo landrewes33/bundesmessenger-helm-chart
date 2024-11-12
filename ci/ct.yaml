@@ -12,3 +12,5 @@ validate-chart-values: true
 validate-maintainers: false
 validate-yaml: true
 excluded-charts: []
+additional-commands:
+  - helm unittest -t JUnit -o report.xml .

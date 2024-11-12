@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+templates:
+  - pvc.yaml
+tests:
+  - it: ensures a PersistentVolumeClaim if enabled
+    set:
+      persistence.enabled: true
+    asserts:
+      - containsDocument:
+          kind: PersistentVolumeClaim
+          apiVersion: v1
+          name: RELEASE-NAME-bundesmessenger
+          any: true
+  - it: ensures no PersistentVolumeClaim if disabled
+    set:
+      persistence.enabled: false
+    asserts:
+      - containsDocument:
+          kind: PersistentVolumeClaim
+        not: true
+  - it: ensures no PVC is created if an existing one is given
+    set:
+      persistence.enabled: true
+      persistence.existingClaim: fake-claim
+    asserts:
+      - containsDocument:
+          kind: PersistentVolumeClaim
+        not: true

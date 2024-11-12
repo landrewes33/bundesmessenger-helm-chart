@@ -1,0 +1,66 @@
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+templates:
+  - webclient/webclient-deployment.yaml
+  - webclient/webclient-configuration.yaml
+  - webclient/webclient-ingress.yaml
+  - nginx-conf.yaml
+set:
+  webclient.uri: webclient.example.org
+tests:
+  - it: ensures a Deployment if enabled
+    template: webclient/webclient-deployment.yaml
+    set:
+      webclient.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: RELEASE-NAME-webclient
+          any: true
+  - it: ensures no Deployment if disabled
+    template: webclient/webclient-deployment.yaml
+    set:
+      webclient.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Deployment
+        not: true
+  - it: ensures an Ingress if (webclient enabled, ingress enabled)
+    template: webclient/webclient-ingress.yaml
+    set:
+      webclient.enabled: true
+      ingress.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Ingress
+          apiVersion: networking.k8s.io/v1
+          name: RELEASE-NAME-webclient
+          any: true
+  - it: ensures no Ingress if (webclient enabled, ingress disabled)
+    template: webclient/webclient-ingress.yaml
+    set:
+      webclient.enabled: true
+      ingress.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true
+  - it: ensures no Ingress if (webclient disabled, ingress enabled)
+    template: webclient/webclient-ingress.yaml
+    set:
+      webclient.enabled: false
+      ingress.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true
+  - it: ensures no Ingress if (webclient disabled, ingress disabled)
+    template: webclient/webclient-ingress.yaml
+    set:
+      webclient.enabled: false
+      ingress.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true

@@ -1,6 +1,9 @@
 {{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
-{{- if and .Values.contentscanner.enabled .Values.schadcodescanner.enabled }}
+{{- if .Values.schadcodescanner.enabled }}
+{{- if not .Values.contentscanner.enabled }}
+  {{- fail "contentscanner must be enabled if schadcodescanner is enabled" }}
+{{- end }}
 {{- $config := .Values.schadcodescanner }}
 {{- $component := "schadcodescanner" -}}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "schadcodescanner") -}}

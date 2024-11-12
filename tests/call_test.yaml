@@ -1,0 +1,65 @@
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+templates:
+  - call/client-deployment.yaml
+  - call/client-configuration.yaml
+  - call/ingress.yaml
+set:
+  call.uri: call.example.org
+tests:
+  - it: ensures a Deployment if enabled
+    template: call/client-deployment.yaml
+    set:
+      call.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: RELEASE-NAME-call
+          any: true
+  - it: ensures no Deployment if disabled
+    template: call/client-deployment.yaml
+    set:
+      call.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Deployment
+        not: true
+  - it: ensures an Ingress if (call enabled, ingress enabled)
+    template: call/ingress.yaml
+    set:
+      call.enabled: true
+      ingress.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Ingress
+          apiVersion: networking.k8s.io/v1
+          name: RELEASE-NAME-call
+          any: true
+  - it: ensures no Ingress if (call enabled, ingress disabled)
+    template: call/ingress.yaml
+    set:
+      call.enabled: true
+      ingress.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true
+  - it: ensures no Ingress if (call disabled, ingress enabled)
+    template: call/ingress.yaml
+    set:
+      call.enabled: false
+      ingress.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true
+  - it: ensures no Ingress if (call disabled, ingress disabled)
+    template: call/ingress.yaml
+    set:
+      call.enabled: false
+      ingress.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true

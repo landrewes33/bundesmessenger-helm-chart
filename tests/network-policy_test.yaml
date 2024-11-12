@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+templates:
+  - network-policy/*.yaml
+tests:
+  - it: ensures no NetworkPolicy if disabled
+    set:
+      networkpolicies.enabled: false
+    asserts:
+      - containsDocument:
+          kind: NetworkPolicy
+        not: true

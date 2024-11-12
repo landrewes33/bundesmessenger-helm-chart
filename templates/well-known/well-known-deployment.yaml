@@ -41,7 +41,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/well-known/well-known-config.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/well-known/well-known-configuration.yaml") . | sha256sum }}
         checksum/config-nginx: {{ include (print $.Template.BasePath "/nginx-conf.yaml") . | sha256sum }}
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
