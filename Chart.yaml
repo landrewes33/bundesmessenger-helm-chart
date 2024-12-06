@@ -7,7 +7,7 @@ home: https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/
 icon: https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/raw/main/docs/images/bum_core_sw.svg
 
 type: application
-appVersion: 1.105.1
+appVersion: 1.120.2
 maintainers:
   - name: BWI GmbH
     email: bundesmessenger@bwi.de
