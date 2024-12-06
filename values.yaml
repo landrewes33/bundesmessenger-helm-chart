@@ -329,6 +329,11 @@ extraConfig:
     # -- (string) Zeitdauer wie lange Medien von fremden Servern im Cache vorgehalten werden.
     # Bei Bedarf werden diese vom remote Server erneut heruntergeladen.
     remote_media_lifetime: 90d
+
+  # -- (bool) Alle Dateien werden als Authentifiziert markiert, wenn aktiviert.
+  # siehe https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#enable_authenticated_media
+  # Authentifizierte Medien werden aktuell nicht vom Matrix Content Scanner unterstützt.
+  enable_authenticated_media: false
   # -- (bool) Authentifizierung notwendig für User-Suche
   require_auth_for_profile_requests: true
   # -- (bool) Limitiere Requests für Nutzer mit shared rooms, abgeschaltet
