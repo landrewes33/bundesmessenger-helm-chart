@@ -133,14 +133,6 @@ data:
     enable_registration_captcha: true
     {{- end }}
 
-    ## Turn ##
-    # The public URIs of the TURN server to give to clients
-    #
-    #turn_uris: []
-    {{- if .Values.config.turnUris }}
-    turn_uris:
-       {{ toYaml .Values.config.turnUris | nindent 6 }}
-    {{end}}
     ## Registration ##
 
     {{ if .Values.mas.enabled -}}

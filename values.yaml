@@ -270,15 +270,6 @@ config:
   #   publicKey: ""
   #   privateKey: ""
 
-  # -- (list) URIs die zum Aufbau von 1:1 WebRTC Anrufe aufzubauen.
-  # Beispiel:
-  # turnUris: ["turn:turn.example.com:3478?transport=udp"]
-  # **ABGEKÜNDIGT**: Nutzen Sie stattdessen `extraConfig`.
-  turnUris: []
-  # -- (string) geheime Schlüssel für TURN-Server
-  # **ABGEKÜNDIGT**: Nutzen Sie stattdessen `extraConfig`.
-  # turnSecret: ""
-
   # -- (bool) Registrierungskonfiguration, beachten Sie, dass die Registrierung mit dem
   # containerinternen Werkzeug register_new_matrix_user immer möglich ist. Synapse-Admin kann dafür genutzt werden.
   # @default -- false
