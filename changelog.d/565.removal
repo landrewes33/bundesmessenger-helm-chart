@@ -1,0 +1,1 @@
+Entfernen der abgekündigten TURN-Einstellungen. Die Konfiguration ist weiterhin über `extraConfig` möglich.
