@@ -22,3 +22,58 @@ tests:
       - containsDocument:
           kind: Deployment
         not: true
+  - it: ensures a Secret on legacy options
+    template: sygnal/sygnal-configuration.yaml
+    set:
+      sygnal.enabled: true
+      sygnal.existingSecret: sygnal
+      sygnal.fcmkey_filename: bundesmessenger.json
+      sygnal.fcmkey_keyvalue: {}
+      sygnal.ioskey_filename: AuthKey.p8
+      sygnal.ioskey_keyvalue: 53C237
+    asserts:
+      - containsDocument:
+          kind: Secret
+          apiVersion: v1
+          name: sygnal
+          any: true
+  - it: ensures a Secret key for legacy FCM option
+    template: sygnal/sygnal-configuration.yaml
+    set:
+      sygnal.enabled: true
+      sygnal.existingSecret: sygnal
+      sygnal.fcmkey_filename: bundesmessenger.json
+      sygnal.fcmkey_keyvalue: {"fake": "values"}
+    documentSelector:
+      path: metadata.name
+      value: sygnal
+    asserts:
+      - equal:
+          path: stringData['bundesmessenger.json']
+          value: |
+            {
+              "fake": "values"
+            }
+  - it: ensures a Secret key for legacy APNS option
+    template: sygnal/sygnal-configuration.yaml
+    set:
+      sygnal.enabled: true
+      sygnal.existingSecret: sygnal
+      sygnal.ioskey_filename: AuthKey.p8
+      sygnal.ioskey_keyvalue: 53C237
+    documentSelector:
+      path: metadata.name
+      value: sygnal
+    asserts:
+      - equal:
+          path: data['AuthKey.p8']
+          value: 53C237
+  - it: ensures no Secret without legacy options
+    template: sygnal/sygnal-configuration.yaml
+    set:
+      sygnal.enabled: true
+      sygnal.existingSecret: sygnal
+    asserts:
+      - containsDocument:
+          kind: Secret
+        not: true

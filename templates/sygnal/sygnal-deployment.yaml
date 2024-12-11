@@ -70,17 +70,20 @@ spec:
               subPath: sygnal.yaml
               readOnly: true
             {{- if .Values.sygnal.fcmkey_filename }}
-            - name: fcmkey
+            - name: secrets
               mountPath: /{{ .Values.sygnal.fcmkey_filename }}
               subPath: {{ .Values.sygnal.fcmkey_filename }}
               readOnly: true
-            {{ end }}
+            {{- end }}
             {{- if .Values.sygnal.ioskey_filename }}
-            - name: ioskey
+            - name: secrets
               mountPath: /{{ .Values.sygnal.ioskey_filename }}
               subPath: {{ .Values.sygnal.ioskey_filename }}
               readOnly: true
-            {{ end }}
+            {{- end }}
+            - name: secrets
+              mountPath: /secrets
+              readOnly: true
             - mountPath: /tmp
               name: sygnal-tmp
       restartPolicy: Always
@@ -89,16 +92,9 @@ spec:
         - name: config
           secret:
             secretName: matrix-sygnal
-        {{- if .Values.sygnal.fcmkey_filename }}
-        - name: fcmkey
+        - name: secrets
           secret:
-            secretName: fcmkey
-        {{ end }}
-        {{- if .Values.sygnal.ioskey_filename }}
-        - name: ioskey
-          secret:
-            secretName: ioskey
-        {{ end }}
+            secretName: {{ .Values.sygnal.existingSecret }}
         - name: sygnal-tmp
           emptyDir:
             sizeLimit: 10Mi

@@ -1,0 +1,1 @@
+Unterstützung von Kubernetes Secrets in der Sygnal-Konfiguration.
