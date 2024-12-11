@@ -1197,6 +1197,11 @@ sygnal:
   #      keyfile: /de.opencode.dvs.ios.p8
   apps: {}
 
+  # -- (string) Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält.
+  # Die Schlüssel des Secrets sind die Dateinamen, welche unter `sygnal.apps`
+  # mit dem Präfix `/secrets` referenziert werden.
+  existingSecret: "sygnal"
+
   # -- (string) iOS-Key Dateiname
   # Wenn iOS Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
   # Bei Nutzung von iOS-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
