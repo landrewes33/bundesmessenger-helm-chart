@@ -1,0 +1,64 @@
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+templates:
+  - matrix-authentication-service/matrix-authentication-service-deployment.yaml
+  - matrix-authentication-service/matrix-authentication-service-configuration.yaml
+  - matrix-authentication-service/matrix-authentication-service-ingress.yaml
+  - secrets.yaml
+tests:
+  - it: ensures a StatefulSet if enabled
+    template: matrix-authentication-service/matrix-authentication-service-deployment.yaml
+    set:
+      mas.enabled: true
+    asserts:
+      - containsDocument:
+          kind: StatefulSet
+          apiVersion: apps/v1
+          name: RELEASE-NAME-matrix-authentication-service
+          any: true
+  - it: ensures no StatefulSet if disabled
+    template: matrix-authentication-service/matrix-authentication-service-deployment.yaml
+    set:
+      mas.enabled: false
+    asserts:
+      - containsDocument:
+          kind: StatefulSet
+        not: true
+  - it: ensures an Ingress if (mas enabled, ingress enabled)
+    template: matrix-authentication-service/matrix-authentication-service-ingress.yaml
+    set:
+      mas.enabled: true
+      ingress.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Ingress
+          apiVersion: networking.k8s.io/v1
+          name: RELEASE-NAME-matrix-authentication-service
+          any: true
+  - it: ensures no Ingress if (mas enabled, ingress disabled)
+    template: matrix-authentication-service/matrix-authentication-service-ingress.yaml
+    set:
+      mas.enabled: true
+      ingress.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true
+  - it: ensures no Ingress if (mas disabled, ingress enabled)
+    template: matrix-authentication-service/matrix-authentication-service-ingress.yaml
+    set:
+      mas.enabled: false
+      ingress.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true
+  - it: ensures no Ingress if (mas disabled, ingress disabled)
+    template: matrix-authentication-service/matrix-authentication-service-ingress.yaml
+    set:
+      mas.enabled: false
+      ingress.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true

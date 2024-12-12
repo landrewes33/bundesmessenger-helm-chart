@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+templates:
+  - well-known/well-known-deployment.yaml
+  - well-known/well-known-configuration.yaml
+  - nginx-conf.yaml
+tests:
+  - it: ensures a Deployment if enabled
+    template: well-known/well-known-deployment.yaml
+    set:
+      wellknown.enabled: true
+      dataPrivacyUrl: yes-i-have-read-and-understand.example.com
+      imprintUrl: acme.noreply.example.com
+    asserts:
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: RELEASE-NAME-wellknown-nginx
+          any: true
+  - it: ensures no Deployment if disabled
+    template: well-known/well-known-deployment.yaml
+    set:
+      wellknown.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Deployment
+        not: true

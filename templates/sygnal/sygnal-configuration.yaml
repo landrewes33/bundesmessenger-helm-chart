@@ -2,35 +2,34 @@
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.sygnal.enabled }}
 
-{{- if .Values.sygnal.ioskey_filename }}
-  {{- $iosKey := .Values.sygnal.ioskey_filename }}
+{{- $fcmKeyFilename := .Values.sygnal.fcmkey_filename }}
+{{- $iosKeyFilename := .Values.sygnal.ioskey_filename }}
+{{- if or $fcmKeyFilename $iosKeyFilename }}
 ---
 apiVersion: v1
 kind: Secret
 metadata:
-  annotations:
-    helm.sh/resource-policy: keep
-  name: ioskey
+  name: {{ required
+    "Sygnal benötigt den Namen des Secrets mit seinen Schlüsseln unter sygnal.existingSecret"
+    .Values.sygnal.existingSecret | quote
+  }}
   namespace: {{ .Release.Namespace }}
-data:
-  {{ $iosKey }}: {{ required "Es ist der Schlüsselinhalt mit anzugeben unter sygnal.ioskey_keyvalue" .Values.sygnal.ioskey_keyvalue | toYaml | quote }}
-
-{{ end }}
-
-{{- if .Values.sygnal.fcmkey_filename }}
-  {{ $fcmKey := .Values.sygnal.fcmkey_filename }}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  annotations:
-    helm.sh/resource-policy: keep
-  name: fcmkey
-  namespace: {{ .Release.Namespace }}
+{{- if $fcmKeyFilename }}
 stringData:
-  {{ $fcmKey }}: |
-{{ required "Es ist der Schlüsselinhalt mit anzugeben unter sygnal.fcmkey_keyvalue" .Values.sygnal.fcmkey_keyvalue | toPrettyJson | indent 4 }}
-{{ end }}
+  {{ $fcmKeyFilename }}: |
+    {{- required
+      "Es ist der Schlüsselinhalt mit anzugeben unter sygnal.fcmkey_keyvalue"
+      .Values.sygnal.fcmkey_keyvalue | toPrettyJson | nindent 4
+    }}
+{{- end }}
+{{- if $iosKeyFilename }}
+data:
+  {{ $iosKeyFilename }}: {{ required
+    "Es ist der Schlüsselinhalt mit anzugeben unter sygnal.ioskey_keyvalue"
+    .Values.sygnal.ioskey_keyvalue | toYaml | quote
+  }}
+{{- end }}
+{{- end }}
 
 ---
 apiVersion: v1

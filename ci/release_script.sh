@@ -154,7 +154,7 @@ printf "Cherry pick or add other commits now. Done? "
 read -r yn
 
 printf "\n================================================================================\n"
-printf "CI pipeline updates helm-docs (\"✍ helm-docs\") and add a commit.\n"
+printf "CI pipeline updates helm-docs (\"✍ helm-docs\") and adds a commit.\n"
 printf "It needs some time… Did it finish? (enter) "
 read -r yn
 
@@ -166,7 +166,7 @@ read -r yn
 # ToDo: optional here with towncrier
 
 printf "\n================================================================================\n"
-printf "Pull branch branch from Gitlab.\n"
+printf "Pull release branch from Gitlab.\n"
 printf "Make sure that all commits have been pulled from Gitlab.\n"
 printf "Manual commands:\n"
 printf "\"git checkout %s/v%s\"\n" "$branchprefix" "$nextVersion"
@@ -174,8 +174,11 @@ printf "\"git pull\" "
 read -r yn
 
 printf "\n================================================================================\n"
-printf "Merge branch into main and push.\n"
-printf "Manual command: \"git merge --no-ff main\" "
+printf "Merge release branch into main and push.\n"
+printf "Manual commands:\n"
+printf "\"git checkout main\"\n"
+printf "\"git merge --no-ff %s/v%s\"\n" "$branchprefix" "$nextVersion"
+printf "\"git push\" "
 read -r yn
 
 printf "\n================================================================================\n"
@@ -186,12 +189,14 @@ printf "\n======================================================================
 printf "Merge branch \"main\" back into \"develop\" and push.\n"
 printf "Manual commands:\n"
 printf "\"git checkout develop\"\n"
-printf "\"git merge --no-ff main\" "
+printf "\"git merge --no-ff main\"\n"
+printf "\"git push\" "
 read -r yn
 
 printf "\n================================================================================\n"
 printf "Delete release branch.\n"
-printf "Manual command: \"git branch -d %s/v%s\" " "$branchprefix" "$nextVersion"
+printf "Manual command:\n"
+printf "\"git branch -d %s/v%s\" " "$branchprefix" "$nextVersion"
 read -r yn
 
 printf "\n================================================================================\n"

@@ -162,7 +162,7 @@ signingkey:
     publishImage:
       registry: registry.opencode.de
       repository: bwi/bundesmessenger/backend/container-images/kubectl
-      tag: 1.31.2-jammy-production
+      tag: 1.31.3-jammy-production
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
@@ -270,15 +270,6 @@ config:
   #   publicKey: ""
   #   privateKey: ""
 
-  # -- (list) URIs die zum Aufbau von 1:1 WebRTC Anrufe aufzubauen.
-  # Beispiel:
-  # turnUris: ["turn:turn.example.com:3478?transport=udp"]
-  # **ABGEKÜNDIGT**: Nutzen Sie stattdessen `extraConfig`.
-  turnUris: []
-  # -- (string) geheime Schlüssel für TURN-Server
-  # **ABGEKÜNDIGT**: Nutzen Sie stattdessen `extraConfig`.
-  # turnSecret: ""
-
   # -- (bool) Registrierungskonfiguration, beachten Sie, dass die Registrierung mit dem
   # containerinternen Werkzeug register_new_matrix_user immer möglich ist. Synapse-Admin kann dafür genutzt werden.
   # @default -- false
@@ -329,6 +320,11 @@ extraConfig:
     # -- (string) Zeitdauer wie lange Medien von fremden Servern im Cache vorgehalten werden.
     # Bei Bedarf werden diese vom remote Server erneut heruntergeladen.
     remote_media_lifetime: 90d
+
+  # -- (bool) Alle Dateien werden als Authentifiziert markiert, wenn aktiviert.
+  # siehe https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#enable_authenticated_media
+  # Authentifizierte Medien werden aktuell nicht vom Matrix Content Scanner unterstützt.
+  enable_authenticated_media: false
   # -- (bool) Authentifizierung notwendig für User-Suche
   require_auth_for_profile_requests: true
   # -- (bool) Limitiere Requests für Nutzer mit shared rooms, abgeschaltet
@@ -1196,6 +1192,11 @@ sygnal:
   #      type: apns
   #      keyfile: /de.opencode.dvs.ios.p8
   apps: {}
+
+  # -- (string) Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält.
+  # Die Schlüssel des Secrets sind die Dateinamen, welche unter `sygnal.apps`
+  # mit dem Präfix `/secrets` referenziert werden.
+  existingSecret: "sygnal"
 
   # -- (string) iOS-Key Dateiname
   # Wenn iOS Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.

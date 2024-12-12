@@ -133,14 +133,6 @@ data:
     enable_registration_captcha: true
     {{- end }}
 
-    ## Turn ##
-    # The public URIs of the TURN server to give to clients
-    #
-    #turn_uris: []
-    {{- if .Values.config.turnUris }}
-    turn_uris:
-       {{ toYaml .Values.config.turnUris | nindent 6 }}
-    {{end}}
     ## Registration ##
 
     {{ if .Values.mas.enabled -}}
@@ -208,10 +200,6 @@ data:
       {{ $passwordDict := dict "password_config" (dict "enabled" false) }}
       {{ $extraConfig := mergeOverwrite $extraConfig $passwordDict }}
     {{- end -}}
-    {{- if .Values.call.enabled -}}
-      {{ $callExpDict := dict "experimental_features" (dict "msc3266_enabled" true) }}
-      {{ $extraConfig := mergeOverwrite $extraConfig $callExpDict }}
-    {{- end -}}
 
     {{- /* Entfernen von per default leeren Variable aus ExtraConfig Dictionary
     Synapse does not starts when federation_custom_ca_list is empty.
@@ -229,7 +217,10 @@ data:
       {{ $caDict := dict "federation_custom_ca_list" ($caList) }}
       {{ $extraConfig := mustMergeOverwrite $extraConfig $caDict }}
     {{- end }}
-
+    
+    {{/* Handled in built-in experimental_features.yaml. */}}
+    {{ $extraConfig := omit $extraConfig "experimental_features" }}
+    
     {{- with $extraConfig }}
 
     ## Extra config ##
