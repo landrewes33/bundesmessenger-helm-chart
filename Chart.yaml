@@ -1,7 +1,7 @@
 ---
 apiVersion: v2
 name: bundesmessenger
-version: 1.10.0
+version: 1.11.0
 description: BWI Matrix BundesMessenger
 home: https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/
 icon: https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/raw/main/docs/images/bum_core_sw.svg
@@ -16,6 +16,8 @@ maintainers:
     email: christian.steinke@bwi.de
   - name: Dirk Klimpel
     email: dirk.klimpel@bwi.de
+  - name: Kai Hiller
+    email: kaialexander.hiller@bwi.de
 
 keywords:
   - BundesMessenger

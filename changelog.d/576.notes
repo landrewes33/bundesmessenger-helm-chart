@@ -1,4 +1,0 @@
-Die Sygnal-Konfiguration wird in ein eigenes Secret zusammen gefasst.
-Der Name des Secrets kann mit `sygnal.existingSecret` konfiguriert werden.
-Die bestehende Konfiguration wird automatisch in das neue Secret
-migriert. Die alten Secrets `fcmkey` und `ioskey` können manuell gelöscht werden.
