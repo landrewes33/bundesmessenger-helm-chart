@@ -7,6 +7,62 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.11.0 (2024-12-12)
+
+### ⚠️ Versionshinweise
+
+- Die Sygnal-Konfiguration wird in ein eigenes Secret zusammen gefasst.
+  Der Name des Secrets kann mit `sygnal.existingSecret` konfiguriert werden.
+  Die bestehende Konfiguration wird automatisch in das neue Secret
+  migriert. Die alten Secrets `fcmkey` und `ioskey` können manuell gelöscht
+  werden. (!576)
+
+### ✨ Features
+
+- Unterstützung von Kubernetes Secrets in der Sygnal-Konfiguration. (!510,
+  !576)
+- Image `bwi/bundesmessenger/backend/container-images/synapse` auf Version
+  `1.120.2` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl`
+  auf Version `1.31.3` aktualisiert.
+
+### 🐛 Bugfixes
+
+- Korrektur der Erstellung der MAS-Config. Contributed by Christoph Wirsing
+  (c.wirsing@cwms.de). (!568)
+
+### 📝 Weitere Änderungen
+
+- Erhöhen der Zuverlässigkeit des Helm-Charts mit
+  [helm-unittest](https://github.com/helm-unittest/helm-unittest). (!542, !572)
+- Herunterladen der Trivy Java-DB aus dem Proxy Cache. (!545)
+- Korrektur der Anweisungen im Release-Script. (!552)
+- Konfiguration von [`enable_authenticated_media:
+  false`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#enable_authenticated_media)
+  für Synapse. (!566)
+- `ghcr.io/renovatebot/renovate` in der CI-Pipeline auf Version `39`
+  aktualisiert.
+- `kindest/node` in der CI-Pipeline auf aktuelles Patch-Level aktualisiert.
+- `kubernetes-sigs/kind` in der CI-Pipeline auf Version `v0.25.0` aktualisiert.
+- `kyverno/kyverno` in der CI-Pipeline auf Version `v1.13.1` aktualisiert.
+- `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
+  `v0.78.2` aktualisiert.
+- `registry-1.docker.io/alpine/helm` in der CI-Pipeline auf Version `3.16.3`
+  aktualisiert.
+- `registry-1.docker.io/aquasec/trivy` in der CI-Pipeline auf Version `0.58.0`
+  aktualisiert.
+- `registry-1.docker.io/library/alpine` in der CI-Pipeline auf Version `3.21`
+  aktualisiert.
+- `registry.gitlab.com/gitlab-org/release-cli` in der CI-Pipeline auf Version
+  `v0.20.0` aktualisiert.
+
+### 🦖 Abkündigungen und Bereinigungen
+
+- Redis ohne Authentifizierung wird nicht länger unterstützt. (!507)
+- Entfernen der abgekündigten TURN-Einstellungen. Die Konfiguration ist
+  weiterhin über `extraConfig` möglich. (!565)
+
 ## BundesMessenger Helm Chart 1.10.0 (2024-11-05)
 
 ### ⚠️ Versionshinweise
