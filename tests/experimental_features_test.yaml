@@ -1,0 +1,109 @@
+# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+suite: ensures experimental_features is not part of other configurations
+templates:
+  - configuration.yaml
+  - secrets.yaml
+set:
+  serverName: happy.place.example.org
+  call.enabled: true
+  call.uri: call.example.org
+  mas.enabled: true
+  extraConfig:
+    experimental_features:
+      new_feature: true
+tests:
+  - it: ensures experimental_features is not part of normal configuration file
+    template: configuration.yaml
+    asserts:
+      - notMatchRegex:
+          path: data[*]
+          pattern: "experimental_features:"
+  - it: ensures experimental_features is not part of default secret file
+    template: secrets.yaml
+    asserts:
+      - notMatchRegex:
+          path: stringData["config.yaml"]
+          pattern: "experimental_features:"
+
+---
+suite: ensures experimental_features is part of the configuration
+templates:
+  - secrets.yaml
+set:
+  call.enabled: true
+  call.uri: call.example.org
+  mas.enabled: true
+  extraConfig:
+    experimental_features:
+      new_feature: true
+tests:
+  - it: ensures experimental_features is set for call
+    template: secrets.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: stringData["experimental-features.yaml"]
+          pattern: "experimental_features:"
+      - matchRegex:
+          path: stringData["experimental-features.yaml"]
+          pattern: "msc3266_enabled: true"
+  - it: ensures experimental_features is set for MAS
+    template: secrets.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: stringData["experimental-features.yaml"]
+          pattern: "experimental_features:"
+      - matchRegex:
+          path: stringData["experimental-features.yaml"]
+          pattern: "msc3861:"
+  - it: ensures experimental_features is set for values.yaml
+    template: secrets.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: stringData["experimental-features.yaml"]
+          pattern: "experimental_features:"
+      - matchRegex:
+          path: stringData["experimental-features.yaml"]
+          pattern: "new_feature: true"
+
+---
+suite: ensures experimental_features is set correctly
+templates:
+  - secrets.yaml
+tests:
+  - it: ensures experimental_features overwritten for call
+    template: secrets.yaml
+    set:
+      call.enabled: true
+      call.uri: call.example.org
+      extraConfig:
+        experimental_features:
+          msc3266_enabled: false
+    asserts:
+      - matchRegex:
+          path: stringData["experimental-features.yaml"]
+          pattern: "experimental_features:"
+      - matchRegex:
+          path: stringData["experimental-features.yaml"]
+          pattern: "msc3266_enabled: true"
+  - it: ensures experimental_features overwritten for MAS
+    template: secrets.yaml
+    documentIndex: 0
+    set:
+      mas.enabled: true
+      extraConfig:
+        experimental_features:
+          msc3861: dummy
+    asserts:
+      - matchRegex:
+          path: stringData["experimental-features.yaml"]
+          pattern: "experimental_features:"
+      - matchRegex:
+          path: stringData["experimental-features.yaml"]
+          pattern: "msc3861:"
+      # - notMatchRegex:
+      #     path: stringData["experimental-features.yaml"]
+      #     pattern: "msc3861: dummy"
