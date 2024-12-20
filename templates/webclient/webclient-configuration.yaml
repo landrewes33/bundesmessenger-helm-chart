@@ -34,15 +34,15 @@ data:
         "participant_limit": 5,
         "brand": "BundesMessenger Call"
       },
+      "features": {
+        "feature_group_calls": true
+      },
       {{- end -}}
       {{- if .Values.additionalConfig.locationSharing.enabled }}
       "bwi_setting_defaults": {
         "BwiFeature.locationShareTypesEnabled": ["Pin"],
         "BwiFeature.disableGeolocation": false,
         "BwiFeature.hideOSMLink": true
-      },
-      "features": {
-        "feature_group_calls": true
       },
       {{- end }}
       "permalink_prefix": "{{- printf "https://%s" .Values.webclient.uri }}",
