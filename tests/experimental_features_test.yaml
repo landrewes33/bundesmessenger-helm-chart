@@ -104,6 +104,6 @@ tests:
       - matchRegex:
           path: stringData["experimental-features.yaml"]
           pattern: "msc3861:"
-      # - notMatchRegex:
-      #     path: stringData["experimental-features.yaml"]
-      #     pattern: "msc3861: dummy"
+      - notMatchRegex:
+          path: stringData["experimental-features.yaml"]
+          pattern: "msc3861: dummy"
