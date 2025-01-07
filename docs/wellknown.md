@@ -55,3 +55,12 @@ Flexibilität der Gesamtsystemarchitektur.
 Insgesamt ermöglicht die Trennung und separate Beantwortung von Well-Known
 Aufrufen eine präzise Kontrolle über den Zugriff auf sensible Informationen,
 optimiert die Performance und erleichtert die Einhaltung von Standards.
+
+## Standardisierung und Flexibilität
+
+Unsere Well-known Endpunkte werden mit den vom Nutzer vorgenommen Angaben
+automatisiert erstellt und somit von uns gepflegt. Sollten weitere Module
+und well-known Einträge in der client.json vom Endpunkt
+`<well-known-uri>/.wellknown/matrix/client` konfiguriert werden müssen,
+kann dies nun zusätzlich zu unserem Standard hinzugefügt werden.
+Die Konfiguration erfolgt über `wellknown.client`.

@@ -1,0 +1,1 @@
+Eigene Einträge in die Well-Known client.json überlagern nun die Standardkonfiguration, statt sie wie bisher zu ersetzen.
