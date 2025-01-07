@@ -303,6 +303,14 @@ config:
 # Vorkonfiguriert nach Best Practise BWI GmbH:
 # Ref: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
 extraConfig:
+  # -- (map) Durch das automatische Annehmen von Einladungen wird gesteuert, ob Benutzern eine Einladungsanfrage
+  # angezeigt wird oder ob sie stattdessen automatisch einem Raum beitreten, wenn sie eine Einladung erhalten.
+  # Es muss sicher gestellt werden, dass der Worker existent ist.
+  auto_accept_invites:
+    enabled: true
+    only_for_direct_messages: true
+    only_from_local_users: true
+
   # old_signing_keys:
   #   "ed25519:id": { key: "base64string", expired_ts: 123456789123 }
   # -- (string) Maximale Dateigröße für Uploads von Medien.

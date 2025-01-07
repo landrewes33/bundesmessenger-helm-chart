@@ -1,0 +1,1 @@
+Konfiguration von [`auto_accept_invites`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#auto_accept_invites). Für Direktnachrichten zwischen lokalen Benutzern müssen Benutzer keine Einladung mehr annehmen.
