@@ -172,7 +172,6 @@ Die ausführliche Dokumentation hierfür erfolgt zu einem späteren Zeitpunkt.
 
 Weiterführende Links:
 
-- [Liste alle Konfigurationswerte mit Beschreibung](docs/standard_values.md)
 - [Mindestkonfiguration von Parametern](docs/requirements_poc.md#requirements-für-die-konfiguration)
 - [Kurzanleitung zur Installation einer Testumgebung](docs/installation_testumgebung.md)
 - [Hinweise zur Nutzung mit ArgoCD](docs/ArgoCD_SigningKey.md)

@@ -1,0 +1,1 @@
+Entfernen der `standard_values.md`. Die Dokumentation der BuM Helm-Konfiguration ist weiterhin in der `values.yaml` zu finden.
