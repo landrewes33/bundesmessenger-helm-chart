@@ -154,11 +154,6 @@ printf "Cherry pick or add other commits now. Done? "
 read -r yn
 
 printf "\n================================================================================\n"
-printf "CI pipeline updates helm-docs (\"✍ helm-docs\") and adds a commit.\n"
-printf "It needs some time… Did it finish? (enter) "
-read -r yn
-
-printf "\n================================================================================\n"
 printf "Create CHANGELOG and review it.\n"
 printf "The simplest way is to manually trigger the CI pipeline \"📰❗ towncrier-create-changelog\".\n" >&2
 printf "Is the CHANGELOG free of mistakes? (enter) "

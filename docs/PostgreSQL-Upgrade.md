@@ -26,7 +26,7 @@ leere Datenbank in der neuen Hauptversion und spielt dann die Daten zurück ein.
 Der BundesMessenger sollte während des Upgrades in den Wartungsmodus versetzt
 werden, sodass keine Daten verloren gehen, die in diesem Zeitraum anfallen. Die
 Konfiguration des Wartungsmodus sollte `blocking: true` beinhalten und kann über
-[additionalConfig.maintenance](standard_values.md#zusätzliche-konfigurationen-für-den-bundesmessenger)
+[additionalConfig.maintenance](../values.yaml#:~:text=maintenance:%20{})
 angepasst werden. Zusätzlich zu dem client-seitigen Wartungsmodus, setzt
 [`extraConfig.hs_disabled`](https://matrix-org.github.io/synapse/develop/usage/configuration/config_documentation.html#hs_disabled-and-hs_disabled_message)
 den Homeserver selbst in einen sicheren Zustand.
