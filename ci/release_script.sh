@@ -127,6 +127,13 @@ yq "(
 )" "$chart_file" | diff -B "$chart_file" - | patch "$chart_file" -
 # keep blank lines in YAML: https://github.com/mikefarah/yq/issues/515#issuecomment-1113420114
 
+printf "\nUpdate values.schema.json\n"
+# shellcheck disable=SC2016
+sed -i 's|'\
+'"$id":\W*"https://schema.bundesmessenger.dev/bum/develop/values.schema.json"|'\
+'"$id": "https://schema.bundesmessenger.dev/bum/v'"$nextVersion"'/values.schema.json"|'\
+    values.schema.json
+
 printf "\n================================================================================\n"
 printf "Commit\n"
 
@@ -134,7 +141,8 @@ git add --no-all \
     "$chart_file" \
     "$scriptDir/../changelog.d/"* \
     "$scriptDir/versions/v${nextVersion}.yaml" \
-    "$scriptDir/../docs/versions/v${nextVersion}.md"
+    "$scriptDir/../docs/versions/v${nextVersion}.md" \
+    "values.schema.json"
 git commit -a -m "Setting version for the release ${nextVersion}"
 
 printf "\n================================================================================\n"

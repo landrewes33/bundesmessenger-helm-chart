@@ -10,9 +10,9 @@ image:
   # ursprünglich: "repository: matrixdotorg/synapse"
   repository: bwi/bundesmessenger/backend/container-images/synapse
 
-  # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
+  # -- (string|null) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
   # @default -- wird im Chart.yaml gesetzt
-  # tag: ""
+  # tag: "1.121.0-jammy-production"
 
   # -- (list) Optional kann ein Array von imagePullSecrets angegeben werden.
   # Secrets müssen manuell im Namensraum angelegt werden.
@@ -80,15 +80,19 @@ monitoring:
 # @default -- Messenger deiner Organisation
 displayName: "Messenger deiner Organisation"
 
-## Erstellen eines ServiceAccounts, samt gewünschter Annotations
-## oder Nutzung eines vorhandenen ServiceAccounts.
-## Es werden darüber hinaus noch weitere ServiceAccounts angelegt, z.B. für den Signing-Key Job oder Redis.
-## Der ServiceAccount für Redis kann via `redis.serviceAccount.name` konfiguriert werden.
-##
+# -- (object) Erstellen eines ServiceAccounts, samt gewünschter Annotations.
+# Beinhaltet gewünschte Annotations oder Nutzung eines vorhandenen
+# ServiceAccounts. Es werden darüber hinaus noch weitere ServiceAccounts
+# angelegt, z.B. für den Signing-Key Job oder Redis. Der ServiceAccount für
+# Redis kann via `redis.serviceAccount.name` konfiguriert werden.
 serviceAccount:
+  # -- (boolean) Aktivierung der Erstellung eines ServiceAccounts.
   create: true
+  # -- (object) Setzen von Annotations für den ServiceAccount
+  # Beispiel: eks.amazonaws.com/role-arn: arn:aws:iam::000000000000:role/matrix-synapse
   annotations: {}
-    # eks.amazonaws.com/role-arn: arn:aws:iam::000000000000:role/matrix-synapse
+  # -- (string|null) Name des ServiceAccounts für das Deployment.
+  # Falls null, wird der Release-Name benutzt.
   # name: non-default-service-name
 
 ## Manuelle Aktivierung bei Nutzung von ArgoCD.
@@ -128,15 +132,18 @@ signingkey:
   ##
   ## Sollte nach dem initialen Durchlauf deaktiviert werden, um Upgrades zu beschleunigen.
 
+  # -- (object) ServiceAccounts für den signingkey-Job.
   serviceAccount:
+    # -- (boolean) Aktivierung der Erstellung eines ServiceAccounts.
     create: true
-    # -- (string) Name des ServiceAccounts für den signingkey-job.
-    # name: non-default-signingkeyjob-name
+    # -- (string|null) Name des ServiceAccounts für den signingkey-Job.
+    # Null für die Verwendung eines Standardnamens für den ServiceAccount.
+    # name: signingkey-serviceaccount
 
+  # -- (bool) Mit dem Job wird zur Installation ein Signierschlüssel erzeugt.
+  # Nach der Erstellung des Keys oder bei manueller Einbindung eines Keys (`extraConfig.old_signing_keys`)
+  # sollte der Job deaktiviert werden.
   job:
-    # -- (bool) Mit dem Job wird zur Installation ein Signierschlüssel erzeugt.
-    # Nach der Erstellung des Keys oder bei manueller Einbindung eines Keys (`extraConfig.old_signing_keys`)
-    # sollte der Job deaktiviert werden.
     enabled: true
 
     ## -- (list) Annotations to apply to the signing-key-job.
@@ -152,9 +159,9 @@ signingkey:
       # ursprünglich: "repository: matrixdotorg/synapse"
       # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen (empfohlen)
       repository: bwi/bundesmessenger/backend/container-images/synapse
-      # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
+      # -- (string|null) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
       # @default -- wird im Chart.yaml gesetzt
-      # tag: ""
+      # tag: "1.121.0-jammy-production"
       # -- (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
     # -- (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.
@@ -266,9 +273,9 @@ config:
 
   ## Schützen Sie die Registrierung mit recaptcha. (optional)
   ##
-  # recaptcha:
-  #   publicKey: ""
-  #   privateKey: ""
+  recaptcha:
+    publicKey: null
+    privateKey: null
 
   # -- (bool) Registrierungskonfiguration, beachten Sie, dass die Registrierung mit dem
   # containerinternen Werkzeug register_new_matrix_user immer möglich ist. Synapse-Admin kann dafür genutzt werden.
@@ -311,6 +318,7 @@ extraConfig:
     only_for_direct_messages: true
     only_from_local_users: true
 
+  # (object) Vorherige Signing-Keys.
   # old_signing_keys:
   #   "ed25519:id": { key: "base64string", expired_ts: 123456789123 }
   # -- (string) Maximale Dateigröße für Uploads von Medien.
@@ -322,8 +330,8 @@ extraConfig:
   # -- (object) Angabe wann Medien von Repository gelöscht werden. Für die Zeitdauer gilt
   # das Datum des letzten Zugriffs / Downloads.
   media_retention:
-    # -- (string) Zeitdauer wie lange eigene Medien vorgehalten werden. Wenn sie gelöscht
-    # werden, sind sie für den Benutzer nicht mehr abrufbar.
+    # -- (string) Zeitdauer wie lange eigene Medien vorgehalten werden.
+    # Wenn sie gelöscht werden, sind sie für den Benutzer nicht mehr abrufbar.
     # local_media_lifetime: 180d
     # -- (string) Zeitdauer wie lange Medien von fremden Servern im Cache vorgehalten werden.
     # Bei Bedarf werden diese vom remote Server erneut heruntergeladen.
@@ -705,9 +713,9 @@ workers:
     extraEnv: []
 
     # -- (list) Zusätzliche Volumes, die dem Worker hinzugefügt werden sollen.
-    # DEFAULT gilt für alle Synapse-Worker-Container.
-    # Nützlich für das Medien-Repo oder zum Hinzufügen von Python-Modulen.
-    # Daher besser im entsprechenden Konfigurationsteil der spez. Worker
+    # DEFAULT gilt für alle Synapse-Worker-Container. Nützlich für das
+    # Media-Repo oder zum Hinzufügen von Python-Modulen. Daher besser im
+    # entsprechenden Konfigurationsteil der spez. Worker.
     volumes: []
 
     # -- (list) Zusätzliche zu mountende Datenträgerpfade (siehe volumes)
@@ -983,10 +991,10 @@ workers:
       ## Inbound federation transaction request
       - "/_matrix/federation/(v1|v2)/send/"
 
+  # -- (object) Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen.
+  # (pusher-worker -> Sygnal -> Push-Provider (Apple od. Google))
+  # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
   pusher:
-    # -- (bool) Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen.
-    # (pusher-worker -> Sygnal -> Push-Provider (Apple od. Google))
-    # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
     enabled: false
 
   appservice:
@@ -1058,7 +1066,7 @@ workers:
     enabled: false
 
 persistence:
-  # -- (bool) Aktivieren der Persistenz-Konfiguration für die Medien-Repository-Funktion.
+  # -- (bool) Aktivieren der Persistenz-Konfiguration für die Media-Repository-Funktion.
   # Diese PVC wird entweder in Synapse oder einem media_repo-Worker eingehängt.
   # Hinweis: Wenn Sie in der Lage sein wollen, dies zu skalieren, müssen Sie den
   # accessMode auf RWX/ReadWriteMany setzen.
@@ -1095,6 +1103,8 @@ volumePermissions:
     tag: latest-jammy-production
     # -- (string) da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung
     pullPolicy: IfNotPresent
+    # -- (array) Liste von Kubernetes Pull-Secrets.
+    pullSecrets: []
 
   # -- (map) Ressourcen des Init-Containers zur Rechtekorrektur
   # Hier keine gesetzt, da kurzlebig und von Hause aus klein
@@ -1133,14 +1143,13 @@ sygnal:
     tag: 0.15.1-jammy-production
     pullPolicy: IfNotPresent
 
-  # -- (string) Proxy, falls benötigt um die Push-Services zu erreichen.
-  # Auskommentieren oder leer lassen für die Benutzung ohne Proxy.
-  # Die Angabe des Zielports beim Proxy ist für die Generierung der
-  # Network Policies zwingend erforderlich
-  proxy: ""
+  # -- (string|null) Proxy, falls benötigt um die Push-Services zu erreichen.
+  # Auskommentieren oder null für die Benutzung ohne Proxy. Die Angabe des
+  # Zielports beim Proxy ist für die Generierung der Network-Policies zwingend
+  # erforderlich.
+  proxy: null
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
-  # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
   # weitere Beispiele:
   #  fsGroup: 27
   #  runAsGroup: 2000
@@ -1206,30 +1215,26 @@ sygnal:
   # mit dem Präfix `/secrets` referenziert werden.
   existingSecret: "sygnal"
 
-  # -- (string) iOS-Key Dateiname
+  # -- (string|null) iOS-Key Dateiname
   # Wenn iOS Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
   # Bei Nutzung von iOS-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
   # Durch Filename-Vergabe wird der unten angegebene ioskey geladen.
-  # Beispiel:
   # ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus der APNS-Sektion
   # der vorhergehenden Apps-Konfiguration übereinstimmen!
-  ioskey_filename: ""
-  # -- (string) iOS-Key Datei-Inhalt. Die Zeichenkette muss in Base64 kodiert sein.
-  # Beispiel:
+  # -- (string|null) iOS-Key Datei-Inhalt. Die Zeichenkette muss in Base64 kodiert sein.
   # ioskey_keyvalue: 'HIER KÖNNTE IHR KEY STEHEN'
-  ioskey_keyvalue: ""
 
-  # -- (string) FCM-Key Dateiname
+  # -- (string|null) FCM-Key Dateiname
   # bei Nutzung von FCM-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
   # Wenn FCM Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
-  # Durch Filename-Vergabe wird der unten angegebene FCM-Service-Account-File geladen
-  # Beispiel:
-  #    fcmkey_filename: de.opencode.dvs.bundesmessenger.json <<-- muss zwingend mit dem service_account_file-Dateinamen
+  # Durch Filename-Vergabe wird der unten angegebene FCM-Service-Account-File geladen.
+  # fcmkey_filename: de.opencode.dvs.bundesmessenger.json <<-- muss zwingend mit dem service_account_file-Dateinamen
   # aus der gcm-Sektion der vorhergehenden Apps-Konfiguration übereinstimmen!
-  fcmkey_filename: ""
-  # -- (string) FCM-Key Service Account File Inhalt
-  #    fcmkey_keyvalue: 'HIER KÖNNTE IHR SERVICE ACCOUNT FILE INHALT STEHEN'
-  fcmkey_keyvalue: {}
+  # -- (object|null) FCM-Key Service Account File Inhalt
+  # fcmkey_keyvalue:
+  #   type: "service_account"
+  #   project_id: "bundesmessenger"
+  #   ...
 
 
 ######################################################################################
@@ -1243,10 +1248,11 @@ wellknown:
   # -- (bool) Aktivierung des Wellknown-Container
   enabled: true
 
-  # -- (object) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
-  # Beispiel:
-  #  m.server: matrix.example.com:443
-  server: {}
+  # -- (object|null) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
+  # Falls null, wird für `m.server` der Homeserver-Name (`publicServerName`,
+  # sonst `serverName`) mit Port 443 verwendet.
+  # server:
+  #   m.server: matrix.example.com:443
 
   # -- (object) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
   # Die Angabe des Objektes "de.bwi": {"data_privacy_url": "https://example.com/privacy",
@@ -1292,6 +1298,7 @@ wellknown:
     repository: bwi/bundesmessenger/backend/container-images/nginx
     tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
+    pullSecrets: []
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
@@ -1414,6 +1421,7 @@ postgresql:
     repository: bitnami/postgresql
     tag: "16"
     # pullSecrets: ["myRegistryKeySecretName"]
+    pullPolicy: IfNotPresent
 
   auth:
     # -- (string) Name für PostgreSQL-DB
@@ -1517,6 +1525,7 @@ redis:
     repository: bwi/bundesmessenger/backend/container-images/redis
     tag: 5_6.0.16-1ubuntu1-jammy-production
     # pullSecrets: ["myRegistryKeySecretName"]
+    pullPolicy: IfNotPresent
   # -- (bool) Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
   # Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
   # false setzen und den externalRedis-Block konfigurieren.
@@ -1535,7 +1544,7 @@ redis:
   master:
     kind: StatefulSet
     persistence:
-      # -- (bool) Persistenzkonfiration des Redis
+      # -- (bool) Persistenzkonfiguration des Redis
       # Beachten Sie, dass Synapse redis nur als Synchronisierungsdienstprogramm verwendet, so dass keine
       # Daten jemals persistiert werden müssen.
       enabled: false
@@ -1649,7 +1658,7 @@ ingress:
   paths: []
 
   # -- (list) Zusätzliche Pfade, die zu den Client-zu-Server Blöcken hinzugefügt werden sollen
-  # Werden vor dem `/_matrix` und `/_synapse` Catch-all-Pfade eingefügt.
+  # Werden vor den `/_matrix` und `/_synapse` Catch-all-Pfaden eingefügt.
   # Beispiele:
   #  # K8s 1.19+
   #  - path: /_matrix/media
@@ -2148,8 +2157,8 @@ schadcodescanner:
 synapse_admin:
   # -- (bool) Aktivieren des Synapse-Admin-Moduls
   enabled: false
-  # -- (string) URI für die Admin GUI, zwingend notwendig
-  uri: ""
+  # -- (string|null) URI für die Admin GUI, zwingend notwendig
+  uri: null
   # -- (map) Konfiguration des Image vom Modul
   image:
     registry: registry.opencode.de
@@ -2181,29 +2190,34 @@ synapse_admin:
   securityContext:
     <<: *defaultSecurityContext
 
-    ## Configuration for mounting additional volumes into the application container.
-    ## AKTUELL in Prüfung:
-    # extraVolumes:
-    #   - name: confnginx
-    #     emptyDir: {}
-    #   - name: lognginx
-    #     emptyDir: {}
-    #   - name: runnginx
-    #     emptyDir: {}
-    #   - name: tmpnginx
-    #     emptyDir: {}
-    #  #- name: backgrounds
-    #  #  persistentVolumeClaim:
-    #  #    claimName: element-backgrounds
-    # extraVolumeMounts:
-    #   - name: confnginx
-    #     mountPath: /etc/nginx/conf.d/
-    #   - name: lognginx
-    #     mountPath: /var/log/nginx/
-    #   - name: runnginx
-    #     mountPath: /var/run/
-    #   - name: tmpnginx
-    #     mountPath: /var/cache/nginx/
+  # -- (object) Zusätzliche in den Synapse Admin einzuhängende Datenträger (Volumes).
+  # Beispiel:
+  # extraVolumes:
+  #   - name: confnginx
+  #     emptyDir: {}
+  #   - name: lognginx
+  #     emptyDir: {}
+  #   - name: runnginx
+  #     emptyDir: {}
+  #   - name: tmpnginx
+  #     emptyDir: {}
+  #   - name: backgrounds
+  #     persistentVolumeClaim:
+  #       claimName: element-backgrounds
+  extraVolumes: []
+
+  # -- (object) Zusätzliche in den Synapse Admin einzuhängende Datenträgerpfade (Volume-Mounts).
+  # Beispiel:
+  # extraVolumeMounts:
+  #   - name: confnginx
+  #     mountPath: /etc/nginx/conf.d/
+  #   - name: lognginx
+  #     mountPath: /var/log/nginx/
+  #   - name: runnginx
+  #     mountPath: /var/run/
+  #   - name: tmpnginx
+  #     mountPath: /var/cache/nginx/
+  extraVolumeMounts: []
 
 
 ######################################################################################
@@ -2213,8 +2227,8 @@ synapse_admin:
 webclient:
   # -- (bool) Element-Webclient im Deployment aktivieren
   enabled: false
-  # -- (string) URL für den Webclient, zwingend notwendig
-  uri: ""
+  # -- (string|null) URL für den Webclient, zwingend notwendig
+  uri: null
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
     registry: registry.opencode.de

@@ -1,0 +1,11 @@
+Diese Veröffentlichung des BundesMessengers aktiviert die Prüfung der
+Helm-Konfiguration [gegen ihr Schema](values.schema.yaml). Damit erkennt und
+meldet Helm strukturelle Fehler und Typfehler in der Konfiguration.
+
+Da es sich um eine neue Funktion handelt, kann es passieren, dass gültige
+Konfigurationen fälschlicherweise nicht akzeptiert werden. Eine schnelle
+Möglichkeit zur einmaligen Umgehung der Überprüfung bietet dann die
+Kommandozeilenoption `--skip-schema-validation` von Helm. Bitte gebt uns in
+einem solchen Fall Rückmeldung über einen unserer
+[Kommunikationskanäle](README.md#kontakt-und-austausch) – dann können wir das
+Schema dauerhaft und für alle BuM-Nutzer korrigieren.
