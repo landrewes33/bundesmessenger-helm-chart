@@ -1,5 +1,6 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
+suite: Confighub
 templates:
   - confighub/confighub-deployment.yaml
   - confighub/confighub-configuration.yaml

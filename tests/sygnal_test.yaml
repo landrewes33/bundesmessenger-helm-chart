@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
-suite: ensures the Sygnal Deployment
+suite: Sygnal
 templates:
   - sygnal/sygnal-deployment.yaml
   - sygnal/sygnal-configuration.yaml
@@ -24,7 +24,7 @@ tests:
           kind: Deployment
         not: true
 ---
-suite: ensures Sygnal handles secrets correctly
+suite: Sygnal secrets
 templates:
   - sygnal/sygnal-deployment.yaml
   - sygnal/sygnal-configuration.yaml

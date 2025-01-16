@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2024-2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
-suite: ensures deployment configurations
+suite: Well-Known deployment
 templates:
   - well-known/well-known-deployment.yaml
   - well-known/well-known-configuration.yaml
@@ -28,7 +28,7 @@ tests:
         not: true
 
 ---
-suite: ensures standard-values are not deleted with additional configurations
+suite: Well-Known default values
 templates:
   - well-known/well-known-configuration.yaml
 set:
@@ -51,7 +51,7 @@ tests:
           pattern: "\"org.matrix.msc3814\":"
 
 ---
-suite: ensures standard values are overwritten as part of the configuration
+suite: Well-Known overrides
 templates:
   - well-known/well-known-configuration.yaml
 set:
