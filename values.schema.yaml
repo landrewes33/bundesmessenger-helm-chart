@@ -1195,234 +1195,18 @@ properties:
     type: object
     properties:
       default:
+        $ref: "#/$defs/worker"
         type: object
-        properties:
-          replicaCount:
-            type: integer
-            description: >-
-              DEFAULT Die Anzahl der Worker-Replikate. Beachten Sie, dass einige
-              Worker eine besondere Behandlung erfordern. Siehe dazu die
-              Dokumentation:
-              https://element-hq.github.io/synapse/latest/workers.html
-            default: 1
-            minimum: 0
-          strategy:
-            type: object
-            properties:
-              type:
-                type: string
-                enum:
-                  - RollingUpdate
-                  - Recreate
-                description: >-
-                  DEFAULT gilt für alle Synapse-Worker-Container.
-
-
-                  Nur wirklich anwendbar, wenn das Deployment ein RWO PV
-                  angehängt hat (z.B. Media Repository).
-
-
-                  Da Replikate = 1 sind, kann eine Aktualisierung "hängen
-                  bleiben", da der vorherige Container mit dem PV verbunden
-                  bleibt und der "neu-aufgebaute" Container nie starten kann.
-                  Das Ändern der Strategie auf "Recreate" wird den einzelnen
-                  vorherigen Container beenden, so dass der neue, ankommende
-                  Container sich mit dem PV verbinden kann.
-                default: RollingUpdate
-            required:
-              - type
-            unevaluatedProperties: false
-          extraConfig:
-            type: object
-            description: Zusätzliche Konfiguration für die Worker
-            default: {}
-            unevaluatedProperties: true
-          annotations:
-            type: object
-            title: Annotations
-            description: DEFAULT sind auf alle Synapse-Worker-Container anzuwenden.
-            default: {}
-            unevaluatedProperties: true
-          extraEnv:
-            type: array
-            title: Zusätzliche Umgebungsvariablen
-            description: DEFAULT sind auf alle Synapse-Worker-Container anzuwenden.
-            items:
-              type: object
-              properties:
-                name:
-                  type: string
-                value:
-                  type: string
-              required:
-                - name
-                - value
-              unevaluatedProperties: false
-            default: []
-            examples:
-              - name: LD_PRELOAD
-                value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
-              - name: SYNAPSE_CACHE_FACTOR
-                value: "1.0"
-          volumes:
-            type: array
-            title: Zusätzliche Volumes für den Worker
-            description: >-
-              DEFAULT gilt für alle Synapse-Worker-Container. Nützlich für das
-              Media-Repo oder zum Hinzufügen von Python-Modulen. Daher besser im
-              entsprechenden Konfigurationsteil der spez. Worker.
-            default: []
-          volumeMounts:
-            type: array
-            title: Zusätzliche zu mountende Datenträgerpfade
-            description: DEFAULT gilt für alle Synapse-Worker-Container.
-            default: []
-          extraCommands:
-            type: array
-            title: Zusätzliche Befehle, die beim Starten von Synapse ausgeführt werden
-            description: DEFAULT gilt für alle Synapse-Worker-Container.
-            items:
-              type: string
-            default: []
-            examples:
-              - - apt-get update -yqq && apt-get install patch -yqq
-                - patch -d/usr/local/lib/python3.10/site-packages/synapse -p2 < /synapse/patches/something.patch
-          podSecurityContext:
-            $ref: "#/$defs/podSecurityContext"
-            type: object
-            title: Informationen zum Pod-Sicherheitskontext
-            description: DEFAULT gilt für alle Synapse-Worker-Container.
-            default:
-              runAsUser: 2666
-              runAsNonRoot: true
-              runAsGroup: 2666
-              fsGroup: 2666
-            unevaluatedProperties: false
-          securityContext:
-            $ref: "#/$defs/securityContext"
-            type: object
-            title: Konfiguration für die Container-Sicherheitsrichtlinie
-            description: DEFAULT gilt für alle Synapse-Worker-Container.
-            default:
-              readOnlyRootFilesystem: true
-              runAsNonRoot: true
-              runAsUser: 2666
-            unevaluatedProperties: false
-          resources:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
-            type: object
-            properties:
-              limits:
-                properties:
-                  cpu:
-                    title: >-
-                      Rechenressourcengrenzen, die auf alle
-                      Synapse-Worker-Container anzuwenden sind
-                    description: >-
-                      DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen
-                      gesondert zu verwalten.
-                    default: 600m
-                  memory:
-                    title: >-
-                      RAM Ressourcengrenzen, die auf alle
-                      Synapse-Worker-Container anzuwenden sind
-                    description: >-
-                      DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen
-                      gesondert zu verwalten.
-                    default: 768Mi
-              requests:
-                properties:
-                  cpu:
-                    title: >-
-                      Anforderungen an Rechenressourcen, die auf alle
-                      Synapse-Worker-Container anzuwenden sind
-                    description: >-
-                      DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen
-                      gesondert zu verwalten.
-                    default: 100m
-                  memory:
-                    title: >-
-                      Anforderungen an RAM Ressourcen, die auf alle
-                      Synapse-Worker-Container anzuwenden sind
-                    description: >-
-                      DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen
-                      gesondert zu verwalten.
-                    default: 150Mi
-            unevaluatedProperties: false
-          livenessProbe:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
-            type: object
-            title: Healthcheck
-            properties:
-              periodSeconds:
-                default: 10
-              httpGet:
-                properties:
-                  path:
-                    default: /health
-                  port:
-                    default: metrics
-            unevaluatedProperties: false
-          readinessProbe:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
-            type: object
-            title: Bereitschaftscheck
-            properties:
-              periodSeconds:
-                default: 3
-              httpGet:
-                properties:
-                  path:
-                    default: /health
-                  port:
-                    default: metrics
-            unevaluatedProperties: false
-          startupProbe:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
-            type: object
-            title: Startup-Check
-            properties:
-              failureThreshold:
-                default: 6
-              httpGet:
-                properties:
-                  path:
-                    default: /health
-                  port:
-                    default: metrics
-            unevaluatedProperties: false
-          nodeSelector:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/nodeSelector
-            type: object
-            title: >-
-              Node Selektor Konfiguration, die auf alle Synapse-Worker-Container
-              anzuwenden sind
-            description: DEFAULT gilt für alle Synapse-Worker-Container.
-            default: {}
-            unevaluatedProperties: false
-          tolerations:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/tolerations
-            type: array
-            title: >-
-              Tolerations/Tains Konfiguration, die auf alle
-              Synapse-Worker-Container anzuwenden sind
-            description: DEFAULT gilt für alle Synapse-Worker-Container.
-            default: []
-            unevaluatedProperties: false
-          affinity:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/affinity
-            type: object
-            default: {}
-            unevaluatedProperties: false
+        title: Standardkonfiguration für Worker
+        description: >-
+          Wird an alle Worker vererbt und kann für jeden Workertyp überschrieben werden.
         required:
+          - enabled
           - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
           - strategy
           - extraConfig
           - annotations
@@ -1441,9 +1225,10 @@ properties:
           - affinity
         unevaluatedProperties: false
       generic_worker:
+        $ref: "#/$defs/worker"
         type: object
+        title: Der generische Worker kann für die meisten Endpunkte verwendet werden
         description: >-
-          Der generische Worker kann für die meisten Endpunkte verwendet werden.
           Seien Sie vorsichtig, wenn Sie die Sync-Endpunkte aktivieren, da sie
           große Mengen an Ressourcen verbrauchen können. Weitere Informationen
           finden Sie unter der obigen Informations-URL. Ein angemessener
@@ -1452,34 +1237,19 @@ properties:
         properties:
           enabled:
             type: boolean
-            description: Aktivieren von generischen Workern
+            title: Aktivieren von generischen Workern
             default: true
+          replicaCount:
+            type: integer
+            default: 2
           listeners:
             type: array
-            description: entsprechende Endpunkte für den generischen Worker
-            items:
-              type: string
-              enum:
-                - client
-                - consent
-                - federation
-                - keys
-                - media
-                - metrics
-                - openid
-                - replication
-                - static
-                - health
+            title: Entsprechende Endpunkte für den generischen Worker
             default:
               - client
               - federation
           csPaths:
             type: array
-            title: >-
-              Pfade für die Ingress-Konfiguration des Workers,
-              Client-Server-Kommunikation
-            items:
-              type: string
             default:
               - /_matrix/client/(r0|v3)/sync$
               - /_matrix/client/(api/v1|r0|v3)/events$
@@ -1529,11 +1299,6 @@ properties:
               - /_matrix/client/(api/v1|r0|v3|unstable)/presence/
           paths:
             type: array
-            title: >-
-              Pfade für die Ingress-Konfiguration des Workers,
-              Server-Server-Kommunikation
-            items:
-              type: string
             default:
               - /_matrix/federation/(v1|v2)/event/
               - /_matrix/federation/(v1|v2)/state/
@@ -1556,79 +1321,48 @@ properties:
               - /_matrix/key/v2/query
               - /_matrix/federation/v1/hierarchy/
               - /_matrix/federation/(v1|v2)/send/
-          replicaCount:
-            type: integer
-            title: Anzahl der Worker-Container
-            description: >-
-              Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer
-              als autoscaling.minReplicas oder wenn nicht gesetzt, dann wird
-              autoscaling.minReplicas übernommen
-            default: 2
           autoscaling:
+            $comment: unevaluatedProperties commented out due to bug in jsonschema.
             type: object
-            description: >-
-              Schalte das HPA für die Container ein.
-
-              Dazu muss entsprechende Konfiguration in die separaten Sektionen
-              eingefügt werden.
-
-              Hinweis: Kann für alle spezifischen Worker benutzt werden. Eine
-              Ausnahme besteht für Stream Writer Worker mit "listeners:
-              [replication]".
-              https://element-hq.github.io/synapse/latest/workers.html#stream-writers
-
-              Auf Grund der Synapse und HPA Architektur ist dies nicht möglich.
-              Wenn diese Worker genutzt werden, wird empfohlen die Anzahl der
-              worker manuell via "replicaCount" zu konfigurieren
-            properties:
-              enabled:
-                type: boolean
-                default: false
-              minReplicas:
-                type: integer
-                title: Minimale Anzahl der Worker-Container
-                default: 2
-              maxReplicas:
-                type: integer
-                title: Maximale Anzahl der Worker-Container
-                default: 10
-              targetCPUUtilizationPercentage:
-                type: integer
-                title: Prozentsatz für CPU-Auslastung um Scaling zu auszulösen
-                default: 80
-              targetMemoryUtilizationPercentage:
-                type: integer
-                title: Prozentsatz für RAM-Auslastung um Scaling zu auszulösen
-                default: 80
-            if:
-              properties:
-                enabled:
-                  const: true
-            then:
-              required:
-                - minReplicas
-                - maxReplicas
-              anyOf:
-                - required:
-                    - targetCPUUtilizationPercentage
-                - required:
-                    - targetMemoryUtilizationPercentage
+            default:
+              enabled: false
+              minReplicas: 2
+              maxReplicas: 10
+              targetCPUUtilizationPercentage: 80
+              targetMemoryUtilizationPercentage: 80
             required:
               - enabled
               - minReplicas
               - maxReplicas
               - targetCPUUtilizationPercentage
               - targetMemoryUtilizationPercentage
-            unevaluatedProperties: false
+            # unevaluatedProperties: false
         required:
           - enabled
+          - replicaCount
           - listeners
           - csPaths
           - paths
-          - replicaCount
           - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
         unevaluatedProperties: false
       federation_reader:
+        $ref: "#/$defs/worker"
         type: object
         title: Allgemeine Worker in spezifische Belange aufteilen
         description: >-
@@ -1649,28 +1383,10 @@ properties:
           listeners:
             type: array
             description: Endpunkte für den Föderationsworker
-            items:
-              type: string
-              enum:
-                - client
-                - consent
-                - federation
-                - keys
-                - media
-                - metrics
-                - openid
-                - replication
-                - static
-                - health
             default:
               - federation
           paths:
             type: array
-            title: >-
-              Pfade für die Ingress-Konfiguration des Workers,
-              Server-Server-Kommunikation
-            items:
-              type: string
             default:
               - /_matrix/federation/(v1|v2)/event/
               - /_matrix/federation/(v1|v2)/state/
@@ -1693,36 +1409,70 @@ properties:
               - /_matrix/key/v2/query
               - /_matrix/federation/v1/hierarchy/
               - /_matrix/federation/(v1|v2)/send/
-        if:
-          properties:
-            enabled:
-              const: true
-        then:
-          required:
-            - listeners
-            - paths
         required:
           - enabled
+          - replicaCount
           - listeners
+          - csPaths
           - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
         unevaluatedProperties: false
       pusher:
+        $ref: "#/$defs/worker"
         type: object
-        title: Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen.
+        title: Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen
         description: >-
           (pusher-worker -> Sygnal -> Push-Provider (Apple oder Google))
 
           Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt
           werden. Ein lokaler Sygnal-Service und Container ist Bestandteil des
-          Helm Charts
+          Helm Charts.
         properties:
           enabled:
             type: boolean
             default: false
         required:
           - enabled
+          - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
         unevaluatedProperties: false
       appservice:
+        $ref: "#/$defs/worker"
         type: object
         title: Worker für das Senden von Daten an registrierte Anwendungsdienste
         description: >-
@@ -1733,19 +1483,64 @@ properties:
             default: false
         required:
           - enabled
+          - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
         unevaluatedProperties: false
       federation_sender:
+        $ref: "#/$defs/worker"
         type: object
-        title: Worker des Föderationssender
-        description: Sendet Föderationsdaten (federation traffic) an andere Matrix-Server.
+        title: Worker des Föderationssenders
+        description: >-
+          Sendet Föderationsdaten (federation traffic) an andere Matrix-Server.
         properties:
           enabled:
             type: boolean
             default: false
         required:
           - enabled
+          - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
         unevaluatedProperties: false
       media_repository:
+        $ref: "#/$defs/worker"
         type: object
         title: Konfiguration des Mediaworker
         description: >-
@@ -1758,26 +1553,11 @@ properties:
             default: true
           listeners:
             type: array
-            description: entsprechende Endpunkte für den Mediaworker
-            items:
-              type: string
-              enum:
-                - client
-                - consent
-                - federation
-                - keys
-                - media
-                - metrics
-                - openid
-                - replication
-                - static
-                - health
+            title: Entsprechende Endpunkte für den Mediaworker
             default:
               - media
           csPaths:
             type: array
-            items:
-              type: string
             default:
               - /_matrix/media/
               - /_synapse/admin/v1/purge_media_cache$
@@ -1788,72 +1568,88 @@ properties:
               - /_synapse/admin/v1/users/.*/media$
           paths:
             type: array
-            items:
-              type: string
             default:
               - /_matrix/media/
+          extraConfig:
+            type: object
+            properties:
+              enable_media_repo:
+                type: boolean
+                title: Eintragung für Mediaworker in Config
+                default: true
+            unevaluatedProperties: true
           resources:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+            $ref: https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
             type: object
             properties:
               limits:
+                type: object
                 properties:
                   cpu:
+                    type: string
                     title: >-
                       Rechenressourcengrenzen, die auf den
                       media_repository-Container anzuwenden sind
                     default: 2000m
                   memory:
+                    type: string
                     title: >-
                       RAM Ressourcengrenzen, die auf den
                       media_repository-Container anzuwenden sind
                     default: 2500Mi
+                required:
+                  - cpu
+                  - memory
+                unevaluatedProperties: false
               requests:
+                type: object
                 properties:
                   cpu:
+                    type: string
                     title: >-
                       Anforderungen an Rechenressourcen, die auf den
                       media_repository-Container anzuwenden sind
                     default: 500m
                   memory:
+                    type: string
                     title: >-
                       Anforderungen an RAM Ressourcen, die auf den
                       media_repository-Container anzuwenden sind
                     default: 1500Mi
-            unevaluatedProperties: false
-          extraConfig:
-            type: object
-            description: Zusätzliche Konfiguration für die Worker
-            properties:
-              enable_media_repo:
-                type: boolean
-                description: Eintragung für Mediaworker in Config
-                default: true
+                required:
+                  - cpu
+                  - memory
+                unevaluatedProperties: false
             required:
-              - enable_media_repo
+              - limits
+              - requests
             unevaluatedProperties: false
-        if:
-          properties:
-            enabled:
-              const: true
-        then:
-          required:
-            - listeners
-          anyOf:
-            - required:
-                - paths
-            - required:
-                - csPaths
         required:
           - enabled
+          - replicaCount
           - listeners
           - csPaths
           - paths
-          - resources
+          - autoscaling
+          - strategy
           - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
         unevaluatedProperties: false
       user_dir:
+        $ref: "#/$defs/worker"
         type: object
         title: Worker für das Benutzerverzeichnis
         description: >-
@@ -1867,45 +1663,38 @@ properties:
           listeners:
             type: array
             title: Entsprechende Endpunkte für den Nutzersuche Worker
-            items:
-              type: string
-              enum:
-                - client
-                - consent
-                - federation
-                - keys
-                - media
-                - metrics
-                - openid
-                - replication
-                - static
-                - health
             default:
               - client
           csPaths:
             type: array
-            items:
-              type: string
             default:
               - /_matrix/client/(r0|v3|unstable)/user_directory/search$
-        if:
-          properties:
-            enabled:
-              const: true
-        then:
-          required:
-            - listeners
-          anyOf:
-            - required:
-                - paths
-            - required:
-                - csPaths
         required:
           - enabled
+          - replicaCount
           - listeners
           - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
         unevaluatedProperties: false
       background_worker:
+        $ref: "#/$defs/worker"
         type: object
         title: Aktivieren des Background-Workers
         description: >-
@@ -1916,6 +1705,27 @@ properties:
             default: false
         required:
           - enabled
+          - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
         unevaluatedProperties: false
     required:
       - default
@@ -4808,3 +4618,336 @@ $defs:
       runAsUser:
         minimum: 1001
         maximum: 60000
+  worker:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      replicaCount:
+        type: integer
+        description: >-
+          DEFAULT Die Anzahl der Worker-Replikate. Beachten Sie, dass einige
+          Worker eine besondere Behandlung erfordern. Siehe dazu die
+          Dokumentation:
+          https://element-hq.github.io/synapse/latest/workers.html
+
+
+          Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer
+          als autoscaling.minReplicas oder wenn nicht gesetzt, dann wird
+          autoscaling.minReplicas übernommen.
+        default: 1
+        minimum: 0
+      listeners:
+        type: array
+        title: Entsprechende Endpunkte für den Worker
+        items:
+          type: string
+          enum:
+            - client
+            - consent
+            - federation
+            - keys
+            - media
+            - metrics
+            - openid
+            - replication
+            - static
+            - health
+        default:
+          - media
+      csPaths:
+        type: array
+        title: >-
+          Pfade für die Ingress-Konfiguration des Workers, Client-Server-Kommunikation
+        items:
+          type: string
+        default: []
+      paths:
+        type: array
+        title: >-
+          Pfade für die Ingress-Konfiguration des Workers, Server-Server-Kommunikation
+        items:
+          type: string
+        default: []
+      autoscaling:
+        type: object
+        title: Schalte das HPA für die Container ein.
+        description: >-
+          Dazu muss entsprechende Konfiguration in die separaten Sektionen
+          eingefügt werden.
+
+          Hinweis: Kann für alle spezifischen Worker benutzt werden. Eine
+          Ausnahme besteht für Stream Writer Worker mit "listeners:
+          [replication]".
+          https://element-hq.github.io/synapse/latest/workers.html#stream-writers
+
+          Auf Grund der Synapse und HPA Architektur ist dies nicht möglich. Wenn
+          diese Worker genutzt werden, wird empfohlen die Anzahl der worker
+          manuell via "replicaCount" zu konfigurieren.
+        properties:
+          enabled:
+            type: boolean
+            default: false
+          minReplicas:
+            type: integer
+            title: Minimale Anzahl der Worker-Container
+            default: 2
+          maxReplicas:
+            type: integer
+            title: Maximale Anzahl der Worker-Container
+            default: 10
+          targetCPUUtilizationPercentage:
+            type: integer
+            title: Prozentsatz für CPU-Auslastung um Scaling zu auszulösen
+            default: 80
+          targetMemoryUtilizationPercentage:
+            type: integer
+            title: Prozentsatz für RAM-Auslastung um Scaling zu auszulösen
+            default: 80
+        required:
+          - enabled
+          - minReplicas
+          - maxReplicas
+          - targetCPUUtilizationPercentage
+          - targetMemoryUtilizationPercentage
+        unevaluatedProperties: false
+      strategy:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - RollingUpdate
+              - Recreate
+            description: >-
+              DEFAULT gilt für alle Synapse-Worker-Container.
+
+
+              Nur wirklich anwendbar, wenn das Deployment ein RWO PV
+              angehängt hat (z.B. Media Repository).
+
+
+              Da Replikate = 1 sind, kann eine Aktualisierung "hängen
+              bleiben", da der vorherige Container mit dem PV verbunden
+              bleibt und der "neu-aufgebaute" Container nie starten kann.
+              Das Ändern der Strategie auf "Recreate" wird den einzelnen
+              vorherigen Container beenden, so dass der neue, ankommende
+              Container sich mit dem PV verbinden kann.
+            default: RollingUpdate
+        required:
+          - type
+        unevaluatedProperties: false
+      extraConfig:
+        type: object
+        description: Zusätzliche Konfiguration für die Worker
+        default: {}
+        unevaluatedProperties: true
+      annotations:
+        type: object
+        title: Annotations
+        description: DEFAULT sind auf alle Synapse-Worker-Container anzuwenden.
+        default: {}
+        unevaluatedProperties: true
+      extraEnv:
+        type: array
+        title: Zusätzliche Umgebungsvariablen
+        description: DEFAULT sind auf alle Synapse-Worker-Container anzuwenden.
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            value:
+              type: string
+          required:
+            - name
+            - value
+          unevaluatedProperties: false
+        default: []
+        examples:
+          - name: LD_PRELOAD
+            value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+          - name: SYNAPSE_CACHE_FACTOR
+            value: "1.0"
+      volumes:
+        type: array
+        title: Zusätzliche Volumes für den Worker
+        description: >-
+          DEFAULT gilt für alle Synapse-Worker-Container. Nützlich für das
+          Media-Repo oder zum Hinzufügen von Python-Modulen. Daher besser im
+          entsprechenden Konfigurationsteil der spez. Worker.
+        default: []
+      volumeMounts:
+        type: array
+        title: Zusätzliche zu mountende Datenträgerpfade
+        description: DEFAULT gilt für alle Synapse-Worker-Container.
+        default: []
+      extraCommands:
+        type: array
+        title: Zusätzliche Befehle, die beim Starten von Synapse ausgeführt werden
+        description: DEFAULT gilt für alle Synapse-Worker-Container.
+        items:
+          type: string
+        default: []
+        examples:
+          - - apt-get update -yqq && apt-get install patch -yqq
+            - patch -d/usr/local/lib/python3.10/site-packages/synapse -p2 < /synapse/patches/something.patch
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        title: Informationen zum Pod-Sicherheitskontext
+        description: DEFAULT gilt für alle Synapse-Worker-Container.
+        default:
+          runAsUser: 2666
+          runAsNonRoot: true
+          runAsGroup: 2666
+          fsGroup: 2666
+        unevaluatedProperties: false
+      securityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        title: Konfiguration für die Container-Sicherheitsrichtlinie
+        description: DEFAULT gilt für alle Synapse-Worker-Container.
+        default:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 2666
+        unevaluatedProperties: false
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf alle
+                  Synapse-Worker-Container anzuwenden sind
+                description: >-
+                  DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen
+                  gesondert zu verwalten.
+                default: 600m
+              memory:
+                title: >-
+                  RAM Ressourcengrenzen, die auf alle
+                  Synapse-Worker-Container anzuwenden sind
+                description: >-
+                  DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen
+                  gesondert zu verwalten.
+                default: 768Mi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf alle
+                  Synapse-Worker-Container anzuwenden sind
+                description: >-
+                  DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen
+                  gesondert zu verwalten.
+                default: 100m
+              memory:
+                title: >-
+                  Anforderungen an RAM Ressourcen, die auf alle
+                  Synapse-Worker-Container anzuwenden sind
+                description: >-
+                  DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen
+                  gesondert zu verwalten.
+                default: 150Mi
+        unevaluatedProperties: false
+      livenessProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        title: Healthcheck
+        properties:
+          periodSeconds:
+            default: 10
+          httpGet:
+            properties:
+              path:
+                default: /health
+              port:
+                default: metrics
+        unevaluatedProperties: false
+      readinessProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        title: Bereitschaftscheck
+        properties:
+          periodSeconds:
+            default: 3
+          httpGet:
+            properties:
+              path:
+                default: /health
+              port:
+                default: metrics
+        unevaluatedProperties: false
+      startupProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        title: Startup-Check
+        properties:
+          failureThreshold:
+            default: 6
+          httpGet:
+            properties:
+              path:
+                default: /health
+              port:
+                default: metrics
+        unevaluatedProperties: false
+      nodeSelector:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/nodeSelector
+        type: object
+        title: >-
+          Node Selektor Konfiguration, die auf alle Synapse-Worker-Container
+          anzuwenden sind
+        description: DEFAULT gilt für alle Synapse-Worker-Container.
+        default: {}
+        unevaluatedProperties: false
+      tolerations:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/tolerations
+        type: array
+        title: >-
+          Tolerations/Tains Konfiguration, die auf alle
+          Synapse-Worker-Container anzuwenden sind
+        description: DEFAULT gilt für alle Synapse-Worker-Container.
+        default: []
+        unevaluatedProperties: false
+      affinity:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/affinity
+        type: object
+        default: {}
+        unevaluatedProperties: false
+    required:
+      - enabled
+      - replicaCount
+      - listeners
+      - csPaths
+      - paths
+      - autoscaling
+      - strategy
+      - extraConfig
+      - annotations
+      - extraEnv
+      - volumes
+      - volumeMounts
+      - extraCommands
+      - podSecurityContext
+      - securityContext
+      - resources
+      - livenessProbe
+      - readinessProbe
+      - startupProbe
+      - nodeSelector
+      - tolerations
+      - affinity
+    unevaluatedProperties: false

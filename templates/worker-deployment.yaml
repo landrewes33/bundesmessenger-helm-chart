@@ -1,22 +1,24 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (or .Values.persistence.enabled .Values.persistence.existingClaim) }}
-{{- $default := .Values.workers.default }}
 {{- $releaseName := .Release.Name }}
 {{- $uniqCaSecrets := list }}
 {{- range .Values.extraConfig.federation_custom_ca_list }}
   {{- /* extract secret name from cert path - between first both slashes, put them in a list and make it unique */}}
   {{- $uniqCaSecrets = uniq (append $uniqCaSecrets (split "/" ( trimPrefix "/" . ))._0) }}
 {{- end }}
-{{- range $worker, $config := .Values.workers }}
-{{- if $config.enabled }}
-{{- $name := $worker | replace "_" "-" }}
-{{- $replicaSize := $config.replicaCount | default $default.replicaCount }}
-{{- if hasKey $config "autoscaling" }}
-  {{- if and $config.autoscaling.enabled (lt ($config.replicaCount | default $default.replicaCount) $config.autoscaling.minReplicas) }}
-  {{- $replicaSize :=  $config.autoscaling.minReplicas }}
+
+{{- $workerConfigs := omit .Values.workers "default" }}
+{{- range $worker, $config := $workerConfigs }}
+  {{- if not $config.enabled }}
+    {{- continue }}
   {{- end }}
-{{- end }}
+
+  {{- $name := $worker | replace "_" "-" }}
+  {{- $replicaSize := $config.replicaCount }}
+  {{- if $config.autoscaling.enabled }}
+    {{- $replicaSize = max $replicaSize $config.autoscaling.minReplicas }}
+  {{- end }}
 
 ---
 apiVersion: apps/v1
@@ -44,23 +46,23 @@ spec:
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") $ | sha256sum }}
         checksum/signing-key-job: {{ include (print $.Template.BasePath "/signing-key-job.yaml") $ | sha256sum }} 
         checksum/ca-secrets: {{ print $uniqCaSecrets | sha256sum }}
-      {{- with ($config.annotations | default $default.annotations) }}
+      {{- with $config.annotations }}
         {{- . | toYaml | nindent 8 }}
       {{- end }}
       labels:
         {{- include "matrix-synapse.selectorLabels" $ | nindent 8 }}
         {{- include "matrix-synapse.monitoringLabels" $ | nindent 8 }}
         app.kubernetes.io/component: {{ $name }}
-      {{- with ($config.labels | default $default.labels) }}
+      {{- with $config.labels }}
         {{- . | toYaml | nindent 8 }}
       {{- end }}
     spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" $ }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       securityContext:
-        {{- $config.podSecurityContext | default $default.podSecurityContext | toYaml | nindent 8 }}
+        {{- $config.podSecurityContext | toYaml | nindent 8 }}
       initContainers:
-      {{- if and $needsVolumePermissions (not (hasKey ($config.podSecurityContext | default $default.podSecurityContext) "fsGroup" )) (eq $name "media-repository") }}
+      {{- if and $needsVolumePermissions (not (hasKey $config.podSecurityContext "fsGroup" )) (eq $name "media-repository") }}
         - name: volume-permissions
           command:
             - sh
@@ -70,7 +72,7 @@ spec:
           image: "{{ printf "%s/%s:%s" $.Values.volumePermissions.image.registry $.Values.volumePermissions.image.repository $.Values.volumePermissions.image.tag }}"
           imagePullPolicy: {{ $.Values.volumePermissions.image.pullPolicy }}
           securityContext:
-          {{- $.Values.volumePermissions.securityContext | default $default.securityContext | toYaml | nindent 12 }}
+          {{- $.Values.volumePermissions.securityContext | toYaml | nindent 12 }}
           resources: {{ $.Values.volumePermissions.resources | toYaml | nindent 12 }}
           volumeMounts:
             - name: media
@@ -78,7 +80,7 @@ spec:
       {{- end }}
         - name: update-config
           securityContext:
-            {{- $config.securityContext | default $default.securityContext | toYaml | nindent 12 }}
+            {{- $config.securityContext | toYaml | nindent 12 }}
           command:
             - sh
             - -c
@@ -101,13 +103,8 @@ spec:
                     -e "s/@@REDIS_PASSWORD@@/${REDIS_PASSWORD:-}/" \
                        > /synapse/config/conf.d/secrets.yaml
 
-              {{- if (or $config.extraCommands $default.extraCommands) }}
-
-              {{- with $config.extraCommands | default $default.extraCommands }}
-              {{ range . }}
-              {{ . | nindent 14 }}
-              {{- end }}
-              {{- end }}
+              {{- range $config.extraCommands }}
+              {{- . | nindent 14 }}
               {{- end }}
 
               exec python3 -B -m synapse.app.{{ $config.app | default "generic_worker" }} \
@@ -143,11 +140,11 @@ spec:
                   key: {{ $.Values.externalRedis.existingSecretPasswordKey }}
                   {{- end -}}
           {{- end }}
-          {{- with $config.extraEnv | default $default.extraEnv }}
+          {{- with $config.extraEnv }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
           securityContext:
-            {{- $config.securityContext | default $default.securityContext | toYaml | nindent 12 }}
+            {{- $config.securityContext | toYaml | nindent 12 }}
           image: "{{ printf "%s/%s:%s" $.Values.image.registry $.Values.image.repository ( include "matrix-synapse.imageTag" $ )}}"
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           ports:
@@ -166,20 +163,20 @@ spec:
               protocol: TCP
             {{- end }}
           {{- end }}
-          {{- if (or $config.readinessProbe $default.readinessProbe) }}
+          {{- with $config.readinessProbe }}
           readinessProbe:
-              {{- $config.readinessProbe | default $default.readinessProbe | toYaml | nindent 12 }}
+            {{- . | toYaml | nindent 12 }}
           {{- end }}
-          {{- if (or $config.livenessProbe $default.livenessProbe) }}
+          {{- with $config.livenessProbe }}
           livenessProbe:
-              {{- $config.livenessProbe | default $default.livenessProbe | toYaml | nindent 12 }}
+            {{- . | toYaml | nindent 12 }}
           {{- end }}
-          {{- if (or $config.startupProbe $default.startupProbe) }}
+          {{- with $config.startupProbe }}
           startupProbe:
-              {{- $config.startupProbe | default $default.startupProbe | toYaml | nindent 12 }}
+            {{- . | toYaml | nindent 12 }}
           {{- end }}
           resources:
-            {{- $config.resources | default $default.resources | toYaml | nindent 12 }}
+            {{- $config.resources | toYaml | nindent 12 }}
           volumeMounts:
             - name: config
               mountPath: /synapse/config/homeserver.yaml
@@ -206,18 +203,18 @@ spec:
             - name: {{ printf "fed-ca-%s" .  }}
               mountPath: /{{ . }}
           {{- end }}
-          {{- with $config.volumeMounts | default $default.volumeMounts }}
+          {{- with $config.volumeMounts }}
             {{ . | toYaml | nindent 12 }}
           {{- end }}
-      {{- with $config.nodeSelector | default $default.nodeSelector }}
+      {{- with $config.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-    {{- with $config.affinity | default $default.affinity }}
+    {{- with $config.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-    {{- with $config.tolerations | default $default.tolerations }}
+    {{- with $config.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
@@ -266,9 +263,10 @@ spec:
             sizeLimit: 1Gi
         {{- end }}
       {{- end }}
-      {{- with $config.volumes | default $default.volumes }}
+      {{- with $config.volumes }}
         {{ . | toYaml | nindent 8 }}
       {{- end }}
+...
 
 {{- if hasKey $config "autoscaling" }}
   {{- if $config.autoscaling.enabled }}
@@ -303,8 +301,8 @@ spec:
           type: Utilization
           averageUtilization: {{ $config.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
+...
   {{- end }}
 {{- end }}
 
-{{- end }}
 {{- end }}
