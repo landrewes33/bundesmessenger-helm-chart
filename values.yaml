@@ -682,9 +682,12 @@ synapse:
 ##
 workers:
 
-  # Standardkonfiguration, diese wird an alle Worker vererbt und kann auch
-  # für jeden Workertyp überschrieben werden.
-  default:
+  # -- (object) Standardkonfiguration für Worker.
+  # Wird an alle Worker vererbt und kann für jeden Workertyp überschrieben werden.
+  default: &workerDefault
+    # -- (boolean) DEFAULT Worker aktivieren.
+    enabled: false
+
     # -- (int) DEFAULT Die Anzahl der Worker-Replikate.
     # Beachten Sie, dass einige Worker eine besondere Behandlung erfordern.
     # Siehe dazu die Dokumentation: https://element-hq.github.io/synapse/latest/workers.html
@@ -809,12 +812,40 @@ workers:
     # DEFAULT gilt für alle Synapse-Worker-Container.
     affinity: {}
 
+    # -- (list) Entsprechende Endpunkte für den Worker.
+    listeners: []
+    # -- (list) Pfade für die Ingress-Konfiguration des Workers, Client-Server-Kommunikation.
+    csPaths: []
+    # -- (list) Pfade für die Ingress-Konfiguration des Workers, Server-Server-Kommunikation.
+    paths: []
+
+    # -- (object) Konfiguration für das Auto-Scaling der Applikation.
+    autoscaling:
+      # -- (bool) schalte das HPA für die Container ein.
+      # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden.
+      # Hinweis: Kann für alle spezifischen Worker benutzt werden.
+      # Eine Ausnahme besteht für Stream Writer Worker mit "listeners: [replication]".
+      # https://element-hq.github.io/synapse/latest/workers.html#stream-writers
+      # Auf Grund der Synapse und HPA Architektur ist dies nicht möglich. Wenn diese Worker genutzt werden,
+      # wird empfohlen die Anzahl der worker manuell via "replicaCount" zu konfigurieren.
+      enabled: false
+      # -- (int) minimale Anzahl der Worker-Container
+      minReplicas: 2
+      # -- (int) maximale Anzahl der Worker-Container
+      maxReplicas: 10
+      # -- (int) Prozentsatz für CPU-Auslastung um Scaling zu triggern
+      targetCPUUtilizationPercentage: 80
+      # -- (int) Prozentsatz für RAM-Auslastung um Scaling zu triggern
+      targetMemoryUtilizationPercentage: 80
+
   ## Der generische Worker kann für die meisten Endpunkte verwendet werden.
   ## Seien Sie vorsichtig, wenn Sie die Sync-Endpunkte aktivieren, da sie große Mengen an
   ## Ressourcen verbrauchen können. Weitere Informationen finden Sie unter der obigen Informations-URL.
   ## Ein angemessener Lastausgleich mit der K8s-Ingress-Ressource ist möglicherweise nicht möglich.
   ##
   generic_worker:
+    <<: *workerDefault
+
     # -- (bool) Aktivieren von Workern
     enabled: true
     # -- (list) entsprechende Endpunkte für den generischen Worker
@@ -958,6 +989,8 @@ workers:
   ## https://element-hq.github.io/synapse/latest/workers.html#load-balancing
 
   federation_reader:
+    <<: *workerDefault
+
     # -- (bool) Aktiviere spez. Worker für Föderationsanfragen
     # Wenn dieser Worker genutzt wird, können die URLs aus dem
     # generic_worker entfernt werden.
@@ -995,19 +1028,27 @@ workers:
   # (pusher-worker -> Sygnal -> Push-Provider (Apple od. Google))
   # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
   pusher:
+    <<: *workerDefault
+
     enabled: false
 
   appservice:
+    <<: *workerDefault
+
     # -- (bool) Dieser Worker sorgt für das Senden von Daten an registrierte Anwendungsdienste.
     # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
 
   federation_sender:
+    <<: *workerDefault
+
     # -- (bool) Dieser Worker sendet Verbundverkehrs (federation traffic)
     # an andere Matrix-Server.
     enabled: false
 
   media_repository:
+    <<: *workerDefault
+
     # -- (bool) Aktivieren des Media-Worker
     # Dieser Worker kümmert sich um die Bereitstellung und Speicherung von Medien.
     # Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit Hintergrundaufgaben.
@@ -1049,6 +1090,8 @@ workers:
   ## Dieser Worker aktualisiert das Benutzerverzeichnis und kann auch darin suchen
   ## Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der Worker optional.
   user_dir:
+    <<: *workerDefault
+
     # -- (bool) Aktivieren des Nutzersuch-Workers
     # Hinweis: Damit kann Last vom generischen bzw. Haupt-Worker genommen werden
     # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
@@ -1061,6 +1104,8 @@ workers:
       - "/_matrix/client/(r0|v3|unstable)/user_directory/search$"
 
   background_worker:
+    <<: *workerDefault
+
     # -- (bool) Aktivieren des Background-Workers
     # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
