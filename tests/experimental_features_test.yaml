@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
-suite: ensures experimental_features is not part of other configurations
+suite: Experimental Features leakage
 templates:
   - configuration.yaml
   - secrets.yaml
@@ -27,7 +27,7 @@ tests:
           pattern: "experimental_features:"
 
 ---
-suite: ensures experimental_features is part of the configuration
+suite: Experimental Features configuration
 templates:
   - secrets.yaml
 set:
@@ -70,7 +70,7 @@ tests:
           pattern: "new_feature: true"
 
 ---
-suite: ensures experimental_features is set correctly
+suite: Experimental Features overrides
 templates:
   - secrets.yaml
 tests:

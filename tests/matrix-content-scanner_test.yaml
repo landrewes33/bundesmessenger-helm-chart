@@ -1,5 +1,6 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
+suite: Matrix Content Scanner
 templates:
   - matrix-content-scanner/contentscanner-deployment.yaml
   - matrix-content-scanner/contentscanner-configuration.yaml

@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
-suite: ensures signing key generation
+suite: Signing Key generation
 templates:
   - signing-key-job.yaml
 tests:
