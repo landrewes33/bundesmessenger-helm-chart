@@ -2210,7 +2210,7 @@ synapse_admin:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/synapse-admin
-    tag: 0.10.3-jammy-production
+    tag: 0.9.1-jammy-production
     pullPolicy: IfNotPresent
 
   ## Ressourcen Konfiguration für Synapse-Admin Server.
