@@ -1,8 +1,10 @@
 {{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.wellknown.enabled }}
-{{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") -}}
-{{- $component := "wellknown-nginx" -}}
+  {{- $wkName := include
+    "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx")
+  }}
+  {{- $component := "wellknown-nginx" }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -57,15 +59,26 @@ data:
         rewrite ^/\.well-known/matrix/{{ last $keys }} /{{ last $keys }}.json break;
       }
     }
-  server.json: |-
-{{-   if .Values.wellknown.server }}
-{{ toPrettyJson .Values.wellknown.server | nindent 4 }}
-{{-   else }}
-{{ dict "m.server" (printf "%s:%d" (.Values.wellknown.host | default (.Values.publicServerName | default .Values.serverName)) (.Values.wellknown.port | default 443)) | toPrettyJson | indent 4 }}
-{{-   end }}
+  server.json: |
+    {{- if .Values.wellknown.server }}
+      {{- toPrettyJson .Values.wellknown.server | nindent 4 }}
+    {{- else }}
+      {{- dict
+          "m.server" (printf "%s:%d"
+            (.Values.wellknown.host
+              | default (include "matrix-synapse.publicServerName" .)
+            )
+            (.Values.wellknown.port | default 443)
+          )
+      | toPrettyJson
+      | nindent 4
+      }}
+    {{- end }}
   client.json: |-
     {{- $defaultClient := dict
-      "m.homeserver" (dict "base_url" (printf "https://%s" ( .Values.publicServerName | default .Values.serverName )))
+      "m.homeserver" (dict
+        "base_url" (include "matrix-synapse.publicServerURL" .)
+      )
     }}
 
     {{- if .Values.mas.enabled }}
@@ -84,40 +97,56 @@ data:
         "secure_backup_setup_methods" (list "passphrase")
         "outbound_keys_pre_sharing_mode" "on_room_opening"
       )
-    ) }}
+    )}}
 
     {{- if .Values.additionalConfig.locationSharing.enabled }}
-     {{- if .Values.additionalConfig.locationSharing.map_style_url }}
-      {{- $_locationSharing := dict
-        "m.tile_server" (dict
-          "map_style_url" (quote ( .Values.additionalConfig.locationSharing.map_style_url )))}}
-      {{- $defaultClient = merge $defaultClient $_locationSharing }}
+      {{- if .Values.additionalConfig.locationSharing.map_style_url }}
+        {{- $_locationSharing := dict
+          "m.tile_server" (dict
+            "map_style_url"
+              (quote .Values.additionalConfig.locationSharing.map_style_url)
+          )
+        }}
+        {{- $defaultClient = merge $defaultClient $_locationSharing }}
       {{- else }}
-           {{- $_locationSharing := dict
-        "m.tile_server" (dict
-          "map_style_url" (printf "https://%s/_matrix/cconfig/style.json" ( .Values.publicServerName | default .Values.serverName ))
-        )
-      }}
-      {{- $defaultClient = merge $defaultClient $_locationSharing }}
+        {{- $_locationSharing := dict
+          "m.tile_server" (dict
+            "map_style_url" (printf "https://%s/_matrix/cconfig/style.json"
+              (include "matrix-synapse.publicServerName" .)
+            )
+          )
+        }}
+        {{- $defaultClient = merge $defaultClient $_locationSharing }}
       {{- end }}
     {{- end }}
 
     {{- $defaultClient = merge $defaultClient (dict
       "de.bwi" (dict
-        "data_privacy_url" (printf "https://%s" ( .Values.dataPrivacyUrl | required "a valid URL for data protection regulations / privacy policy (dataPrivacyUrl) is required. "))
-        "imprint_url" (printf "https://%s" ( .Values.imprintUrl | required "a valid URL for imprint (imprintUrl) is required. "))
+        "data_privacy_url" (printf "https://%s"
+          (.Values.dataPrivacyUrl | required (print
+            "a valid URL for data protection regulations / privacy policy "
+            "(dataPrivacyUrl) is required."
+          ))
+        )
+        "imprint_url" (printf "https://%s"
+          (.Values.imprintUrl | required
+            "a valid URL for imprint (imprintUrl) is required."
+          )
+        )
       )
-    ) }}
+    )}}
 
     {{- $customClient := .Values.wellknown.client | default dict }}
     {{- $mergedClient := mergeOverwrite $defaultClient $customClient }}
     {{ $mergedClient | toPrettyJson | nindent 4 }}
-{{-   range $key, $value := .Values.wellknown.extraData }}
-  {{ $key }}.json: |-
-{{-     if $value | kindIs "string" -}}
-    {{ $value | nindent 4 }}
-{{-     else -}}
-    {{ $value | toPrettyJson | nindent 4 }}
-{{-     end -}}
-{{-   end -}}
-{{- end -}}
+{{- range $key, $value := .Values.wellknown.extraData }}
+  {{ $key }}.json: |
+    {{- if $value | kindIs "string" }}
+      {{- $value | nindent 4 }}
+    {{- else }}
+      {{- $value | toPrettyJson | nindent 4 }}
+    {{- end }}
+{{- end }}
+...
+
+{{- end }}

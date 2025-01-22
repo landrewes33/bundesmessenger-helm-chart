@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.webclient.enabled }}
 {{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
@@ -20,12 +20,14 @@ data:
     {
       "default_server_config": {
         "m.homeserver": {
-          "base_url": "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}",
+          "base_url": {{ include "matrix-synapse.publicServerURL" . | quote }},
           "server_name": {{ $displayName | quote }}
         }
       },
       "enable_presence_by_hs_url": {
-        "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}": {{ .Values.extraConfig.presence.enabled | default false }}
+        {{ include "matrix-synapse.publicServerURL" . | quote }}: {{
+            .Values.extraConfig.presence.enabled | default false
+          }}
       },
       {{- if .Values.call.enabled }}
       "element_call": {
