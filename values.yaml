@@ -2027,7 +2027,7 @@ contentscanner:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/matrix-content-scanner
-    tag: 1.1.0-jammy-production
+    tag: 1.2.1-jammy-production
     pullPolicy: IfNotPresent
 
   replicaCount: 1
