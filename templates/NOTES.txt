@@ -12,7 +12,7 @@ Zugriffe bzw. Endpunkte müssen manuell nachgesteuert werden.
 
 Ihre Synapse Instanz startet nun, der Zugriff sollte innerhalb weniger Minuten über
 folgende URL(s) möglich sein:
-  {{- range (concat .Values.ingress.csHosts (list (.Values.publicServerName | default .Values.serverName))) }}
+  {{- range (concat .Values.ingress.csHosts (list (include "matrix-synapse.publicServerName" .))) }}
     {{- if $.Values.ingress.tls }}
 https://{{ . }}
     {{- else }}

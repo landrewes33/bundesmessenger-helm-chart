@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "matrix-synapse.fullname" . -}}
@@ -6,7 +6,7 @@
 {{- $wkName := include "matrix-synapse.externalname" (dict "global" . "external" "wellknown-nginx") -}}
 {{- $chubName := include "matrix-synapse.externalname" (dict "global" . "external" "confighub-nginx") -}}
 {{- $masName := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-authentication-service") -}}
-{{- $matrixUri := .Values.publicServerName | default .Values.serverName }}
+{{- $matrixUri := include "matrix-synapse.publicServerName" . }}
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -40,18 +40,18 @@ spec:
   rules:
   {{- $csHosts := .Values.ingress.csHosts }}
   {{- if $.Values.ingress.includeServerName }}
-    {{- $csHosts = concat (list (.Values.publicServerName | default .Values.serverName)) $csHosts }}
+    {{- $csHosts = concat (list $matrixUri) $csHosts }}
   {{- end }}
   {{- $s2sHosts := .Values.ingress.hosts }}
   {{- if .Values.ingress.includeServerName }}
-    {{- $s2sHosts = concat (list (.Values.publicServerName | default .Values.serverName)) $s2sHosts }}
+    {{- $s2sHosts = concat (list $matrixUri) $s2sHosts }}
   {{- end }}
   {{- $wkHosts := .Values.ingress.wkHosts }}
   {{- if .Values.ingress.includeServerName }}
     {{- $wkHosts = concat (list .Values.serverName) $wkHosts }}
   {{- end }}
   {{- /* Add .well-known to Synapse FQDN for client configuration */}}
-  {{- $wkHosts = uniq (concat (list ( .Values.publicServerName | default .Values.serverName )) $wkHosts ) }}
+  {{- $wkHosts = uniq (concat (list $matrixUri) $wkHosts ) }}
   {{- $hosts := uniq (concat $s2sHosts $csHosts $wkHosts) }}
   {{- range $hosts }}
     {{- $host := . }}

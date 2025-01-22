@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{/* vim: set filetype=mustache: */}}
 {{/*
@@ -25,6 +25,27 @@ If release name contains chart name it will be used as a full name.
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
+{{- end -}}
+
+{{/*
+publicServerName.
+*/}}
+{{- define "matrix-synapse.publicServerName" -}}
+{{- .Values.publicServerName | default .Values.serverName }}
+{{- end -}}
+
+{{/*
+publicServerURL.
+*/}}
+{{- define "matrix-synapse.publicServerURL" -}}
+{{- printf "https://%s" (include "matrix-synapse.publicServerName" .) }}
+{{- end -}}
+
+{{/*
+config.publicBaseURL.
+*/}}
+{{- define "matrix-synapse.publicBaseURL" -}}
+{{- .Values.config.publicBaseurl | default (include "matrix-synapse.publicServerName" .) }}
 {{- end -}}
 
 {{/*
@@ -425,7 +446,7 @@ for a list of options that can be passed.
 Set MAS default uri
 */}}
 {{- define "matrix-synapse.masUri" -}}
-  {{- if .Values.mas.enabled -}}
-{{- .Values.mas.uri | default ( .Values.publicServerName | default .Values.serverName ) -}}
-  {{- end -}}
+{{- if .Values.mas.enabled }}
+  {{- .Values.mas.uri | default (include "matrix-synapse.publicServerName" .) }}
+{{- end }}
 {{- end -}}

@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{-  $recommendedLogging := (dict) -}}
 {{- if .Values.config.useRecommendedLogging -}}
@@ -48,7 +48,7 @@ data:
     ## Server ##
 
     server_name: {{ required "You need to specify a serverName" .Values.serverName | quote }}
-    public_baseurl: {{ .Values.config.publicBaseurl | default (printf "https://%s" (.Values.publicServerName | default .Values.serverName)) | quote }}
+    public_baseurl: {{ include "matrix-synapse.publicBaseURL" . | quote }}
     pid_file: /homeserver.pid
     web_client: False
     soft_file_limit: 0
