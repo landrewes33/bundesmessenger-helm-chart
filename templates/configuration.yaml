@@ -125,7 +125,7 @@ data:
 
     media_store_path: "/synapse/data/media"
     uploads_path: "/synapse/data/uploads"
-    {{- if .Values.config.recaptcha }}
+    {{- if and .Values.config.recaptcha.privateKey .Values.config.recaptcha.publicKey }}
 
     ## Captcha ##
 
