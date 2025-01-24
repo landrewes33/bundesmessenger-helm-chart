@@ -45,7 +45,7 @@ publicServerURL.
 config.publicBaseURL.
 */}}
 {{- define "matrix-synapse.publicBaseURL" -}}
-{{- .Values.config.publicBaseurl | default (include "matrix-synapse.publicServerName" .) }}
+{{- .Values.config.publicBaseurl | default ( printf "https://%s" (include "matrix-synapse.publicServerName" .)) }}
 {{- end -}}
 
 {{/*
