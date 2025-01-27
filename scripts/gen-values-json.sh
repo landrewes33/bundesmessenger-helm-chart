@@ -12,4 +12,5 @@ yq --output-format=json \
             \"Do not modify by hand. This file is auto-generated from values.schema.yaml\" \
     } * ." \
 < values.schema.yaml \
+| scripts/schema-tools.py bundle - \
 > values.schema.json

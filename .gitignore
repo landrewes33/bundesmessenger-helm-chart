@@ -13,3 +13,4 @@ homeserver.prod.yaml
 /bin
 /.m2
 /helm-package
+/schemacache
