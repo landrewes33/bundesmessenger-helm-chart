@@ -363,6 +363,8 @@ extraConfig:
     enabled: true
     # -- (bool) Suche alle Nutzer, eingeschaltet
     search_all_users: true
+  # -- (bool) Nutzer können Anzeigenamen ändern, abgeschaltet
+  enable_set_displayname: false
   # -- (bool) Nur Raummitglieder können einen Alias für einen Raum konfigurieren.
   require_membership_for_aliases: true
   # -- (string) Meldet und löscht alle Geräte, auf die länger als die angegebene Zeitspanne
