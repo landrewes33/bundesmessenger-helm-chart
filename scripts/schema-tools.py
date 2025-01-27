@@ -1,9 +1,8 @@
-#!/bin/python3
+#!/usr/bin/env python3
 """JSON Schema utility functions."""
 
 import hashlib
 import json
-import re
 import sys
 from collections.abc import Iterator, Mapping, Set
 from dataclasses import dataclass
@@ -15,12 +14,13 @@ from typing import (
     Generic,
     Literal,
     Optional,
+    Protocol,
     TypedDict,
     TypeGuard,
     TypeVar,
     get_args,
 )
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urldefrag, urljoin, urlparse
 from urllib.request import urlretrieve
 
 
@@ -90,15 +90,6 @@ def is_definition(obj: Any) -> TypeGuard[dict[str, Schema]]:
     )
 
 
-def definitions(schema: Schema) -> dict[str, Schema]:
-    if schema is False or schema is True:
-        return {}
-    defs = schema.get("$defs", {})
-    if not is_definition(defs):
-        raise ValueError("Invalid $defs")
-    return defs
-
-
 def retrieve_schema(uri: str) -> Schema:
     """Retrieves schema content from cache, or otherwise from the given URI."""
     le_hash = hashlib.sha256(uri.encode(encoding="utf8")).hexdigest()
@@ -116,7 +107,7 @@ def retrieve_schema(uri: str) -> Schema:
 
 
 def json_pointer(schema: Schema, pointer: str) -> Any:
-    if not pointer:
+    if not pointer or pointer == "/":
         return schema
     if not pointer.startswith("/"):
         raise NotImplementedError(f"Non-local pointer '{pointer}'")
@@ -127,17 +118,23 @@ def json_pointer(schema: Schema, pointer: str) -> Any:
     return obj
 
 
-def follow_ref(defs: dict[str, Schema], ref_value: str) -> Schema:
-    url = urlparse(ref_value)
+def do_url(url_str: str) -> tuple[Optional[str], str]:
+    """Returns an absolute URL and fragment part.
 
-    if url.netloc or url.path:
-        base_url = "https://schema.bundesmessenger.dev/kubernetes/dummy.schema.json"
-        abs_url = urljoin(base_url, ref_value)
-        schema = retrieve_schema(abs_url)
-        return json_pointer(schema, url.fragment)
-    if match := re.match(r"/\$defs/(.*)", url.fragment):
-        return defs[match.group(1)]
-    raise NotImplementedError("Local JSON pointer to other location than $def.")
+    If `url_str` has only a fragment part, a URL of None is returned.
+    """
+    url = urlparse(url_str)
+    if not url.netloc and not url.path:
+        return None, url.fragment
+    base_url = "https://schema.bundesmessenger.dev/kubernetes/dummy.schema.json"
+    return urldefrag(urljoin(base_url, url_str))
+
+
+def follow_ref(schema: Schema, ref_value: str) -> tuple[Schema, str]:
+    abs_url, frag = do_url(ref_value)
+    if not abs_url:
+        return schema, frag
+    return retrieve_schema(abs_url), frag
 
 
 def is_local_ref(ref: str) -> bool:
@@ -175,7 +172,7 @@ def types(schema: Schema) -> set[JSONType]:
     if schema is True:
         return set(ALL_TYPES)
     if not isinstance(schema, dict):
-        raise TypeError()
+        raise TypeError(f"Schema got invalid type {type(schema)}.")
     if (ls := type_list(schema)) is None:
         return set(ALL_TYPES)
     return set(ls)
@@ -295,7 +292,7 @@ class Node:
             refs={uri: ref.inverse() for uri, ref in self.refs.items()},
         )
 
-    def to_schema(self, is_root=False) -> Schema:
+    def to_schema(self, is_root: bool = False) -> Schema:
         def properties() -> dict[str, "Node"]:
             lexical_children = {
                 k: c
@@ -343,11 +340,11 @@ class Node:
             )
         )
 
-    def to_json(self, *args, **kwargs) -> str:
+    def to_json(self, *args: Any, **kwargs: Any) -> str:
         return json.dumps(self.to_schema(is_root=True), *args, **kwargs)
 
 
-def type_tree_hull(schema: Schema) -> Node:
+def type_tree_hull(schema: Schema, pointer: str = "/") -> Node:
     funcs: FuncDict[Node] = {
         "lift": Node.from_schema,
         "combine": Node.merge,
@@ -356,13 +353,14 @@ def type_tree_hull(schema: Schema) -> Node:
             (Node.make_child(p, k) for k, p in ps.items()),
             Node.default(),
         ),
+        "additionalProperties": lambda t: Node.default(),
         "items": Node.make_item,
         "allOf": lambda ts: reduce(Node.merge_subnode, ts, Node.default()),
         "anyOf": lambda ts: reduce(Node.merge_subnode_union, ts, Node.from_types()),
         "oneOf": lambda ts: reduce(Node.merge_subnode_union, ts, Node.from_types()),
         "not_": Node.inverse,
         "ref_": lambda uri: Node.make_ref(
-            type_tree_hull(follow_ref(definitions(schema), uri)),
+            type_tree_hull(*follow_ref(schema, uri)),
             uri,
         ),
     }
@@ -372,12 +370,70 @@ def type_tree_hull(schema: Schema) -> Node:
 T = TypeVar("T")
 
 
+@dataclass(frozen=True)
+class BundleNode:
+    schema: Schema
+    refs: dict[str, Schema]
+
+    @staticmethod
+    def default() -> "BundleNode":
+        return BundleNode(schema=True, refs=dict())
+
+    @staticmethod
+    def from_schema(schema: Schema) -> "BundleNode":
+        return BundleNode(schema=schema, refs=dict())
+
+    @staticmethod
+    def from_ref(
+        schema: Schema, ref_value: str, bundle: Callable[[Schema, str], "BundleNode"]
+    ) -> "BundleNode":
+        abs_url, frag = do_url(ref_value)
+        if not abs_url:
+            return bundle(schema, frag)
+
+        ref_schema = retrieve_schema(abs_url)
+        ref_node = bundle(ref_schema, frag)
+
+        return BundleNode(schema=True, refs={abs_url: ref_schema} | ref_node.refs)
+
+    def combine(self, other: "BundleNode") -> "BundleNode":
+        return BundleNode(self.schema, self.refs | other.refs)
+
+    def to_json(self, *args: Any, **kwargs: Any) -> str:
+        if not isinstance(self.schema, dict):
+            return json.dumps(self.schema, *args, **kwargs)
+        bundled_defs = {"$defs": self.schema["$defs"] | dict(sorted(self.refs.items()))}
+        return json.dumps(self.schema | bundled_defs, *args, **kwargs)
+
+
+def bundle(schema: Schema, pointer: str = "/") -> BundleNode:
+    """Walks sub-schemas, recording any external $refs."""
+
+    def combineAll(*others: "BundleNode") -> "BundleNode":
+        return reduce(BundleNode.combine, others, BundleNode.default())
+
+    funcs: FuncDict[BundleNode] = {
+        "lift": BundleNode.from_schema,
+        "combine": BundleNode.combine,
+        "properties": lambda ps: combineAll(*ps.values()),
+        "additionalProperties": lambda x: x,
+        "items": lambda x: x,
+        "allOf": lambda ts: combineAll(*ts),
+        "anyOf": lambda ts: combineAll(*ts),
+        "oneOf": lambda ts: combineAll(*ts),
+        "not_": lambda x: x,
+        "ref_": lambda ref: BundleNode.from_ref(schema, ref, bundle),
+    }
+    return resolve_subschemas(json_pointer(schema, pointer), funcs)
+
+
 # FuncDict = TypedDict("FuncDict", {"not": Callable[[T], T]})
 class FuncDict(TypedDict, Generic[T]):
     lift: Callable[[Schema], T]
     combine: Callable[[T, T], T]
     items: Callable[[T], T]
     properties: Callable[[Mapping[str, T]], T]
+    additionalProperties: Callable[[T], T]
     allOf: Callable[[Iterator[T]], T]
     anyOf: Callable[[Iterator[T]], T]
     oneOf: Callable[[Iterator[T]], T]
@@ -409,6 +465,8 @@ def resolve_subschemas(schema: Schema, funcs: FuncDict[T]) -> T:
         results.append(funcs["items"](rec(it)))
     if isinstance(sd := schema.get("properties"), dict):
         results.append(funcs["properties"]({k: rec(s) for k, s in sd.items()}))
+    if isinstance(s := schema.get("additionalProperties"), dict):
+        results.append(funcs["additionalProperties"](rec(s)))
     if isinstance(sl := schema.get("allOf"), list):
         results.append(funcs["allOf"](rec(s) for s in sl))
     if isinstance(sl := schema.get("anyOf"), list):
@@ -423,22 +481,46 @@ def resolve_subschemas(schema: Schema, funcs: FuncDict[T]) -> T:
     return reduce(funcs["combine"], results)
 
 
+class SchemaResult(Protocol):
+    """Required methods to be used by the CLI."""
+
+    def to_json(self, *args: Any, **kwargs: Any) -> str: ...
+
+
 def main() -> None:
-    try:
-        script_name = "???.py"
-        script_name = sys.argv[0]
-        schemafile = sys.argv[1]
-    except IndexError:
-        print("No schema file provided.", file=sys.stderr)
-        print(f"Usage: {script_name} <JSON Schema file>", file=sys.stderr)
+    def usage(err_msg: str) -> int:
+        script_name = (sys.argv[:1] or ["__main__.py"])[0]
+        print(err_msg, file=sys.stderr)
+        print(f"Usage: {script_name} <lint|bundle> <JSON Schema file>", file=sys.stderr)
         print(f"\n{__doc__}", file=sys.stderr)
         exit(1)
 
-    with open(schemafile) as f:
-        schema = json.load(f)
+    if len(sys.argv) > 3:
+        exit(usage("Too many arguments."))
+    if not (command := (sys.argv[1:] or [""])[0]):
+        exit(usage("No command provided."))
+    if command not in ["lint", "bundle"]:
+        exit(usage(f"Command must be 'lint' or 'bundle', was {command}."))
+    if not (paths := sys.argv[2:]):
+        if sys.stdin.isatty():
+            exit(usage("No schema file provided."))
+    schemafile = (paths or ["-"])[0]
 
-    type_tree = type_tree_hull(schema)
-    print(type_tree.to_json(indent=2, ensure_ascii=False))
+    def load_json(path: str) -> Any:
+        if path == "-":
+            return json.load(sys.stdin)
+        with open(path) as f:
+            return json.load(f)
+
+    schema = load_json(schemafile)
+
+    COMMANDS: dict[str, Callable[[Schema], SchemaResult]] = {
+        "lint": type_tree_hull,
+        "bundle": bundle,
+    }
+
+    result = COMMANDS[command](schema)
+    print(result.to_json(indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":
