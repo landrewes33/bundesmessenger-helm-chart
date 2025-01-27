@@ -675,6 +675,14 @@
           "description": "Übersenden von Profildaten, wenn Chat gestartet wird",
           "default": true
         },
+        "enable_set_displayname": {
+          "type": [
+            "null",
+            "boolean"
+          ],
+          "description": "Nutzer können Anzeigenamen ändern",
+          "default": false
+        },
         "allow_public_rooms_without_auth": {
           "type": [
             "null",
