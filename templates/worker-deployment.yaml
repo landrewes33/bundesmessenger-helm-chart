@@ -193,11 +193,11 @@ spec:
               mountPath: /synapse/secrets
             - name: signingkey
               mountPath: /synapse/keys
+            - mountPath: /tmp/
+              name: tempdir
           {{- if eq $name "media-repository" }}
             - name: media
               mountPath: /synapse/data
-            - mountPath: /tmp/
-              name: tempdir
           {{- end }}
           {{- range $uniqCaSecrets }}
             - name: {{ printf "fed-ca-%s" .  }}
