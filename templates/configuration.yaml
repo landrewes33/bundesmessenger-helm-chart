@@ -153,8 +153,6 @@ data:
     trusted_key_servers: {{- .Values.config.trustedKeyServers | toYaml | nindent 6 }}
 
     ## Workers ##
-    # Add a random shared secret to authenticate traffic.
-    worker_replication_secret: {{ randAlphaNum 24 | quote }}
 
     {{- $default := .Values.workers.default }}
     {{- range $worker, $config := .Values.workers }}
