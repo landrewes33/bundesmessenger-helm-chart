@@ -305,20 +305,9 @@ Set redis host
 */}}
 {{- define "matrix-synapse.redis.host" -}}
 {{- if .Values.redis.enabled -}}
-{{- printf "%s-%s" (include "matrix-synapse.redis.fullname" .) "master" | trunc 63 | trimSuffix "-" -}}
+  {{- printf "%s-%s" (include "matrix-synapse.redis.fullname" .) "master" | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{ required "A valid externalRedis.host is required" .Values.externalRedis.host }}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Set redis secret
-*/}}
-{{- define "matrix-synapse.redis.secret" -}}
-{{- if .Values.redis.enabled -}}
-{{- template "matrix-synapse.redis.fullname" . -}}
-{{- else -}}
-{{- template "matrix-synapse.fullname" . -}}
+  {{- required "A valid externalRedis.host is required" .Values.externalRedis.host }}
 {{- end -}}
 {{- end -}}
 
@@ -327,23 +316,58 @@ Set redis port
 */}}
 {{- define "matrix-synapse.redis.port" -}}
 {{- if .Values.redis.enabled -}}
-{{- .Values.redis.master.service.ports.redis | default 6379 }}
+  {{- .Values.redis.master.service.ports.redis | default 6379 }}
 {{- else -}}
-{{ required "A valid externalRedis.port is required" .Values.externalRedis.port }}
+  {{- required "A valid externalRedis.port is required" .Values.externalRedis.port }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Set redis password
+Name of the Secret containing the Redis password.
+
+Empty if no existingSecret is used.
+*/}}
+{{- define "matrix-synapse.redis.secret-name" -}}
+{{- if .Values.redis.enabled }}
+  {{- .Values.redis.auth.existingSecret | default "" -}}
+{{- else -}}
+  {{- .Values.externalRedis.existingSecret | default "" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Key to the password contained in the Redis Secret.
+
+Empty if no existingSecret is used.
+*/}}
+{{- define "matrix-synapse.redis.secret-key" -}}
+{{- if and .Values.redis.enabled .Values.redis.auth.existingSecret }}
+  {{- required
+    "To use a Secret for Redis, redis.auth.existingSecretPasswordKey is required"
+    .Values.redis.auth.existingSecretPasswordKey
+  -}}
+{{- else if and (not .Values.redis.enabled) .Values.externalRedis.existingSecret -}}
+  {{- required
+    "To use a Secret for Redis, externalRedis.existingSecretPasswordKey is required"
+    .Values.externalRedis.existingSecretPasswordKey
+  -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Redis password.
+
+Empty if an existingSecret is used.
 */}}
 {{- define "matrix-synapse.redis.password" -}}
-{{- if (and .Values.redis.enabled .Values.redis.password) -}}
-{{ .Values.redis.password }}
-{{- else if (and .Values.redis.enabled .Values.redis.auth.password) -}}
-{{ .Values.redis.auth.password }}
-{{- else if .Values.externalRedis.password -}}
-{{ .Values.externalRedis.password }}
-{{- end -}}
+{{- if and .Values.redis.enabled (not .Values.redis.auth.existingSecret) }}
+  {{- required "Redis requires a Secret or password" .Values.redis.auth.password }}
+{{- else if and (not .Values.redis.enabled) (not .Values.externalRedis.existingSecret) }}
+  {{- required
+    "External Redis requires a Secret or password"
+    .Values.externalRedis.password
+  }}
+{{- end }}
 {{- end -}}
 
 {{/*

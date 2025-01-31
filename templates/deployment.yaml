@@ -4,8 +4,17 @@
 {{- if (and .Values.postgresql.enabled (and (not .Values.postgresql.auth.password) (not .Values.postgresql.auth.existingSecret))) -}}
   {{- fail "You must specify a static postgres password or existing secret if using the included postgres chart" -}}
 {{- end -}}
-{{- if (and .Values.redis.enabled (and .Values.redis.usePassword (and (not .Values.redis.auth.password) (not .Values.redis.auth.existingSecret)))) -}}
-  {{- fail "You must specify a static redis password or existing secret if using the included redis chart" -}}
+{{- if not .Values.redis.auth.enabled -}}
+  {{- fail "Redis without authentication is not supported by this chart" -}}
+{{- end -}}
+{{- $redisSecretName := include "matrix-synapse.redis.secret-name" . -}}
+{{- $redisPassword := include "matrix-synapse.redis.password" . -}}
+{{- if eq (empty $redisSecretName) (empty $redisPassword) -}}
+  {{- fail (print
+    "INVARIANT VIOLATION! Of Redis secret-name and Redis password there must "
+    "be exactly one. ($redisSecretName: " $redisSecretName ", $redisPassword: "
+    $redisPassword ")"
+  )}}
 {{- end -}}
 {{- if not .Values.redis.auth.enabled -}}
   {{- fail "Redis without authentication is not supported by this chart" -}}
@@ -112,17 +121,15 @@ spec:
                   key: {{ .Values.externalPostgresql.existingSecretPasswordKey }}
                   {{- end }}
           {{- end }}
-          {{- if or (and .Values.redis.enabled (default .Values.redis.usePassword true)) .Values.externalRedis.existingSecret }}
+          {{- if and
+              ($redisSecretName := include "matrix-synapse.redis.secret-name" .)
+              ($redisSecretKey := include "matrix-synapse.redis.secret-key" .)
+          }}
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  {{- if .Values.redis.enabled }}
-                  name: {{ .Values.redis.auth.existingSecret | default (include "matrix-synapse.redis.fullname" .) }}
-                  key: {{ .Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
-                  {{- else }}
-                  name: {{ .Values.externalRedis.existingSecret }}
-                  key: {{ .Values.externalRedis.existingSecretPasswordKey }}
-                  {{- end -}}
+                  name: {{ $redisSecretName }}
+                  key: {{ $redisSecretKey }}
           {{- end }}
           {{- if .Values.demomode.enabled }}
             - name: ADMINS

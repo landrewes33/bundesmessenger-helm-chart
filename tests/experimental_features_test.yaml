@@ -76,6 +76,7 @@ templates:
 tests:
   - it: ensures experimental_features overwritten for call
     template: secrets.yaml
+    documentIndex: 0
     set:
       call.enabled: true
       call.uri: call.example.org

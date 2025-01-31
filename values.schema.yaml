@@ -2700,18 +2700,6 @@ properties:
             type: ["null", "string"]
             title: Schlüsselinformationen für ein genanntes Secret
             default: redis-password
-        if:
-          enabled:
-            const: true
-        then:
-          required:
-            - password
-        else:
-          required:
-            - existingSecret
-          dependentRequired:
-            existingSecret:
-              - existingSecretPasswordKey
         unevaluatedProperties: false
       architecture:
         enum:
@@ -4507,27 +4495,55 @@ allOf:
                 - username
                 - password
                 - database
-  - if:
-      redis:
-        properties:
-          enabled: false
-    then:
-      externalRedis:
-        required:
-          - host
-          - port
-        if:
-          enabled:
-            const: true
-        then:
-          required:
-            - password
-        else:
-          required:
-            - existingSecret
-          dependentRequired:
-            existingSecret:
-              - existingSecretPasswordKey
+  - oneOf:
+      - properties:
+          redis:
+            properties:
+              enabled:
+                const: true
+              auth:
+                oneOf:
+                  - properties:
+                      existingSecret:
+                        type: string
+                      password:
+                        $comment: >-
+                          Relax null type requirement to just emptyness, because
+                          subchart values can’t be reliably set to null in Helm.
+                        maxLength: 0
+                    requires:
+                      - existingSecret
+                  - properties:
+                      existingSecret:
+                        $comment: >-
+                          Relax null type requirement to just emptyness, because
+                          subchart values can’t be reliably set to null in Helm.
+                        maxLength: 0
+                      password:
+                        type: string
+                    requires:
+                      - password
+      - properties:
+          redis:
+            properties:
+              enabled:
+                const: false
+          externalRedis:
+            oneOf:
+              - properties:
+                  existingSecret:
+                    type: string
+                  password:
+                    type: "null"
+                requires:
+                  - existingSecret
+              - properties:
+                  existingSecret:
+                    type: "null"
+                  password:
+                    type: string
+                requires:
+                  - password
 required:
   - image
   - serverName
