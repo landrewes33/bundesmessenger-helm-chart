@@ -1444,6 +1444,7 @@ properties:
         description: >-
           (pusher-worker -> Sygnal -> Push-Provider (Apple oder Google))
 
+
           Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt
           werden. Ein lokaler Sygnal-Service und Container ist Bestandteil des
           Helm Charts.

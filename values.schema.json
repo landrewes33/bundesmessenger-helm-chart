@@ -1769,7 +1769,7 @@
           "$ref": "#/$defs/worker",
           "type": "object",
           "title": "Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen",
-          "description": "(pusher-worker -> Sygnal -> Push-Provider (Apple oder Google))\nHinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden. Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.",
+          "description": "(pusher-worker -> Sygnal -> Push-Provider (Apple oder Google))\n\nHinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden. Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.",
           "properties": {
             "enabled": {
               "type": "boolean",

@@ -847,7 +847,6 @@ workers:
   ##
   generic_worker:
     <<: *workerDefault
-
     # -- (bool) Aktivieren von Workern
     enabled: true
     # -- (list) entsprechende Endpunkte für den generischen Worker
@@ -992,7 +991,6 @@ workers:
 
   federation_reader:
     <<: *workerDefault
-
     # -- (bool) Aktiviere spez. Worker für Föderationsanfragen
     # Wenn dieser Worker genutzt wird, können die URLs aus dem
     # generic_worker entfernt werden.
@@ -1031,29 +1029,25 @@ workers:
   # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
   pusher:
     <<: *workerDefault
-
     enabled: false
 
+  # -- (object) Worker für das Senden von Daten an registrierte Anwendungsdienste.
+  # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
   appservice:
     <<: *workerDefault
-
-    # -- (bool) Dieser Worker sorgt für das Senden von Daten an registrierte Anwendungsdienste.
-    # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
 
+  # -- (object) Sender von Verbundverkehrs (federation traffic) an andere Matrix-Server.
   federation_sender:
     <<: *workerDefault
-
-    # -- (bool) Dieser Worker sendet Verbundverkehrs (federation traffic)
-    # an andere Matrix-Server.
     enabled: false
 
+  # -- (object) Worker zur Bereitstellung und Speicherung von Medien.
+  # Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit
+  # Hintergrundaufgaben.
   media_repository:
     <<: *workerDefault
-
     # -- (bool) Aktivieren des Media-Worker
-    # Dieser Worker kümmert sich um die Bereitstellung und Speicherung von Medien.
-    # Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit Hintergrundaufgaben.
     enabled: true
     # -- (list) Zusätzliche Listener für Media-Worker
     listeners: [media]
@@ -1089,11 +1083,11 @@ workers:
     extraConfig:
       enable_media_repo: true
 
-  ## Dieser Worker aktualisiert das Benutzerverzeichnis und kann auch darin suchen
-  ## Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der Worker optional.
+  # -- (object) Dieser Worker aktualisiert das Benutzerverzeichnis und kann darin suchen.
+  # Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der
+  # Worker optional.
   user_dir:
     <<: *workerDefault
-
     # -- (bool) Aktivieren des Nutzersuch-Workers
     # Hinweis: Damit kann Last vom generischen bzw. Haupt-Worker genommen werden
     # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
@@ -1107,7 +1101,6 @@ workers:
 
   background_worker:
     <<: *workerDefault
-
     # -- (bool) Aktivieren des Background-Workers
     # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
     enabled: false
