@@ -1,10 +1,9 @@
-{{/* SPDX-FileCopyrightText: 2023–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2023–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.networkpolicies.enabled }}
   {{- range $worker, $config := .Values.workers }}
     {{- if $config.enabled }}
 {{- $name := $worker | replace "_" "-" }}
-{{- $app := $config.app | default $worker }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -69,7 +68,7 @@ spec:
       - protocol: TCP
         port: 6379
     {{- end }}
-    {{- if and $.Values.sygnal.enabled (or (eq $worker "pusher") (eq ($config.app | default "") "pusher")) }}
+    {{- if and $.Values.sygnal.enabled (eq $worker "pusher") }}
     - to:
       - podSelector:
           matchLabels:

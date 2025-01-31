@@ -107,7 +107,7 @@ spec:
               {{- . | nindent 14 }}
               {{- end }}
 
-              exec python3 -B -m synapse.app.{{ $config.app | default "generic_worker" }} \
+              exec python3 -B -m synapse.app.generic_worker \
                           -c /synapse/config/homeserver.yaml \
                           -c /synapse/config/conf.d/ \
                           -c /synapse/config/{{ $name }}.worker
