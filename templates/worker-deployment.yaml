@@ -128,17 +128,15 @@ spec:
                   key: {{ $.Values.externalPostgresql.existingSecretPasswordKey }}
                   {{- end }}
           {{- end }}
-          {{- if or (and $.Values.redis.enabled (default $.Values.redis.usePassword true)) $.Values.externalRedis.existingSecret }}
+          {{- if and
+              ($redisSecretName := include "matrix-synapse.redis.secret-name" $)
+              ($redisSecretKey := include "matrix-synapse.redis.secret-key" $)
+          }}
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  {{- if $.Values.redis.enabled }}
-                  name: {{ $.Values.redis.auth.existingSecret | default (include "matrix-synapse.redis.fullname" $) }}
-                  key: {{ $.Values.redis.auth.existingSecretPasswordKey | default "redis-password" }}
-                  {{- else }}
-                  name: {{ $.Values.externalRedis.existingSecret }}
-                  key: {{ $.Values.externalRedis.existingSecretPasswordKey }}
-                  {{- end -}}
+                  name: {{ $redisSecretName }}
+                  key: {{ $redisSecretKey }}
           {{- end }}
           {{- with $config.extraEnv }}
             {{- . | toYaml | nindent 12 }}
