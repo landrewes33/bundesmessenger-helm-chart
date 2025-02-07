@@ -1251,8 +1251,8 @@ sygnal:
   apps: {}
 
   # -- (string) Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält.
-  # Die Schlüssel des Secrets sind die Dateinamen, welche unter `sygnal.apps`
-  # mit dem Präfix `/secrets` referenziert werden.
+  # Nähere Infos unter ./docs/sygnal_push.md#einbindung-von-secrets
+
   existingSecret: "sygnal"
 
   # -- (string|null) iOS-Key Dateiname
