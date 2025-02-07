@@ -1470,12 +1470,13 @@ postgresql:
     # -- (string) Name für PostgreSQL Nutzer
     username: synapse
 
-    # -- (string) Passwort für PostgreSQL Nutzer
-    password: synapse
+    # -- (string|null) Passwort für PostgreSQL Nutzer
+    password: ""
 
-    # -- (string) Bestehendes Secret das anstelle eines statischen Passwortes
-    # verwendet wird
-    existingSecret: ""
+    # -- (string|null) Name des Secrets, in welchem das Passwort steht.
+    # Ist `postgresql.enabled` und es existiert kein Secret dieses Namens, so
+    # wird ein neues Secret automatisch erstellt und verwendet.
+    existingSecret: postgresql
     secretKeys:
       # -- (string) Schlüssel, der das Datenbank-Passwort enthält.
       # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
@@ -1533,11 +1534,11 @@ externalPostgresql:
   # -- (string) Name für PostgreSQL Nutzer
   username: synapse
 
-  # -- (string) Passwort für PostgreSQL Nutzer
-  password: synapse
+  # -- (string|null) Passwort für PostgreSQL Nutzer
+  password: null
 
-  # -- (string) Der Name eines bestehenden Secrets mit Postgresql-Anmeldedaten
-  existingSecret: ""
+  # -- (string|null) Der Name eines bestehenden Secrets mit Postgresql-Anmeldedaten
+  existingSecret: null
 
   # -- (string) Passwortschlüssel, der aus dem bestehenden Secret abgerufen wird
   existingSecretPasswordKey: password

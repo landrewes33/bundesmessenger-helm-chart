@@ -196,20 +196,9 @@ Set postgres host
 */}}
 {{- define "matrix-synapse.postgresql.host" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- template "matrix-synapse.postgresql.fullname" . -}}
+  {{- template "matrix-synapse.postgresql.fullname" . -}}
 {{- else -}}
-{{ required "A valid externalPostgresql.host is required" .Values.externalPostgresql.host }}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Set postgres secret
-*/}}
-{{- define "matrix-synapse.postgresql.secret" -}}
-{{- if .Values.postgresql.enabled -}}
-{{- template "matrix-synapse.postgresql.fullname" . -}}
-{{- else -}}
-{{- template "matrix-synapse.fullname" . -}}
+  {{- required "A valid externalPostgresql.host is required" .Values.externalPostgresql.host }}
 {{- end -}}
 {{- end -}}
 
@@ -218,13 +207,12 @@ Set postgres port
 */}}
 {{- define "matrix-synapse.postgresql.port" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- if .Values.postgresql.service -}}
-{{- .Values.postgresql.service.port | default 5432 }}
+  {{- required
+    "A valid PostgreSQL port at postgresql.primary.service.ports.postgresql is required"
+    .Values.postgresql.primary.service.ports.postgresql
+  -}}
 {{- else -}}
-5432
-{{- end -}}
-{{- else -}}
-{{- required "A valid externalPostgresql.port is required" .Values.externalPostgresql.port -}}
+  {{- required "A valid externalPostgresql.port is required" .Values.externalPostgresql.port -}}
 {{- end -}}
 {{- end -}}
 
@@ -233,20 +221,57 @@ Set postgresql username
 */}}
 {{- define "matrix-synapse.postgresql.username" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- .Values.postgresql.auth.username | default "postgres" }}
+  {{- .Values.postgresql.auth.username | default "postgres" }}
 {{- else -}}
-{{ required "A valid externalPostgresql.username is required" .Values.externalPostgresql.username }}
+  {{- required "A valid externalPostgresql.username is required" .Values.externalPostgresql.username }}
 {{- end -}}
 {{- end -}}
 
 {{/*
-Set postgresql password
+PostgreSQL password.
+
+Empty if an existingSecret is used.
 */}}
 {{- define "matrix-synapse.postgresql.password" -}}
+{{- if and .Values.postgresql.enabled (not .Values.postgresql.auth.existingSecret) }}
+  {{- required "PostgreSQL requires a Secret or password" .Values.postgresql.auth.password }}
+{{- else if and (not .Values.postgresql.enabled) (not .Values.externalPostgresql.existingSecret) }}
+  {{- required
+    "External PostgreSQL requires a Secret or password"
+    .Values.externalPostgresql.password
+  }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Name of the Secret containing the PostgreSQL password.
+
+Empty if no existingSecret is used.
+*/}}
+{{- define "matrix-synapse.postgresql.secret-name" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- .Values.postgresql.auth.password | default "synapse" }}
-{{- else if not (and .Values.externalPostgresql.existingSecret .Values.externalPostgresql.existingSecretPasswordKey) -}}
-{{ required "A valid externalPostgresql.password is required" .Values.externalPostgresql.password }}
+  {{ .Values.postgresql.auth.existingSecret | default "" }}
+{{- else -}}
+  {{ .Values.externalPostgresql.existingSecret | default "" }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Key to the password contained in the PostgreSQL Secret.
+
+Empty if no existingSecret is used.
+*/}}
+{{- define "matrix-synapse.postgresql.secret-key" -}}
+{{- if and .Values.postgresql.enabled .Values.postgresql.auth.existingSecret -}}
+  {{- required
+    "To use a Secret for PostgreSQL, postgresql.auth.secretKeys.userPasswordKey is required"
+    .Values.postgresql.auth.secretKeys.userPasswordKey
+  }}
+{{- else if and (not .Values.postgresql.enabled) .Values.externalPostgresql.existingSecret -}}
+  {{- required
+    "To use a Secret for PostgreSQL, externalPostgresql.existingSecretPasswordKey is required"
+    .Values.externalPostgresql.existingSecretPasswordKey
+  }}
 {{- end -}}
 {{- end -}}
 
@@ -255,9 +280,9 @@ Set postgresql database
 */}}
 {{- define "matrix-synapse.postgresql.database" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- .Values.postgresql.auth.database | default "synapse" }}
+  {{- .Values.postgresql.auth.database | default "synapse" }}
 {{- else -}}
-{{ required "A valid externalPostgresql.database is required" .Values.externalPostgresql.database }}
+  {{- required "A valid externalPostgresql.database is required" .Values.externalPostgresql.database }}
 {{- end -}}
 {{- end -}}
 
@@ -266,9 +291,9 @@ Set postgresql sslmode
 */}}
 {{- define "matrix-synapse.postgresql.sslmode" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- .Values.postgresql.sslmode | default "prefer" }}
+  {{- .Values.postgresql.sslmode | default "prefer" }}
 {{- else -}}
-{{- .Values.externalPostgresql.sslmode | default "prefer" }}
+  {{- .Values.externalPostgresql.sslmode | default "prefer" }}
 {{- end -}}
 {{- end -}}
 
@@ -280,13 +305,13 @@ for a list of options that can be passed.
 */}}
 {{- define "matrix-synapse.postgresql.extraArgs" -}}
 {{- if .Values.postgresql.enabled -}}
-{{- with .Values.postgresql.extraArgs }}
-  {{- . | toYaml }}
-{{- end }}
+  {{- with .Values.postgresql.extraArgs }}
+    {{- . | toYaml }}
+  {{- end }}
 {{- else -}}
-{{- with .Values.externalPostgresql.extraArgs }}
-  {{- . | toYaml }}
-{{- end }}
+  {{- with .Values.externalPostgresql.extraArgs }}
+    {{- . | toYaml }}
+  {{- end }}
 {{- end -}}
 {{- end -}}
 

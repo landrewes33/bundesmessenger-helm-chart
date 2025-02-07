@@ -1,8 +1,14 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (or .Values.persistence.enabled .Values.persistence.existingClaim) (not .Values.workers.media_repository.enabled ) }}
-{{- if (and .Values.postgresql.enabled (and (not .Values.postgresql.auth.password) (not .Values.postgresql.auth.existingSecret))) -}}
-  {{- fail "You must specify a static postgres password or existing secret if using the included postgres chart" -}}
+{{- $postgresqlSecretName := include "matrix-synapse.postgresql.secret-name" . -}}
+{{- $postgresqlPassword := include "matrix-synapse.postgresql.password" . -}}
+{{- if eq (empty $postgresqlSecretName) (empty $postgresqlPassword) -}}
+  {{- fail (print
+    "INVARIANT VIOLATION! Of PostgreSQL secret-name and PostgreSQL password "
+    "there must be exactly one. ($postgresqlSecretName: " $postgresqlSecretName
+    ", $postgresqlPassword: " $postgresqlPassword ")"
+  )}}
 {{- end -}}
 {{- if not .Values.redis.auth.enabled -}}
   {{- fail "Redis without authentication is not supported by this chart" -}}
@@ -109,18 +115,16 @@ spec:
                           -c /synapse/config/homeserver.yaml \
                           -c /synapse/config/conf.d/
           env:
-          {{- if or .Values.postgresql.enabled .Values.externalPostgresql.existingSecret }}
+          {{- if and
+              ($postgresSecretName := include "matrix-synapse.postgresql.secret-name" .)
+              ($postgresSecretKey := include "matrix-synapse.postgresql.secret-key" .)
+          }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  {{- if .Values.postgresql.enabled }}
-                  name: {{ .Values.postgresql.auth.existingSecret | default (include "matrix-synapse.postgresql.fullname" .) }}
-                  key: {{ .Values.postgresql.auth.secretKeys.userPasswordKey | default "password" }}
-                  {{- else }}
-                  name: {{ .Values.externalPostgresql.existingSecret }}
-                  key: {{ .Values.externalPostgresql.existingSecretPasswordKey }}
-                  {{- end }}
-          {{- end }}
+                  name: {{ $postgresSecretName }}
+                  key: {{ $postgresSecretKey }}
+          {{- end -}}
           {{- if and
               ($redisSecretName := include "matrix-synapse.redis.secret-name" .)
               ($redisSecretKey := include "matrix-synapse.redis.secret-key" .)

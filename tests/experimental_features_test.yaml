@@ -12,6 +12,7 @@ set:
   extraConfig:
     experimental_features:
       new_feature: true
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures experimental_features is not part of normal configuration file
     template: configuration.yaml
@@ -37,6 +38,7 @@ set:
   extraConfig:
     experimental_features:
       new_feature: true
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures experimental_features is set for call
     template: secrets.yaml
@@ -73,6 +75,8 @@ tests:
 suite: Experimental Features overrides
 templates:
   - secrets.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures experimental_features overwritten for call
     template: secrets.yaml

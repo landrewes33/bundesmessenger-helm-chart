@@ -6,6 +6,7 @@ templates:
   - synapse-admin/synapse-admin-ingress.yaml
 set:
   synapse_admin.uri: synapse-admin.example.org
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment if enabled
     template: synapse-admin/synapse-admin-deployment.yaml

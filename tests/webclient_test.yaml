@@ -8,6 +8,7 @@ templates:
   - nginx-conf.yaml
 set:
   webclient.uri: webclient.example.org
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment if enabled
     template: webclient/webclient-deployment.yaml

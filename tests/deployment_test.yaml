@@ -7,6 +7,8 @@ templates:
   - demomode/demomode.yaml
   - secrets.yaml
   - signing-key-job.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment
     template: deployment.yaml
