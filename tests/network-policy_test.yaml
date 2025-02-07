@@ -3,6 +3,8 @@
 suite: Network Policies
 templates:
   - network-policy/*.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures no NetworkPolicy if disabled
     set:

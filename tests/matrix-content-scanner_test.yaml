@@ -4,6 +4,8 @@ suite: Matrix Content Scanner
 templates:
   - matrix-content-scanner/contentscanner-deployment.yaml
   - matrix-content-scanner/contentscanner-configuration.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a StatefulSet if enabled
     template: matrix-content-scanner/contentscanner-deployment.yaml

@@ -9,6 +9,7 @@ templates:
   - signing-key-job.yaml
 set:
   serverName: explosives.acme.example.com
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures all StatefulSets if enabled
     template: worker-deployment.yaml
@@ -95,6 +96,7 @@ templates:
   - signing-key-job.yaml
 set:
   serverName: paints.acme.example.org
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a HorizontalPodAutoscaler if autoscaling is enabled
     template: worker-deployment.yaml
@@ -124,6 +126,7 @@ templates:
   - signing-key-job.yaml
 set:
   serverName: parachutes.acme.example.com
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures replicas get set
     template: worker-deployment.yaml

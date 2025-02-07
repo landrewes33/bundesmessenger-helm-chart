@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2023–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2023–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if and ( .Values.demomode.enabled | default false ) (semverCompare ">=1.21.0" .Capabilities.KubeVersion.Version) -}}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "demomode") -}}
@@ -171,21 +171,19 @@ spec:
             - name: db-dump-container
               image: "{{ .Values.demomode.postgresqldump | default (printf "%s/%s:%s" .Values.postgresql.image.registry .Values.postgresql.image.repository .Values.postgresql.image.tag ) }}"
               env:
-          {{- if or .Values.postgresql.enabled .Values.externalPostgresql.existingSecret }}
+              {{- if and
+                  ($postgresSecretName := include "matrix-synapse.postgresql.secret-name" $)
+                  ($postgresSecretKey := include "matrix-synapse.postgresql.secret-key" $)
+              }}
                 - name: PGPASSWORD
                   valueFrom:
                     secretKeyRef:
-                      {{- if .Values.postgresql.enabled }}
-                      name: {{ .Values.postgresql.existingSecret | default (include "matrix-synapse.postgresql.fullname" .) }}
-                      key: password
-                      {{- else }}
-                      name: {{ .Values.externalPostgresql.existingSecret }}
-                      key: {{ .Values.externalPostgresql.existingSecretPasswordKey }}
-                      {{- end }}
-          {{- else }}
+                      name: {{ $postgresSecretName }}
+                      key: {{ $postgresSecretKey }}
+              {{- else }}
                 - name: PGPASSWORD
                   value: {{ include "matrix-synapse.postgresql.password" . }}
-          {{- end }}
+              {{- end }}
                 - name: POSTGRES_USER
                   value: {{ include "matrix-synapse.postgresql.username" . }}
                 - name: POSTGRES_DB
@@ -270,21 +268,19 @@ spec:
             - name: reset-db-container
               image: "{{ .Values.demomode.postgresqldump | default (printf "%s/%s:%s" .Values.postgresql.image.registry .Values.postgresql.image.repository .Values.postgresql.image.tag ) }}"
               env:
-          {{- if or .Values.postgresql.enabled .Values.externalPostgresql.existingSecret }}
+              {{- if and
+                  ($postgresSecretName := include "matrix-synapse.postgresql.secret-name" .)
+                  ($postgresSecretKey := include "matrix-synapse.postgresql.secret-key" .)
+              }}
                 - name: PGPASSWORD
                   valueFrom:
                     secretKeyRef:
-                      {{- if .Values.postgresql.enabled }}
-                      name: {{ .Values.postgresql.existingSecret | default (include "matrix-synapse.postgresql.fullname" .) }}
-                      key: password
-                      {{- else }}
-                      name: {{ .Values.externalPostgresql.existingSecret }}
-                      key: {{ .Values.externalPostgresql.existingSecretPasswordKey }}
-                      {{- end }}
-          {{- else }}
+                      name: {{ $postgresSecretName }}
+                      key: {{ $postgresSecretKey }}
+              {{- else }}
                 - name: PGPASSWORD
                   value: {{ include "matrix-synapse.postgresql.password" . }}
-          {{- end }}
+              {{- end }}
                 - name: POSTGRES_USER
                   value: {{ include "matrix-synapse.postgresql.username" . }}
                 - name: POSTGRES_DB

@@ -2450,17 +2450,14 @@ properties:
         properties:
           database:
             type: ["null", "string"]
-            minLength: 1
             title: DB-Name für PostgreSQL-DB
             default: synapse_db
           username:
             type: ["null", "string"]
-            minLength: 1
             title: Nutzername für PostgreSQL-DB
             default: synapse
           password:
             type: ["null", "string"]
-            minLength: 1
             title: Password für PostgreSQL Nutzer
             default: synapse
           existingSecret:
@@ -2474,14 +2471,12 @@ properties:
             properties:
               userPasswordKey:
                 type: ["null", "string"]
-                minLength: 1
                 title: >-
                   Schlüssel, der das Datenbank-Passwort für den Nutzer enthält
                 description: Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
                 default: password
               adminPasswordKey:
                 type: ["null", "string"]
-                minLength: 1
                 title: >-
                   Schlüssel, der das Datenbank-Passwort für den Admin (user
                   postgres) enthält
@@ -2526,13 +2521,11 @@ properties:
             properties:
               args:
                 type: ["null", "string"]
-                minLength: 1
                 description: Extra Argumente zur Initialisierung der Datenbank
                 default: --lc-collate=C --lc-ctype=C --encoding=UTF8
             unevaluatedProperties: false
           extendedConfiguration:
             type: ["null", "string"]
-            minLength: 1
             title: Extra Konfiguration der Datenbank
             description: >-
               Die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder
@@ -2547,7 +2540,6 @@ properties:
                 default: ""
               size:
                 type: ["null", "string"]
-                minLength: 1
                 default: 16Gi
             unevaluatedProperties: false
           resources:
@@ -4470,32 +4462,6 @@ properties:
 patternProperties:
   ^x-: true
 allOf:
-  - if:
-      postgresql:
-        properties:
-          enabled: false
-    then:
-      externalPostgresql:
-        required:
-          - host
-          - port
-        oneOf:
-          - required:
-              - username
-              - password
-              - database
-            not:
-              required:
-                - existingSecretPasswordKey
-                - existingSecret
-          - required:
-              - existingSecretPasswordKey
-              - existingSecret
-            not:
-              required:
-                - username
-                - password
-                - database
   - oneOf:
       - properties:
           redis:
@@ -4545,6 +4511,55 @@ allOf:
                     type: string
                 requires:
                   - password
+  - oneOf:
+    - properties:
+        postgresql:
+          properties:
+            enabled:
+              const: true
+            auth:
+              oneOf:
+                - properties:
+                    existingSecret:
+                      type: string
+                    password:
+                      $comment: >-
+                        Relax null type requirement to just emptyness, because
+                        subchart values can’t be reliably set to null in Helm.
+                      maxLength: 0
+                  required:
+                    - existingSecret
+                - properties:
+                    existingSecret:
+                      $comment: >-
+                        Relax null type requirement to just emptyness, because
+                        subchart values can’t be reliably set to null in Helm.
+                      maxLength: 0
+                    password:
+                      type: string
+                  required:
+                    - password
+    - properties:
+        postgresql:
+          properties:
+            enabled:
+              const: false
+        externalPostgresql:
+          oneOf:
+            - properties:
+                existingSecret:
+                  type: string
+                password:
+                  type: "null"
+              required:
+                - existingSecret
+            - properties:
+                existingSecret:
+                  type: "null"
+                password:
+                  type: string
+              required:
+                - password
 required:
   - image
   - serverName

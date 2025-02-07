@@ -5,6 +5,8 @@ templates:
   - well-known/well-known-deployment.yaml
   - well-known/well-known-configuration.yaml
   - nginx-conf.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment if enabled
     template: well-known/well-known-deployment.yaml
@@ -36,6 +38,7 @@ set:
     org.matrix.msc3814: "true"
   dataPrivacyUrl: https://dsgvo.example.org
   imprintUrl: https://impressum.example.org
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures standard values are not dropped
     template: well-known/well-known-configuration.yaml
@@ -60,6 +63,7 @@ set:
   wellknown.client:
     m.homeserver:
       base_url: https://happy.place.example.org
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures value is present and overwritten
     template: well-known/well-known-configuration.yaml

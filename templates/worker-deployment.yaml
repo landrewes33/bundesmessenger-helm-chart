@@ -116,17 +116,15 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-          {{- if or $.Values.postgresql.enabled $.Values.externalPostgresql.existingSecret }}
+          {{- if and
+              ($postgresSecretName := include "matrix-synapse.postgresql.secret-name" $)
+              ($postgresSecretKey := include "matrix-synapse.postgresql.secret-key" $)
+          }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  {{- if $.Values.postgresql.enabled }}
-                  name: {{ $.Values.postgresql.auth.existingSecret | default (include "matrix-synapse.postgresql.fullname" $) }}
-                  key: {{ $.Values.postgresql.auth.secretKeys.userPasswordKey | default "password" }}
-                  {{- else }}
-                  name: {{ $.Values.externalPostgresql.existingSecret }}
-                  key: {{ $.Values.externalPostgresql.existingSecretPasswordKey }}
-                  {{- end }}
+                  name: {{ $postgresSecretName }}
+                  key: {{ $postgresSecretKey }}
           {{- end }}
           {{- if and
               ($redisSecretName := include "matrix-synapse.redis.secret-name" $)

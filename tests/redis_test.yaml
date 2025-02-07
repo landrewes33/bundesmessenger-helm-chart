@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
 suite: Redis authentication
 templates:
@@ -9,6 +9,7 @@ templates:
   - signing-key-job.yaml
 set:
   serverName: example.org
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures internal Redis works with existingSecret
     set:
@@ -58,6 +59,7 @@ tests:
           content:
             name: REDIS_PASSWORD
       - template: secrets.yaml
+        documentIndex: 0
         matchRegex:
           path: stringData['config.yaml']
           pattern: 'password: "P455W02D"'
@@ -96,6 +98,7 @@ tests:
           content:
             name: REDIS_PASSWORD
       - template: secrets.yaml
+        documentIndex: 0
         matchRegex:
           path: stringData['config.yaml']
           pattern: 'password: "P455W02D"'
@@ -132,6 +135,8 @@ tests:
 suite: Redis Secret generation
 templates:
   - secrets.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures internal Redis Secret if required
     set:
