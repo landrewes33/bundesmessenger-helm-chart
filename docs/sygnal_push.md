@@ -84,3 +84,55 @@ getunnelt wird).
 
 Alternativ kann der Proxy direkt in der Konfiguration über den Schalter `proxy`
 angegeben werden.
+
+## Nutzung eines Secrets für Sygnal Push Konfiguration
+
+Es ist empfohlen geheime Zugangsdaten, Passwörter und Tokens als Secret
+zu mounten und nicht als unverschlüsselten Text im Helm-Chart anzugeben.
+
+Dafür kann der Konfigurationsschalter `sygnal.existingSecret` mit dem Namen
+eines vorhandenen Secrets besetzt werden.
+
+Die Schlüssel des Secrets sind die Dateinamen der Zugangsschlüssel für FCM und APN.
+Diese werden auch unter `sygnal.apps` referenziert und mit in den Container eingebunden.
+In der Referenzierung wird der Dateiname samt Pfad angegeben, in diesem Fall
+mit dem Präfix `/secrets`.
+
+Als Beispiel:
+
+Secret:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: "sygnal"
+  namespace: bundesm
+stringData:
+  fcm-example.json: |
+    [...]
+data:
+  MyKey.p007: [...]
+```
+
+Konfiguration:
+
+```yaml
+sygnal:
+  apps:
+    de.bwi.messenger.x.ios.example:
+      type: apns
+      keyfile: /secrets/MyKey.p007
+      [...]
+    de.bwi.messenger.x.android.prod:
+      type: gcm
+      [...]
+      service_account_file: /secrets/fcm-example.json
+```
+
+Die Konfigurationen, welche wir registrierten Nutzerhäusern zur Verfügung
+stellen, enthalten bereits die richtigen Angaben. Diese können zur nachhaltigen
+Nutzung auch manuell in ein Secret und in ein Vault überführt werden.
+
+Im Zuge eines Deployment wird ein Secret mit den Schlüsseln angelegt, wenn nicht
+bereits vorhanden.
