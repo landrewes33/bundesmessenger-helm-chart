@@ -2371,7 +2371,7 @@ call:
     image:
       registry: ghcr.io
       repository: element-hq/lk-jwt-service
-      tag: 0.1.1
+      tag: 0.1.2
       pullPolicy: IfNotPresent
 
     # -- (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
