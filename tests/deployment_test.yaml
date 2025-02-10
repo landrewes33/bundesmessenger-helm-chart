@@ -8,15 +8,30 @@ templates:
   - secrets.yaml
   - signing-key-job.yaml
 set:
+  serverName: happy.place.example.org
   externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment
     template: deployment.yaml
-    set:
-      serverName: happy.place.example.org
     asserts:
       - containsDocument:
           kind: Deployment
           apiVersion: apps/v1
           name: RELEASE-NAME-bundesmessenger
           any: true
+  - it: ensures a pull secret is passed in
+    template: deployment.yaml
+    set:
+      image.pullSecrets:
+        - name: a-little-secret
+      volumePermissions.image.pullSecrets:
+        - name: a-medium-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-medium-secret

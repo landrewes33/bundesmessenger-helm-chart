@@ -6,14 +6,13 @@ templates:
   - well-known/well-known-configuration.yaml
   - nginx-conf.yaml
 set:
+  wellknown.enabled: true
+  dataPrivacyUrl: yes-i-have-read-and-understand.example.com
+  imprintUrl: acme.noreply.example.com
   externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment if enabled
     template: well-known/well-known-deployment.yaml
-    set:
-      wellknown.enabled: true
-      dataPrivacyUrl: yes-i-have-read-and-understand.example.com
-      imprintUrl: acme.noreply.example.com
     asserts:
       - containsDocument:
           kind: Deployment
@@ -28,7 +27,19 @@ tests:
       - containsDocument:
           kind: Deployment
         not: true
-
+  - it: ensures a pull secret is passed in
+    template: well-known/well-known-deployment.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      wellknown.image.pullSecrets:
+        - name: a-little-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
 ---
 suite: Well-Known default values
 templates:

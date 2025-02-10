@@ -169,18 +169,14 @@ matrix-synapse: monitoring
 Pull secrets
 */}}
 {{- define "matrix-synapse.imagePullSecrets" -}}
-  {{- if or .Values.image.pullSecrets .Values.wellknown.image.pullSecrets .Values.volumePermissions.pullSecrets }}
+{{- with concat
+    .Values.image.pullSecrets
+    .Values.volumePermissions.image.pullSecrets
+    .Values.wellknown.image.pullSecrets
+-}}
 imagePullSecrets:
-    {{- with .Values.image.pullSecrets }}
-      {{- . | toYaml | nindent 2 }}
-    {{- end }}
-    {{- with .Values.wellknown.image.pullSecrets }}
-      {{- . | toYaml | nindent 2 }}
-    {{- end }}
-    {{- with .Values.volumePermissions.image.pullSecrets }}
-      {{- . | toYaml | nindent 2 }}
-    {{- end }}
-  {{- end -}}
+  {{- . | toYaml | nindent 2 }}
+{{- end }}
 {{- end -}}
 
 {{/*
