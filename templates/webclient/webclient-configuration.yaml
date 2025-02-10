@@ -2,7 +2,6 @@
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.webclient.enabled }}
 {{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
-{{- $displayName := .Values.webclient.displayName | default "Messenger deiner Organisation" }}
 # The config.json file is to be put into Kubernetes as a config file in such a way that
 # the element web instance can read it.
 
@@ -21,7 +20,7 @@ data:
       "default_server_config": {
         "m.homeserver": {
           "base_url": {{ include "matrix-synapse.publicServerURL" . | quote }},
-          "server_name": {{ $displayName | quote }}
+          "server_name": {{ .Values.webclient.displayName | quote }}
         }
       },
       "enable_presence_by_hs_url": {

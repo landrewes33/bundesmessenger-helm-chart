@@ -20,7 +20,6 @@ image:
   # Beispiel:
   # pullSecrets:
   #   - name: myRegistryKeySecretName
-  # @default -- nicht gesetzt
   pullSecrets: []
 
   # -- (string) Pullpolicy für das konfigurierte Image
@@ -76,10 +75,6 @@ monitoring:
   # `kubectl get Prometheus --all-namespaces -o jsonpath='{.items[*].spec.podMonitorSelector.matchLabels}'`
   labels: {}
 
-# -- (string) Anzeigename des Servers in Webclients
-# @default -- Messenger deiner Organisation
-displayName: "Messenger deiner Organisation"
-
 # -- (object) Erstellen eines ServiceAccounts, samt gewünschter Annotations.
 # Beinhaltet gewünschte Annotations oder Nutzung eines vorhandenen
 # ServiceAccounts. Es werden darüber hinaus noch weitere ServiceAccounts
@@ -95,10 +90,10 @@ serviceAccount:
   # Falls null, wird der Release-Name benutzt.
   # name: non-default-service-name
 
-## Manuelle Aktivierung bei Nutzung von ArgoCD.
-# Sollte durch `.Capabilities.APIVersions.Has "argoproj.io/v1alpha1"` erkannt werden,
-# kann hier aber erzwungen werden.
-# argoCD: true
+# -- (boolean) Manuelle Aktivierung bei Nutzung von ArgoCD.
+# Sollte durch `.Capabilities.APIVersions.Has "argoproj.io/v1alpha1"` erkannt
+# werden, kann hier aber erzwungen werden.
+argoCD: false
 
 # Standardwerte für alle Pods.
 # Alle `podSecurityContext`-Schlüssel in dieser Datei verwenden die Werte aus
@@ -231,8 +226,8 @@ ipv4Only: true
 ## Ref: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
 ##
 config:
-  # -- (string) Die öffentlich zugängliche URL für die Synapse-Instanz
-  # lautet standardmäßig `https://<publicServerName>`
+  # -- (string|null) Die öffentlich zugängliche URL für die Synapse-Instanz.
+  # Lautet standardmäßig `https://<publicServerName>`.
   # Beispiel:
   # publicBaseurl: "https://matrix.example.com"
 
@@ -435,6 +430,8 @@ extraConfig:
     enabled: false
   # -- (bool) dynamisches Vorschaubild, eingeschaltet
   dynamic_thumbnails: true
+  # -- (object) Experimentelle Features.
+  experimental_features: {}
 ########################################
 ## Konfigurationen für Föderation
 ########################################
@@ -1144,6 +1141,9 @@ volumePermissions:
     # -- (string) da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung
     pullPolicy: IfNotPresent
     # -- (array) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
+    # pullSecrets:
+    #   - name: myRegistryKeySecretName
     pullSecrets: []
 
   # -- (map) Ressourcen des Init-Containers zur Rechtekorrektur
@@ -1233,6 +1233,13 @@ sygnal:
       # -- (string) Zu verwendende Konfiguration für den Port des Bereitschaftscheck
       port: sygnal-port
 
+  # -- (object|null) Startup-Check.
+  # startupProbe:
+  #   failureThreshold: 6
+  #   httpGet:
+  #     path: /health
+  #     port: metrics
+
   # -- (object) Node Selektor Konfiguration für Sygnal-Container.
   nodeSelector: {}
 
@@ -1288,6 +1295,13 @@ wellknown:
   # -- (bool) Aktivierung des Wellknown-Container
   enabled: true
 
+  # -- (string|null) DNS-Name des Wellknown-Servers.
+  # Falls nicht gesetzt, wird der öffentliche Servername verwendet.
+  # host: wellknown.example.org
+
+  # -- (integer) Port des Wellknown-Servers.
+  port: 443
+
   # -- (object|null) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
   # Falls null, wird für `m.server` der Homeserver-Name (`publicServerName`,
   # sonst `serverName`) mit Port 443 verwendet.
@@ -1314,6 +1328,9 @@ wellknown:
   #    imprintUrl: https://example.com/imprint
   client: {}
 
+  # -- (integer) Replica-Count.
+  replicaCount: 1
+
   # -- (map) Zusätzliche Daten, die unter .well-known/matrix/<data> bereitgestellt werden
   # Dictionaries werden in JSON umgewandelt, einfache Strings werden direkt ausgeliefert
   # MSC1929 Beispiel:
@@ -1330,14 +1347,15 @@ wellknown:
   htdocsPath: /usr/share/nginx/html
 
   # -- (map) Das Webserver Image
-  # optional:
-  # pullSecrets:
-  #   - myRegistryKeySecretName
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/nginx
     tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
+    # -- (array) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
+    # pullSecrets:
+    #   - name: myRegistryKeySecretName
     pullSecrets: []
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
@@ -1386,6 +1404,9 @@ confighub:
   # -- (bool) Aktivierung des ConfigHub-Container
   enabled: true
 
+  # -- (integer) Replica-Count.
+  replicaCount: 1
+
   # -- (map) Zusätzliche Daten, die unter /_matrix/cconfig/<data> bereitgestellt werden
   # Dictionaries werden in JSON umgewandelt, einfache Strings werden direkt ausgeliefert
   # Beispiel siehe wellknown-Konfiguration
@@ -1396,14 +1417,16 @@ confighub:
   htdocsPath: /usr/share/nginx/html
 
   # -- (map) Das Webserver Image
-  # optional:
-  # pullSecrets:
-  #   - myRegistryKeySecretName
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/nginx
     tag: 1.18.0-6ubuntu14.4-jammy-production
     pullPolicy: IfNotPresent
+    # -- (array) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
+    # pullSecrets:
+    #   - name: myRegistryKeySecretName
+    pullSecrets: []
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
@@ -1543,7 +1566,9 @@ externalPostgresql:
   # -- (string) Passwortschlüssel, der aus dem bestehenden Secret abgerufen wird
   existingSecretPasswordKey: password
 
-  # sslmode: prefer
+  # -- (string) Verwendeter SSL-Modus.
+  # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+  sslmode: prefer
 
   # -- (list) Zusätzliche Argumente für die Datenbankverbindung
   # ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
@@ -1768,10 +1793,23 @@ mas:
   # Diese wird nicht automatisch angelegt und muss bereit gestellt werden.
   # https://matrix-org.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
   postgresql:
+    # -- (string|null) Host für PostgreSQL-DB von MAS.
+    # Falls ungesetzt, wird die Haupt-PostgreSQL-Instanz verwendet.
+    # host: masdb.example.org
+    # -- (integer) Port für PostgreSQL-DB von MAS.
     port: 5432
+    # -- (string) DB-Name für PostgreSQL-DB von MAS.
     database: mas_synapse
+    # -- (string) Nutzername für PostgreSQL-DB von MAS.
     username: massynapse
+    # -- (string) Password für PostgreSQL Nutzer von MAS.
     password: mas-synapse
+    # -- (string) Verwendeter SSL-Modus.
+    # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+    sslmode: prefer
+    # -- (object) Zusätzliche Optionen für MAS PostgreSQL.
+    # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+    extraArgs: {}
 
   # -- (list) Diese URLs ersetzen bzw. überlagern die URLs vom Synapse.
   # D.h., dass diese URLs vom MAS anstatt von Synapse beantwortet werden müssen.
@@ -2277,6 +2315,9 @@ webclient:
     tag: 2.21.0-jammy-production
     pullPolicy: IfNotPresent
 
+  # -- (string) Anzeigename des Servers in Webclients.
+  displayName: Messenger deiner Organisation
+
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
   #  fsGroup: 1001
@@ -2374,6 +2415,9 @@ call:
       tag: 0.1.1
       pullPolicy: IfNotPresent
 
+    # -- (integer) Replica-Count.
+    replicaCount: 1
+
     # -- (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
     # Beispiel:
     # - name: NO_PROXY
@@ -2440,7 +2484,7 @@ additionalConfig:
 
     serviceAccount:
       create: true
-      # -- (string) Name des ServiceAccounts für den dsgo-exporter-job.
+      # -- (string|null) Name des ServiceAccounts für den dsgo-exporter-job.
       # name: non-default-dsgvo-exporter-name
 
   locationSharing:
@@ -2611,8 +2655,8 @@ demomode:
 
   serviceAccount:
     create: true
-  # -- (string) Name des ServiceAccounts für den demomode-job.
-  # name: non-default-demomode-name
+    # -- (string|null) Name des ServiceAccounts für den demomode-job.
+    # name: non-default-demomode-name
 
   # -- (string) Auswahl des Demomodus
   # Folgende Möglichkeiten:

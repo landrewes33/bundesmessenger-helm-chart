@@ -115,12 +115,6 @@
       ],
       "unevaluatedProperties": false
     },
-    "displayName": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Anzeigename des Servers in Webclients",
-      "default": "Messenger deiner Organisation"
-    },
     "serviceAccount": {
       "type": "object",
       "title": "Erstellen eines ServiceAccounts",
@@ -158,6 +152,12 @@
         "annotations"
       ],
       "unevaluatedProperties": false
+    },
+    "argoCD": {
+      "type": "boolean",
+      "title": "Manuelle Aktivierung bei Nutzung von ArgoCD",
+      "description": "Sollte durch `.Capabilities.APIVersions.Has \"argoproj.io/v1alpha1\"` erkannt werden, kann hier aber erzwungen werden.",
+      "default": false
     },
     "signingkey": {
       "type": "object",
@@ -444,6 +444,18 @@
       "title": "Matrix-Konfigurationswerte, die sich auf andere Teile des Charts auswirken.",
       "description": "Jeden Wert, der nicht von diesem Block behandelt wird, sollten Sie stattdessen im Abschnitt `extraConfig` unten einstellen. Ref: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html",
       "properties": {
+        "publicBaseurl": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "title": "Die öffentlich zugängliche URL für die Synapse-Instanz",
+          "description": "Lautet standardmäßig `https://<publicServerName>`",
+          "default": null,
+          "examples": [
+            "https://matrix.example.com"
+          ]
+        },
         "logLevel": {
           "type": "string",
           "enum": [
@@ -1060,6 +1072,14 @@
           ],
           "description": "dynamisches Vorschaubild",
           "default": true
+        },
+        "experimental_features": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "title": "Experimentelle Features",
+          "default": {}
         },
         "allow_public_rooms_over_federation": {
           "type": [
@@ -2402,6 +2422,23 @@
           },
           "unevaluatedProperties": false
         },
+        "startupProbe": {
+          "type": [
+            "null",
+            "object"
+          ],
+          "oneOf": [
+            {
+              "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json",
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "unevaluatedProperties": false
+        },
         "nodeSelector": {
           "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/nodeSelector",
           "type": "object",
@@ -2575,6 +2612,23 @@
           "description": "Aktivieren des Wellknown-Container.",
           "default": true
         },
+        "host": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "title": "DNS-Name des Wellknown-Servers",
+          "description": "Fall nicht gesetzt, wird der öffentliche Servername verwendet.",
+          "default": null,
+          "examples": [
+            "wellknown.example.org"
+          ]
+        },
+        "port": {
+          "type": "integer",
+          "title": "Port des Wellknown-Servers",
+          "default": 443
+        },
         "server": {
           "type": [
             "null",
@@ -2623,6 +2677,11 @@
             }
           ],
           "unevaluatedProperties": true
+        },
+        "replicaCount": {
+          "type": "integer",
+          "title": "Replica-Count",
+          "default": 1
         },
         "extraData": {
           "type": "object",
@@ -2757,7 +2816,9 @@
       },
       "required": [
         "enabled",
+        "port",
         "client",
+        "replicaCount",
         "extraData",
         "htdocsPath",
         "image",
@@ -2780,6 +2841,11 @@
           "title": "Aktivierung des ConfigHub-Containers",
           "default": true
         },
+        "replicaCount": {
+          "type": "integer",
+          "title": "Replica-Count",
+          "default": 1
+        },
         "extraData": {
           "type": "object",
           "title": "Zusätzliche Daten, die unter /_matrix/cconfig/<data> bereitgestellt werden",
@@ -2795,20 +2861,42 @@
           "default": "/usr/share/nginx/html"
         },
         "image": {
-          "$ref": "#/$defs/image",
-          "type": "object",
-          "title": "ConfigHub Webserver-Image",
-          "default": {
-            "registry": "registry.opencode.de",
-            "repository": "bwi/bundesmessenger/backend/container-images/nginx",
-            "tag": "1.18.0-6ubuntu14.4-jammy-production",
-            "pullPolicy": "IfNotPresent"
-          },
+          "allOf": [
+            {
+              "$ref": "#/$defs/image",
+              "type": "object",
+              "title": "ConfigHub Webserver-Image",
+              "default": {
+                "registry": "registry.opencode.de",
+                "repository": "bwi/bundesmessenger/backend/container-images/nginx",
+                "tag": "1.18.0-6ubuntu14.4-jammy-production",
+                "pullPolicy": "IfNotPresent"
+              }
+            },
+            {
+              "properties": {
+                "pullSecrets": {
+                  "$ref": "#/$defs/pullSecrets",
+                  "type": "array",
+                  "title": "Liste von Kubernetes Pull-Secrets.",
+                  "default": [],
+                  "examples": [
+                    [
+                      {
+                        "name": "myRegistryKeySecretName"
+                      }
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
           "required": [
             "registry",
             "repository",
             "tag",
-            "pullPolicy"
+            "pullPolicy",
+            "pullSecrets"
           ],
           "unevaluatedProperties": false
         },
@@ -2888,6 +2976,7 @@
       },
       "required": [
         "enabled",
+        "replicaCount",
         "extraData",
         "htdocsPath",
         "image",
@@ -3205,6 +3294,20 @@
           "title": "Passwortschlüssel",
           "description": "Wird aus dem bestehenden Secret abgerufen."
         },
+        "sslmode": {
+          "type": "string",
+          "enum": [
+            "disable",
+            "allow",
+            "prefer",
+            "require",
+            "verify-ca",
+            "verify-full"
+          ],
+          "title": "Verwendeter SSL-Modus.",
+          "description": "https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS",
+          "default": "prefer"
+        },
         "extraArgs": {
           "type": "object",
           "title": "Zusätzliche Argumente für die Datenbankverbindung",
@@ -3218,6 +3321,7 @@
         "port",
         "database",
         "username",
+        "sslmode",
         "extraArgs"
       ],
       "unevaluatedProperties": false
@@ -3614,6 +3718,18 @@
         "postgresql": {
           "type": "object",
           "properties": {
+            "host": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "title": "Host für PostgreSQL-DB von MAS",
+              "description": "Falls ungesetzt, wird die Haupt-PostgreSQL-Instanz verwendet.",
+              "default": null,
+              "examples": [
+                "masdb.example.org"
+              ]
+            },
             "port": {
               "type": "integer",
               "title": "Port für PostgreSQL-DB von MAS",
@@ -3636,13 +3752,39 @@
               "minLength": 1,
               "title": "Password für PostgreSQL Nutzer von MAS",
               "default": "mas-synapse"
+            },
+            "sslmode": {
+              "type": "string",
+              "enum": [
+                "disable",
+                "allow",
+                "prefer",
+                "require",
+                "verify-ca",
+                "verify-full"
+              ],
+              "title": "Verwendeter SSL-Modus",
+              "description": "https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS",
+              "default": "prefer"
+            },
+            "extraArgs": {
+              "type": "object",
+              "title": "Zusätzliche Optionen für MAS PostgreSQL",
+              "description": "https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "default": {},
+              "unevaluatedProperties": false
             }
           },
           "required": [
             "port",
             "database",
             "username",
-            "password"
+            "password",
+            "sslmode",
+            "extraArgs"
           ],
           "unevaluatedProperties": false
         },
@@ -4651,6 +4793,11 @@
           ],
           "unevaluatedProperties": false
         },
+        "displayName": {
+          "type": "string",
+          "title": "Anzeigename des Servers in Webclients",
+          "default": "Messenger deiner Organisation"
+        },
         "resources": {
           "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json",
           "type": "object",
@@ -4719,6 +4866,7 @@
       "required": [
         "enabled",
         "image",
+        "displayName",
         "resources",
         "podSecurityContext",
         "securityContext"
@@ -4915,6 +5063,11 @@
               ],
               "unevaluatedProperties": false
             },
+            "replicaCount": {
+              "type": "integer",
+              "title": "Replica-Count",
+              "default": 1
+            },
             "extraEnv": {
               "type": "array",
               "title": "Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind",
@@ -5016,6 +5169,7 @@
           },
           "required": [
             "image",
+            "replicaCount",
             "extraEnv",
             "podSecurityContext",
             "securityContext",
@@ -5061,6 +5215,17 @@
               "properties": {
                 "create": {
                   "type": "boolean"
+                },
+                "name": {
+                  "type": [
+                    "null",
+                    "boolean"
+                  ],
+                  "title": "Name des ServiceAccounts für den dsgo-exporter-job",
+                  "default": null,
+                  "examples": [
+                    "non-default-dsgvo-exporter-name"
+                  ]
                 }
               },
               "required": [
@@ -5402,6 +5567,17 @@
           "properties": {
             "create": {
               "type": "boolean"
+            },
+            "name": {
+              "type": [
+                "null",
+                "boolean"
+              ],
+              "title": "Name des ServiceAccounts für den demomode-job.",
+              "default": null,
+              "examples": [
+                "non-default-demomode-name"
+              ]
             }
           },
           "required": [
@@ -5642,8 +5818,8 @@
     "imprintUrl",
     "adminAPIServerName",
     "monitoring",
-    "displayName",
     "serviceAccount",
+    "argoCD",
     "signingkey",
     "ipv4Only",
     "config",
