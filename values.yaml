@@ -1023,23 +1023,33 @@ workers:
 
   # -- (object) Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen.
   # (pusher-worker -> Sygnal -> Push-Provider (Apple od. Google))
-  # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
+  # Ein lokaler Sygnal-Service und -Container ist Bestandteil des Helm-Charts.
+  # Die Pusher-Worker werden als `pusher_instances` in die Synapse-Konfiguration
+  # übernommen.
   pusher:
     <<: *workerDefault
     enabled: false
 
   # -- (object) Worker für das Senden von Daten an registrierte Anwendungsdienste.
-  # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+  # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden. Diese
+  # wird als `notify_appservices_from_worker` in die Synapse-Konfiguration
+  # übernommen.
   appservice:
     <<: *workerDefault
     enabled: false
 
-  # -- (object) Sender von Verbundverkehrs (federation traffic) an andere Matrix-Server.
+  # -- (object) Sender von Verbundverkehr (federation traffic) an andere Matrix-Server.
+  # Die Föderationssender-Worker werden als `federation_sender_instances` in die
+  # Synapse-Konfiguration übernommen.
   federation_sender:
     <<: *workerDefault
+    # -- (bool) Aktivieren der Föderationssender-Worker.
     enabled: false
 
   # -- (object) Worker zur Bereitstellung und Speicherung von Medien.
+  # Einer der Worker wird als `media_instance_running_background_jobs` in die
+  # Synapse-Konfiguration übernommen.
+  #
   # Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit
   # Hintergrundaufgaben.
   media_repository:
@@ -1083,11 +1093,13 @@ workers:
   # -- (object) Dieser Worker aktualisiert das Benutzerverzeichnis und kann darin suchen.
   # Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der
   # Worker optional.
+  #
+  # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden. Diese
+  # wird als `update_user_directory_from_worker` in die Synapse-Konfiguration
+  # übernommen.
   user_dir:
     <<: *workerDefault
-    # -- (bool) Aktivieren des Nutzersuch-Workers
-    # Hinweis: Damit kann Last vom generischen bzw. Haupt-Worker genommen werden
-    # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+    # -- (bool) Aktivieren des Nutzersuch-Workers.
     enabled: false
     # -- (list) Zusätzliche Listener für NutzerSuch-Worker
     listeners: [client]
@@ -1096,10 +1108,12 @@ workers:
     csPaths:
       - "/_matrix/client/(r0|v3|unstable)/user_directory/search$"
 
+  # (object) -- Konfiguration des Background-Workers.
+  # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden. Diese
+  # wird als `run_background_tasks_on` in die Synapse-Konfiguration übernommen.
   background_worker:
     <<: *workerDefault
-    # -- (bool) Aktivieren des Background-Workers
-    # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+    # -- (bool) Aktivieren des Background-Workers.
     enabled: false
 
 persistence:

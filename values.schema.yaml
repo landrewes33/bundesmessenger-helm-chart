@@ -1457,10 +1457,9 @@ properties:
         description: >-
           (pusher-worker -> Sygnal -> Push-Provider (Apple oder Google))
 
-
-          Hinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt
-          werden. Ein lokaler Sygnal-Service und Container ist Bestandteil des
-          Helm Charts.
+          Ein lokaler Sygnal-Service und -Container ist Bestandteil des
+          Helm-Charts. Die Pusher-Worker werden als `pusher_instances` in die
+          Synapse-Konfiguration übernommen.
         properties:
           enabled:
             type: boolean
@@ -1495,10 +1494,15 @@ properties:
         title: Worker für das Senden von Daten an registrierte Anwendungsdienste
         description: >-
           Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+          Diese wird als `notify_appservices_from_worker` in die
+          Synapse-Konfiguration übernommen.
         properties:
           enabled:
             type: boolean
             default: false
+          replicaCount:
+            type: integer
+            const: 1
         required:
           - enabled
           - replicaCount
@@ -1526,12 +1530,14 @@ properties:
       federation_sender:
         $ref: "#/$defs/worker"
         type: object
-        title: Worker des Föderationssenders
+        title: Sender von Verbundverkehr (federation traffic) an andere Matrix-Server
         description: >-
-          Sendet Föderationsdaten (federation traffic) an andere Matrix-Server.
+          Die Föderationssender-Worker werden als `federation_sender_instances`
+          in die Synapse-Konfiguration übernommen.
         properties:
           enabled:
             type: boolean
+            title: Aktivieren der Föderationssender-Worker
             default: false
         required:
           - enabled
@@ -1560,14 +1566,18 @@ properties:
       media_repository:
         $ref: "#/$defs/worker"
         type: object
-        title: Konfiguration des Mediaworker
+        title: Worker zur Bereitstellung und Speicherung von Medien
         description: >-
-          Dieser Worker kümmert sich um die Bereitstellung und Speicherung von
-          Medien. Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten
-          mit Hintergrundaufgaben.
+          Einer der Worker wird als `media_instance_running_background_jobs` in
+          die Synapse-Konfiguration übernommen.
+
+
+          Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit
+          Hintergrundaufgaben.
         properties:
           enabled:
             type: boolean
+            title: Aktivieren des Media-Worker
             default: true
           listeners:
             type: array
@@ -1669,15 +1679,23 @@ properties:
       user_dir:
         $ref: "#/$defs/worker"
         type: object
-        title: Worker für das Benutzerverzeichnis
+        title: Dieser Worker aktualisiert das Benutzerverzeichnis und kann darin suchen
         description: >-
-          Dieser Worker aktualisiert das Benutzerverzeichnis und kann darin
-          suchen. Jeder generic_worker kann im Benutzerverzeichnis suchen, daher
-          ist der Worker optional.
+          Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der
+          Worker optional.
+
+
+          Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+          Diese wird als `update_user_directory_from_worker` in die
+          Synapse-Konfiguration übernommen.
         properties:
           enabled:
             type: boolean
+            title: Aktivieren des Nutzersuch-Workers
             default: false
+          replicaCount:
+            type: integer
+            const: 1
           listeners:
             type: array
             title: Entsprechende Endpunkte für den Nutzersuche Worker
@@ -1714,13 +1732,19 @@ properties:
       background_worker:
         $ref: "#/$defs/worker"
         type: object
-        title: Aktivieren des Background-Workers
+        title: Konfiguration des Background-Workers
         description: >-
           Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+          Diese wird als `run_background_tasks_on` in die Synapse-Konfiguration
+          übernommen.
         properties:
           enabled:
             type: boolean
+            title: Aktivieren des Background-Workers
             default: false
+          replicaCount:
+            type: integer
+            const: 1
         required:
           - enabled
           - replicaCount
