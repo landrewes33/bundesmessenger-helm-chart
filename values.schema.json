@@ -1769,7 +1769,7 @@
           "$ref": "#/$defs/worker",
           "type": "object",
           "title": "Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen",
-          "description": "(pusher-worker -> Sygnal -> Push-Provider (Apple oder Google))\n\nHinweis: Es kann jeweils nur eine Instanz dieses Workers ausgeführt werden. Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.",
+          "description": "(pusher-worker -> Sygnal -> Push-Provider (Apple oder Google))\nEin lokaler Sygnal-Service und -Container ist Bestandteil des Helm-Charts. Die Pusher-Worker werden als `pusher_instances` in die Synapse-Konfiguration übernommen.",
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -1806,11 +1806,15 @@
           "$ref": "#/$defs/worker",
           "type": "object",
           "title": "Worker für das Senden von Daten an registrierte Anwendungsdienste",
-          "description": "Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.",
+          "description": "Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden. Diese wird als `notify_appservices_from_worker` in die Synapse-Konfiguration übernommen.",
           "properties": {
             "enabled": {
               "type": "boolean",
               "default": false
+            },
+            "replicaCount": {
+              "type": "integer",
+              "const": 1
             }
           },
           "required": [
@@ -1842,11 +1846,12 @@
         "federation_sender": {
           "$ref": "#/$defs/worker",
           "type": "object",
-          "title": "Worker des Föderationssenders",
-          "description": "Sendet Föderationsdaten (federation traffic) an andere Matrix-Server.",
+          "title": "Sender von Verbundverkehr (federation traffic) an andere Matrix-Server",
+          "description": "Die Föderationssender-Worker werden als `federation_sender_instances` in die Synapse-Konfiguration übernommen.",
           "properties": {
             "enabled": {
               "type": "boolean",
+              "title": "Aktivieren der Föderationssender-Worker",
               "default": false
             }
           },
@@ -1879,11 +1884,12 @@
         "media_repository": {
           "$ref": "#/$defs/worker",
           "type": "object",
-          "title": "Konfiguration des Mediaworker",
-          "description": "Dieser Worker kümmert sich um die Bereitstellung und Speicherung von Medien. Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit Hintergrundaufgaben.",
+          "title": "Worker zur Bereitstellung und Speicherung von Medien",
+          "description": "Einer der Worker wird als `media_instance_running_background_jobs` in die Synapse-Konfiguration übernommen.\n\nHinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit Hintergrundaufgaben.",
           "properties": {
             "enabled": {
               "type": "boolean",
+              "title": "Aktivieren des Media-Worker",
               "default": true
             },
             "listeners": {
@@ -2003,12 +2009,17 @@
         "user_dir": {
           "$ref": "#/$defs/worker",
           "type": "object",
-          "title": "Worker für das Benutzerverzeichnis",
-          "description": "Dieser Worker aktualisiert das Benutzerverzeichnis und kann darin suchen. Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der Worker optional.",
+          "title": "Dieser Worker aktualisiert das Benutzerverzeichnis und kann darin suchen",
+          "description": "Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der Worker optional.\n\nHinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden. Diese wird als `update_user_directory_from_worker` in die Synapse-Konfiguration übernommen.",
           "properties": {
             "enabled": {
               "type": "boolean",
+              "title": "Aktivieren des Nutzersuch-Workers",
               "default": false
+            },
+            "replicaCount": {
+              "type": "integer",
+              "const": 1
             },
             "listeners": {
               "type": "array",
@@ -2053,12 +2064,17 @@
         "background_worker": {
           "$ref": "#/$defs/worker",
           "type": "object",
-          "title": "Aktivieren des Background-Workers",
-          "description": "Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.",
+          "title": "Konfiguration des Background-Workers",
+          "description": "Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden. Diese wird als `run_background_tasks_on` in die Synapse-Konfiguration übernommen.",
           "properties": {
             "enabled": {
               "type": "boolean",
+              "title": "Aktivieren des Background-Workers",
               "default": false
+            },
+            "replicaCount": {
+              "type": "integer",
+              "const": 1
             }
           },
           "required": [
