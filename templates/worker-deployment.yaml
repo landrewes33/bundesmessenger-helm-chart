@@ -8,15 +8,16 @@
   {{- $uniqCaSecrets = uniq (append $uniqCaSecrets (split "/" ( trimPrefix "/" . ))._0) }}
 {{- end }}
 
+{{- $default := .Values.workers.default }}
 {{- $workerConfigs := omit .Values.workers "default" }}
 {{- range $worker, $config := $workerConfigs }}
+  {{ $config = merge $config $default }}
   {{- if not $config.enabled }}
     {{- continue }}
   {{- end }}
-
   {{- $name := $worker | replace "_" "-" }}
   {{- $replicaSize := $config.replicaCount }}
-  {{- if $config.autoscaling.enabled }}
+  {{- if and (hasKey $config "autoscaling" ) $config.autoscaling.enabled }}
     {{- $replicaSize = max $replicaSize $config.autoscaling.minReplicas }}
   {{- end }}
 

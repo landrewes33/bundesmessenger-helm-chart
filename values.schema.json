@@ -2124,6 +2124,10 @@
           "unevaluatedProperties": false
         }
       },
+      "additionalProperties": {
+        "$ref": "#/$defs/worker",
+        "type": "object"
+      },
       "required": [
         "default",
         "generic_worker",
