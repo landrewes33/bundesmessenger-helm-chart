@@ -180,13 +180,14 @@ templates:
   - signing-key-job.yaml
 set:
   serverName: custom.acme.example.org
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a custom worker is configured and deployed
     template: worker-deployment.yaml
     set:
       workers:
-        default: &workerDefault
-          enabled: false
+        custom_worker:
+          enabled: true
           replicaCount: 1
           strategy:
             type: RollingUpdate
@@ -244,9 +245,6 @@ tests:
             maxReplicas: 10
             targetCPUUtilizationPercentage: 80
             targetMemoryUtilizationPercentage: 80
-        custom_worker:
-          <<: *workerDefault
-          enabled: true
     asserts:
       - containsDocument:
           kind: StatefulSet
