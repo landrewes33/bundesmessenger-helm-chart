@@ -1,0 +1,1 @@
+Hinzufügen eines JSON-Schema für das values.yaml.
