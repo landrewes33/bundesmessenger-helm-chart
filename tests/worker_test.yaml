@@ -170,3 +170,86 @@ tests:
         equal:
           path: spec.replicas
           value: 42
+---
+suite: Worker custom definition
+templates:
+  - worker-deployment.yaml
+  - configuration.yaml
+  - worker-configuration.yaml
+  - secrets.yaml
+  - signing-key-job.yaml
+set:
+  serverName: custom.acme.example.org
+tests:
+  - it: ensures a custom worker is configured and deployed
+    template: worker-deployment.yaml
+    set:
+      workers:
+        default: &workerDefault
+          enabled: false
+          replicaCount: 1
+          strategy:
+            type: RollingUpdate
+          extraConfig: {}
+          annotations: {}
+          extraEnv: []
+          volumes: []
+          volumeMounts: []
+          extraCommands: []
+          podSecurityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+            fsGroup: 2666
+            runAsGroup: 2666
+            runAsUser: 2666
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsUser: 2666
+          resources:
+            limits:
+              cpu: 600m
+              memory: 768Mi
+            requests:
+              cpu: 100m
+              memory: 150Mi
+          livenessProbe:
+            periodSeconds: 10
+            httpGet:
+              path: /health
+              port: metrics
+          readinessProbe:
+            periodSeconds: 3
+            httpGet:
+              path: /health
+              port: metrics
+          startupProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /health
+              port: metrics
+          nodeSelector: {}
+          tolerations: []
+          affinity: {}
+          listeners: []
+          csPaths: []
+          paths: []
+          autoscaling:
+            enabled: false
+            minReplicas: 2
+            maxReplicas: 10
+            targetCPUUtilizationPercentage: 80
+            targetMemoryUtilizationPercentage: 80
+        custom_worker:
+          <<: *workerDefault
+          enabled: true
+    asserts:
+      - containsDocument:
+          kind: StatefulSet
+          apiVersion: apps/v1
+          name: RELEASE-NAME-custom-worker
+          any: true
