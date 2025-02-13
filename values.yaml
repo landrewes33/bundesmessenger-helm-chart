@@ -1478,62 +1478,74 @@ confighub:
 
 
 ######################################################################################
-##          Konfiguration für Postgres Server
+##          Konfiguration des internen PostgreSQL-Servers
 ######################################################################################
-## Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht,
-## Wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie
-## enabled auf false setzen und den externalPostgresql-Block konfigurieren.
+## Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und
+## schnelle Möglichkeit, Demo- und Testsysteme des BundesMessengers aufzusetzen.
+## Nicht empfohlen ist die Aktivierung für Produktivsysteme.
+##
+## Empfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen
+## Sie `postgresql.enabled` auf `false` und konfigurieren Sie den
+## `externalPostgresql`-Block.
 
 postgresql:
-  # -- (bool) Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht,
-  # Wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie
-  # enabled auf false setzen und den externalPostgresql-Block konfigurieren.
-  # @default -- false da externe DB vorausgesetzt wird
+  # -- (bool) Aktivieren des internen PostgreSQL-Servers.
+  # Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern
+  # vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled`
+  # auf `false` und konfigurieren Sie den `externalPostgresql`-Block.
   enabled: false
 
-  # -- (map) Das PostgreSQL Image
-  # @default -- WIRD NICHT EMPFOHLEN!!
+  # -- (object) Das zu verwendende PostgreSQL-Container-Abbild.
   image:
     registry: docker.io
     repository: bitnami/postgresql
     tag: "16"
+    # -- (array) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
     # pullSecrets: ["myRegistryKeySecretName"]
+    pullSecrets: []
     pullPolicy: IfNotPresent
 
+  # (object) -- Authentifizierung gegenüber dem internen PostgreSQL-Server.
   auth:
-    # -- (string) Name für PostgreSQL-DB
+    # -- (string) Name der PostgreSQL-Datenbank.
     database: synapse_db
 
-    # -- (string) Name für PostgreSQL Nutzer
+    # -- (string) Name des PostgreSQL-Nutzers.
     username: synapse
 
     # -- (string|null) Passwort für PostgreSQL Nutzer
     password: ""
 
-    # -- (string|null) Name des Secrets, in welchem das Passwort steht.
-    # Ist `postgresql.enabled` und es existiert kein Secret dieses Namens, so
-    # wird ein neues Secret automatisch erstellt und verwendet.
+    # -- (string|null) Name des Secrets, in dem das PostgreSQL-Passwort steht.
+    # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen
+    # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
     existingSecret: postgresql
     secretKeys:
-      # -- (string) Schlüssel, der das Datenbank-Passwort enthält.
+      # -- (string) Verweis im `existingSecret` auf das Datenbank-Passwort.
       # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
       userPasswordKey: password
-      # -- (string) Schlüssel, der das PostgreSQL enthält.
+      # -- (string) Verweis im `existingSecret` auf das Passwort des postgres-Nutzers.
       # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
       adminPasswordKey: postgres-password
 
-  # -- (int) PostgreSQL container port
   containerPorts:
+    # -- (integer) Port des PostgreSQL-Containers.
     postgresql: 5432
 
   primary:
+    service:
+      ports:
+        # -- (integer) Port des PostgreSQL-Service.
+        postgresql: 5432
+
     initdb:
       # -- (string) Extra Argumente zur Initialisierung der Datenbank
       args: "--lc-collate=C --lc-ctype=C --encoding=UTF8"
 
-    # -- (string) Extra Konfiguration der Datenbank
-    # die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder Synapse-
-    # Prozess seine Verbindungen zur Datenbank hält
+    # -- (string) Extra Konfiguration der Datenbank.
+    # Die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder
+    # Synapse-Prozess seine Verbindungen zur Datenbank hält.
     extendedConfiguration: |
       max_connections = 1024
 
@@ -1554,8 +1566,8 @@ postgresql:
         # -- (string) Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind.
         memory: 256Mi
 
-  # -- (list) Zusätzliche Argumente für die Datenbankverbindung
-  # ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+  # -- (object) Zusätzliche Argumente für die Datenbankverbindung.
+  # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
   extraArgs: {}
 
 # -- (map) Ein extern konfigurierter Postgres-Server, der für die Datenbank von Synapse verwendet wird.
@@ -1584,13 +1596,13 @@ externalPostgresql:
   # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
   sslmode: prefer
 
-  # -- (list) Zusätzliche Argumente für die Datenbankverbindung
-  # ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+  # -- (object) Zusätzliche Argumente für die Datenbankverbindung.
+  # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
   extraArgs: {}
 
 
 ######################################################################################
-##          Konfiguration für Redis Server
+##          Konfiguration des Redis-Servers
 ######################################################################################
 ## Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
 ## Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie
@@ -1600,33 +1612,47 @@ externalPostgresql:
 ## Dokument docs/redis_sysctl_tuning.md beschrieben.
 
 redis:
+  # -- (bool) Aktivieren des internen Redis-Servers.
+  # Hinweis: Durch Setzten auf `true`, wird der `externalRedis`-Block ignoriert.
+  enabled: true
+
+  # -- (object) Das verwendete Redis-Image.
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/redis
     tag: 5_6.0.16-1ubuntu1-jammy-production
+    # -- (array) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
     # pullSecrets: ["myRegistryKeySecretName"]
+    pullSecrets: []
     pullPolicy: IfNotPresent
-  # -- (bool) Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
-  # Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
-  # false setzen und den externalRedis-Block konfigurieren.
-  enabled: true
-  # -- (map) Konfiguration für Authentifikation gegen Redis
-  # Oder verwenden Sie ein bestehendes Geheimnis mit "redis-password"-Schlüssel
-  # anstelle eines statischen Passworts.
+
+  # -- (map) Authentifikation gegenüber Redis.
+  # Verwenden Sie ein bestehendes Secret mit `redis-password`-Eintrag anstelle
+  # eines statischen Passworts.
   auth:
+    # -- (boolean) Aktivieren der Authentifikation.
     enabled: true
+    # -- (string|null) Password für Redis.
+    # Ist der Wert null, wird stattdessen `existingSecret` verwendet.
     password: null
+    # -- (string|null) Name des Secrets mit dem Redis-Passwort.
+    # Darf nicht gleichzeitig mit `password` gesetzt sein. Existiert noch kein
+    # Kubernetes Secret mit dem angegebenen Namen, wird es mit einem zufälligen
+    # Passwort automatisch generiert und von Helm verwaltet.
     existingSecret: redis
+    # -- (string) Verweis im `existingSecret` auf das Redis-Passwort.
+    # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
     existingSecretPasswordKey: redis-password
 
   # -- (string) Form der Architektur des Deployments
   architecture: standalone
   master:
     kind: StatefulSet
+    # -- (object) Persistenzkonfiguration des Redis.
+    # Beachten Sie, dass Synapse Redis nur als Synchronisierungsdienstprogramm
+    # verwendet, so dass keine Daten jemals persistiert werden müssen.
     persistence:
-      # -- (bool) Persistenzkonfiguration des Redis
-      # Beachten Sie, dass Synapse redis nur als Synchronisierungsdienstprogramm verwendet, so dass keine
-      # Daten jemals persistiert werden müssen.
       enabled: false
     service:
       ports:

@@ -3011,52 +3011,57 @@
     },
     "postgresql": {
       "type": "object",
-      "description": "Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht, wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie 'enabled' auf 'false' setzen und den externalPostgresql-Block konfigurieren.",
+      "title": "Konfiguration des internen PostgreSQL-Servers",
+      "description": "Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und schnelle Möglichkeit, Demo- und Testsysteme des BundesMessengers aufzusetzen. Nicht empfohlen ist die Aktivierung für Produktivsysteme.\n\nEmpfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den `externalPostgresql`-Block.",
       "properties": {
         "enabled": {
           "type": "boolean",
-          "description": "Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht, wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie 'enabled' auf 'false' setzen und den externalPostgresql-Block konfigurieren; default: false da externe DB vorausgesetzt wird.",
+          "title": "Aktivieren des internen PostgreSQL-Servers",
+          "description": "Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den `externalPostgresql`-Block.",
           "default": false
         },
         "image": {
           "$ref": "#/$defs/image",
           "type": "object",
-          "title": "Das PostgreSQL Image",
+          "title": "Das zu verwendende PostgreSQL-Container-Abbild",
+          "properties": {
+            "pullSecrets": {
+              "type": "array",
+              "title": "Liste von Kubernetes Pull-Secrets",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            }
+          },
           "default": {
             "registry": "docker.io",
             "repository": "bitnami/postgresql",
             "tag": "16",
+            "pullSecrets": [],
             "pullPolicy": "IfNotPresent"
           },
           "required": [
             "registry",
             "repository",
             "tag",
+            "pullSecrets",
             "pullPolicy"
           ],
-          "unevaluatedProperties": false
+          "unevaluatedProperties": true
         },
         "auth": {
-          "type": [
-            "null",
-            "object"
-          ],
-          "title": "Authentifizierung für namespace internen PostgreSQL",
+          "type": "object",
+          "title": "Authentifizierung gegenüber dem internen PostgreSQL-Server",
           "properties": {
             "database": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "title": "DB-Name für PostgreSQL-DB",
+              "type": "string",
+              "title": "Name der PostgreSQL-Datenbank",
               "default": "synapse_db"
             },
             "username": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "title": "Nutzername für PostgreSQL-DB",
+              "type": "string",
+              "title": "Name des PostgreSQL-Nutzers",
               "default": "synapse"
             },
             "password": {
@@ -3065,147 +3070,123 @@
                 "string"
               ],
               "title": "Password für PostgreSQL Nutzer",
-              "default": "synapse"
+              "default": ""
             },
             "existingSecret": {
               "type": [
                 "null",
                 "string"
               ],
-              "title": "Bestehendes Secret das anstelle eines statischen Passwortes verwendet wird."
+              "title": "Name des Secrets, in dem das PostgreSQL-Passwort steht",
+              "description": "Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen Namen, so wird ein neues Secret automatisch erstellt und verwendet.",
+              "default": "postgresql"
             },
             "secretKeys": {
-              "type": [
-                "null",
-                "object"
-              ],
+              "type": "object",
               "title": "Schlüsselinformationen für ein genanntes Secret",
               "properties": {
                 "userPasswordKey": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
-                  "title": "Schlüssel, der das Datenbank-Passwort für den Nutzer enthält",
+                  "type": "string",
+                  "title": "Verweis im `existingSecret` auf das Datenbank-Passwort",
                   "description": "Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.",
                   "default": "password"
                 },
                 "adminPasswordKey": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
-                  "title": "Schlüssel, der das Datenbank-Passwort für den Admin (user postgres) enthält",
+                  "type": "string",
+                  "title": "Verweis im `existingSecret` auf das Passwort des postgres-Nutzers",
                   "description": "Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.",
                   "default": "postgres-password"
                 }
               },
-              "unevaluatedProperties": false
+              "required": [
+                "userPasswordKey",
+                "adminPasswordKey"
+              ],
+              "unevaluatedProperties": true
             }
           },
-          "oneOf": [
-            {
-              "required": [
-                "username",
-                "password",
-                "database"
-              ],
-              "not": {
-                "required": [
-                  "existingSecretPasswordKey",
-                  "existingSecret"
-                ]
-              }
-            },
-            {
-              "required": [
-                "existingSecretPasswordKey",
-                "existingSecret"
-              ],
-              "not": {
-                "required": [
-                  "username",
-                  "password",
-                  "database"
-                ]
-              }
-            }
+          "required": [
+            "database",
+            "username",
+            "secretKeys"
           ],
-          "unevaluatedProperties": false
+          "unevaluatedProperties": true
         },
         "containerPorts": {
-          "type": [
-            "null",
-            "object"
-          ],
-          "description": "PostgreSQL container port",
+          "type": "object",
           "properties": {
             "postgresql": {
-              "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort",
               "type": "integer",
+              "title": "Port des PostgreSQL-Containers",
               "default": 5342
             }
           },
           "required": [
             "postgresql"
           ],
-          "unevaluatedProperties": false
+          "unevaluatedProperties": true
         },
         "primary": {
-          "type": [
-            "null",
-            "object"
-          ],
+          "type": "object",
           "properties": {
-            "initdb": {
-              "type": [
-                "null",
-                "object"
+            "service": {
+              "type": "object",
+              "properties": {
+                "ports": {
+                  "type": "object",
+                  "properties": {
+                    "postgresql": {
+                      "type": "integer",
+                      "title": "Port des PostgreSQL-Service",
+                      "default": 5432
+                    }
+                  },
+                  "required": [
+                    "postgresql"
+                  ],
+                  "unevaluatedProperties": true
+                }
+              },
+              "required": [
+                "ports"
               ],
+              "unevaluatedProperties": true
+            },
+            "initdb": {
+              "type": "object",
               "properties": {
                 "args": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": "string",
                   "description": "Extra Argumente zur Initialisierung der Datenbank",
                   "default": "--lc-collate=C --lc-ctype=C --encoding=UTF8"
                 }
               },
-              "unevaluatedProperties": false
+              "unevaluatedProperties": true
             },
             "extendedConfiguration": {
-              "type": [
-                "null",
-                "string"
-              ],
+              "type": "string",
               "title": "Extra Konfiguration der Datenbank",
               "description": "Die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder Synapseprozess seine Verbindungen zur Datenbank hält",
               "default": "max_connections = 1024"
             },
             "persistence": {
-              "type": [
-                "null",
-                "object"
-              ],
-              "description": "Persistenzkonfiguration für Storage für PostgreSQL",
+              "type": "object",
+              "title": "Persistenzkonfiguration für Storage für PostgreSQL",
               "properties": {
                 "storageClass": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": "string",
                   "default": ""
                 },
                 "size": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
+                  "type": "string",
                   "default": "16Gi"
                 }
               },
-              "unevaluatedProperties": false
+              "required": [
+                "storageClass",
+                "size"
+              ],
+              "unevaluatedProperties": true
             },
             "resources": {
               "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json",
@@ -3240,26 +3221,41 @@
             }
           },
           "required": [
+            "service",
+            "initdb",
+            "extendedConfiguration",
+            "persistence",
             "resources"
           ],
-          "unevaluatedProperties": false
+          "unevaluatedProperties": true
         },
         "extraArgs": {
-          "type": [
-            "null",
-            "object"
-          ],
-          "description": "Zusätzliche Argumente für die Datenbankverbindung. ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config",
-          "properties": {},
-          "default": null,
+          "$comment": "This config option is not part of the `postgresql` chart.",
+          "type": "object",
+          "title": "Zusätzliche Argumente für die Datenbankverbindung",
+          "description": "Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config",
+          "additionalProperties": {
+            "type": [
+              "null",
+              "string",
+              "number",
+              "integer",
+              "boolean"
+            ]
+          },
+          "default": {},
           "unevaluatedProperties": false
         }
       },
       "required": [
         "enabled",
-        "image"
+        "image",
+        "auth",
+        "containerPorts",
+        "primary",
+        "extraArgs"
       ],
-      "unevaluatedProperties": false
+      "unevaluatedProperties": true
     },
     "externalPostgresql": {
       "type": "object",
@@ -3333,7 +3329,7 @@
           "title": "Zusätzliche Argumente für die Datenbankverbindung",
           "description": "ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config",
           "default": {},
-          "unevaluatedProperties": true
+          "unevaluatedProperties": false
         }
       },
       "required": [
@@ -3348,45 +3344,59 @@
     },
     "redis": {
       "type": "object",
-      "description": "Diese Konfiguration ist für den internen Redis, der für die Verwendung mit Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf false setzen und den externalRedis-Block konfigurieren.",
+      "title": "Konfiguration des Redis-Servers",
+      "description": "Diese Konfiguration ist für den internen Redis, der für die Verwendung mit Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie `redis.enabled: false` und konfigurieren den `externalRedis`-Block.",
       "properties": {
         "enabled": {
           "type": "boolean",
-          "description": "Diese Konfiguration ist für den internen Redis, der für die Verwendung mit Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf false setzen und den externalRedis-Block konfigurieren.",
+          "tiitle": "Aktivieren des internen Redis-Servers",
+          "description": "Hinweis: Durch Setzten auf `true`, wird der `externalRedis`-Block ignoriert.",
           "default": true
         },
         "image": {
           "$ref": "#/$defs/image",
           "type": "object",
-          "title": "Das Redis Image",
+          "title": "Das verwendete Redis-Image",
+          "properties": {
+            "pullSecrets": {
+              "type": "array",
+              "title": "Liste von Kubernetes Pull-Secrets",
+              "items": {
+                "type": "string"
+              },
+              "default": [],
+              "examples": [
+                [
+                  "myRegistryKeySecretName"
+                ]
+              ]
+            }
+          },
           "default": {
             "registry": "registry.opencode.de",
             "repository": "bwi/bundesmessenger/backend/container-images/redis",
             "tag": "5_6.0.16-1ubuntu1-jammy-production",
+            "pullSecrets": [],
             "pullPolicy": "IfNotPresent"
           },
           "required": [
             "registry",
             "repository",
             "tag",
+            "pullSecrets",
             "pullPolicy"
           ],
-          "unevaluatedProperties": false
+          "unevaluatedProperties": true
         },
         "auth": {
-          "type": [
-            "null",
-            "object"
-          ],
+          "type": "object",
           "title": "Authentifikation gegenüber Redis",
-          "description": "Verwenden Sie ein bestehendes Geheimnis mit \"redis-password\"-Eintrag anstelle eines statischen Passworts.",
+          "description": "Verwenden Sie ein bestehendes Secret mit `redis-password`-Eintrag anstelle eines statischen Passworts.",
           "properties": {
             "enabled": {
-              "type": [
-                "null",
-                "boolean"
-              ],
-              "title": "Aktivieren der Authentifikation mit Passwort",
+              "type": "boolean",
+              "const": true,
+              "title": "Aktivieren der Authentifikation",
               "default": true
             },
             "password": {
@@ -3395,43 +3405,45 @@
                 "string"
               ],
               "title": "Password für Redis",
-              "default": "synapse"
+              "description": "Ist der Wert null, wird stattdessen `existingSecret` verwendet.",
+              "default": null
             },
             "existingSecret": {
               "type": [
                 "null",
                 "string"
               ],
-              "title": "Bestehendes Secret",
-              "description": "Wird anstelle eines statischen Passwortes verwendet.",
-              "default": null
+              "title": "Name des Secrets mit dem Redis-Passwort",
+              "description": "Darf nicht gleichzeitig mit `password` gesetzt sein. Existiert noch kein Kubernetes Secret mit dem angegebenen Namen, wird es mit einem zufälligen Passwort automatisch generiert und von Helm verwaltet.",
+              "default": "redis"
             },
             "existingSecretPasswordKey": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "title": "Schlüsselinformationen für ein genanntes Secret",
+              "type": "string",
+              "title": "Verweis im `existingSecret` auf das Redis-Passwort",
+              "description": "Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.",
               "default": "redis-password"
             }
           },
-          "unevaluatedProperties": false
+          "required": [
+            "enabled",
+            "existingSecretPasswordKey"
+          ],
+          "unevaluatedProperties": true
         },
         "architecture": {
+          "type": "string",
           "enum": [
             "standalone",
             "replication"
           ],
-          "description": "Form der Architektur des Deployments",
+          "title": "Form der Architektur des Deployments",
           "default": "standalone"
         },
         "master": {
-          "type": [
-            "null",
-            "object"
-          ],
+          "type": "object",
           "properties": {
             "kind": {
+              "type": "string",
               "enum": [
                 "Deployment",
                 "StatefulSet",
@@ -3440,34 +3452,22 @@
               "default": "StatefulSet"
             },
             "persistence": {
-              "type": [
-                "null",
-                "object"
-              ],
+              "type": "object",
               "title": "Persistenzkonfiguration des Redis",
-              "description": "Beachten Sie, dass Synapse redis nur als Synchronisierungsdienstprogramm verwendet, so dass keine Daten jemals persistiert werden müssen.",
+              "description": "Beachten Sie, dass Synapse Redis nur als Synchronisierungsdienstprogramm verwendet, so dass keine Daten jemals persistiert werden müssen.",
               "properties": {
                 "enabled": {
-                  "type": [
-                    "null",
-                    "boolean"
-                  ],
+                  "type": "boolean",
                   "default": false
                 }
               },
-              "unevaluatedProperties": false
+              "unevaluatedProperties": true
             },
             "service": {
-              "type": [
-                "null",
-                "object"
-              ],
+              "type": "object",
               "properties": {
                 "ports": {
-                  "type": [
-                    "null",
-                    "object"
-                  ],
+                  "type": "object",
                   "properties": {
                     "redis": {
                       "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort",
@@ -3475,13 +3475,10 @@
                       "default": 6379
                     }
                   },
-                  "required": [
-                    "redis"
-                  ],
-                  "unevaluatedProperties": false
+                  "unevaluatedProperties": true
                 }
               },
-              "unevaluatedProperties": false
+              "unevaluatedProperties": true
             },
             "resources": {
               "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json",
@@ -3515,17 +3512,17 @@
               "unevaluatedProperties": false
             }
           },
-          "required": [
-            "resources"
-          ],
-          "unevaluatedProperties": false
+          "unevaluatedProperties": true
         }
       },
       "required": [
         "enabled",
-        "image"
+        "image",
+        "auth",
+        "architecture",
+        "master"
       ],
-      "unevaluatedProperties": false
+      "unevaluatedProperties": true
     },
     "externalRedis": {
       "type": "object",
@@ -5909,7 +5906,8 @@
       "title": "Array von imagePullSecrets",
       "default": [],
       "items": {
-        "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalObjectReference.schema.json"
+        "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalObjectReference.schema.json",
+        "type": "object"
       }
     },
     "podSecurityContext": {
