@@ -2495,134 +2495,155 @@ properties:
     unevaluatedProperties: false
   postgresql:
     type: object
+    title: Konfiguration des internen PostgreSQL-Servers
     description: >-
-      Diese Konfiguration ist für die Einrichtung des intern bereitgestellten
-      Postgres-Servers gedacht, wenn Sie stattdessen einen vorhandenen Server
-      verwenden wollen, sollten Sie 'enabled' auf 'false' setzen und den
-      externalPostgresql-Block konfigurieren.
+      Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und
+      schnelle Möglichkeit, Demo- und Testsysteme des BundesMessengers
+      aufzusetzen. Nicht empfohlen ist die Aktivierung für Produktivsysteme.
+
+
+      Empfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden,
+      setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den
+      `externalPostgresql`-Block.
     properties:
       enabled:
         type: boolean
+        title: Aktivieren des internen PostgreSQL-Servers
         description: >-
-          Diese Konfiguration ist für die Einrichtung des intern
-          bereitgestellten Postgres-Servers gedacht, wenn Sie stattdessen einen
-          vorhandenen Server verwenden wollen, sollten Sie 'enabled' auf 'false'
-          setzen und den externalPostgresql-Block konfigurieren; default: false
-          da externe DB vorausgesetzt wird.
+          Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern
+          vorhandenen PostgreSQL-Server zu verwenden, setzen Sie
+          `postgresql.enabled` auf `false` und konfigurieren Sie den
+          `externalPostgresql`-Block.
         default: false
       image:
         $ref: "#/$defs/image"
         type: object
-        title: Das PostgreSQL Image
+        title: Das zu verwendende PostgreSQL-Container-Abbild
+        properties:
+          pullSecrets:
+            type: array
+            title: Liste von Kubernetes Pull-Secrets
+            items:
+              type: string
+            default: []
         default:
           registry: docker.io
           repository: bitnami/postgresql
           tag: "16"
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
-        unevaluatedProperties: false
+        unevaluatedProperties: true
       auth:
-        type: ["null", "object"]
-        title: Authentifizierung für namespace internen PostgreSQL
+        type: object
+        title: Authentifizierung gegenüber dem internen PostgreSQL-Server
         properties:
           database:
-            type: ["null", "string"]
-            title: DB-Name für PostgreSQL-DB
+            type: string
+            title: Name der PostgreSQL-Datenbank
             default: synapse_db
           username:
-            type: ["null", "string"]
-            title: Nutzername für PostgreSQL-DB
+            type: string
+            title: Name des PostgreSQL-Nutzers
             default: synapse
           password:
             type: ["null", "string"]
             title: Password für PostgreSQL Nutzer
-            default: synapse
+            default: ""
           existingSecret:
             type: ["null", "string"]
-            title: >-
-              Bestehendes Secret das anstelle eines statischen Passwortes
-              verwendet wird.
+            title: Name des Secrets, in dem das PostgreSQL-Passwort steht
+            description: >-
+              Ist `postgresql.enabled` und es existiert kein Secret mit dem
+              angegebenen Namen, so wird ein neues Secret automatisch erstellt
+              und verwendet.
+            default: postgresql
           secretKeys:
-            type: ["null", "object"]
+            type: object
             title: Schlüsselinformationen für ein genanntes Secret
             properties:
               userPasswordKey:
-                type: ["null", "string"]
-                title: >-
-                  Schlüssel, der das Datenbank-Passwort für den Nutzer enthält
+                type: string
+                title: Verweis im `existingSecret` auf das Datenbank-Passwort
                 description: Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
                 default: password
               adminPasswordKey:
-                type: ["null", "string"]
-                title: >-
-                  Schlüssel, der das Datenbank-Passwort für den Admin (user
-                  postgres) enthält
+                type: string
+                title: Verweis im `existingSecret` auf das Passwort des postgres-Nutzers
                 description: Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
                 default: postgres-password
-            unevaluatedProperties: false
-        oneOf:
-          - required:
-              - username
-              - password
-              - database
-            not:
-              required:
-                - existingSecretPasswordKey
-                - existingSecret
-          - required:
-              - existingSecretPasswordKey
-              - existingSecret
-            not:
-              required:
-                - username
-                - password
-                - database
-        unevaluatedProperties: false
+            required:
+              - userPasswordKey
+              - adminPasswordKey
+            unevaluatedProperties: true
+        required:
+          - database
+          - username
+          - secretKeys
+        unevaluatedProperties: true
       containerPorts:
-        type: ["null", "object"]
-        description: PostgreSQL container port
+        type: object
         properties:
           postgresql:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort
             type: integer
+            title: Port des PostgreSQL-Containers
             default: 5342
         required:
           - postgresql
-        unevaluatedProperties: false
+        unevaluatedProperties: true
       primary:
-        type: ["null", "object"]
+        type: object
         properties:
+          service:
+            type: object
+            properties:
+              ports:
+                type: object
+                properties:
+                  postgresql:
+                    type: integer
+                    title: Port des PostgreSQL-Service
+                    default: 5432
+                required:
+                  - postgresql
+                unevaluatedProperties: true
+            required:
+              - ports
+            unevaluatedProperties: true
           initdb:
-            type: ["null", "object"]
+            type: object
             properties:
               args:
-                type: ["null", "string"]
+                type: string
                 description: Extra Argumente zur Initialisierung der Datenbank
                 default: --lc-collate=C --lc-ctype=C --encoding=UTF8
-            unevaluatedProperties: false
+            unevaluatedProperties: true
           extendedConfiguration:
-            type: ["null", "string"]
+            type: string
             title: Extra Konfiguration der Datenbank
             description: >-
               Die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder
               Synapseprozess seine Verbindungen zur Datenbank hält
             default: max_connections = 1024
           persistence:
-            type: ["null", "object"]
-            description: Persistenzkonfiguration für Storage für PostgreSQL
+            type: object
+            title: Persistenzkonfiguration für Storage für PostgreSQL
             properties:
               storageClass:
-                type: ["null", "string"]
+                type: string
                 default: ""
               size:
-                type: ["null", "string"]
+                type: string
                 default: 16Gi
-            unevaluatedProperties: false
+            required:
+              - storageClass
+              - size
+            unevaluatedProperties: true
           resources:
             $ref: >-
               https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
@@ -2654,20 +2675,30 @@ properties:
                     default: 256Mi
             unevaluatedProperties: false
         required:
+          - service
+          - initdb
+          - extendedConfiguration
+          - persistence
           - resources
-        unevaluatedProperties: false
+        unevaluatedProperties: true
       extraArgs:
-        type: ["null", "object"]
+        $comment: This config option is not part of the `postgresql` chart.
+        type: object
+        title: Zusätzliche Argumente für die Datenbankverbindung
         description: >-
-          Zusätzliche Argumente für die Datenbankverbindung. ref:
-          https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
-        properties: {}
-        default: null
+          Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+        additionalProperties:
+          type: ["null", "string", "number", "integer", "boolean"]
+        default: {}
         unevaluatedProperties: false
     required:
       - enabled
       - image
-    unevaluatedProperties: false
+      - auth
+      - containerPorts
+      - primary
+      - extraArgs
+    unevaluatedProperties: true
   externalPostgresql:
     type: object
     title: Authentifizierung für externen PostgreSQL
@@ -2725,7 +2756,7 @@ properties:
         description: >-
           ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
         default: {}
-        unevaluatedProperties: true
+        unevaluatedProperties: false
     required:
       - host
       - port
@@ -2736,101 +2767,121 @@ properties:
     unevaluatedProperties: false
   redis:
     type: object
+    title: Konfiguration des Redis-Servers
     description: >-
       Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
       Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen
-      Sie enabled auf false setzen und den externalRedis-Block konfigurieren.
+      Sie `redis.enabled: false` und konfigurieren den `externalRedis`-Block.
     properties:
       enabled:
         type: boolean
+        tiitle: Aktivieren des internen Redis-Servers
         description: >-
-          Diese Konfiguration ist für den internen Redis, der für die Verwendung
-          mit Worker/Sharding eingesetzt wird. Für einen externen Redis-Server
-          setzen Sie enabled auf false setzen und den externalRedis-Block
-          konfigurieren.
+          Hinweis: Durch Setzten auf `true`, wird der `externalRedis`-Block ignoriert.
         default: true
       image:
         $ref: "#/$defs/image"
         type: object
-        title: Das Redis Image
+        title: Das verwendete Redis-Image
+        properties:
+          pullSecrets:
+            type: array
+            title: Liste von Kubernetes Pull-Secrets
+            items:
+              type: string
+            default: []
+            examples:
+              - ["myRegistryKeySecretName"]
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/redis
           tag: 5_6.0.16-1ubuntu1-jammy-production
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
-        unevaluatedProperties: false
+        unevaluatedProperties: true
       auth:
-        type: ["null", "object"]
+        type: object
         title: Authentifikation gegenüber Redis
         description: >-
-          Verwenden Sie ein bestehendes Geheimnis mit "redis-password"-Eintrag
+          Verwenden Sie ein bestehendes Secret mit `redis-password`-Eintrag
           anstelle eines statischen Passworts.
         properties:
           enabled:
-            type: ["null", "boolean"]
-            title: Aktivieren der Authentifikation mit Passwort
+            type: boolean
+            const: true
+            title: Aktivieren der Authentifikation
             default: true
           password:
             type: ["null", "string"]
             title: Password für Redis
-            default: synapse
+            description: Ist der Wert null, wird stattdessen `existingSecret` verwendet.
+            default: null
           existingSecret:
             type: ["null", "string"]
-            title: Bestehendes Secret
-            description: Wird anstelle eines statischen Passwortes verwendet.
-            default: null
+            title: Name des Secrets mit dem Redis-Passwort
+            description: >-
+              Darf nicht gleichzeitig mit `password` gesetzt sein. Existiert
+              noch kein Kubernetes Secret mit dem angegebenen Namen, wird es mit
+              einem zufälligen Passwort automatisch generiert und von Helm
+              verwaltet.
+            default: redis
           existingSecretPasswordKey:
-            type: ["null", "string"]
-            title: Schlüsselinformationen für ein genanntes Secret
+            type: string
+            title: Verweis im `existingSecret` auf das Redis-Passwort
+            description: Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
             default: redis-password
-        unevaluatedProperties: false
+        required:
+          - enabled
+          - existingSecretPasswordKey
+        unevaluatedProperties: true
       architecture:
+        type: string
         enum:
           - standalone
           - replication
-        description: Form der Architektur des Deployments
+        title: Form der Architektur des Deployments
         default: standalone
       master:
-        type: ["null", "object"]
+        type: object
         properties:
           kind:
+            type: string
             enum:
               - Deployment
               - StatefulSet
               - DaemonSet
             default: StatefulSet
           persistence:
-            type: ["null", "object"]
+            type: object
             title: Persistenzkonfiguration des Redis
             description: >-
-              Beachten Sie, dass Synapse redis nur als
+              Beachten Sie, dass Synapse Redis nur als
               Synchronisierungsdienstprogramm verwendet, so dass keine Daten
               jemals persistiert werden müssen.
             properties:
               enabled:
-                type: ["null", "boolean"]
+                type: boolean
                 default: false
-            unevaluatedProperties: false
+            unevaluatedProperties: true
           service:
-            type: ["null", "object"]
+            type: object
             properties:
               ports:
-                type: ["null", "object"]
+                type: object
                 properties:
                   redis:
                     $ref: >-
                       https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort
                     type: integer
                     default: 6379
-                required:
-                  - redis
-                unevaluatedProperties: false
-            unevaluatedProperties: false
+                unevaluatedProperties: true
+            unevaluatedProperties: true
           resources:
             $ref: >-
               https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
@@ -2861,13 +2912,14 @@ properties:
                       Redis-Container anzuwenden sind
                     default: 256Mi
             unevaluatedProperties: false
-        required:
-          - resources
-        unevaluatedProperties: false
+        unevaluatedProperties: true
     required:
       - enabled
       - image
-    unevaluatedProperties: false
+      - auth
+      - architecture
+      - master
+    unevaluatedProperties: true
   externalRedis:
     type: object
     title: Authentifizierung für externen Redis Server
@@ -4660,54 +4712,54 @@ allOf:
                 requires:
                   - password
   - oneOf:
-    - properties:
-        postgresql:
-          properties:
-            enabled:
-              const: true
-            auth:
-              oneOf:
-                - properties:
-                    existingSecret:
-                      type: string
-                    password:
-                      $comment: >-
-                        Relax null type requirement to just emptyness, because
-                        subchart values can’t be reliably set to null in Helm.
-                      maxLength: 0
-                  required:
-                    - existingSecret
-                - properties:
-                    existingSecret:
-                      $comment: >-
-                        Relax null type requirement to just emptyness, because
-                        subchart values can’t be reliably set to null in Helm.
-                      maxLength: 0
-                    password:
-                      type: string
-                  required:
-                    - password
-    - properties:
-        postgresql:
-          properties:
-            enabled:
-              const: false
-        externalPostgresql:
-          oneOf:
-            - properties:
-                existingSecret:
-                  type: string
-                password:
-                  type: "null"
-              required:
-                - existingSecret
-            - properties:
-                existingSecret:
-                  type: "null"
-                password:
-                  type: string
-              required:
-                - password
+      - properties:
+          postgresql:
+            properties:
+              enabled:
+                const: true
+              auth:
+                oneOf:
+                  - properties:
+                      existingSecret:
+                        type: string
+                      password:
+                        $comment: >-
+                          Relax null type requirement to just emptyness, because
+                          subchart values can’t be reliably set to null in Helm.
+                        maxLength: 0
+                    required:
+                      - existingSecret
+                  - properties:
+                      existingSecret:
+                        $comment: >-
+                          Relax null type requirement to just emptyness, because
+                          subchart values can’t be reliably set to null in Helm.
+                        maxLength: 0
+                      password:
+                        type: string
+                    required:
+                      - password
+      - properties:
+          postgresql:
+            properties:
+              enabled:
+                const: false
+          externalPostgresql:
+            oneOf:
+              - properties:
+                  existingSecret:
+                    type: string
+                  password:
+                    type: "null"
+                required:
+                  - existingSecret
+              - properties:
+                  existingSecret:
+                    type: "null"
+                  password:
+                    type: string
+                required:
+                  - password
 required:
   - image
   - serverName
@@ -4780,6 +4832,7 @@ $defs:
     items:
       $ref: >-
         https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalObjectReference.schema.json
+      type: object
   podSecurityContext:
     $ref: >-
       https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSecurityContext.schema.json
