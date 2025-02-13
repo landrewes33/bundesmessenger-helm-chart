@@ -1,0 +1,1 @@
+Upload des Schemas ins OpenCoDE-Backend und korrekte Rückführung in den develop-Branch.
