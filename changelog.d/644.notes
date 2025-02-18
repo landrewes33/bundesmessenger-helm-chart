@@ -1,0 +1,6 @@
+Dieses Release migriert Secrets der internen Redis und PostgreSQL Subcharts. In
+den meisten Fällen ist keine weitere Maßnahme erforderlich. Eine Ausnahme stellt
+der Fall dar, dass in der eigenen Konfiguration `existingSecret: ""`
+angegeben ist. Dann muss dieser Wert auf einen Namen, wie zum Beispiel `redis`
+oder `postgresql` geändert werden. Falls ein Secret mit dem neu angegebenen
+Namen nicht existiert, wird es dann erstellt.

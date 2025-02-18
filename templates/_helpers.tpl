@@ -28,6 +28,62 @@ If release name contains chart name it will be used as a full name.
 {{- end -}}
 
 {{/*
+Asserts all given keys are present in the dict.
+
+Args:
+  first item: (dict) The dict to check.
+  rest: (str) Names of the keys that must be present.
+*/}}
+{{- define "matrix-synapse.assertKeys" -}}
+{{- range rest . }}
+  {{- if not (hasKey (first $) .) }}
+    {{- fail (print "Missing key " . " in dict") }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Returns whether a new Secret must be created.
+
+Panics if the looked-up secret and `legacyValue` both exist, but do not match.
+
+Args:
+  global: (dict) Global dict.
+  secretName: (str) Name of the Secret to check.
+  secretPath: (str) Path to the config option of the Secret name.
+  keys: (list of dicts) List of Secret keys to check.
+    secretKey: (str) Key into the given Secret.
+    legacyValue: (str) The corresponding legacy plain-text secret.
+    legacyPath: (str) The path to the legacy secret config option.
+*/}}
+{{- define "matrix-synapse.assertExistingSecret" -}}
+{{- include "matrix-synapse.assertKeys" (list . 
+  "global" "secretName" "secretPath" "keys"
+)}}
+{{- $existingSecret := lookup "v1" "Secret" .global.Release.Namespace .secretName }}
+{{- range $item := .keys }}
+  {{- include "matrix-synapse.assertKeys" (list $item
+    "secretKey" "legacyValue" "legacyPath"
+  )}}
+  {{- $existingValue := dig "data" $item.secretKey "" $existingSecret | b64dec }}
+  {{- if and $item.legacyValue $existingValue (ne $item.legacyValue $existingValue) }}
+    {{- fail (print
+      "Widersprechende Angaben: Das Geheimnis unter `" $item.legacyPath "` ist "
+      "ein anderes als im Secret `" $.secretName "` (`" $.secretPath "`) unter "
+      "dem Schlüssel `" $item.secretKey "` angegeben. Setzen Sie `"
+      $item.legacyPath ": \"\"`, um das Geheimnis aus dem Secret zu verwenden. "
+      "Um das Geheimnis im Secret zu ändern, nutzen Sie z.B. `kubectl "
+      "--namespace=" $.global.Release.Namespace " edit secret " $.secretName
+      "` und editieren Sie `data` bzw. `stringData`."
+    )}}
+  {{- end }}
+{{- end }}
+{{- if not $existingSecret }}
+  {{- "true" }}
+{{- end }}
+{{- end -}}
+
+{{/*
 publicServerName.
 */}}
 {{- define "matrix-synapse.publicServerName" -}}
