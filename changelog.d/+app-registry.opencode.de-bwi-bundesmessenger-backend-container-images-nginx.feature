@@ -1,0 +1,1 @@
+Image `registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx` auf Version `1.18.0-6ubuntu14.5-jammy-production` aktualisiert.
