@@ -3070,13 +3070,11 @@
                 "string"
               ],
               "title": "Password für PostgreSQL Nutzer",
-              "default": ""
+              "default": "synapse"
             },
             "existingSecret": {
-              "type": [
-                "null",
-                "string"
-              ],
+              "type": "string",
+              "minLength": 1,
               "title": "Name des Secrets, in dem das PostgreSQL-Passwort steht",
               "description": "Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen Namen, so wird ein neues Secret automatisch erstellt und verwendet.",
               "default": "postgresql"
@@ -3108,6 +3106,7 @@
           "required": [
             "database",
             "username",
+            "existingSecret",
             "secretKeys"
           ],
           "unevaluatedProperties": true
@@ -3409,12 +3408,10 @@
               "default": null
             },
             "existingSecret": {
-              "type": [
-                "null",
-                "string"
-              ],
+              "type": "string",
+              "minLength": 1,
               "title": "Name des Secrets mit dem Redis-Passwort",
-              "description": "Darf nicht gleichzeitig mit `password` gesetzt sein. Existiert noch kein Kubernetes Secret mit dem angegebenen Namen, wird es mit einem zufälligen Passwort automatisch generiert und von Helm verwaltet.",
+              "description": "Existiert noch kein Kubernetes Secret mit dem angegebenen Namen, wird es mit einem zufälligen Passwort automatisch generiert.",
               "default": "redis"
             },
             "existingSecretPasswordKey": {
@@ -3426,6 +3423,7 @@
           },
           "required": [
             "enabled",
+            "existingSecret",
             "existingSecretPasswordKey"
           ],
           "unevaluatedProperties": true
@@ -5659,38 +5657,6 @@
               "properties": {
                 "enabled": {
                   "const": true
-                },
-                "auth": {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "existingSecret": {
-                          "type": "string"
-                        },
-                        "password": {
-                          "$comment": "Relax null type requirement to just emptyness, because subchart values can’t be reliably set to null in Helm.",
-                          "maxLength": 0
-                        }
-                      },
-                      "requires": [
-                        "existingSecret"
-                      ]
-                    },
-                    {
-                      "properties": {
-                        "existingSecret": {
-                          "$comment": "Relax null type requirement to just emptyness, because subchart values can’t be reliably set to null in Helm.",
-                          "maxLength": 0
-                        },
-                        "password": {
-                          "type": "string"
-                        }
-                      },
-                      "requires": [
-                        "password"
-                      ]
-                    }
-                  ]
                 }
               }
             }
@@ -5747,38 +5713,6 @@
               "properties": {
                 "enabled": {
                   "const": true
-                },
-                "auth": {
-                  "oneOf": [
-                    {
-                      "properties": {
-                        "existingSecret": {
-                          "type": "string"
-                        },
-                        "password": {
-                          "$comment": "Relax null type requirement to just emptyness, because subchart values can’t be reliably set to null in Helm.",
-                          "maxLength": 0
-                        }
-                      },
-                      "required": [
-                        "existingSecret"
-                      ]
-                    },
-                    {
-                      "properties": {
-                        "existingSecret": {
-                          "$comment": "Relax null type requirement to just emptyness, because subchart values can’t be reliably set to null in Helm.",
-                          "maxLength": 0
-                        },
-                        "password": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "password"
-                      ]
-                    }
-                  ]
                 }
               }
             }

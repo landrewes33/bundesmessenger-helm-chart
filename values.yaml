@@ -1515,9 +1515,9 @@ postgresql:
     username: synapse
 
     # -- (string|null) Passwort für PostgreSQL Nutzer
-    password: ""
+    password: synapse
 
-    # -- (string|null) Name des Secrets, in dem das PostgreSQL-Passwort steht.
+    # -- (string) Name des Secrets, in dem das PostgreSQL-Passwort steht.
     # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen
     # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
     existingSecret: postgresql
@@ -1636,10 +1636,9 @@ redis:
     # -- (string|null) Password für Redis.
     # Ist der Wert null, wird stattdessen `existingSecret` verwendet.
     password: null
-    # -- (string|null) Name des Secrets mit dem Redis-Passwort.
-    # Darf nicht gleichzeitig mit `password` gesetzt sein. Existiert noch kein
-    # Kubernetes Secret mit dem angegebenen Namen, wird es mit einem zufälligen
-    # Passwort automatisch generiert und von Helm verwaltet.
+    # -- (string) Name des Secrets mit dem Redis-Passwort.
+    # Existiert noch kein Kubernetes Secret mit dem angegebenen Namen, wird es
+    # mit einem zufälligen Passwort automatisch generiert.
     existingSecret: redis
     # -- (string) Verweis im `existingSecret` auf das Redis-Passwort.
     # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
