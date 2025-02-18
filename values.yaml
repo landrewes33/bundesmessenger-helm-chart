@@ -2142,7 +2142,7 @@ schadcodescanner:
   clamavImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/clamav
-    tag: 0.103.9_dfsg-0ubuntu0.22.04.1-jammy-production
+    tag: 0.103.12_dfsg-0ubuntu0.22.04.1-jammy-production
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
   icapImage:
