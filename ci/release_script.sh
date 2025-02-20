@@ -130,9 +130,16 @@ yq "(
 printf "\nUpdate values.schema.json\n"
 # shellcheck disable=SC2016
 sed -i 's|'\
-'"$id":\W*"https://schema.bundesmessenger.dev/bum/develop/values.schema.json"|'\
+'"$id":\s*"https://schema.bundesmessenger.dev/bum/develop/values.schema.json"|'\
 '"$id": "https://schema.bundesmessenger.dev/bum/v'"$nextVersion"'/values.schema.json"|'\
-    values.schema.json
+    "$scriptDir/../values.schema.json"
+
+printf "\nUpdate values.schema.yaml\n"
+# shellcheck disable=SC2016
+sed -i 's|'\
+'$id:\s*https://schema.bundesmessenger.dev/bum/develop/values.schema.json|'\
+'$id: https://schema.bundesmessenger.dev/bum/v'"$nextVersion"'/values.schema.json|'\
+    "$scriptDir/../values.schema.yaml"
 
 printf "\n================================================================================\n"
 printf "Commit\n"
@@ -142,7 +149,8 @@ git add --no-all \
     "$scriptDir/../changelog.d/"* \
     "$scriptDir/versions/v${nextVersion}.yaml" \
     "$scriptDir/../docs/versions/v${nextVersion}.md" \
-    "values.schema.json"
+    "$scriptDir/../values.schema.json" \
+    "$scriptDir/../values.schema.yaml"
 git commit -a -m "Setting version for the release ${nextVersion}"
 
 printf "\n================================================================================\n"
