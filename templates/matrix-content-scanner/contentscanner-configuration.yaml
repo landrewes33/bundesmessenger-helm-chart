@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.contentscanner.enabled }}
 {{- $scannername := include "matrix-synapse.externalname" (dict "global" . "external" "schadcodescanner") -}}
@@ -38,8 +38,26 @@ data:
         # List of allowed MIME types. If a file has a MIME type that's not in this list, its
         # scan is considered failed.
         # Optional, defaults to allowing all MIME types.
-        #allowed_mimetypes: ["image/jpeg"]
+        # allowed_mimetypes: ["image/jpeg"]
+        
+        # List of blocked MIME types.
+        # If specified, `allowed_mimetypes` must not be specified as well.
+        # If specified, a file whose MIME type is on this list will produce a scan that is
+        # considered failed.
+        # Unrecognised binary files are considered to be `application/octet-stream`.
+        # Unrecognised text files are considered to be `text/plain`.
+        # Optional.
+        # blocked_mimetypes: ["image/jpeg"]
 
+      {{- if ne nil .Values.contentscanner.allowed_mimetypes }}
+        allowed_mimetypes: {{-
+          .Values.contentscanner.allowed_mimetypes | toYaml | nindent 10
+        }}
+      {{- else if .Values.contentscanner.blocked_mimetypes }}
+        blocked_mimetypes: {{-
+          .Values.contentscanner.blocked_mimetypes | toYaml | nindent 10
+        }}
+      {{- end }}
 
     # Optional. A command to execute when unlinking files from the file
     # system instead of using node's fs.unlink. When executed, the first
@@ -62,17 +80,17 @@ data:
         # scanned before existing items reach their TTL, the least-recently accessed will be
         # evicted.
         # Optional, defaults to 1024.
-        max_size: 2048
+        max_size: {{ .Values.contentscanner.max_cache_size | default 2048 }}
 
         # The maximum amount of time an entry will stay in the cache before being evicted.
         # Optional, defaults to 1 week.
-        ttl: "1d"
+        ttl: {{ .Values.contentscanner.ttl | default "1d" }}
 
         # The maximum cachable file size. If a file is bigger than this size, a copy of it
         # will be not be cached even if the scan succeeds. If the file is requested again, it
         # is downloaded again from the homeserver, but is not written to disk or scanned.
         # Optional, defaults to no maximum size.
-        max_file_size: "100MB"
+        max_file_size: {{ .Values.contentscanner.max_file_size | default "100MB" }}
 
 
     # Configuration for downloading files.

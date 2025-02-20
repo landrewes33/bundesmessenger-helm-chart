@@ -2071,6 +2071,44 @@ contentscanner:
   # Mittelsmann zwischen AV und Matrix-Synapse
   enabled: false
 
+  # -- (list|null) Liste der zulässigen MIME-Typen.
+  # Falls angegeben, darf `blocked_mimetypes` nicht ebenfalls angegeben werden.
+  # Wenn eine Datei einen MIME-Typ hat, der nicht in dieser Liste enthalten ist,
+  # wird ihr Scan als fehlgeschlagen betrachtet. Eine Liste aller MIME-Typen
+  # findet man unter
+  # https://www.iana.org/assignments/media-types/media-types.xhtml
+  #
+  # Nicht erkannte Binärdateien werden als „application/octet-stream“ betrachtet.
+  # Nicht erkannte Textdateien werden als „text/plain“ betrachtet.
+  # Falls beide (`allowd_mimetypes` und `blocked_mimetypes`) nicht angegeben,
+  # werden alle MIME-Typen zugelassen.
+  # allowed_mimetypes:
+  #   - text/plain
+
+  # -- (list|null) Liste der blockierten MIME-Typen.
+  # Falls angegeben, darf `allowed_mimetypes` nicht ebenfalls angegeben werden.
+  # Falls angegeben, führt eine Datei, deren MIME-Typ auf dieser Liste steht, zu einem Scan, der
+  # als fehlgeschlagen gilt.
+  # Nicht erkannte Binärdateien werden als `application/octet-stream` betrachtet.
+  # Nicht erkannte Textdateien werden als `text/plain` betrachtet.Bin
+  # blocked_mimetypes:
+  #   - text/plain
+
+  # -- (string) Die maximale zwischenspeicherbare Dateigröße.
+  # Wenn eine Datei größer als diese Größe ist, wird eine Kopie davon
+  # nicht zwischengespeichert, selbst wenn der Scan erfolgreich ist.
+  # Wenn die Datei erneut angefordert wird, wird sie erneut vom Homeserver
+  # heruntergeladen, aber nicht auf die Festplatte geschrieben oder gescannt.
+  max_file_size: "100MB"
+
+  # -- (int) Maximale Anzahl von Ergebnissen, die im Cache gespeichert werden können.
+  # Wenn mehr Dateien gescannt werden, bevor vorhandene Elemente ihre TTL erreichen,
+  # werden die zuletzt aufgerufenen entfernt.
+  max_cache_size: 2048
+
+  # -- (string) Die maximale Zeit, die ein Eintrag im Cache verbleibt, bevor er entfernt wird.
+  ttl: 1d
+
   # -- (list) Zusätzliche in den Matrix-Content-Scanner zu mountende Datenträger (Volumes)
   # Beispiel:
   #  - name: custom-scanscript

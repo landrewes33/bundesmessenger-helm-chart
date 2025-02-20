@@ -3544,6 +3544,53 @@ properties:
         title: Aktivieren des Matrix-Content-Scanner
         description: Mittelsmann zwischen AV und Matrix-Synapse
         default: false
+      allowed_mimetypes:
+        type: ["null", "array"]
+        title: Liste der zulässigen MIME-Typen
+        description: >-
+          Falls angegeben, darf `blocked_mimetypes` nicht ebenfalls angegeben werden.
+          Wenn eine Datei einen MIME-Typ hat, der nicht in dieser Liste enthalten ist,
+          wird ihr Scan als fehlgeschlagen betrachtet.
+          Nicht erkannte Binärdateien werden als „application/octet-stream“ betrachtet.
+          Nicht erkannte Textdateien werden als „text/plain“ betrachtet.
+          Optional, standardmäßig werden alle MIME-Typen zugelassen.
+        items:
+          type: string
+        default: null
+      blocked_mimetypes:
+        type: ["null", "array"]
+        minItems: 1
+        title: Liste der blockierten MIME-Typen
+        description: >-
+          Falls angegeben, darf `allowed_mimetypes` nicht ebenfalls angegeben werden.
+          Falls angegeben, führt eine Datei, deren MIME-Typ auf dieser
+          Liste steht, zu einem Scan, der als fehlgeschlagen gilt.
+          Nicht erkannte Binärdateien werden als `application/octet-stream` betrachtet.
+          Nicht erkannte Textdateien werden als `text/plain` betrachtet.dann
+        items:
+          type: string
+        default: null
+      max_file_size:
+        type: string
+        title: Die maximale zwischenspeicherbare Dateigröße
+        description: >-
+          Wenn eine Datei größer als diese Größe ist, wird eine Kopie davon
+          nicht zwischengespeichert, selbst wenn der Scan erfolgreich ist.
+          Wenn die Datei erneut angefordert wird, wird sie erneut vom Homeserver
+          heruntergeladen, aber nicht auf die Festplatte geschrieben oder gescannt.
+        default: "100MB"
+      max_cache_size:
+        type: integer
+        title: Maximale Anzahl von Ergebnissen, die im Cache gespeichert werden können
+        description: >-
+          Wenn mehr Dateien gescannt werden, bevor vorhandene Elemente ihre TTL erreichen,
+          werden die zuletzt aufgerufenen entfernt.
+        default: 2048
+      ttl:
+        type: string
+        title: >-
+          Die maximale Zeit, die ein Eintrag im Cache verbleibt, bevor er entfernt wird
+        default: "1d"
       extraVolumes:
         type: array
         title: >-
@@ -3658,6 +3705,26 @@ properties:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
         unevaluatedProperties: false
+    oneOf:
+      - properties:
+          allowed_mimetypes:
+            type: "null"
+          blocked_mimetypes:
+            type: "null"
+      - properties:
+          allowed_mimetypes:
+            type: array
+          blocked_mimetypes:
+            type: "null"
+        required:
+          - allowed_mimetypes
+      - properties:
+          allowed_mimetypes:
+            type: "null"
+          blocked_mimetypes:
+            type: array
+        required:
+          - blocked_mimetypes
     required:
       - enabled
       - extraVolumes
