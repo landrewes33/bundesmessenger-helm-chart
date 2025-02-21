@@ -31,6 +31,13 @@ helm-package/
 # Filtering
 /filter.txt
 /filter_replace.txt
+# JS
+node_modules/
+# Python
+.mypy_cache/
+.venv/
+# Folder for local files not to be managed by Git
+/local/
 # Other
 changelog.d/
 towncrier.toml
@@ -39,3 +46,4 @@ pusher-values.yaml
 /docs/images/*.vsdx
 /docs/images/*.jpg
 /docs/images/*.png
+schemacache/
