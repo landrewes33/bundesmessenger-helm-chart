@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.schadcodescanner.enabled }}
 {{- $component := "schadcodescanner" -}}
@@ -75,8 +75,6 @@ data:
     LogClean yes
     LogSyslog no
     LogVerbose no
-    LogFileMaxSize 0
-    LogFile /dev/stdout
     DatabaseDirectory /clamav/database
     LocalSocket /run/clamav/clamd.sock
     ExitOnOOM yes
