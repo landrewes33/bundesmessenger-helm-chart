@@ -1724,6 +1724,11 @@ ingress:
   # Bsp: nginx.ingress.kubernetes.io/whitelist-source-range: "192.168.10.0/24, 10.10.12.0/24, 10.0.0.1"
   annotationsAdminAPI: {}
 
+  # -- (map) Annotations zur Konfiguration des Ingress für das Admin-Portal.
+  # Dies ermöglicht z.B. das Konfigurieren eines IP-Filters für den administrativen Zugriff.
+  # Bsp: nginx.ingress.kubernetes.io/whitelist-source-range: "192.168.10.0/24, 10.10.12.0/24, 10.0.0.1"
+  annotationsAdminPortal: {}
+
   # -- (list) Hosts, die der Ingress-Konfiguration für die Verarbeitung von
   # Client-to-Server-API-Anfragepfade hinzugefügt werden sollen.
   # Hinweis: serverName bzw. publicServerName wird einbezogen, wenn includeServerName gesetzt ist. (default)
@@ -2374,6 +2379,58 @@ synapse_admin:
   #   - name: tmpnginx
   #     mountPath: /var/cache/nginx/
   extraVolumeMounts: []
+
+
+######################################################################################
+##          Konfiguration für Admin-Portal
+######################################################################################
+
+adminPortal:
+  # -- (bool) Aktivieren des Admin-Portal-Moduls
+  enabled: false
+  # -- (string) URI für das Admin-Portal, zwingend notwendig
+  uri: ""
+  # -- (bool) Aktivieren der TLS Zertifikatsüberprüfung
+  TLSverify: true
+  # -- (string) LogLevel Core-Komponente
+  logLevelCore: "INFO"
+  # -- (string) LogLevel Audit-Komponente
+  logLevelAudit: "OFF"
+  # -- (map) Konfiguration des Image vom Core- bzw. Backend-Modul
+  coreImage:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/bumap-core
+    tag: 1.0.1-jammy-production
+    pullPolicy: IfNotPresent
+  # -- (map) Konfiguration des Image vom UI-Modul
+  uiImage:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/bumap-ui
+    tag: 1.0.0-jammy-production
+    pullPolicy: IfNotPresent
+
+  ## Ressourcen Konfiguration für alle Admin-Portal Module.
+  resources:
+    limits:
+      # -- (string) Rechenressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind.
+      cpu: 150m
+      # -- (string) RAM Ressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind.
+      memory: 100Mi
+    requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf die Admin-Portal Pods anzuwenden sind.
+      cpu: 5m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den Admin-Portal Pods anzuwenden sind.
+      memory: 15Mi
+
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    runAsGroup: 1001
+    runAsUser: 1001
+
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des Containers
+  securityContext:
+    <<: *defaultSecurityContext
 
 
 ######################################################################################

@@ -1,0 +1,46 @@
+{{/* SPDX-FileCopyrightText: 2024–2025 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if .Values.adminPortal.enabled }}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "adminportal") -}}
+{{- $component := "adminportal" -}}
+{{- $coreName := "synapse-core" -}}
+{{- $uiName := "synapse-ui" -}}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}-{{ $uiName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}-{{ $uiName }}
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: http
+  selector:
+    {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}-{{ $uiName }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}-{{ $coreName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}-{{ $coreName }}
+spec:
+  ports:
+  - name: admin-core
+    protocol: TCP
+    port: 8000
+    targetPort: admin-core
+  selector:
+    {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}-{{ $coreName }}
+{{- end }}

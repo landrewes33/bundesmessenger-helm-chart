@@ -3612,6 +3612,19 @@
           ],
           "unevaluatedProperties": false
         },
+        "annotationsAdminPortal": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/annotations",
+          "type": "object",
+          "title": "Annotations zur Konfiguration des Ingress für das Admin-Portal",
+          "description": "Dies ermöglicht z.B. das Konfigurieren eines IP-Filters für den administrativen Zugriff.",
+          "default": {},
+          "examples": [
+            {
+              "nginx.ingress.kubernetes.io/whitelist-source-range": "192.168.10.0/24, 10.10.12.0/24, 10.0.0.1"
+            }
+          ],
+          "unevaluatedProperties": false
+        },
         "csHosts": {
           "type": "array",
           "description": "Hosts, die der Ingress-Konfiguration für die Verarbeitung von Client-to-Server-API-Anfragepfade hinzugefügt werden sollen. Hinweis: serverName bzw. publicServerName wird einbezogen, wenn includeServerName gesetzt ist. (default)\n\nBeispiel:\n  - matrix.example.com",
@@ -4852,6 +4865,167 @@
         "securityContext",
         "extraVolumes",
         "extraVolumeMounts"
+      ],
+      "unevaluatedProperties": false
+    },
+    "adminPortal": {
+      "type": "object",
+      "title": "Konfiguration für Admin-Portal",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Aktivieren des Admin-Portal-Moduls",
+          "default": false
+        },
+        "uri": {
+          "type": [
+            "null",
+            "string"
+          ],
+          "title": "URI für das Admin-Portal, zwingend notwendig",
+          "default": null
+        },
+        "TLSverify": {
+          "type": "boolean",
+          "title": "Aktivieren der TLS Zertifikatsüberprüfung",
+          "default": false
+        },
+        "logLevelCore": {
+          "type": "string",
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "CRITICAL",
+            "NOTSET",
+            "OFF"
+          ],
+          "title": "LogLevel der Core-Komponente vom Admin-Portal",
+          "description": "Benötigt, um das LogLevel der Komponente zu steuern und unnötige Details auszublenden.",
+          "default": "INFO"
+        },
+        "logLevelAudit": {
+          "type": "string",
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARNING",
+            "ERROR",
+            "CRITICAL",
+            "NOTSET",
+            "OFF"
+          ],
+          "title": "LogLevel der Audit-Komponente vom Admin-Portal",
+          "description": "Benötigt, um das LogLevel der Komponente zu steuern und unnötige Details auszublenden.",
+          "default": "OFF"
+        },
+        "coreImage": {
+          "$ref": "#/$defs/image",
+          "type": "object",
+          "title": "Konfiguration des Image vom Core- bzw. Backend-Modul",
+          "default": {
+            "registry": "registry.opencode.de",
+            "repository": "bwi/bundesmessenger/backend/container-images/bumap-core",
+            "tag": "1.0.0-jammy",
+            "pullPolicy": "IfNotPresent"
+          },
+          "required": [
+            "registry",
+            "repository",
+            "tag",
+            "pullPolicy"
+          ],
+          "unevaluatedProperties": false
+        },
+        "uiImage": {
+          "$ref": "#/$defs/image",
+          "type": "object",
+          "title": "Konfiguration des Image vom UI-Modul",
+          "default": {
+            "registry": "registry.opencode.de",
+            "repository": "bwi/bundesmessenger/backend/container-images/bumap-ui",
+            "tag": "1.0.0-jammy",
+            "pullPolicy": "IfNotPresent"
+          },
+          "required": [
+            "registry",
+            "repository",
+            "tag",
+            "pullPolicy"
+          ],
+          "unevaluatedProperties": false
+        },
+        "resources": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json",
+          "type": "object",
+          "title": "Ressourcen-Konfiguration für alle Admin-Portal Module",
+          "properties": {
+            "limits": {
+              "properties": {
+                "cpu": {
+                  "title": "Rechenressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind",
+                  "default": "150m"
+                },
+                "memory": {
+                  "title": "RAM-Ressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind",
+                  "default": "100Mi"
+                }
+              }
+            },
+            "requests": {
+              "properties": {
+                "cpu": {
+                  "title": "Anforderungen an Rechenressourcen, die auf die Admin-Portal Pods anzuwenden sind",
+                  "default": "5m"
+                },
+                "memory": {
+                  "title": "Anforderungen an RAM-Ressourcen, die auf den Admin-Portal Pods anzuwenden sind",
+                  "default": "15Mi"
+                }
+              }
+            }
+          },
+          "unevaluatedProperties": false
+        },
+        "podSecurityContext": {
+          "$ref": "#/$defs/podSecurityContext",
+          "type": "object",
+          "title": "Informationen zum Sicherheitskontext, die der Pod übernehmen soll",
+          "default": {
+            "runAsNonRoot": true,
+            "seccompProfile": {
+              "type": "RuntimeDefault"
+            },
+            "runAsGroup": 1001,
+            "runAsUser": 1001
+          },
+          "unevaluatedProperties": false
+        },
+        "securityContext": {
+          "$ref": "#/$defs/securityContext",
+          "type": "object",
+          "title": "Konfiguration für die Container-Sicherheitsrichtlinie des Containers",
+          "default": {
+            "capabilities": {
+              "drop": [
+                "ALL"
+              ]
+            },
+            "allowPrivilegeEscalation": false,
+            "readOnlyRootFilesystem": true
+          },
+          "unevaluatedProperties": false
+        }
+      },
+      "required": [
+        "enabled",
+        "uri",
+        "coreImage",
+        "uiImage",
+        "resources",
+        "podSecurityContext",
+        "securityContext"
       ],
       "unevaluatedProperties": false
     },

@@ -73,6 +73,7 @@ damit ein Deployment möglich und erfolgreich ist.
 | Alle Ingress-Routen und Network policies | `ingress.enabled.false` | Alle Routen und Network-Policies müssen manuell konfiguriert werden, wenn kein DVS-Standard Ingress-Controller nicht vorhanden ist und in der Konfiguration deaktiviert wurde. |
 | `schadcodescanner.freshclam.mirrors` | eigener lokaler privater Mirror, da Zugriff auf Internet nicht möglich | Hier kann und muss eine Liste von privaten Mirrors für den eingesetzten ClamAV Updater freshclam hinterlegt werden, wenn ein Zugriff auf den offiziellen Server unter database.clamav.net nicht möglich ist. |
 | `synapse_admin.uri` | `synapse_admin.enabled: true` | Wenn der Synapse-Admin genutzt werden soll, kann eine sich von `adminAPIServerName` unterscheidende URL konfiguriert werden (empfohlen). |
+| `adminPortal.uri` | `adminPortal.enabled: true` | Wenn das BundesMessenger Admin-Portal genutzt werden soll, kann eine sich von `adminAPIServerName` unterscheidende URL konfiguriert werden (empfohlen). |
 | `webclient.uri` | `webclient.enabled: true` | Wenn der Webclient genutzt werden will, muss eine entsprechende URL für die WebGUI konfiguriert werden. |
 | `call.uri` | `call.enabled: true` | Wenn der Call Client genutzt werden will, muss eine entsprechende URL für die WebGUI konfiguriert werden. |
 | `displayName` | `webclient.enabled: true` | Der Anzeigename des Messengers im Webclient. Default: `Messenger deiner Organisation`. |

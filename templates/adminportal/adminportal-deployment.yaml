@@ -1,0 +1,155 @@
+{{/* SPDX-FileCopyrightText: 2024–2025 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if .Values.adminPortal.enabled }}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "adminportal") -}}
+{{- $component := "adminportal" -}}
+{{- $coreName := "synapse-core" -}}
+{{- $uiName := "synapse-ui" -}}
+{{- $apiPath := "/synapse-core" -}}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}-{{ $coreName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}-{{ $coreName }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "matrix-synapse.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: {{ $component }}-{{ $coreName }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/adminportal/adminportal-configuration.yaml") . | sha256sum }}
+      labels:
+        {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: {{ $component }}-{{ $coreName }}
+    spec:
+      serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      securityContext:
+        {{- .Values.adminPortal.podSecurityContext | toYaml | nindent 8 }}
+      {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
+      containers:
+      - name: {{ $name }}-{{ $coreName }}
+        image: {{ quote (printf "%s/%s:%s"
+            .Values.adminPortal.coreImage.registry
+            .Values.adminPortal.coreImage.repository
+            .Values.adminPortal.coreImage.tag
+        )}}
+        imagePullPolicy: {{ .Values.adminPortal.coreImage.pullPolicy}}
+        securityContext:
+          {{- toYaml .Values.adminPortal.securityContext | nindent 10 }}
+        ports:
+          - containerPort: 8000
+            name: admin-core
+            protocol: TCP
+        readinessProbe:
+          tcpSocket:
+            port: admin-core
+          periodSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: {{ $apiPath }}/health
+            port: admin-core
+          periodSeconds: 10
+        envFrom:
+          - configMapRef:
+              name: {{ $name }}-{{ $coreName }}
+        resources:
+          {{- toYaml .Values.adminPortal.resources | nindent 10 }}
+      restartPolicy: Always
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $name }}-{{ $uiName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}-{{ $uiName }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "matrix-synapse.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: {{ $component }}-{{ $uiName }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/adminportal/adminportal-configuration.yaml") . | sha256sum }}
+        checksum/config-nginx: {{ include (print $.Template.BasePath "/nginx-conf.yaml") . | sha256sum }}
+      labels:
+        {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: {{ $component }}-{{ $uiName }}
+    spec:
+      serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      securityContext:
+        {{- .Values.adminPortal.podSecurityContext | toYaml | nindent 8 }}
+      {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
+      containers:
+      - name: {{ $name }}-{{ $uiName }}
+        image: {{ quote (printf "%s/%s:%s"
+          .Values.adminPortal.uiImage.registry
+          .Values.adminPortal.uiImage.repository
+          .Values.adminPortal.uiImage.tag
+        )}}
+        imagePullPolicy: {{ .Values.adminPortal.uiImage.pullPolicy }}
+        securityContext:
+          {{- toYaml .Values.adminPortal.securityContext | nindent 10 }}
+        ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+        readinessProbe:
+          tcpSocket:
+            port: http
+          periodSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /status
+            port: http
+          periodSeconds: 10
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+        - name: nginx-conf
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+          readOnly: true
+        - name: nginx-conf-d
+          mountPath: /etc/nginx/conf.d
+          readOnly: true
+        - name: {{ $uiName }}-config-volume
+          mountPath: /usr/share/nginx/html/env.js
+          subPath: env.js
+        - name: {{ $uiName }}-config-volume
+          mountPath: /etc/nginx/sites-enabled/default.conf
+          subPath: admin-ui.conf
+        resources:
+          {{- toYaml .Values.adminPortal.resources | nindent 10 }}
+      restartPolicy: Always
+      volumes:
+      - name: {{ $uiName }}-config-volume
+        configMap:
+          name: {{ $name }}-{{ $uiName }}
+      - name: tmp
+        emptyDir:
+          sizeLimit: 60Mi
+          medium: Memory
+      - name: nginx-conf
+        configMap:
+          name: nginx-conf-default
+      - name: nginx-conf-d
+        configMap:
+          name: nginx-conf-d
+{{- end }}

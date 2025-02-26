@@ -63,3 +63,26 @@ tests:
       - containsDocument:
           kind: Ingress
         not: true
+---
+suite: Synapse Admin with Admin Portal
+templates:
+  - synapse-admin/synapse-admin-deployment.yaml
+  # - adminportal/adminportal-deployment.yaml
+set:
+  synapse_admin.uri: admin.example.org
+  adminPortal.uri: admin.example.org
+  externalPostgresql.existingSecret: postgresql
+tests:
+  - it: ensures admin portal and synapse admin do not have the same uri if enabled
+    set:
+      adminPortal.enabled: true
+      synapse_admin.enabled: true
+    asserts:
+      - failedTemplate:
+          errorMessage: ".Values.synapse_admin.uri must not be .Values.adminPortal.uri"
+  - it: ensures admin portal and synapse admin do not have the same uri if disabled
+    set:
+      adminPortal.enabled: false
+      synapse_admin.enabled: true
+    asserts:
+      - notFailedTemplate: {}
