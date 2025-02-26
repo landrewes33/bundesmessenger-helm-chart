@@ -1,0 +1,28 @@
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+suite: Admin Portal Ingress
+templates:
+  - adminportal/adminportal-ingress.yaml
+set:
+  adminAPIServerName: admin-api.example.org
+  externalPostgresql.existingSecret: postgresql
+tests:
+  - it: ensures an Ingress if enabled
+    set:
+      ingress.enabled: true
+      adminPortal:
+        enabled: true
+        uri: adminportal.example.com
+    asserts:
+      - containsDocument:
+          kind: Ingress
+          apiVersion: networking.k8s.io/v1
+          name: RELEASE-NAME-adminportal
+          any: true
+  - it: ensures no Ingress if disabled
+    set:
+      ingress.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true

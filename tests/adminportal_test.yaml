@@ -1,0 +1,35 @@
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+suite: Admin Portal
+templates:
+  - adminportal/adminportal-deployment.yaml
+  - adminportal/adminportal-configuration.yaml
+  - nginx-conf.yaml
+set:
+  uri: adminportal.example.com
+  externalPostgresql.existingSecret: postgresql
+tests:
+  - it: ensures a Deployment if enabled
+    template: adminportal/adminportal-deployment.yaml
+    set:
+      adminPortal:
+        enabled: true
+    asserts:
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: RELEASE-NAME-adminportal-synapse-core
+          any: true
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: RELEASE-NAME-adminportal-synapse-ui
+          any: true
+  - it: ensures no Deployment if disabled
+    template: adminportal/adminportal-deployment.yaml
+    set:
+      adminPortal.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Deployment
+        not: true

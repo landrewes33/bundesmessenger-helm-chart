@@ -57,7 +57,7 @@ Args:
     legacyPath: (str) The path to the legacy secret config option.
 */}}
 {{- define "matrix-synapse.assertExistingSecret" -}}
-{{- include "matrix-synapse.assertKeys" (list . 
+{{- include "matrix-synapse.assertKeys" (list .
   "global" "secretName" "secretPath" "keys"
 )}}
 {{- $existingSecret := lookup "v1" "Secret" .global.Release.Namespace .secretName }}
@@ -459,7 +459,6 @@ Set synapse_admin uri
     {{- end -}}
   {{- end -}}
 {{- end -}}
-
 
 {{/*
 Check networkpolicy requirements TBD CHECK POSTGRES

@@ -28,6 +28,10 @@
   app: Synapse
 - path: synapse_admin.image
   app: Synapse-Admin
+- path: adminPortal.coreImage
+  app: BuM Admin-Portal Synapse Core
+- path: adminPortal.uiImage
+  app: BuM Admin-Portal Synapse UI
 - path: mas.image
   app: Matrix-Authentication-Service
 - path: postgresql.image

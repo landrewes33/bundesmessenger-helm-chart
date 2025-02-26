@@ -31,8 +31,9 @@ Nach der Installation sind in der Umgebung keine Benutzer vorhanden. Mindestens
 der erste Benutzer muss per Kommandozeile angelegt werden. Weitere Benutzer
 lassen sich im Anschluss auch per
 [Admin API](https://element-hq.github.io/synapse/latest/admin_api/user_admin_api.html#create-or-modify-account)
-(z.B. mit `curl`) oder der Administrationsoberfläche
-[Synapse-Admin](./synapse_admin.md) anlegen.
+(z.B. mit `curl`), der Administrationsoberfläche
+[Synapse-Admin](https://github.com/Awesome-Technologies/synapse-admin) oder dem
+[BundesMessenger Admin-Portal](./admin_portal.md) anlegen.
 
 Am Ende der Installation werden die notwendigen Kommandozeilen ausgegeben.
 In der Ausgabe sind die Umgebungsvariablen (Deployment und Namespace)

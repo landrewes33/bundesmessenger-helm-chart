@@ -3,7 +3,7 @@
 Der BundesMessenger WebClient auf Basis von [Element Web](https://github.com/vector-im/element-web)
 kann zusätzlich bereitgestellt werden.
 
-In dem folgenden Beispiel wird zusätzlich zur Synapse Installation der WebClient
+In dem folgenden Beispiel wird zusätzlich zur Synapse-Installation der WebClient
 
 - aktiviert (`webclient.enabled=true`) und
 - eine URL festgelegt (`webclient.uri`).

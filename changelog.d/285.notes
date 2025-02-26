@@ -1,0 +1,9 @@
+In diesem Release des Helm Charts ist das erste Mal eine Version des
+[BundesMessenger Admin-Portal](https://gitlab.opencode.de/bwi/bundesmessenger/admin-portal) enthalten.
+Dieses kann ab sofort getestet werden. Das Portal wird in Zukunft Synapse-Admin ablösen,
+wenn es von den Features den notwendigen Umfang erreicht hat.
+Es wird derzeit nicht automatisch aktiviert und muss durch
+den Administrator im Deployment manuell aktiviert werden (`adminPortal.enabled`).
+Wenn sich dies in Zukunft ändert, wird es eine Information in den Release Notes geben.
+Da es die erste Version des Admin-Portals ist, sind in Zukunft noch Änderungen am Deployment
+oder dem Portal zu erwarten, z.B. die Veröffentlichung in einem eigenen Sub-Chart.
