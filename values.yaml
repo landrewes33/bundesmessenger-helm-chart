@@ -2546,7 +2546,7 @@ call:
     image:
       registry: ghcr.io
       repository: element-hq/lk-jwt-service
-      tag: 0.1.2
+      tag: 0.2.0
       pullPolicy: IfNotPresent
 
     # -- (integer) Replica-Count.
