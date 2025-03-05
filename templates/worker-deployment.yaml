@@ -87,7 +87,9 @@ spec:
             - -c
             - |
               cat /tmp/{{ $name }}.worker | sed "s/@@HOSTNAME@@/${HOSTNAME}/" > /synapse/config/{{ $name }}.worker
-          image: "{{ printf "%s/%s:%s" $.Values.image.registry $.Values.image.repository ( include "matrix-synapse.imageTag" $ )}}"
+          image: {{ quote (printf "%s/%s:%s"
+            $.Values.image.registry $.Values.image.repository $.Values.image
+          )}}
           volumeMounts:
           - mountPath: "/tmp/"
             name: temp-worker-config
@@ -142,7 +144,9 @@ spec:
           {{- end }}
           securityContext:
             {{- $config.securityContext | toYaml | nindent 12 }}
-          image: "{{ printf "%s/%s:%s" $.Values.image.registry $.Values.image.repository ( include "matrix-synapse.imageTag" $ )}}"
+          image: {{ quote (printf "%s/%s:%s"
+            $.Values.image.registry $.Values.image.repository $.Values.image.tag
+          )}}
           imagePullPolicy: {{ $.Values.image.pullPolicy }}
           ports:
             - name: metrics
