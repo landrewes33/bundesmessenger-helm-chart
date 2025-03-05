@@ -150,7 +150,9 @@ spec:
           {{- with .Values.synapse.extraEnv }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
-          image: "{{ printf "%s/%s:%s" .Values.image.registry .Values.image.repository ( include "matrix-synapse.imageTag" . )}}"
+          image: {{ quote (printf "%s/%s:%s"
+            .Values.image.registry .Values.image.repository .Values.image
+          )}}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.synapse.securityContext | nindent 12 }}

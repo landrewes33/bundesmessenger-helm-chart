@@ -6,26 +6,18 @@
   "title": "BundesMessenger Helm-Konfiguration",
   "properties": {
     "image": {
-      "$comment": "Not the same structure as #/$defs/image",
+      "$ref": "#/$defs/image",
       "type": "object",
       "properties": {
         "registry": {
-          "type": "string",
           "default": "registry.opencode.de"
         },
         "repository": {
-          "type": "string",
           "title": "Repository/Image Konfiguration, für Synapse und Workernodes",
           "default": "bwi/bundesmessenger/backend/container-images/synapse"
         },
         "tag": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "title": "Tag zum überschreiben",
-          "description": "Standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet",
-          "default": null
+          "title": "Verwendete Version des Synapse-Abbilds"
         },
         "pullSecrets": {
           "$ref": "#/$defs/pullSecrets",
@@ -34,8 +26,6 @@
           "description": "ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry"
         },
         "pullPolicy": {
-          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/imagePullPolicy",
-          "type": "string",
           "title": "Pull-Policy für das konfigurierte Image",
           "description": "imagePullPolicy „Always“, wenn tag ist „latest“ (imagepullpolicy-always.yaml)",
           "default": "IfNotPresent"
@@ -211,31 +201,21 @@
               "unevaluatedProperties": false
             },
             "generateImage": {
-              "$comment": "Not the same structure as #/$defs/image",
+              "$ref": "#/$defs/image",
               "type": "object",
               "properties": {
                 "registry": {
-                  "type": "string",
                   "default": "registry.opencode.de"
                 },
                 "repository": {
-                  "type": "string",
                   "title": "Repository/Image Konfiguration für Synapse-signing-key-job",
                   "description": "Es wird dringend empfohlen, dass die gleiche Konfiguration wie vom Synapse bzw. den Workernodes genutzt wird.\n\nIst kein Tag angegeben, wird das Tag aus der Chart.yaml übernommen (empfohlen).",
                   "default": "bwi/bundesmessenger/backend/container-images/synapse"
                 },
                 "tag": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
-                  "title": "Tag zum Überschreiben",
-                  "description": "Standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet.",
-                  "default": null
+                  "title": "Verwendete Version des Synapse-Abbilds"
                 },
                 "pullPolicy": {
-                  "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/imagePullPolicy",
-                  "type": "string",
                   "title": "PullPolicy für das Image vom Signing-Key-Job",
                   "default": "IfNotPresent"
                 }
@@ -254,7 +234,6 @@
               "default": {
                 "registry": "registry.opencode.de",
                 "repository": "bwi/bundesmessenger/backend/container-images/kubectl",
-                "tag": "1.31.0-jammy-production",
                 "pullPolicy": "IfNotPresent"
               },
               "required": [
@@ -2234,8 +2213,7 @@
                 },
                 "tag": {
                   "title": "Tag des Images zur Rechtebereinigung",
-                  "description": "Hinweis: Noch kein finaler Tag, build version 10 als Alternative zu latest.",
-                  "default": "latest-jammy-production"
+                  "description": "Hinweis: Noch kein finaler Tag, build version 10 als Alternative zu latest."
                 },
                 "pullPolicy": {
                   "description": "Da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung.",
@@ -2336,7 +2314,6 @@
           "default": {
             "registry": "registry.opencode.de",
             "repository": "bwi/bundesmessenger/backend/container-images/sygnal",
-            "tag": "0.14.3-jammy-production",
             "pullPolicy": "IfNotPresent"
           },
           "required": [
@@ -2740,7 +2717,6 @@
               "default": {
                 "registry": "registry.opencode.de",
                 "repository": "bwi/bundesmessenger/backend/container-images/nginx",
-                "tag": "1.18.0-6ubuntu14.4-jammy-production",
                 "pullPolicy": "IfNotPresent"
               }
             },
@@ -2889,7 +2865,6 @@
               "default": {
                 "registry": "registry.opencode.de",
                 "repository": "bwi/bundesmessenger/backend/container-images/nginx",
-                "tag": "1.18.0-6ubuntu14.4-jammy-production",
                 "pullPolicy": "IfNotPresent"
               }
             },
@@ -3037,7 +3012,6 @@
           "default": {
             "registry": "docker.io",
             "repository": "bitnami/postgresql",
-            "tag": "16",
             "pullSecrets": [],
             "pullPolicy": "IfNotPresent"
           },
@@ -3374,7 +3348,6 @@
           "default": {
             "registry": "registry.opencode.de",
             "repository": "bwi/bundesmessenger/backend/container-images/redis",
-            "tag": "5_6.0.16-1ubuntu1-jammy-production",
             "pullSecrets": [],
             "pullPolicy": "IfNotPresent"
           },
@@ -3727,7 +3700,6 @@
           "default": {
             "registry": "ghcr.io",
             "repository": "element-hq/matrix-authentication-service",
-            "tag": "0.12.0-debug",
             "pullPolicy": "IfNotPresent"
           },
           "required": [
@@ -4297,7 +4269,6 @@
           "default": {
             "registry": "registry.opencode.de",
             "repository": "bwi/bundesmessenger/backend/container-images/matrix-content-scanner",
-            "tag": "1.0.6-jammy-production",
             "pullPolicy": "IfNotPresent"
           },
           "required": [
@@ -4431,7 +4402,6 @@
           "default": {
             "registry": "registry.opencode.de",
             "repository": "bwi/bundesmessenger/backend/container-images/clamav",
-            "tag": "0.103.9_dfsg-0ubuntu0.22.04.1-jammy-production",
             "pullPolicy": "IfNotPresent"
           },
           "required": [
@@ -4449,7 +4419,6 @@
           "default": {
             "registry": "registry.opencode.de",
             "repository": "bwi/bundesmessenger/backend/container-images/icap",
-            "tag": "1_0.5.6-2build1-jammy-production",
             "pullPolicy": "IfNotPresent"
           },
           "required": [
@@ -4713,7 +4682,6 @@
           "default": {
             "registry": "registry.opencode.de",
             "repository": "bwi/bundesmessenger/backend/container-images/synapse-admin",
-            "tag": "0.9.1-jammy-production",
             "pullPolicy": "IfNotPresent"
           },
           "required": [
@@ -5051,7 +5019,6 @@
           "default": {
             "registry": "registry.opencode.de",
             "repository": "bwi/bundesmessenger/backend/container-images/bundesmessenger-web",
-            "tag": "2.18.0-jammy-production",
             "pullPolicy": "IfNotPresent"
           },
           "required": [
@@ -5235,7 +5202,6 @@
               "default": {
                 "registry": "registry.opencode.de",
                 "repository": "bwi/bundesmessenger/backend/container-images/bundesmessenger-call",
-                "tag": "0.4.0-jammy-production",
                 "pullPolicy": "IfNotPresent"
               },
               "required": [
@@ -5321,7 +5287,6 @@
               "default": {
                 "registry": "registry.opencode.de",
                 "repository": "bwi/bundesmessenger/backend/container-images/bundesmessenger-call",
-                "tag": "0.4.0-jammy-production",
                 "pullPolicy": "IfNotPresent"
               },
               "required": [
@@ -5736,7 +5701,6 @@
           "default": {
             "registry": "registry.opencode.de",
             "repository": "bwi/bundesmessenger/backend/container-images/wget",
-            "tag": "1.21.2-jammy-production",
             "pullPolicy": "IfNotPresent"
           },
           "required": [

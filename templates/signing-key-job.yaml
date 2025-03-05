@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- $insideArgoCD := (or .Values.argoCD (.Capabilities.APIVersions.Has "argoproj.io/v1alpha1")) }}
 {{- $secretName := include "matrix-synapse.workername" (dict "global" . "worker" "signingkey") }}
@@ -132,7 +132,11 @@ spec:
               else
                 generate_signing_key -o /synapse/keys/signing.key
               fi
-          image: "{{ printf "%s/%s:%s" .Values.signingkey.job.generateImage.registry .Values.signingkey.job.generateImage.repository ( .Values.signingkey.job.generateImage.tag | default ( include "matrix-synapse.imageTag" . ) ) }}"
+          image: {{ quote (printf "%s/%s:%s"
+            .Values.signingkey.job.generateImage.registry
+            .Values.signingkey.job.generateImage.repository
+            .Values.signingkey.job.generateImage.tag
+          )}}
           imagePullPolicy: {{ .Values.signingkey.job.generateImage.pullPolicy }}
           securityContext:
             {{- toYaml .Values.signingkey.securityContext | nindent 12 }}
