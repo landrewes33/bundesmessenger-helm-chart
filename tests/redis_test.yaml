@@ -1,0 +1,199 @@
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+suite: Redis authentication
+templates:
+  - deployment.yaml
+  - configuration.yaml
+  - demomode/demomode.yaml
+  - secrets.yaml
+  - signing-key-job.yaml
+set:
+  serverName: example.org
+  externalPostgresql.existingSecret: postgresql
+tests:
+  - it: ensures internal Redis works with existingSecret
+    set:
+      redis.enabled: true
+      redis.auth.existingSecret: redis-secret
+      redis.auth.existingSecretPasswordKey: lepass
+      # Using null here would cause Helm to *coalesce* it with the property in
+      # the values.yaml – effectively removing the property. The result would be
+      # *merged* with the subchart’s value, resulting in the use of the
+      # redis subchart’s default, which is of type `string`. To work around
+      # this, we releax the null-ness requirement to simple emptiness.
+      #
+      # Coalesce vs. merge:
+      # https://github.com/helm/helm/blob/d1e9c022c68e36112aa40f6983d4d27e67501cf4/pkg/chartutil/coalesce.go#L252-L293
+      #
+      redis.auth.password: ""
+    asserts:
+      - template: deployment.yaml
+        contains:
+          path: spec.template.spec.containers[?(@.name=="synapse")].env
+          content:
+            name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: redis-secret
+                key: lepass
+      - template: secrets.yaml
+        documentIndex: 0
+        matchRegex:
+          path: stringData['config.yaml']
+          pattern: 'password: "@@REDIS_PASSWORD@@"'
+  - it: ensures internal Redis password is treated as Secret
+    set:
+      redis.enabled: true
+      redis.auth.existingSecret: redis-secret
+      redis.auth.existingSecretPasswordKey: lepass
+      redis.auth.password: P455W02D
+      # Work around helm-unittest dependency gopkg.in/yaml.v3 not handling empty
+      # arrays correctly by adding another entry to the `env` array.
+      # https://github.com/helm-unittest/helm-unittest/issues/501
+      postgresql.enabled: true
+    asserts:
+      - template: deployment.yaml
+        contains:
+          path: spec.template.spec.containers[?(@.name=="synapse")].env
+          content:
+            name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: redis-secret
+                key: lepass
+      - template: secrets.yaml
+        documentIndex: 0
+        matchRegex:
+          path: stringData['config.yaml']
+          pattern: 'password: "@@REDIS_PASSWORD@@"'
+  - it: ensures external Redis works with existingSecret
+    set:
+      redis.enabled: false
+      externalRedis.existingSecret: redis-secret
+      externalRedis.existingSecretPasswordKey: lepass
+      externalRedis.password: null
+    asserts:
+      - template: deployment.yaml
+        contains:
+          path: spec.template.spec.containers[?(@.name=="synapse")].env
+          content:
+            name: REDIS_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: redis-secret
+                key: lepass
+      - template: secrets.yaml
+        matchRegex:
+          path: stringData['config.yaml']
+          pattern: 'password: "@@REDIS_PASSWORD@@"'
+  - it: ensures external Redis works with password
+    set:
+      redis.enabled: false
+      externalRedis.existingSecret: null
+      externalRedis.password: P455W02D
+      # See description above.
+      postgresql.enabled: true
+    asserts:
+      - template: deployment.yaml
+        notContains:
+          any: true
+          path: spec.template.spec.containers[?(@.name=="synapse")].env
+          content:
+            name: REDIS_PASSWORD
+      - template: secrets.yaml
+        documentIndex: 0
+        matchRegex:
+          path: stringData['config.yaml']
+          pattern: 'password: "P455W02D"'
+  - it: ensures external Redis errors on password and externalSecret
+    set:
+      redis.enabled: false
+      externalRedis.existingSecret: redis-secret
+      externalRedis.password: P455W02D
+    asserts:
+      - failedTemplate: {}
+  - it: ensures external Redis errors without credentials
+    set:
+      redis.enabled: false
+      externalRedis.existingSecret: null
+      externalRedis.password: null
+    asserts:
+      - failedTemplate: {}
+---
+suite: Redis Secret generation
+templates:
+  - secrets.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
+  redis.auth.existingSecretPasswordKey: password-key
+tests:
+  - it: ensures internal Redis Secret if required
+    set:
+      redis.enabled: true
+      redis.auth.existingSecret: redis-secret
+      redis.auth.password: ""
+    documentSelector:
+      path: metadata.name
+      value: redis-secret
+    asserts:
+      - containsDocument:
+          kind: Secret
+          apiVersion: v1
+          name: redis-secret
+          any: true
+      - matchRegex:
+          path: stringData.password-key
+          pattern: "^[a-zA-z0-9]{42}$"
+  - it: ensures internal Redis errors if no existingSecret is given
+    set:
+      redis.enabled: true
+      redis.auth.existingSecret: ""
+    asserts:
+      - failedTemplate: {}
+  - it: ensures no internal Redis Secret if not required
+    set:
+      redis.enabled: false
+      externalRedis.existingSecret: redis-secret
+    asserts:
+      - containsDocument:
+          kind: Secret
+          name: redis-secret
+        not: true
+---
+suite: Redis Secret consistency
+templates:
+  - secrets.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
+  redis.enabled: true
+  redis.auth.existingSecretPasswordKey: password-key
+kubernetesProvider:
+  scheme:
+    v1/Secret:
+      gvr:
+        version: v1
+        resource: secrets
+      namespaced: true
+  objects:
+    # An already existing Secret.
+    - apiVersion: v1
+      kind: Secret
+      metadata:
+        name: redis-secret
+        namespace: NAMESPACE
+      data:
+        password-key: bGVwYXNzd29yZA==  # lepassword
+      type: Opaque
+tests:
+  - it: ensures internal Redis Secret is consistent
+    set:
+      redis.auth.existingSecret: redis-secret
+      redis.auth.password: synapse-changed
+    asserts:
+      - failedTemplate: {}
+  - it: ensures internal Redis Secret succeeds if consistent
+    set:
+      redis.auth.existingSecret: redis-secret
+      redis.auth.password: lepassword
+    asserts:
+      - notFailedTemplate: {}

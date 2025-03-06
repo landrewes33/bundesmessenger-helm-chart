@@ -1,5 +1,6 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
+suite: Web Client
 templates:
   - webclient/webclient-deployment.yaml
   - webclient/webclient-configuration.yaml
@@ -7,6 +8,7 @@ templates:
   - nginx-conf.yaml
 set:
   webclient.uri: webclient.example.org
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment if enabled
     template: webclient/webclient-deployment.yaml

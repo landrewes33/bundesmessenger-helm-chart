@@ -1,0 +1,61 @@
+{{/* SPDX-FileCopyrightText: 2024–2025 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if and .Values.ingress.enabled .Values.adminPortal.enabled }}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "adminportal") -}}
+{{- $uri := .Values.adminPortal.uri | required "adminPortal.uri is required." -}}
+{{- $coreName := "synapse-core" -}}
+{{- $uiName := "synapse-ui" -}}
+{{- $apiPath := "/synapse-core" -}}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+  {{- with merge dict
+      .Values.ingress.annotationsAdminPortal
+      .Values.ingress.annotations
+  }}
+  annotations: {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+      {{- if has $.Values.adminPortal.uri .hosts }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+        {{- if .secretName }}
+      secretName: {{ .secretName }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  rules:
+  - host: {{ $uri | quote }}
+    http:
+      paths:
+      - path: {{ $apiPath }}
+        backend:
+          service:
+            name: {{ $name }}-{{ $coreName }}
+            port:
+              number: 8000
+        pathType: Prefix
+      - path: /
+        backend:
+          service:
+            name: {{ $name }}-{{ $uiName }}
+            port:
+              number: 8080
+        pathType: Prefix
+
+{{- end }}

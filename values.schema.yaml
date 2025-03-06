@@ -1,0 +1,5331 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+$id: https://schema.bundesmessenger.dev/bum/v1.12.0/values.schema.json
+type: object
+title: BundesMessenger Helm-Konfiguration
+properties:
+  image:
+    $ref: "#/$defs/image"
+    type: object
+    properties:
+      registry:
+        default: registry.opencode.de
+      repository:
+        title: Repository/Image Konfiguration, für Synapse und Workernodes
+        default: bwi/bundesmessenger/backend/container-images/synapse
+      tag:
+        title: Verwendete Version des Synapse-Abbilds
+      pullSecrets:
+        $ref: "#/$defs/pullSecrets"
+        type: array
+        title: Secrets müssen manuell im Namensraum angelegt werden
+        description: >-
+          ref:
+          https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry
+      pullPolicy:
+        title: Pull-Policy für das konfigurierte Image
+        description: >-
+          imagePullPolicy „Always“, wenn tag ist „latest“ (imagepullpolicy-always.yaml)
+        default: IfNotPresent
+    required:
+      - registry
+      - repository
+      - pullSecrets
+      - pullPolicy
+    unevaluatedProperties: false
+  nameOverride:
+    type: ["null", "string"]
+    description: >-
+      Überschreibt einen Teil des installierten Namens, behält aber den
+      Releasenamen bei.
+    default: null
+  fullnameOverride:
+    type: ["null", "string"]
+    description: Überschreiben Sie den vollständigen Namen des installierten Charts.
+    default: null
+  serverName:
+    type: string
+    title: Matrix-Domänenname
+    description: Wird für den Domänenteil in Ihren MXIDs verwendet.
+  publicServerName:
+    type: ["null", "string"]
+    title: Öffentliche Matrix-Servername
+    description: >-
+      Wird für alle öffentlichen URLs in der Konfiguration, sowie für
+      Client-API-Links im Ingress verwendet.
+  dataPrivacyUrl:
+    type: string
+    title: URL der Datenschutzbestimmungen
+    description: >-
+      Öffentliche URL, unter welcher der Nutzer die Datenschutzbestimmungen
+      einsehen kann. Muss ohne 'https://' angegeben werden.
+  imprintUrl:
+    type: string
+    title: URL des Impressums
+    description: >-
+      Eine URL (ohne 'https://') unter der der Nutzer das Impressum einsehen kann.
+  adminAPIServerName:
+    type: string
+    title: Servername für die Admin-API
+    description: >-
+      Der Servername für den Endpunkt '/_synapse/admin' und alle anderen APIs,
+      die für administrative Konfigurationen im Ingress verwendet werden.
+      Schnittstellen für Konfiguration werden nur über adminAPIServerName zur
+      Verfügung gestellt.
+  monitoring:
+    type: object
+    title: Monitoring mit Prometheus
+    properties:
+      enabled:
+        type: boolean
+        title: Aktivieren des Monitorings für Synapse-Dienste in Prometheus
+        default: false
+      labels:
+        type: object
+        description: >-
+          Labels, die Prometheus Operator als matchLabels benutzt
+          (podMonitorSelector, ruleSelector), um den PodMonitor und die
+          PrometheusRule zu aktivieren. `kubectl get Prometheus --all-namespaces
+          -o jsonpath='{.items[*].spec.podMonitorSelector.matchLabels}'`
+        default: {}
+        unevaluatedProperties: true
+    required:
+      - enabled
+      - labels
+    unevaluatedProperties: false
+  serviceAccount:
+    type: object
+    title: Erstellen eines ServiceAccounts
+    description: >-
+      Beinhaltet gewünschte Annotations oder Nutzung eines vorhandenen
+      ServiceAccounts. Es werden darüber hinaus noch weitere ServiceAccounts
+      angelegt, z.B. für den Signing-Key Job oder Redis. Der ServiceAccount für
+      Redis kann via `redis.serviceAccount.name` konfiguriert werden.
+    properties:
+      create:
+        type: boolean
+        title: Aktivierung der Erstellung eines ServiceAccounts
+        default: true
+      annotations:
+        type: object
+        title: Setzen von Annotations für den ServiceAccount
+        default: {}
+        examples:
+          - eks.amazonaws.com/role-arn: arn:aws:iam::000000000000:role/matrix-synapse
+        unevaluatedProperties: true
+      name:
+        type: ["null", "string"]
+        minLength: 1
+        title: Name des ServiceAccounts für das Deployment
+        description: >-
+          Falls null, wird der Release-Name benutzt.
+        default: null
+    required:
+      - create
+      - annotations
+    unevaluatedProperties: false
+  argoCD:
+    type: boolean
+    title: Manuelle Aktivierung bei Nutzung von ArgoCD
+    description: >-
+      Sollte durch `.Capabilities.APIVersions.Has "argoproj.io/v1alpha1"`
+      erkannt werden, kann hier aber erzwungen werden.
+    default: false
+  signingkey:
+    type: object
+    title: Die Quelle des von Synapse im Verbund verwendeten Signierschlüssels
+    description: >-
+      Aktivieren Sie einen Kubernetes-Job, um einen Signierschlüssel zu erzeugen
+      und zu speichern, wenn noch keiner vorhanden ist. Wenn Sie bereits einen
+      Matrix-Server in Ihrer Domäne betrieben haben, dann wollen Sie den alten
+      Signierschlüssel beibehalten – entweder durch Verwendung der
+      `existingSecret`-Konfiguration, oder indem Sie den alten Schlüssel unter
+      `extraConfig.old_signing_keys` einbinden.
+
+
+      Wenn Sie Ihren Signierschlüssel verlieren, kann es sein, dass der
+      Föderationsverkehr von Ihrer Instanz möglicherweise nicht mehr vom
+      weiteren Netzwerk als vertrauenswürdig eingestuft wird.
+
+
+      Sollte nach dem initialen Durchlauf deaktiviert werden, um Upgrades zu
+      beschleunigen.
+    properties:
+      serviceAccount:
+        type: object
+        title: ServiceAccounts für den signingkey-Job
+        properties:
+          create:
+            type: boolean
+            description: Aktivierung der Erstellung eines ServiceAccounts
+            default: true
+          name:
+            type: ["null", "string"]
+            minLength: 1
+            title: Name des ServiceAccounts für den Signingkey-Job
+            description: >-
+              Null für die Verwendung eines Standardnamens für den ServiceAccount.
+            default: null
+        required:
+          - create
+        unevaluatedProperties: false
+      job:
+        type: object
+        title: Mit dem Job wird zur Installation ein Signierschlüssel erzeugt
+        description: >-
+          Nach der Erstellung des Keys oder bei manueller Einbindung eines Keys
+          (`extraConfig.old_signing_keys`) sollte der Job deaktiviert werden.
+        properties:
+          enabled:
+            type: boolean
+            default: true
+          annotations:
+            type: object
+            title: Annotations für den signing-key-job
+            default: {}
+            examples:
+              - argocd.argoproj.io/hook: PostSync
+                argocd.argoproj.io/hook-delete-policy: HookSucceeded
+            unevaluatedProperties: false
+          generateImage:
+            $ref: "#/$defs/image"
+            type: object
+            properties:
+              registry:
+                default: registry.opencode.de
+              repository:
+                title: Repository/Image Konfiguration für Synapse-signing-key-job
+                description: >-
+                  Es wird dringend empfohlen, dass die gleiche Konfiguration wie
+                  vom Synapse bzw. den Workernodes genutzt wird.
+
+
+                  Ist kein Tag angegeben, wird das Tag aus der Chart.yaml
+                  übernommen (empfohlen).
+                default: bwi/bundesmessenger/backend/container-images/synapse
+              tag:
+                title: Verwendete Version des Synapse-Abbilds
+              pullPolicy:
+                title: PullPolicy für das Image vom Signing-Key-Job
+                default: IfNotPresent
+            required:
+              - registry
+              - repository
+              - pullPolicy
+            unevaluatedProperties: false
+          publishImage:
+            $ref: "#/$defs/image"
+            type: object
+            title: >-
+              Repository/Image-Konfiguration für den Upload des generierten
+              Signing-Schlüssels
+            default:
+              registry: registry.opencode.de
+              repository: bwi/bundesmessenger/backend/container-images/kubectl
+              pullPolicy: IfNotPresent
+            required:
+              - registry
+              - repository
+              - tag
+              - pullPolicy
+            unevaluatedProperties: false
+        required:
+          - enabled
+          - annotations
+          - generateImage
+          - publishImage
+        unevaluatedProperties: false
+      existingSecret:
+        type: ["null", "string"]
+        minLength: 1
+        description: >-
+          Signierschlüssel-Secret, das im Voraus erstellt wurde
+        default: null
+      existingSecretKey:
+        type: ["null", "string"]
+        minLength: 1
+        description: Signing.key im Signierschlüssel-Secret
+        default: null
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        default:
+          runAsUser: 2666
+          fsGroup: 2666
+        unevaluatedProperties: false
+      securityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        default:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 2666
+        unevaluatedProperties: false
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        title: Ressourcen für das Image der Erzeugung vom Signierschlüssel
+        default:
+          limits:
+            cpu: 100m
+            memory: 250Mi
+          requests:
+            cpu: 100m
+            memory: 250Mi
+        unevaluatedProperties: false
+      livenessProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        title: Healthcheck
+        default:
+          exec:
+            command:
+              - /bin/sh
+              - "-c"
+              - /scripts/signing-key-check.sh -o health
+            initialDelaySeconds: 10
+            periodSeconds: 15
+        unevaluatedProperties: false
+      readinessProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        title: Bereitschaftscheck
+        default:
+          exec:
+            command:
+              - /bin/sh
+              - "-c"
+              - /scripts/signing-key-check.sh -o ready
+            initialDelaySeconds: 5
+            periodSeconds: 10
+        unevaluatedProperties: false
+    oneOf:
+      - $comment: Generate new key
+        properties:
+          job:
+            properties:
+              enabled:
+                const: true
+          existingSecret:
+            type: "null"
+          existingSecretKey:
+            type: "null"
+      - $comment: Use existing key
+        properties:
+          job:
+            properties:
+              enabled:
+                const: false
+          existingSecret:
+            type: string
+          existingSecretKey:
+            type: string
+        required:
+          - existingSecret
+          - existingSecretKey
+      - $comment: Use key from legacy config option
+        properties:
+          job:
+            properties:
+              enabled:
+                const: false
+          existingSecret:
+            type: "null"
+          existingSecretKey:
+            type: "null"
+    required:
+      - serviceAccount
+      - job
+      - podSecurityContext
+      - securityContext
+      - resources
+      - livenessProbe
+      - readinessProbe
+    unevaluatedProperties: false
+  ipv4Only:
+    type: boolean
+    title: Schaltet alle internen IP-Adressevergaben auf IPv4-only
+    description: >-
+      Wenn `true` sind alle Listener und Anbindungspunkte `0.0.0.0`, wenn
+      `false` sind einige Listener bzw. Anbindungspunkte `::` (IPv6). Derzeit
+      wird nur reine IPv4 (https://github.com/element-hq/synapse/issues/13107)
+      oder Dual-Stack Umgebungen unterstützt, keine reine IPv6 Umgebung.
+    default: true
+  config:
+    type: object
+    title: Matrix-Konfigurationswerte, die sich auf andere Teile des Charts auswirken.
+    description: >-
+      Jeden Wert, der nicht von diesem Block behandelt wird, sollten Sie
+      stattdessen im Abschnitt `extraConfig` unten einstellen. Ref:
+      https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
+    properties:
+      publicBaseurl:
+        type: ["null", "string"]
+        title: Die öffentlich zugängliche URL für die Synapse-Instanz
+        description: Lautet standardmäßig `https://<publicServerName>`
+        default: null
+        examples:
+          - https://matrix.example.com
+      logLevel:
+        type: string
+        enum:
+          - DEBUG
+          - INFO
+          - WARNING
+          - ERROR
+          - CRITICAL
+          - NOTSET
+        title: Aktiviert eine Standardkonfiguration für das Logging
+        description: >-
+          Benötigt, um unnötige Details nicht zu erfassen. Die Deaktivierung ist
+          nötig, wenn z.B. das logLevel für alles auf DEBUG erhöht werden soll.
+          Die Einstellungen befinden sich in der Datei
+          /files/default_logging.yaml.
+        default: INFO
+      useRecommendedLogging:
+        type: boolean
+        title: Use TerseJsonFormatter structured logging
+        description: >-
+          Dokumentation:
+          https://element-hq.github.io/synapse/latest/structured_logging.html
+        default: true
+      useStructuredLogging:
+        type: boolean
+        title: Use TerseJsonFormatter structured logging
+        description: >-
+          Dokumentation:
+          https://element-hq.github.io/synapse/latest/structured_logging.html
+        default: false
+      extraLoggers:
+        type: object
+        title: Geben Sie hier zusätzliche Logger-Konfigurationen an.
+        description: >-
+          Ref:
+          https://element-hq.github.io/synapse/latest/structured_logging.html.
+          Diese Konfiguration wird mit dem useRecommendedLogging
+          zusammengeführt, wobei extraLoggers die höhere Priorität hat und bei
+          Bedarf die Standardkonfiguration überschreibt.
+        default: {}
+        examples:
+          - synapse.storage.SQL.level: WARNING
+        unevaluatedProperties: true
+      reportStats:
+        type: boolean
+        description: >-
+          Erfassung Nutzungsstatistiken (Hostname, Synapse-Version und -Uptime,
+          total_users usw.) an die Entwickler melden.
+        default: false
+      enable_metrics:
+        type: boolean
+        description: Metriken erfassen
+        default: true
+      recaptcha:
+        type: object
+        title: Schützen Sie die Registrierung mit recaptcha
+        description: >-
+          Die Verwendung ist optional. Ref:
+          https://matrix-org.github.io/synapse/latest/CAPTCHA_SETUP.html
+        properties:
+          publicKey:
+            type: ["null", "string"]
+            minLength: 1
+            default: null
+          privateKey:
+            type: ["null", "string"]
+            minLength: 1
+            default: null
+        unevaluatedProperties: false
+      enableRegistration:
+        type: boolean
+        title: Registrierungskonfiguration
+        description: >-
+          Beachten Sie, dass die Registrierung mit dem containerinternen
+          Werkzeug register_new_matrix_user immer möglich ist.
+          Synapse-Admin/Admin-Portal kann dafür genutzt werden
+        default: false
+      registrationSharedSecret:
+        type: ["null", "string"]
+        description: >-
+          Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge
+          gesetzt, wenn er nicht angegeben wird
+        default: null
+      macaroonSecretKey:
+        type: ["null", "string"]
+        description: >-
+          Es wird dringend empfohlen, diesen Wert auf einen secure value
+          (secret) zu setzen
+        default: null
+      extraListeners:
+        type: array
+        description: Extra listener
+        items:
+          properties: {}
+        default: []
+      trustedKeyServers:
+        type: array
+        title: Vertrauenswürdige Schlüssel-Server
+        description: >-
+          Eine Gruppe von vertrauenswürdigen Servern, die zu kontaktieren sind,
+          wenn ein anderer Server nicht auf eine Signierschlüssel-Anfrage
+          antwortet. Per Default ein leeres Array, da so nur bekannte Server
+          direkt angefragt werden, oder das Event verfällt.
+        default: []
+        examples:
+          - - server_name: matrix.org
+              verify_keys:
+                "ed25519:auto": Noi6WqcDj0QmPxCNQqgezwTlBKrfqehY1u2FyWP9uYw
+    required:
+      - logLevel
+      - useRecommendedLogging
+      - useStructuredLogging
+      - extraLoggers
+      - reportStats
+      - enable_metrics
+      - recaptcha
+      - enableRegistration
+      - extraListeners
+      - trustedKeyServers
+    unevaluatedProperties: false
+  extraConfig:
+    type: object
+    title: Beliebige weitere Synapse-Konfiguration
+    description: >-
+      Vorkonfiguriert nach Best Practise BWI GmbH. Ref:
+      https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
+    properties:
+      auto_accept_invites:
+        type: object
+        description: >-
+          Durch das automatische Annehmen von Einladungen wird gesteuert, ob
+          Benutzern eine Einladungsanfrage angezeigt wird oder ob sie
+          stattdessen automatisch einem Raum beitreten, wenn sie eine Einladung
+          erhalten. Es muss sicher gestellt werden, dass der Worker existent
+          ist.
+        default:
+          enabled: true
+          only_for_direct_messages: true
+          only_from_local_users: true
+        unevaluatedProperties: true
+      old_signing_keys:
+        type: ["null", "array"]
+        title: Liste von vorherigen Signingkeys
+        description: >-
+          Zum Beispiel: "ed25519:id": {key: "base64string", expired_ts: 123456789123}
+        default: null
+      max_upload_size:
+        type: ["null", "string"]
+        minLength: 1
+        title: Maximale Dateigröße für Uploads von Medien
+        description: >-
+          Zu beachten ist, dass dies auch vom Reverse Proxy erlaubt werden muss,
+          siehe: "ingress.annotations:
+          nginx.ingress.kubernetes.io/proxy-body-size"
+        default: 50M
+      max_avatar_size:
+        type: ["null", "string"]
+        minLength: 1
+        title: Maximal zulässige Dateigröße für ein Benutzer-Profilbild
+        default: 5M
+      media_retention:
+        type: ["null", "object"]
+        title: Angabe wann Medien von Repository gelöscht werden
+        description: Für die Zeitdauer gilt das Datum des letzten Zugriffs/Downloads.
+        properties:
+          remote_media_lifetime:
+            type: ["null", "string"]
+            minLength: 1
+            title: Verwahrdauer fremder Medien im Cache
+            description: >-
+              Bei Bedarf werden diese vom remote Server erneut heruntergeladen.
+            default: 90d
+          local_media_lifetime:
+            type: ["null", "string"]
+            minLength: 1
+            title: Verwahrdauer eigener Medien im Cache
+            description: >-
+              Werden sie gelöscht, sind sie für den Benutzer nicht mehr abrufbar.
+            default: null
+        unevaluatedProperties: true
+      require_auth_for_profile_requests:
+        type: ["null", "boolean"]
+        description: Authentifizierung notwendig für User-Suche
+        default: true
+      limit_profile_requests_to_users_who_share_rooms:
+        type: ["null", "boolean"]
+        description: Limitiere Requests für Nutzer mit shared rooms
+        default: false
+      include_profile_data_on_invite:
+        type: ["null", "boolean"]
+        description: >-
+          Übersenden von Profildaten, wenn Chat gestartet wird
+        default: true
+      enable_set_displayname:
+        type: ["null", "boolean"]
+        description: Nutzer können Anzeigenamen ändern
+        default: false
+      allow_public_rooms_without_auth:
+        type: ["null", "boolean"]
+        description: Öffentliche Räume ohne Login/Authentifizierung
+        default: false
+      block_non_admin_invites:
+        type: ["null", "boolean"]
+        description: Einladung die von unpriviligierten Nutzern stammen blocken
+        default: false
+      ip_range_whitelist:
+        type: ["null", "array"]
+        title: IP-Allowlist für Föderation und Push-Services
+        description: Wird zwingend benötigt.
+        items:
+          properties: {}
+        default:
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+      presence:
+        type: ["null", "object"]
+        description: Anwesenheitsstatus anzeigen
+        properties:
+          enabled:
+            type: ["null", "boolean"]
+            default: false
+        unevaluatedProperties: true
+      enable_search:
+        type: ["null", "boolean"]
+        description: Nutzersuche zulassen
+        default: true
+      user_directory:
+        type: ["null", "object"]
+        description: Nutzerverzeichnis erstellen
+        properties:
+          enabled:
+            type: ["null", "boolean"]
+            default: true
+          search_all_users:
+            type: ["null", "boolean"]
+            description: Suche alle Nutzer
+            default: true
+        unevaluatedProperties: true
+      require_membership_for_aliases:
+        type: ["null", "boolean"]
+        description: Nur Raummitglieder können einen Alias für einen Raum konfigurieren.
+        default: true
+      delete_stale_devices_after:
+        type: ["null", "string"]
+        minLength: 1
+        description: >-
+          Meldet und löscht alle Geräte, auf die länger als die angegebene
+          Zeitspanne nicht zugegriffen wurde.
+        default: 90d
+      user_ips_max_age:
+        type: ["null", "string"]
+        minLength: 1
+        description: Maximale Speicherzeit für IPs von Nutzern
+        default: 28d
+      forget_rooms_on_leave:
+        type: ["null", "boolean"]
+        description: >-
+          Benutzer vergessen Räume beim Verlassen automatisch. Nur wenn alle
+          Nutzer einen Raum verlassen und vergessen haben, wird er automatisch
+          vom Server gelöscht.
+        default: true
+      forgotten_room_retention_period:
+        type: ["null", "string"]
+        minLength: 1
+        description: >-
+          Zeitraum nachdem lokal vergessene Räume aus der Datenbank gelöscht
+          werden. Wenn der Wert undefiniert oder null ist, wird nichts gelöscht.
+        default: 28d
+      retention:
+        type: ["null", "object"]
+        title: Nachrichtenaufbewahrungsrichtlinien
+        description: Die Einstellung wird auf Raumebene vorgenommen.
+        properties:
+          enabled:
+            type: ["null", "boolean"]
+            default: false
+        unevaluatedProperties: true
+      url_preview_enabled:
+        type: ["null", "boolean"]
+        description: URL-Vorschau
+        default: false
+      oembed:
+        type: ["null", "object"]
+        title: Eingebettete URL-Darstellung von Drittanbietern
+        properties:
+          disable_default_providers:
+            type: ["null", "boolean"]
+            default: true
+        unevaluatedProperties: true
+      enable_3pid_lookup:
+        type: ["null", "boolean"]
+        title: thirdParty Identifier lookup (3pid)
+        default: false
+      allow_guest_access:
+        type: ["null", "boolean"]
+        title: Gastzugang erlauben
+        default: false
+      password_config:
+        type: ["null", "object"]
+        title: Passwortkonfiguration
+        properties:
+          enabled:
+            type: ["null", "boolean"]
+            title: Aktivieren des Login mit Passwort
+            default: true
+          localdb_enabled:
+            type: ["null", "boolean"]
+            title: Lokale Nutzerdatenbank einschalten
+            description: >-
+              Falls deaktiviert, müssen andere `password_providers` definiert werden.
+            default: true
+          policy:
+            type: ["null", "object"]
+            description: Passwortpolicy Konfigurationen
+            properties:
+              enabled:
+                type: ["null", "boolean"]
+                description: Policy aktivieren
+                default: true
+              minimum_length:
+                type: ["null", "integer"]
+                description: Passwortmindestlänge in Zeichen
+                default: 8
+                minimum: 8
+              require_digit:
+                type: ["null", "boolean"]
+                description: Zahl muss mit genutzt werden
+                default: true
+              require_symbol:
+                type: ["null", "boolean"]
+                description: Sonderzeichen muss genutzt werden
+                default: true
+              require_lowercase:
+                type: ["null", "boolean"]
+                description: Kleinbuchstaben muss genutzt werden
+                default: true
+              require_uppercase:
+                type: ["null", "boolean"]
+                description: Großbuchstaben muss genutzt werden
+                default: true
+            dependentRequired:
+              require_lowercase:
+                - require_uppercase
+              require_uppercase:
+                - require_lowercase
+            unevaluatedProperties: true
+        unevaluatedProperties: true
+      ui_auth:
+        type: ["null", "object"]
+        properties:
+          session_timeout:
+            type: ["null", "string"]
+            minLength: 1
+            description: User-Interactive Authentication API timeout
+            default: 15s
+        unevaluatedProperties: true
+      push:
+        type: ["null", "object"]
+        properties:
+          include_content:
+            type: ["null", "boolean"]
+            description: >-
+              Push Modul verschickt Inhalt der Nachricht über
+              Google-/Apple-Push-Services.
+            default: false
+        unevaluatedProperties: true
+      encryption_enabled_by_default_for_room_type:
+        type: ["null", "string"]
+        enum:
+          - all
+          - invite
+          - "off"
+        description: Verschlüsselung für neue Räume
+        default: all
+      stats:
+        type: ["null", "object"]
+        title: Nutzer- und Raumstatistiken
+        description: >-
+          Beachten Sie, das Deaktivieren kann dazu führen, dass bestimmte
+          Funktionen (z.B. das Raumverzeichnis) nicht korrekt funktionieren.
+          Details:
+          https://element-hq.github.io/synapse/latest/room_and_user_statistics.html
+        properties:
+          enabled:
+            type: ["null", "boolean"]
+            title: Einschalten der Nutzer- und Raumstatistiken
+            default: true
+        unevaluatedProperties: true
+      enable_room_list_search:
+        type: ["null", "boolean"]
+        description: Raumsuche
+        default: true
+      opentracing:
+        type: ["null", "object"]
+        description: >-
+          OpenTracing ist ein Werkzeug, das einen Einblick in den kausalen
+          Zusammenhang der Arbeit in und zwischen Servern gibt. Die einzelnen
+          Server verfolgen Ereignisse und melden sie an einen zentralen Server –
+          im Fall von Synapse: Jaeger
+        properties:
+          enabled:
+            type: ["null", "boolean"]
+            default: false
+        unevaluatedProperties: true
+      dynamic_thumbnails:
+        type: ["null", "boolean"]
+        description: dynamisches Vorschaubild
+        default: true
+      experimental_features:
+        type: ["null", "object"]
+        title: Experimentelle Features
+        default: {}
+      allow_public_rooms_over_federation:
+        type: ["null", "boolean"]
+        description: öffentliche Räume über Föderation erlauben
+        default: false
+      federation_domain_whitelist:
+        type: ["null", "array"]
+        description: Allowlist (Matrix-Server-Namen) für Föderation
+        items:
+          properties: {}
+        default: null
+      prevent_media_downloads_from:
+        type: ["null", "array"]
+        description: >-
+          Eine Liste von Matrix-Servern, von denen die eigenen Benutzer keine
+          Medien herunterladen dürfen.
+        items:
+          properties: {}
+        default: null
+      federation_custom_ca_list:
+        type: ["null", "array"]
+        description: >-
+          Liste der CA-Files im PEM-Format für die föderierten Instanzen. Diese
+          müssen als Secret im Namespace des Deployments vorliegen, da sie im
+          Synapse-Container gemountet werden.
+
+
+          Hinweis: Stellen Sie sicher, dass Sie eine PEM-Datei verwenden, die
+          die vollständige Zertifikatskette einschließlich aller
+          Zwischenzertifikate   enthält (wenn Sie beispielsweise certbot
+          verwenden, verwenden Sie fullchain.pem als Ihr Zertifikat, nicht
+          cert.pem).
+
+
+          Der Pfad wird durch Secretname und Zertifikatsname(inklusive
+          ".pem"-Endung) angegeben.
+
+
+          Aus dem Pfad wird der Name des Secrets abgeleitet. Bei dem angegebenen
+          Zertifikat "/SECRETNAME1/myCA1.pem" muss sich im Secret "SECRETNAME1"
+          die Datei "myCA1.pem" befinden. Sie müssen das Secret manuell selbst
+          vorab anlegen.
+        items:
+          properties: {}
+        default: null
+      federation:
+        type: ["null", "object"]
+        title: Einstellungen zur Föderation
+        description: >-
+          Die folgenden Optionen beziehen sich auf die Konfiguration der
+          Timeout- und Wiederholungslogik für eine Föderations-Anfrage,
+          unabhängig von den anderen Anfragen. Der Algorithmus mit kurzer
+          Wiederholung (short-retry) wird verwendet, wenn etwas oder jemand auf
+          eine Antwort auf die Anfrage wartet, während der Algorithmus mit
+          langer Wiederholung (long-retry) für Anfragen verwendet wird, die im
+          Hintergrund ausgeführt werden, wie z. B. das Senden einer
+          Föderationstransaktion
+        properties:
+          client_timeout:
+            type: ["null", "string"]
+            description: Timeout für die Föderation-Anfragen
+            default: 60s
+          max_short_retry_delay:
+            type: ["null", "string"]
+            description: >-
+              Maximale Verzögerung, die für den short-retry verwendet werden soll.
+            default: 2s
+          max_long_retry_delay:
+            type: ["null", "string"]
+            description: >-
+              Maximale Verzögerung, die für den long-retry verwendet werden soll.
+            default: 60s
+          max_short_retries:
+            type: ["null", "integer"]
+            description: Maximale Anzahl von Wiederholungsversuchen für den short-retry.
+            default: 3
+          max_long_retries:
+            type: ["null", "integer"]
+            description: Maximale Anzahl von Wiederholungsversuchen für den long-retry.
+            default: 10
+          destination_min_retry_interval:
+            type: ["null", "string"]
+            title: Optionen zur Wiederholungslogik
+            description: >-
+              Die folgenden Optionen steuern die Wiederholungslogik bei der
+              Kommunikation mit einem bestimmten Homeserver. Im Gegensatz zu den
+              vorherigen Konfigurationsoptionen gelten diese Werte für alle
+              Anforderungen für ein bestimmtes Ziel und der Status des Backoffs
+              wird in der Datenbank gespeichert.
+
+
+              Der anfängliche Backoff (Interval), nach erstem Fehlschlag
+            default: 10m
+          destination_retry_multiplier:
+            type: ["null", "number"]
+            description: >-
+              Multiplier für wiederholende Fehler zum anfängliche Backoff (Interval).
+            default: 2
+          destination_max_retry_interval:
+            type: ["null", "string"]
+            description: Eine Kappungsgrenze (Limit) des Backoff (Interval).
+            default: 1w
+        dependentRequired:
+          client_timeout:
+            - max_short_retry_delay
+            - max_long_retry_delay
+            - max_short_retries
+            - max_long_retries
+          max_short_retry_delay:
+            - client_timeout
+            - max_long_retry_delay
+            - max_short_retries
+            - max_long_retries
+          max_long_retry_delay:
+            - max_short_retry_delay
+            - client_timeout
+            - max_short_retries
+            - max_long_retries
+          max_short_retries:
+            - max_short_retry_delay
+            - max_long_retry_delay
+            - client_timeout
+            - max_long_retries
+          max_long_retries:
+            - max_short_retry_delay
+            - max_long_retry_delay
+            - max_short_retries
+            - client_timeout
+          destination_min_retry_interval:
+            - destination_retry_multiplier
+            - destination_max_retry_interval
+          destination_retry_multiplier:
+            - destination_min_retry_interval
+            - destination_max_retry_interval
+          destination_max_retry_interval:
+            - destination_retry_multiplier
+            - destination_min_retry_interval
+        unevaluatedProperties: true
+    dependentRequired:
+      federation_custom_ca_list:
+        - federation_domain_whitelist
+    unevaluatedProperties: true
+  extraSecrets:
+    type: object
+    title: Zusätzliche Secrets
+    description: >-
+      Geben Sie hier eine beliebige – geheime – Synapse-Konfiguration an. Diese
+      Werte werden in Secrets anstelle von Configmaps gespeichert. Ref:
+      https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
+    default: {}
+    examples:
+      - password_config:
+          pepper: ""
+    unevaluatedProperties: true
+  synapse:
+    type: object
+    title: Synapse Hauptkonfiguration
+    properties:
+      strategy:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - RollingUpdate
+              - Recreate
+            description: >-
+              Nur wirklich anwendbar, wenn das Deployment ein RWO PV angehängt
+              hat (z.B. wenn Media Repository für den Haupt-Synapse-Container
+              aktiviert ist).
+
+              Da Replikate = 1 sind, kann eine Aktualisierung "hängen bleiben",
+              da der vorherige Container mit dem PV verbunden bleibt und der
+              "neu-aufgebaute" Container nie starten kann. Das Ändern der
+              Strategie auf "Recreate" wird den einzelnen vorherigen Container
+              beenden, so dass der neue, ankommende Container sich mit dem PV
+              verbinden kann.
+            default: RollingUpdate
+        required:
+          - type
+        unevaluatedProperties: false
+      annotations:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/annotations
+        type: object
+        default: {}
+        unevaluatedProperties: false
+      labels:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/labels
+        type: object
+        default: {}
+        unevaluatedProperties: false
+      extraEnv:
+        type: array
+        description: >-
+          Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-Pod
+          anzuwenden sind.
+
+
+          Dies ist unter anderem für die Nutzung eines ausgehenden Proxies
+          (https://element-hq.github.io/synapse/latest/setup/forward_proxy.html)
+          notwendig.
+
+
+          Achtung: U.U. sind die gleichen Einstellungen zusätzlich unter
+          "workers.default" bzw. für den Sygnal selbst zu konfigurieren. Der
+          Sygnal muss in der "no_proxy" Ausnahme enthalten sein, da Synapse ihn
+          sonst versucht via Proxy zu erreichen. Für die BuM Apps ist dies
+          "push-local".
+        items:
+          type: object
+          unevaluatedProperties: false
+        default: []
+        examples:
+          - - name: LD_PRELOAD
+              value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+            - name: SYNAPSE_CACHE_FACTOR
+              value: "2"
+            - name: http_proxy
+              value: http://USERNAME:PASSWORD@proxy.example.com:8080/
+            - name: https_proxy
+              value: http://USERNAME:PASSWORD@proxy.example.com:8080/
+            - name: no_proxy
+              value: "*.cluster.local,push-local"
+      extraVolumes:
+        type: array
+        title: Zusätzliche in Synapse zu mountende Datenträger (Volumes)
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Volume.schema.json
+          type: object
+          unevaluatedProperties: false
+        default: []
+        examples:
+          - name: spamcheck
+            configMap:
+              name: spamcheck
+      extraVolumeMounts:
+        type: array
+        title: Zusätzliche in Synapse zu mountende Datenträgerpfade (Volumes)
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.VolumeMount.schema.json
+          type: object
+          unevaluatedProperties: false
+        default: []
+        examples:
+          - - name: spamcheck
+              mountPath: /usr/local/lib/python3.10/site-packages/company
+              readOnly: true
+      extraCommands:
+        type: array
+        title: Zusätzliche Befehle, die beim Starten von Synapse ausgeführt werden
+        items:
+          type: string
+        default: []
+        examples:
+          - - apt-get update -yqq && apt-get install patch -yqq
+            - patch -d/usr/local/lib/python3.10/site-packages/synapse -p2 < /synapse/patches/something.patch
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        default:
+          runAsUser: 2666
+          fsGroup: 2666
+        unevaluatedProperties: false
+      securityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        default:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 2666
+        unevaluatedProperties: false
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        description: >-
+          Begrenzungen und Anforderungen für CPU-Ressourcen werden in
+          CPU-Einheiten gemessen. In Kubernetes entspricht eine CPU-Einheit
+          einem physischen CPU-Kern oder einem virtuellen Kern, je nachdem, ob
+          es sich bei dem Knoten um einen physischen Host oder eine virtuelle
+          Maschine handelt, die innerhalb einer physischen Maschine ausgeführt
+          wird.
+
+
+          Anteilige Anforderungen sind zulässig.
+
+
+          Wenn Sie einen Container definieren und
+          `spec.containers[].resources.requests.cpu` auf 0,5 setzen, fordern Sie
+          nur halb so viel CPU-Zeit an, als wenn Sie 1,0 CPU anfordern würden.
+
+
+          Für CPU-Ressourceneinheiten entspricht der Mengenausdruck 0,1 dem
+          Ausdruck 100m, was als "einhundert Milli-CPU" gelesen werden kann.
+
+
+          Manche Leute sagen "einhundert Milli-Cores", und das bedeutet
+          dasselbe.
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf den Haupt-Synapse-Container
+                  anzuwenden sind.
+                default: 1500m
+              memory:
+                title: >-
+                  RAM Ressourcengrenzen, die auf den Haupt-Synapse-Container
+                  anzuwenden sind.
+                default: 2000Mi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf den
+                  Haupt-Synapse-Container anzuwenden sind.
+                default: 500m
+              memory:
+                title: >-
+                  Anforderungen an RAM Ressourcen, die auf den
+                  Haupt-Synapse-Container anzuwenden sind.
+                default: 1000Mi
+        unevaluatedProperties: false
+      livenessProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        properties:
+          periodSeconds:
+            default: 10
+          httpGet:
+            properties:
+              path:
+                default: /health
+              port:
+                default: metrics
+        unevaluatedProperties: false
+      readinessProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        properties:
+          periodSeconds:
+            default: 3
+          httpGet:
+            properties:
+              path:
+                default: /health
+              port:
+                default: metrics
+        unevaluatedProperties: false
+      startupProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        properties:
+          failureThreshold:
+            default: 6
+          httpGet:
+            properties:
+              path:
+                default: /health
+              port:
+                default: metrics
+        unevaluatedProperties: false
+      nodeSelector:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/nodeSelector
+        type: object
+        title: Node Selektoren, die für den Haupt-Synapse-Container festgelegt werden
+        default: {}
+        unevaluatedProperties: false
+      tolerations:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/tolerations
+        type: array
+        title: >
+          Tolerations bzw. Taints die für den Haupt-Synapse-Container genutzt
+          werden sollen
+        default: []
+        unevaluatedProperties: false
+      affinity:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/affinity
+        type: object
+        default: {}
+        unevaluatedProperties: false
+    required:
+      - strategy
+      - annotations
+      - labels
+      - extraEnv
+      - extraVolumes
+      - extraVolumeMounts
+      - extraCommands
+      - podSecurityContext
+      - securityContext
+      - resources
+      - livenessProbe
+      - readinessProbe
+      - startupProbe
+      - nodeSelector
+      - tolerations
+      - affinity
+    unevaluatedProperties: false
+  workers:
+    type: object
+    properties:
+      default:
+        $ref: "#/$defs/worker"
+        type: object
+        title: Standardkonfiguration für Worker
+        description: >-
+          Wird an alle Worker vererbt und kann für jeden Workertyp überschrieben werden.
+        required:
+          - enabled
+          - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
+        unevaluatedProperties: false
+      generic_worker:
+        $ref: "#/$defs/worker"
+        type: object
+        title: Der generische Worker kann für die meisten Endpunkte verwendet werden
+        description: >-
+          Seien Sie vorsichtig, wenn Sie die Sync-Endpunkte aktivieren, da sie
+          große Mengen an Ressourcen verbrauchen können. Weitere Informationen
+          finden Sie unter der obigen Informations-URL. Ein angemessener
+          Lastausgleich mit der K8s-Ingress-Ressource ist möglicherweise nicht
+          möglich.
+        properties:
+          enabled:
+            type: boolean
+            title: Aktivieren von generischen Workern
+            default: true
+          replicaCount:
+            type: integer
+            default: 2
+          listeners:
+            type: array
+            title: Entsprechende Endpunkte für den generischen Worker
+            default:
+              - client
+              - federation
+          csPaths:
+            type: array
+            default:
+              - /_matrix/client/(r0|v3)/sync$
+              - /_matrix/client/(api/v1|r0|v3)/events$
+              - /_matrix/client/(api/v1|r0|v3)/initialSync$
+              - /_matrix/client/(api/v1|r0|v3)/rooms/[^/]+/initialSync$
+              - /_matrix/client/(api/v1|r0|v3|unstable)/createRoom$
+              - /_matrix/client/(api/v1|r0|v3|unstable)/publicRooms$
+              - /_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/joined_members$
+              - /_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/context/.*
+              - /_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/members$
+              - /_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/state$
+              - /_matrix/client/v1/rooms/.*/hierarchy$
+              - /_matrix/client/(v1|unstable)/rooms/.*/relations/
+              - /_matrix/client/v1/rooms/.*/threads$
+              - /_matrix/client/unstable/im.nheko.summary/rooms/.*/summary$
+              - /_matrix/client/(r0|v3|unstable)/account/3pid$
+              - /_matrix/client/(r0|v3|unstable)/account/whoami$
+              - /_matrix/client/(r0|v3|unstable)/devices$
+              - /_matrix/client/versions$
+              - /_matrix/client/(api/v1|r0|v3|unstable)/voip/turnServer$
+              - /_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/event/
+              - /_matrix/client/(api/v1|r0|v3|unstable)/joined_rooms$
+              - /_matrix/client/(api/v1|r0|v3|unstable/.*)/rooms/.*/aliases
+              - /_matrix/client/v1/rooms/.*/timestamp_to_event$
+              - /_matrix/client/(api/v1|r0|v3|unstable)/search$
+              - /_matrix/client/(r0|v3|unstable)/user/.*/filter(/|$)
+              - /_matrix/client/(api/v1|r0|v3|unstable)/directory/room/.*$
+              - /_matrix/client/(r0|v3|unstable)/capabilities$
+              - /_matrix/client/(r0|v3|unstable)/notifications$
+              - /_matrix/client/(r0|v3|unstable)/keys/query$
+              - /_matrix/client/(r0|v3|unstable)/keys/changes$
+              - /_matrix/client/(r0|v3|unstable)/keys/claim$
+              - /_matrix/client/(r0|v3|unstable)/room_keys(/.*)?(/.*)?$
+              - /_matrix/client/(r0|v3|unstable)/keys/upload(/.*)?$
+              - /_matrix/client/(api/v1|r0|v3|unstable)/login$
+              - /_matrix/client/(r0|v3|unstable)/register$
+              - /_matrix/client/(r0|v3|unstable)/register/available$
+              - /_matrix/client/v1/register/m.login.registration_token/validity$
+              - /_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/redact
+              - /_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/send
+              - /_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/(join|invite|leave|ban|unban|kick)$
+              - /_matrix/client/(api/v1|r0|v3|unstable)/join/
+              - /_matrix/client/(api/v1|r0|v3|unstable)/knock/
+              - /_matrix/client/(api/v1|r0|v3|unstable)/profile/
+              - /_matrix/client/(v1|unstable/org.matrix.msc2716)/rooms/.*/batch_send
+              - /_matrix/client/(r0|v3|unstable)/user_directory/search$
+              - /_matrix/client/(api/v1|r0|v3|unstable)/presence/
+          paths:
+            type: array
+            default:
+              - /_matrix/federation/(v1|v2)/event/
+              - /_matrix/federation/(v1|v2)/state/
+              - /_matrix/federation/(v1|v2)/state_ids/
+              - /_matrix/federation/(v1|v2)/backfill/
+              - /_matrix/federation/(v1|v2)/get_missing_events/
+              - /_matrix/federation/(v1|v2)/publicRooms
+              - /_matrix/federation/(v1|v2)/query/
+              - /_matrix/federation/(v1|v2)/make_join/
+              - /_matrix/federation/(v1|v2)/make_leave/
+              - /_matrix/federation/(v1|v2)/send_join/
+              - /_matrix/federation/(v1|v2)/send_leave/
+              - /_matrix/federation/(v1|v2)/invite/
+              - /_matrix/federation/(v1|v2)/query_auth/
+              - /_matrix/federation/(v1|v2)/event_auth/
+              - /_matrix/federation/v1/timestamp_to_event/
+              - /_matrix/federation/(v1|v2)/exchange_third_party_invite/
+              - /_matrix/federation/(v1|v2)/user/devices/
+              - /_matrix/federation/(v1|v2)/get_groups_publicised$
+              - /_matrix/key/v2/query
+              - /_matrix/federation/v1/hierarchy/
+              - /_matrix/federation/(v1|v2)/send/
+          autoscaling:
+            $comment: unevaluatedProperties commented out due to bug in jsonschema.
+            type: object
+            default:
+              enabled: false
+              minReplicas: 2
+              maxReplicas: 10
+              targetCPUUtilizationPercentage: 80
+              targetMemoryUtilizationPercentage: 80
+            required:
+              - enabled
+              - minReplicas
+              - maxReplicas
+              - targetCPUUtilizationPercentage
+              - targetMemoryUtilizationPercentage
+            # unevaluatedProperties: false
+        required:
+          - enabled
+          - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
+        unevaluatedProperties: false
+      federation_reader:
+        $ref: "#/$defs/worker"
+        type: object
+        title: Allgemeine Worker in spezifische Belange aufteilen
+        description: >-
+          Wird zum Beispiel den Empfang von Föderationstransaktionen benötigt.
+
+
+          Hinweis: Diese Worker sollten eingehenden Datenverkehr basierend auf
+          der Quell-IP routen lassen, was noch als TODO offen ist.
+          https://element-hq.github.io/synapse/latest/workers.html#load-balancing
+        properties:
+          enabled:
+            type: boolean
+            title: Aktiviere spez. Worker für Föderationsanfragen
+            description: >-
+              Wenn dieser Worker genutzt wird, können die URLs aus dem
+              generic_worker entfernt werden.
+            default: false
+          listeners:
+            type: array
+            description: Endpunkte für den Föderationsworker
+            default:
+              - federation
+          paths:
+            type: array
+            default:
+              - /_matrix/federation/(v1|v2)/event/
+              - /_matrix/federation/(v1|v2)/state/
+              - /_matrix/federation/(v1|v2)/state_ids/
+              - /_matrix/federation/(v1|v2)/backfill/
+              - /_matrix/federation/(v1|v2)/get_missing_events/
+              - /_matrix/federation/(v1|v2)/publicRooms
+              - /_matrix/federation/(v1|v2)/query/
+              - /_matrix/federation/(v1|v2)/make_join/
+              - /_matrix/federation/(v1|v2)/make_leave/
+              - /_matrix/federation/(v1|v2)/send_join/
+              - /_matrix/federation/(v1|v2)/send_leave/
+              - /_matrix/federation/(v1|v2)/invite/
+              - /_matrix/federation/(v1|v2)/query_auth/
+              - /_matrix/federation/(v1|v2)/event_auth/
+              - /_matrix/federation/v1/timestamp_to_event/
+              - /_matrix/federation/(v1|v2)/exchange_third_party_invite/
+              - /_matrix/federation/(v1|v2)/user/devices/
+              - /_matrix/federation/(v1|v2)/get_groups_publicised$
+              - /_matrix/key/v2/query
+              - /_matrix/federation/v1/hierarchy/
+              - /_matrix/federation/(v1|v2)/send/
+        required:
+          - enabled
+          - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
+        unevaluatedProperties: false
+      pusher:
+        $ref: "#/$defs/worker"
+        type: object
+        title: Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen
+        description: >-
+          (pusher-worker -> Sygnal -> Push-Provider (Apple oder Google))
+
+          Ein lokaler Sygnal-Service und -Container ist Bestandteil des
+          Helm-Charts. Die Pusher-Worker werden als `pusher_instances` in die
+          Synapse-Konfiguration übernommen.
+        properties:
+          enabled:
+            type: boolean
+            default: false
+        required:
+          - enabled
+          - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
+        unevaluatedProperties: false
+      appservice:
+        $ref: "#/$defs/worker"
+        type: object
+        title: Worker für das Senden von Daten an registrierte Anwendungsdienste
+        description: >-
+          Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+          Diese wird als `notify_appservices_from_worker` in die
+          Synapse-Konfiguration übernommen.
+        properties:
+          enabled:
+            type: boolean
+            default: false
+          replicaCount:
+            type: integer
+            const: 1
+        required:
+          - enabled
+          - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
+        unevaluatedProperties: false
+      federation_sender:
+        $ref: "#/$defs/worker"
+        type: object
+        title: Sender von Verbundverkehr (federation traffic) an andere Matrix-Server
+        description: >-
+          Die Föderationssender-Worker werden als `federation_sender_instances`
+          in die Synapse-Konfiguration übernommen.
+        properties:
+          enabled:
+            type: boolean
+            title: Aktivieren der Föderationssender-Worker
+            default: false
+        required:
+          - enabled
+          - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
+        unevaluatedProperties: false
+      media_repository:
+        $ref: "#/$defs/worker"
+        type: object
+        title: Worker zur Bereitstellung und Speicherung von Medien
+        description: >-
+          Einer der Worker wird als `media_instance_running_background_jobs` in
+          die Synapse-Konfiguration übernommen.
+
+
+          Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit
+          Hintergrundaufgaben.
+        properties:
+          enabled:
+            type: boolean
+            title: Aktivieren des Media-Worker
+            default: true
+          listeners:
+            type: array
+            title: Entsprechende Endpunkte für den Mediaworker
+            default:
+              - media
+          csPaths:
+            type: array
+            default:
+              - /_matrix/media/
+              - /_synapse/admin/v1/purge_media_cache$
+              - /_synapse/admin/v1/room/.*/media
+              - /_synapse/admin/v1/user/.*/media
+              - /_synapse/admin/v1/media/
+              - /_synapse/admin/v1/quarantine_media/
+              - /_synapse/admin/v1/users/.*/media$
+          paths:
+            type: array
+            default:
+              - /_matrix/media/
+          extraConfig:
+            type: object
+            properties:
+              enable_media_repo:
+                type: boolean
+                title: Eintragung für Mediaworker in Config
+                default: true
+            unevaluatedProperties: true
+          resources:
+            $ref: https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+            type: object
+            properties:
+              limits:
+                type: object
+                properties:
+                  cpu:
+                    type: string
+                    title: >-
+                      Rechenressourcengrenzen, die auf den
+                      media_repository-Container anzuwenden sind
+                    default: 2000m
+                  memory:
+                    type: string
+                    title: >-
+                      RAM Ressourcengrenzen, die auf den
+                      media_repository-Container anzuwenden sind
+                    default: 2500Mi
+                required:
+                  - cpu
+                  - memory
+                unevaluatedProperties: false
+              requests:
+                type: object
+                properties:
+                  cpu:
+                    type: string
+                    title: >-
+                      Anforderungen an Rechenressourcen, die auf den
+                      media_repository-Container anzuwenden sind
+                    default: 500m
+                  memory:
+                    type: string
+                    title: >-
+                      Anforderungen an RAM Ressourcen, die auf den
+                      media_repository-Container anzuwenden sind
+                    default: 1500Mi
+                required:
+                  - cpu
+                  - memory
+                unevaluatedProperties: false
+            required:
+              - limits
+              - requests
+            unevaluatedProperties: false
+        required:
+          - enabled
+          - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
+        unevaluatedProperties: false
+      user_dir:
+        $ref: "#/$defs/worker"
+        type: object
+        title: Dieser Worker aktualisiert das Benutzerverzeichnis und kann darin suchen
+        description: >-
+          Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der
+          Worker optional.
+
+
+          Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+          Diese wird als `update_user_directory_from_worker` in die
+          Synapse-Konfiguration übernommen.
+        properties:
+          enabled:
+            type: boolean
+            title: Aktivieren des Nutzersuch-Workers
+            default: false
+          replicaCount:
+            type: integer
+            const: 1
+          listeners:
+            type: array
+            title: Entsprechende Endpunkte für den Nutzersuche Worker
+            default:
+              - client
+          csPaths:
+            type: array
+            default:
+              - /_matrix/client/(r0|v3|unstable)/user_directory/search$
+        required:
+          - enabled
+          - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
+        unevaluatedProperties: false
+      background_worker:
+        $ref: "#/$defs/worker"
+        type: object
+        title: Konfiguration des Background-Workers
+        description: >-
+          Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+          Diese wird als `run_background_tasks_on` in die Synapse-Konfiguration
+          übernommen.
+        properties:
+          enabled:
+            type: boolean
+            title: Aktivieren des Background-Workers
+            default: false
+          replicaCount:
+            type: integer
+            const: 1
+        required:
+          - enabled
+          - replicaCount
+          - listeners
+          - csPaths
+          - paths
+          - autoscaling
+          - strategy
+          - extraConfig
+          - annotations
+          - extraEnv
+          - volumes
+          - volumeMounts
+          - extraCommands
+          - podSecurityContext
+          - securityContext
+          - resources
+          - livenessProbe
+          - readinessProbe
+          - startupProbe
+          - nodeSelector
+          - tolerations
+          - affinity
+        unevaluatedProperties: false
+    additionalProperties:
+      $ref: "#/$defs/worker"
+      type: object
+    required:
+      - default
+      - generic_worker
+      - federation_reader
+      - pusher
+      - appservice
+      - federation_sender
+      - media_repository
+      - user_dir
+      - background_worker
+    unevaluatedProperties: false
+  persistence:
+    type: object
+    title: Persistenz-Konfiguration für die Media-Repository-Funktion
+    description: >-
+      Diese PVC wird entweder in Synapse oder einem media_repo-Worker
+      eingehängt. Hinweis: Wenn Sie in der Lage sein wollen, dies zu skalieren,
+      müssen Sie den accessMode auf RWX/ReadWriteMany setzen.
+    properties:
+      enabled:
+        type: boolean
+        title: Aktivieren der Persistenz-Konfiguration
+        default: true
+      existingClaim:
+        type: ["null", "string"]
+        title: Name des VolumeClaims
+        description: Leerer Wert lässt dynamisches Provisionieren zu.
+        default: null
+      storageClass:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PersistentVolumeSpec.schema.json#/properties/storageClassName
+        type: string
+        default: ""
+      accessMode:
+        type: string
+        enum:
+          - ReadWriteOnce
+          - ReadWriteMany
+        default: ReadWriteOnce
+      size:
+        type: string
+        minLength: 1
+        default: 10Gi
+    required:
+      - enabled
+      - storageClass
+      - accessMode
+      - size
+    unevaluatedProperties: false
+  volumePermissions:
+    type: object
+    title: Init-Containers zur Rechtekorrektur
+    description: Passt die Rechte auf dem Volume für Media an.
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      uid:
+        type: integer
+        default: 2666
+      gid:
+        type: integer
+        default: 2666
+      securityContext:
+        $comment: "Violates keywords in #/$defs/securityContext"
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SecurityContext.schema.json
+        type: object
+        title: >-
+          Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
+        properties:
+          runAsNonRoot:
+            default: false
+          runAsUser:
+            default: 0
+        unevaluatedProperties: false
+      image:
+        type: object
+        allOf:
+          - $ref: "#/$defs/image"
+            title: Image zur Rechtebereinigung
+            properties:
+              registry:
+                default: registry.opencode.de
+              repository:
+                default: bwi/bundesmessenger/backend/container-images/ubuntu
+              tag:
+                title: Tag des Images zur Rechtebereinigung
+                description: >-
+                  Hinweis: Noch kein finaler Tag, build version 10 als
+                  Alternative zu latest.
+              pullPolicy:
+                description: >-
+                  Da latest-Tag, PullPolicy immer für das zu nutzende Image zur
+                  Rechtebereinigung.
+                default: IfNotPresent
+          - properties:
+              pullSecrets:
+                $ref: "#/$defs/pullSecrets"
+        required:
+          - registry
+          - repository
+          - tag
+          - pullPolicy
+          - pullSecrets
+        unevaluatedProperties: false
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        title: Ressourcen des Init-Containers zur Rechtekorrektur
+        description: >-
+          Hier keine gesetzt, da kurzlebig und von Hause aus klein.
+        default: {}
+        examples:
+          - resources:
+              requests:
+                memory: 128Mi
+                cpu: 100m
+        unevaluatedProperties: false
+    required:
+      - enabled
+      - uid
+      - gid
+      - securityContext
+      - image
+      - resources
+    unevaluatedProperties: false
+  service:
+    type: object
+    title: Konfiguration für den Hauptdienst von Synapse
+    description: >-
+      Um TLS in Synapse selbst zu verwenden, fügen Sie einen TLS-Listener hinzu
+      und ändern Sie die Ports, die hier konfiguriert sind.
+    properties:
+      type:
+        type: string
+        minLength: 1
+        title: Typ des auszuliefernden Endpunktes für den Hauptdienst von Synapse
+        default: ClusterIP
+      port:
+        type: integer
+        title: >-
+          Interner Port des auszuliefernden Endpunktes für den Hauptdienst von Synapse
+        default: 8008
+      targetPort:
+        type: string
+        minLength: 1
+        title: >-
+          Externer Port des Auszuliefernden Endpunktes für den Hauptdienst von Synapse
+        default: http
+    required:
+      - type
+      - port
+      - targetPort
+    unevaluatedProperties: false
+  sygnal:
+    type: object
+    title: Konfiguration für Sygnal
+    description: >-
+      Reference: https://github.com/matrix-org/sygnal
+    properties:
+      enabled:
+        type: boolean
+        title: Aktivieren des Sygnal-Container
+        default: false
+      image:
+        $ref: "#/$defs/image"
+        type: object
+        title: Image/Repo-Konfiguration von Sygnal
+        default:
+          registry: registry.opencode.de
+          repository: bwi/bundesmessenger/backend/container-images/sygnal
+          pullPolicy: IfNotPresent
+        required:
+          - registry
+          - repository
+          - tag
+          - pullPolicy
+        unevaluatedProperties: false
+      proxy:
+        type: ["null", "string"]
+        title: Proxy, falls benötigt um die Push-Services zu erreichen
+        description: >-
+          Auskommentieren oder null für die Benutzung ohne Proxy. Die Angabe des
+          Zielports beim Proxy ist für die Generierung der Network-Policies
+          zwingend erforderlich.
+        default: null
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        title: Informationen zum Sicherheitskontext, die der Pod übernehmen soll
+        default: {}
+        unevaluatedProperties: false
+      securityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        title: >-
+          Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
+        default:
+          readOnlyRootFilesystem: true
+        unevaluatedProperties: false
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        title: Resource-Konfiguration für Sygnal-Server
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf den Sygnal-Container anzuwenden sind
+                default: 300m
+              memory:
+                title: >-
+                  RAM Ressourcengrenzen, die auf den Sygnal-Container anzuwenden sind
+                default: 100Mi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf den
+                  Sygnal-Container anzuwenden sind
+                default: 150m
+              memory:
+                title: >-
+                  Anforderungen an RAM Ressourcen, die auf den Sygnal-Container
+                  anzuwenden sind
+                default: 45Mi
+        unevaluatedProperties: false
+      livenessProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        title: Healthcheck
+        properties:
+          periodSeconds:
+            default: 10
+          tcpSocket:
+            properties:
+              port:
+                title: Zu verwendende Konfiguration für den Port des Healthchecks
+                default: sygnal-port
+        unevaluatedProperties: false
+      readinessProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        title: Bereitschaftscheck
+        properties:
+          periodSeconds:
+            default: 10
+          tcpSocket:
+            properties:
+              port:
+                title: Zu verwendende Konfiguration für den Port des Bereitschaftscheck
+                default: sygnal-port
+        unevaluatedProperties: false
+      startupProbe:
+        type: ["null", "object"]
+        oneOf:
+          - $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+            type: object
+          - type: "null"
+        default: null
+        unevaluatedProperties: false
+      nodeSelector:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/nodeSelector
+        type: object
+        title: Node Selektor Konfiguration für Sygnal-Container
+        default: {}
+        unevaluatedProperties: false
+      tolerations:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/tolerations
+        type: array
+        title: Tolerations/Tains Konfiguration für Sygnal-Container
+        default: []
+      affinity:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/affinity
+        type: object
+        title: Affinitäts-Konfiguration für Sygnal-Container
+        default: {}
+        unevaluatedProperties: false
+      apps:
+        type: object
+        title: Konfiguration für Push-Dienste (APNS und FCM)
+        default: {}
+        examples:
+          - de.opencode.dvs.ios:
+              type: apns
+              keyfile: /de.opencode.dvs.ios.p8
+        unevaluatedProperties: true
+      existingSecret:
+        type: string
+        title: Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält
+        description: >-
+          Die Schlüssel des Secrets sind die Dateinamen, welche unter
+          `sygnal.apps` mit dem Präfix `/secrets` referenziert werden.
+        default: sygnal
+      ioskey_filename:
+        type: ["null", "string"]
+        minLength: 1
+        title: iOS-Key Dateiname
+        description: >-
+          Wenn iOS Push mit genutzt wird, muss ein gültiger und valider
+          Dateiname angegeben werden. Bei Nutzung von iOS-Pushservice, muss Key
+          mit angegeben werden. Weiteres siehe README.md
+
+
+          Durch Filename-Vergabe wird der unten angegebene ioskey geladen.
+
+
+          Beispiel: ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend
+          mit dem Keyfile-Dateinamen aus der APNS-Sektion der vorhergehenden
+          Apps-Konfiguration übereinstimmen!
+        default: null
+      ioskey_keyvalue:
+        type: ["null", "string"]
+        minLength: 1
+        title: iOS-Key Datei-Inhalt
+        default: null
+        examples:
+          - ioskey_keyvalue: HIER KÖNNTE IHR KEY STEHEN
+      fcmkey_filename:
+        type: ["null", "string"]
+        minLength: 1
+        title: FCM-Key Dateiname
+        description: >-
+          Bei Nutzung von FCM-Pushservice, muss Key mit angegeben werden.
+          Weiteres siehe README.md.
+
+
+          Wenn FCM Push mit genutzt wird, muss ein gültiger und valider
+          Dateiname angegeben werden. Durch Filename-Vergabe wird der unten
+          angegebene FCM-Service-Account-File geladen.
+
+
+          Beispiel: fcmkey_filename: de.opencode.dvs.bundesmessenger.json <<--
+          muss zwingend mit dem service_account_file-Dateinamen aus der
+          gcm-Sektion der vorhergehenden Apps-Konfiguration übereinstimmen!
+        default: null
+      fcmkey_keyvalue:
+        type: ["null", "object"]
+        title: FCM-Key Service Account File Inhalt
+        default: null
+        examples:
+          - fcmkey_keyvalue: HIER KÖNNTE IHR SERVICE ACCOUNT FILE INHALT STEHEN
+        unevaluatedProperties: true
+    allOf:
+      - oneOf:
+          - properties:
+              ioskey_filename:
+                type: "null"
+              ioskey_keyvalue:
+                type: "null"
+          - properties:
+              ioskey_filename:
+                type: string
+              ioskey_keyvalue:
+                type: string
+            required:
+              - ioskey_filename
+              - ioskey_keyvalue
+      - oneOf:
+          - properties:
+              fcmkey_filename:
+                type: "null"
+              fcmkey_keyvalue:
+                type: "null"
+          - properties:
+              fcmkey_filename:
+                type: string
+              fcmkey_keyvalue:
+                type: object
+            required:
+              - fcmkey_filename
+              - fcmkey_keyvalue
+    required:
+      - enabled
+      - image
+      - podSecurityContext
+      - securityContext
+      - resources
+      - livenessProbe
+      - readinessProbe
+      - nodeSelector
+      - tolerations
+      - affinity
+      - apps
+      - existingSecret
+    unevaluatedProperties: false
+  wellknown:
+    type: object
+    title: nginx-Server, der auf alle `/.well-known/matrix/server`-Anfragen antwortet
+    description: Ermöglicht den Verbund ohne Hinzufügen von SRV-Einträgen zu DNS.
+    properties:
+      enabled:
+        type: boolean
+        description: Aktivieren des Wellknown-Container.
+        default: true
+      host:
+        type: ["null", "string"]
+        title: DNS-Name des Wellknown-Servers
+        description: Fall nicht gesetzt, wird der öffentliche Servername verwendet.
+        default: null
+        examples:
+          - wellknown.example.org
+      port:
+        type: integer
+        title: Port des Wellknown-Servers
+        default: 443
+      server:
+        type: ["null", "object"]
+        title: >-
+          Die Host- und Port-Kombination, die auf .well-known/matrix/server zu
+          bedienen ist
+        description: >-
+          Falls null, wird der der Homeserver-Name (publicServerName, sonst
+          serverName) mit Port 443 verwendet.
+        properties:
+          m.server:
+            $comment: ""
+            type: string
+            pattern: ^([A-Za-z0-9.-]+):([0-9]+)$
+        examples:
+          - m.server: matrix.example.com:443
+        required:
+          - m.server
+        unevaluatedProperties: true
+      client:
+        type: object
+        title: Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
+        description: >-
+          Die Angabe des Objektes "de.bwi": {"data_privacy_url":
+          "https://example.com/privacy", "imprintUrl":
+          "https://example.com/imprint"} ist verpflichtend, wenn keine
+          .Values.dataPrivacyUrl und .Values.imprintUrl angegeben wurde und auf
+          den WellKnown-Server verzichtet wird.
+
+
+          Alle Angaben, welche die selben Schlüssel wie in der
+          Standardkonfiguration setzen, überschreiben unsere generierte
+          client.json. Zusätzliche Angaben werden hinzugefügt.
+        default: {}
+        examples:
+          - io.element.e2ee:
+              secure_backup_required: true
+              secure_backup_setup_methods:
+                - passphrase
+              outbound_keys_pre_sharing_mode: on_room_opening
+            m.homeserver:
+              base_url: https://matrix.example.com
+            de.bwi:
+              data_privacy_url: https://example.com/privacy
+              imprintUrl: https://example.com/imprint
+        unevaluatedProperties: true
+      replicaCount:
+        type: integer
+        title: Replica-Count
+        default: 1
+      extraData:
+        type: object
+        title: >-
+          Zusätzliche Daten, die unter .well-known/matrix/<data> bereitgestellt werden
+        description: >-
+          Dictionaries werden in JSON umgewandelt, einfache Strings werden
+          direkt ausgeliefert. (Beispiel MSC1929)
+        default: {}
+        examples:
+          - support:
+              admins:
+                - matrix_id: "@admin:example.com"
+                  email_address: admin@example.com
+                  role: admin
+              support_page: https://example.com/support
+        unevaluatedProperties: true
+      htdocsPath:
+        type: string
+        minLength: 1
+        title: Ein benutzerdefinierter htdocs-Pfad
+        description: >-
+          Nützlich, wenn ein anderes Image ausgeführt wird.
+        default: /usr/share/nginx/html
+      image:
+        type: object
+        allOf:
+          - $ref: "#/$defs/image"
+            title: Das Webserver Image
+            default:
+              registry: registry.opencode.de
+              repository: bwi/bundesmessenger/backend/container-images/nginx
+              pullPolicy: IfNotPresent
+          - properties:
+              pullSecrets:
+                $ref: "#/$defs/pullSecrets"
+        required:
+          - registry
+          - repository
+          - tag
+          - pullPolicy
+          - pullSecrets
+        unevaluatedProperties: false
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        title: Informationen zum Sicherheitskontext, die der Pod übernehmen soll
+        default:
+          runAsUser: 1001
+          runAsGroup: 1001
+          fsGroup: 1001
+        unevaluatedProperties: false
+      securityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        title: Konfiguration für die Container-Sicherheitsrichtlinie
+        default:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+        unevaluatedProperties: false
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        title: Resource-Konfiguration für well-known-Server
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf den well-known server anzuwenden sind
+                default: 50m
+              memory:
+                title: >-
+                  RAM Ressourcengrenzen, die auf den well-known server anzuwenden sind
+                default: 50Mi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf den well-known
+                  server anzuwenden sind
+                default: 5m
+              memory:
+                title: >-
+                  Anforderungen an RAM Ressourcen, die auf den well-known server
+                  anzuwenden sind
+                default: 15Mi
+        unevaluatedProperties: false
+      nodeSelector:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/nodeSelector
+        type: object
+        title: Node-Selector-Konfiguration für well-known-Server
+        default: {}
+        unevaluatedProperties: false
+      tolerations:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/tolerations
+        type: array
+        title: Tolerations/Tains Konfiguration für well-known server
+        default: []
+      affinity:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/affinity
+        type: object
+        default: {}
+        unevaluatedProperties: false
+    required:
+      - enabled
+      - port
+      - client
+      - replicaCount
+      - extraData
+      - htdocsPath
+      - image
+      - podSecurityContext
+      - securityContext
+      - resources
+      - nodeSelector
+      - tolerations
+      - affinity
+    unevaluatedProperties: false
+  confighub:
+    type: object
+    title: Konfiguration für ConfigurationHub-Server
+    description: >-
+      Dies wird einen NginX-Server einrichten, der notwendige Dateien zur
+      Konfiguration und Information der Clients ausliefert und die nicht zum
+      Matrix / Synapse-Server gehören.
+    properties:
+      enabled:
+        type: boolean
+        title: Aktivierung des ConfigHub-Containers
+        default: true
+      replicaCount:
+        type: integer
+        title: Replica-Count
+        default: 1
+      extraData:
+        type: object
+        title: >-
+          Zusätzliche Daten, die unter /_matrix/cconfig/<data> bereitgestellt werden
+        description: >-
+          Dictionaries werden in JSON umgewandelt, einfache Strings werden
+          direkt ausgeliefert Beispiel siehe wellknown-Konfiguration.
+        default: {}
+        unevaluatedProperties: true
+      htdocsPath:
+        type: string
+        minLength: 1
+        title: Ein benutzerdefinierter htdocs-Pfad
+        description: >-
+          Nützlich, wenn ein anderes Image ausgeführt wird. Per default
+          "/usr/share/nginx/html" (nginx).
+        default: /usr/share/nginx/html
+      image:
+        allOf:
+          - $ref: "#/$defs/image"
+            type: object
+            title: ConfigHub Webserver-Image
+            default:
+              registry: registry.opencode.de
+              repository: bwi/bundesmessenger/backend/container-images/nginx
+              pullPolicy: IfNotPresent
+          - properties:
+              pullSecrets:
+                $ref: "#/$defs/pullSecrets"
+                type: array
+                title: Liste von Kubernetes Pull-Secrets.
+                default: []
+                examples:
+                  - - name: myRegistryKeySecretName
+        required:
+          - registry
+          - repository
+          - tag
+          - pullPolicy
+          - pullSecrets
+        unevaluatedProperties: false
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        title: Informationen zum Sicherheitskontext, die der Pod übernehmen soll
+        default:
+          runAsUser: 1001
+          runAsGroup: 1001
+          fsGroup: 1001
+        unevaluatedProperties: false
+      securityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        title: Konfiguration für die Container-Sicherheitsrichtlinie
+        default:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+        unevaluatedProperties: false
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        title: Ressourcen-Konfiguration für den Confighub
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: Rechenressourcengrenzen für den Confighub
+                default: 50m
+              memory:
+                title: RAM Ressourcengrenzen für den Confighub
+                default: 50Mi
+          requests:
+            properties:
+              cpu:
+                title: Anforderungen an Rechenressourcen für den Confighub
+                default: 5m
+              memory:
+                title: Anforderungen an RAM Ressourcen für den Confighub
+                default: 15Mi
+        unevaluatedProperties: false
+      nodeSelector:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/nodeSelector
+        type: object
+        title: NodeSelektor-Konfiguration für den Confighub
+        default: {}
+        unevaluatedProperties: false
+      tolerations:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/tolerations
+        type: array
+        title: Tolerations/Tains Konfiguration für den Confighub
+        default: []
+      affinity:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/affinity
+        type: object
+        title: Affinitäts-Konfiguration für den Confighub
+        default: {}
+        unevaluatedProperties: false
+    required:
+      - enabled
+      - replicaCount
+      - extraData
+      - htdocsPath
+      - image
+      - podSecurityContext
+      - securityContext
+      - resources
+      - nodeSelector
+      - tolerations
+      - affinity
+    unevaluatedProperties: false
+  postgresql:
+    type: object
+    title: Konfiguration des internen PostgreSQL-Servers
+    description: >-
+      Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und
+      schnelle Möglichkeit, Demo- und Testsysteme des BundesMessengers
+      aufzusetzen. Nicht empfohlen ist die Aktivierung für Produktivsysteme.
+
+
+      Empfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden,
+      setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den
+      `externalPostgresql`-Block.
+    properties:
+      enabled:
+        type: boolean
+        title: Aktivieren des internen PostgreSQL-Servers
+        description: >-
+          Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern
+          vorhandenen PostgreSQL-Server zu verwenden, setzen Sie
+          `postgresql.enabled` auf `false` und konfigurieren Sie den
+          `externalPostgresql`-Block.
+        default: false
+      image:
+        $ref: "#/$defs/image"
+        type: object
+        title: Das zu verwendende PostgreSQL-Container-Abbild
+        properties:
+          pullSecrets:
+            type: array
+            title: Liste von Kubernetes Pull-Secrets
+            items:
+              type: string
+            default: []
+        default:
+          registry: docker.io
+          repository: bitnami/postgresql
+          pullSecrets: []
+          pullPolicy: IfNotPresent
+        required:
+          - registry
+          - repository
+          - tag
+          - pullSecrets
+          - pullPolicy
+        unevaluatedProperties: true
+      auth:
+        type: object
+        title: Authentifizierung gegenüber dem internen PostgreSQL-Server
+        properties:
+          database:
+            type: string
+            title: Name der PostgreSQL-Datenbank
+            default: synapse_db
+          username:
+            type: string
+            title: Name des PostgreSQL-Nutzers
+            default: synapse
+          password:
+            type: ["null", "string"]
+            title: Password für PostgreSQL Nutzer
+            default: synapse
+          existingSecret:
+            type: string
+            minLength: 1
+            title: Name des Secrets, in dem das PostgreSQL-Passwort steht
+            description: >-
+              Ist `postgresql.enabled` und es existiert kein Secret mit dem
+              angegebenen Namen, so wird ein neues Secret automatisch erstellt
+              und verwendet.
+            default: postgresql
+          secretKeys:
+            type: object
+            title: Schlüsselinformationen für ein genanntes Secret
+            properties:
+              userPasswordKey:
+                type: string
+                title: Verweis im `existingSecret` auf das Datenbank-Passwort
+                description: Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
+                default: password
+              adminPasswordKey:
+                type: string
+                title: Verweis im `existingSecret` auf das Passwort des postgres-Nutzers
+                description: Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
+                default: postgres-password
+            required:
+              - userPasswordKey
+              - adminPasswordKey
+            unevaluatedProperties: true
+        required:
+          - database
+          - username
+          - existingSecret
+          - secretKeys
+        unevaluatedProperties: true
+      containerPorts:
+        type: object
+        properties:
+          postgresql:
+            type: integer
+            title: Port des PostgreSQL-Containers
+            default: 5342
+        required:
+          - postgresql
+        unevaluatedProperties: true
+      primary:
+        type: object
+        properties:
+          service:
+            type: object
+            properties:
+              ports:
+                type: object
+                properties:
+                  postgresql:
+                    type: integer
+                    title: Port des PostgreSQL-Service
+                    default: 5432
+                required:
+                  - postgresql
+                unevaluatedProperties: true
+            required:
+              - ports
+            unevaluatedProperties: true
+          initdb:
+            type: object
+            properties:
+              args:
+                type: string
+                description: Extra Argumente zur Initialisierung der Datenbank
+                default: --lc-collate=C --lc-ctype=C --encoding=UTF8
+            unevaluatedProperties: true
+          extendedConfiguration:
+            type: string
+            title: Extra Konfiguration der Datenbank
+            description: >-
+              Die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder
+              Synapseprozess seine Verbindungen zur Datenbank hält
+            default: max_connections = 1024
+          persistence:
+            type: object
+            title: Persistenzkonfiguration für Storage für PostgreSQL
+            properties:
+              storageClass:
+                type: string
+                default: ""
+              size:
+                type: string
+                default: 16Gi
+            required:
+              - storageClass
+              - size
+            unevaluatedProperties: true
+          resources:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+            type: object
+            properties:
+              limits:
+                properties:
+                  cpu:
+                    title: >-
+                      Rechenressourcengrenzen, die auf den PostgreSQL-Container
+                      anzuwenden sind
+                    default: 1
+                  memory:
+                    title: >-
+                      RAM Ressourcengrenzen, die auf den PostgreSQL-Container
+                      anzuwenden sind
+                    default: 4096Mi
+              requests:
+                properties:
+                  cpu:
+                    title: >-
+                      Anforderungen an Rechenressourcen, die auf den
+                      PostgreSQL-Container anzuwenden sind
+                    default: 250m
+                  memory:
+                    title: >-
+                      Anforderungen an RAM Ressourcen, die auf den
+                      PostgreSQL-Container anzuwenden sind
+                    default: 256Mi
+            unevaluatedProperties: false
+        required:
+          - service
+          - initdb
+          - extendedConfiguration
+          - persistence
+          - resources
+        unevaluatedProperties: true
+      extraArgs:
+        $comment: This config option is not part of the `postgresql` chart.
+        type: object
+        title: Zusätzliche Argumente für die Datenbankverbindung
+        description: >-
+          Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+        additionalProperties:
+          type: ["null", "string", "number", "integer", "boolean"]
+        default: {}
+        unevaluatedProperties: false
+    required:
+      - enabled
+      - image
+      - auth
+      - containerPorts
+      - primary
+      - extraArgs
+    unevaluatedProperties: true
+  externalPostgresql:
+    type: object
+    title: Authentifizierung für externen PostgreSQL
+    properties:
+      host:
+        type: string
+        minLength: 1
+        title: Hostname für externen PostgreSQL Server
+        default: postgres-4-matrix-postgresql.postgres.svc.cluster.local
+      port:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort
+        type: integer
+        title: Port für externe PostgreSQL-DB
+        default: 5342
+      database:
+        type: string
+        minLength: 1
+        title: DB-Name für PostgreSQL-DB
+        default: synapse_db
+      username:
+        type: string
+        minLength: 1
+        title: Nutzername für PostgreSQL-DB
+        default: synapse
+      password:
+        type: ["null", "string"]
+        minLength: 1
+        title: Password für PostgreSQL Nutzer
+        default: synapse
+      existingSecret:
+        type: ["null", "string"]
+        title: Bestehendes Secret
+        description: Wird anstelle eines statischen Passwortes verwendet.
+      existingSecretPasswordKey:
+        type: ["null", "string"]
+        title: Passwortschlüssel
+        description: Wird aus dem bestehenden Secret abgerufen.
+      sslmode:
+        type: string
+        enum:
+          - disable
+          - allow
+          - prefer
+          - require
+          - verify-ca
+          - verify-full
+        title: Verwendeter SSL-Modus.
+        description: >-
+          https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+        default: prefer
+      extraArgs:
+        type: object
+        title: Zusätzliche Argumente für die Datenbankverbindung
+        description: >-
+          ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+        default: {}
+        unevaluatedProperties: false
+    required:
+      - host
+      - port
+      - database
+      - username
+      - sslmode
+      - extraArgs
+    unevaluatedProperties: false
+  redis:
+    type: object
+    title: Konfiguration des Redis-Servers
+    description: >-
+      Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
+      Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen
+      Sie `redis.enabled: false` und konfigurieren den `externalRedis`-Block.
+    properties:
+      enabled:
+        type: boolean
+        tiitle: Aktivieren des internen Redis-Servers
+        description: >-
+          Hinweis: Durch Setzten auf `true`, wird der `externalRedis`-Block ignoriert.
+        default: true
+      image:
+        $ref: "#/$defs/image"
+        type: object
+        title: Das verwendete Redis-Image
+        properties:
+          pullSecrets:
+            type: array
+            title: Liste von Kubernetes Pull-Secrets
+            items:
+              type: string
+            default: []
+            examples:
+              - ["myRegistryKeySecretName"]
+        default:
+          registry: registry.opencode.de
+          repository: bwi/bundesmessenger/backend/container-images/redis
+          pullSecrets: []
+          pullPolicy: IfNotPresent
+        required:
+          - registry
+          - repository
+          - tag
+          - pullSecrets
+          - pullPolicy
+        unevaluatedProperties: true
+      auth:
+        type: object
+        title: Authentifikation gegenüber Redis
+        description: >-
+          Verwenden Sie ein bestehendes Secret mit `redis-password`-Eintrag
+          anstelle eines statischen Passworts.
+        properties:
+          enabled:
+            type: boolean
+            const: true
+            title: Aktivieren der Authentifikation
+            default: true
+          password:
+            type: ["null", "string"]
+            title: Password für Redis
+            description: Ist der Wert null, wird stattdessen `existingSecret` verwendet.
+            default: null
+          existingSecret:
+            type: string
+            minLength: 1
+            title: Name des Secrets mit dem Redis-Passwort
+            description: >-
+              Existiert noch kein Kubernetes Secret mit dem angegebenen Namen,
+              wird es mit einem zufälligen Passwort automatisch generiert.
+            default: redis
+          existingSecretPasswordKey:
+            type: string
+            title: Verweis im `existingSecret` auf das Redis-Passwort
+            description: Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
+            default: redis-password
+        required:
+          - enabled
+          - existingSecret
+          - existingSecretPasswordKey
+        unevaluatedProperties: true
+      architecture:
+        type: string
+        enum:
+          - standalone
+          - replication
+        title: Form der Architektur des Deployments
+        default: standalone
+      master:
+        type: object
+        properties:
+          kind:
+            type: string
+            enum:
+              - Deployment
+              - StatefulSet
+              - DaemonSet
+            default: StatefulSet
+          persistence:
+            type: object
+            title: Persistenzkonfiguration des Redis
+            description: >-
+              Beachten Sie, dass Synapse Redis nur als
+              Synchronisierungsdienstprogramm verwendet, so dass keine Daten
+              jemals persistiert werden müssen.
+            properties:
+              enabled:
+                type: boolean
+                default: false
+            unevaluatedProperties: true
+          service:
+            type: object
+            properties:
+              ports:
+                type: object
+                properties:
+                  redis:
+                    $ref: >-
+                      https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort
+                    type: integer
+                    default: 6379
+                unevaluatedProperties: true
+            unevaluatedProperties: true
+          resources:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+            type: object
+            properties:
+              limits:
+                properties:
+                  cpu:
+                    title: >-
+                      Rechenressourcengrenzen, die auf den Redis-Container
+                      anzuwenden sind
+                    default: 500m
+                  memory:
+                    title: >-
+                      RAM Ressourcengrenzen, die auf den Redis-Container
+                      anzuwenden sind
+                    default: 768Mi
+              requests:
+                properties:
+                  cpu:
+                    title: >-
+                      Anforderungen an Rechenressourcen, die auf den
+                      Redis-Container anzuwenden sind
+                    default: 300m
+                  memory:
+                    title: >-
+                      Anforderungen an RAM Ressourcen, die auf den
+                      Redis-Container anzuwenden sind
+                    default: 256Mi
+            unevaluatedProperties: false
+        unevaluatedProperties: true
+    required:
+      - enabled
+      - image
+      - auth
+      - architecture
+      - master
+    unevaluatedProperties: true
+  externalRedis:
+    type: object
+    title: Authentifizierung für externen Redis Server
+    properties:
+      host:
+        type: string
+        minLength: 1
+        title: Hostname für externen Redis Server
+        default: redis
+      port:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort
+        type: integer
+        title: Port für externe PostgreSQL-DB
+        default: 6379
+      password:
+        type: ["null", "string"]
+        title: Password für Redis
+        default: synapse
+      existingSecret:
+        type: ["null", "string"]
+        title: Bestehendes Secret
+        description: Wird anstelle eines statischen Passwortes verwendet.
+        default: null
+      existingSecretPasswordKey:
+        type: ["null", "string"]
+        title: Schlüsselinformationen für ein genanntes Secret
+        default: redis-password
+    required:
+      - host
+      - port
+    unevaluatedProperties: false
+  ingress:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: true
+      traefikPaths:
+        type: boolean
+        default: false
+      annotations:
+        $comment: >-
+          Allow unevaluatedProperties to work around a bug in check-jsonschema:
+          https://github.com/json-schema-org/JSON-Schema-Test-Suite/pull/755
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/annotations
+        type: object
+        description: >-
+          Annotations zur Konfiguration des Ingress
+          (regex,proxy-body-size,owasp,cors). Folgende Einträge sind bei der
+          Nutzung des Cert-Managers mit lets-encrypt notwendig:
+
+          kubernetes.io/ingress.class: nginx
+
+          kubernetes.io/tls-acme: "true"
+        default:
+          nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+          nginx.ingress.kubernetes.io/cors-allow-methods: PUT, GET, POST, OPTIONS
+          nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+          nginx.ingress.kubernetes.io/enable-cors: "true"
+          nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
+          nginx.ingress.kubernetes.io/proxy-body-size: 50m
+          nginx.ingress.kubernetes.io/use-regex: "true"
+        unevaluatedProperties: true
+      annotationsAdminAPI:
+        type: object
+        title: Annotations zur Konfiguration des Ingress für die Admin-API
+        description: >-
+          Dies ermöglicht z.B. das Konfigurieren eines IP-Filters für den
+          administrativen Zugriff.
+        additionalProperties:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.IPBlock.schema.json#/properties/cidr
+          type: string
+        examples:
+          - nginx.ingress.kubernetes.io/whitelist-source-range: >-
+              192.168.10.0/24, 10.10.12.0/24, 10.0.0.1
+        unevaluatedProperties: false
+      annotationsAdminPortal:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/annotations
+        type: object
+        title: Annotations zur Konfiguration des Ingress für das Admin-Portal
+        description: >-
+          Dies ermöglicht z.B. das Konfigurieren eines IP-Filters für den
+          administrativen Zugriff.
+        default: {}
+        examples:
+          - nginx.ingress.kubernetes.io/whitelist-source-range: >-
+              192.168.10.0/24, 10.10.12.0/24, 10.0.0.1
+        unevaluatedProperties: false
+      csHosts:
+        type: array
+        description: >-
+          Hosts, die der Ingress-Konfiguration für die Verarbeitung von
+          Client-to-Server-API-Anfragepfade hinzugefügt werden sollen. Hinweis:
+          serverName bzw. publicServerName wird einbezogen, wenn
+          includeServerName gesetzt ist. (default)
+
+
+          Beispiel:
+            - matrix.example.com
+        items:
+          type: string
+        default: []
+      hosts:
+        type: array
+        description: >-
+          Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung
+          von Server-zu-Server-API-Anfragen hinzugefügt werden sollen. Hinweis:
+          serverName bzw. publicServerName wird einbezogen, wenn
+          includeServerName gesetzt ist. (default)
+
+
+          Beispiel:
+            - example.com
+        items:
+          type: string
+        default: []
+      wkHosts:
+        type: array
+        description: >-
+          Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung
+          von wellknown-Anfragen hinzugefügt werden sollen. Hinweis: serverName
+          bzw. publicServerName wird einbezogen, wenn includeServerName gesetzt
+          ist. (default)
+
+
+          Beispiel:
+            - example.com
+        items:
+          type: string
+        default: []
+      paths:
+        type: array
+        description: >-
+          Zusätzliche Pfade, die zu den Server-zu-Server-Eingangsblöcken
+          hinzugefügt werden sollen. Werden vor dem `/_matrix` Catch-all-Pfad
+          eingefügt.
+
+
+          Beispiele:
+            - path: /_matrix/media
+              pathType: Prefix
+              backend:
+                service:
+                  name: matrix-media-repo
+                  port: 8000
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.HTTPIngressPath.schema.json#/properties
+          type: object
+          unevaluatedProperties: false
+        default: []
+      csPaths:
+        type: array
+        description: >-
+          Zusätzliche Pfade, die zu den Client-zu-Server-Eingangsblöcken
+          hinzugefügt werden sollen. Werden vor den `/_matrix` und `/_synapse`
+          Catch-all-Pfaden eingefügt.
+
+
+          Beispiele:
+            - path: /_matrix/media
+              pathType: Prefix
+              backend:
+                service:
+                  name: matrix-media-repo
+                  port: 8000
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.HTTPIngressPath.schema.json#/properties
+          type: object
+          unevaluatedProperties: false
+        default: []
+      includeUnderscoreSynapse:
+        type: boolean
+        description: >-
+          Soll der `/_synapse`-Pfad im Ingress enthalten sein, werden die
+          Client-APIs unter diesem Pfad bereitgestellt.
+        default: true
+      includeServerName:
+        type: boolean
+        description: >-
+          Nimmt `serverName` bzw. `publicServerName` in die Liste der Domains
+          für den Ingress mit auf. Kann auf `false` gesetzt werden, wenn die
+          Hauptdomäne auf irgendeine externe Weise verwaltet wird.
+        default: true
+      tls:
+        type: array
+        title: >-
+          Zusätzliche Pfade, die zu den Client-zu-Server-Eingangsblöcken
+          hinzugefügt werden sollen
+        description: >-
+          Werden vor den `/_matrix` und `/_synapse` Catch-all-Pfaden eingefügt.
+
+
+          Beispiele:
+            - path: /_matrix/media
+              pathType: Prefix
+              backend:
+                service:
+                  name: matrix-media-repo
+                  port: 8000
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.IngressTLS.schema.json
+          type: object
+          unevaluatedProperties: false
+        default: []
+      className:
+        type: string
+        default: nginx
+    required:
+      - enabled
+      - traefikPaths
+      - annotations
+      - annotationsAdminAPI
+      - csHosts
+      - hosts
+      - wkHosts
+      - paths
+      - csPaths
+      - includeUnderscoreSynapse
+      - includeServerName
+      - tls
+      - className
+    unevaluatedProperties: false
+  mas:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        title: Aktivieren des Matrix-Authentication-Service.
+        default: false
+      image:
+        $ref: "#/$defs/image"
+        type: object
+        title: Konfiguration des MAS Image
+        default:
+          registry: ghcr.io
+          repository: element-hq/matrix-authentication-service
+          pullPolicy: IfNotPresent
+        required:
+          - registry
+          - repository
+          - tag
+          - pullPolicy
+        unevaluatedProperties: false
+      uri:
+        type: string
+        title: URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider.
+        description: >-
+          Eine URI ist dringend ratsam, damit der Dienst routing-technisch
+          getrennt ist. Ein stabiles Deployment ohne eigene URI wurde bisher
+          nicht erprobt.
+      postgresql:
+        type: object
+        properties:
+          host:
+            type: ["null", "string"]
+            title: Host für PostgreSQL-DB von MAS
+            description: Falls ungesetzt, wird die Haupt-PostgreSQL-Instanz verwendet.
+            default: null
+            examples:
+              - masdb.example.org
+          port:
+            type: integer
+            title: Port für PostgreSQL-DB von MAS
+            default: 5432
+          database:
+            type: string
+            minLength: 1
+            title: DB-Name für PostgreSQL-DB von MAS
+            default: mas_synapse
+          username:
+            type: string
+            minLength: 1
+            title: Nutzername für PostgreSQL-DB von MAS
+            default: massynapse
+          password:
+            type: string
+            minLength: 1
+            title: Password für PostgreSQL Nutzer von MAS
+            default: mas-synapse
+          sslmode:
+            type: string
+            enum:
+              - disable
+              - allow
+              - prefer
+              - require
+              - verify-ca
+              - verify-full
+            title: Verwendeter SSL-Modus
+            description: >-
+              https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+            default: prefer
+          extraArgs:
+            type: object
+            title: Zusätzliche Optionen für MAS PostgreSQL
+            description: >-
+              https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+            additionalProperties:
+              type: string
+            default: {}
+            unevaluatedProperties: false
+        required:
+          - port
+          - database
+          - username
+          - password
+          - sslmode
+          - extraArgs
+        unevaluatedProperties: false
+      paths:
+        type: array
+        title: URLs überlagern die URLs vom Synapse
+        description: >-
+          D.h., dass diese URLs vom MAS anstatt von Synapse beantwortet werden
+          müssen. Die hier definierten URLs werden von dem Ingress des Synapse
+          entfernt und dem MAS zugeordnet, wenn vorhanden.
+        items:
+          type: string
+        default:
+          - /_matrix/client/(api/v1|r0|v3|unstable)/login
+          - /_matrix/client/(api/v1|r0|v3|unstable)/logout
+          - /_matrix/client/(api/v1|r0|v3|unstable)/refresh
+      masPaths:
+        type: array
+        title: >-
+          Liste der URL-Einstiegspunkte, die der MAS benötigt bzw. der `mas.uri`
+          zugeordnet werden
+        items:
+          type: string
+        default:
+          - /authorize
+          - /oauth2
+          - /account
+          - /graphql
+          - /.well-known/openid-configuration
+          - /
+      upstream_oauth2_provider:
+        type: array
+        title: >-
+          Konfiguration eines Upstream Authentification Providers zur
+          Delegierung der Authentifizierung
+        description: >-
+          Die Angaben werden automatisch in die Konfiguration unter
+          `upstream_oauth2.providers` bereit gestellt.
+
+
+          https://matrix-org.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
+
+          https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#upstream_oauth2
+        items:
+          properties:
+            providers:
+              type: object
+              unevaluatedProperties: true
+          required:
+            - providers
+        default: []
+      clients:
+        type: array
+        title: OIDC Clients
+        description: >-
+          Werden zusätzlich zum Synypase Client konfiguriert.
+
+
+          https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#clients
+        items:
+          type: object
+          unevaluatedProperties: true
+      passwords:
+        type: object
+        title: Passwords.
+        description: >-
+          https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#passwords
+        properties:
+          enabled:
+            type: boolean
+            title: Whether to enable the password database
+            description: >-
+              If disabled, users will only be able to log in using upstream OIDC
+              providers.
+          schemes:
+            type: array
+            title: List of password hashing schemes being used.
+            description: ⚠ Only change this if you know what you're doing.
+            items:
+              type: object
+              properties:
+                version:
+                  type: integer
+                algorithm:
+                  type: string
+              required:
+                - version
+                - algorithm
+              unevaluatedProperties: false
+            default:
+              - version: 1
+                algorithm: argon2id
+        unevaluatedProperties: true
+      account:
+        type: object
+        title: Account.
+        description: >-
+          https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#account
+        properties:
+          email_change_allowed:
+            type: boolean
+            title: Whether users are allowed to change their email addresses
+            default: true
+          displayname_change_allowed:
+            type: boolean
+            title: Whether users are allowed to change their display names
+            description: >-
+              This should be in sync with the policy in the homeserver configuration.
+            default: true
+          password_registration_enabled:
+            type: boolean
+            title: Whether to enable self-service password registration
+            description: This has no effect if password login is disabled.
+            default: true
+          password_change_allowed:
+            type: boolean
+            title: Whether users are allowed to change their passwords
+            description: This has no effect if password login is disabled.
+            default: true
+          password_recovery_enabled:
+            type: boolean
+            title: Whether email-based password recovery is enabled
+            description: This has no effect if password login is disabled.
+            default: true
+        unevaluatedProperties: true
+      policy:
+        type: object
+        title: Zusätzliche Policy Konfiguration für MAS
+        description: >-
+          Die Angaben werden automatisch in die Konfiguration unter
+          `policy.data` bereit gestellt.
+
+
+          https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#policy
+        properties:
+          admin_users:
+            type: array
+            items:
+              properties: {}
+            default: []
+          passwords:
+            type: object
+            title: Registration using passwords
+            properties:
+              min_length:
+                type: integer
+                title: Minimum length of a password.
+                default: 8
+              require_lowercase:
+                type: boolean
+                title: Require at least one lowercase character in a password
+                default: false
+              require_uppercase:
+                type: boolean
+                title: Require at least one uppercase character in a password
+                default: false
+              require_number:
+                type: boolean
+                title: Require at least one number in a password
+                default: false
+            unevaluatedProperties: true
+        unevaluatedProperties: true
+      rate_limiting:
+        type: object
+        title: Rate-limiting.
+        description: >-
+          https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting
+        unevaluatedProperties: true
+      email:
+        type: object
+        title: Zusätzliche E-Mail Konfiguration für MAS
+        description: >-
+          https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#email
+        properties:
+          transport:
+            type: string
+            minLength: 1
+            default: blackhole
+        unevaluatedProperties: true
+      extraVolumes:
+        type: array
+        title: Zusätzliche in den MAS zu mountende Datenträger (Volumes)
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Volume.schema.json
+          type: object
+          unevaluatedProperties: false
+        default: []
+        examples:
+          - - name: oauth2
+              configMap:
+                name: oauth
+      extraVolumeMounts:
+        type: array
+        title: Zusätzliche in den MAS zu mountende Datenträgerpfade (Volumes)
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.VolumeMount.schema.json
+          type: object
+          unevaluatedProperties: false
+        default: []
+        examples:
+          - - name: oauth2
+              mountPath: /etc/ssl/certs/
+              subMountPath: oauthprovider.crt
+              readOnly: true
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        title: Informationen zum Sicherheitskontext, die der Pod übernehmen soll
+        default:
+          runAsUser: 2666
+          runAsGroup: 2666
+          fsGroup: 2666
+          runAsNonRoot: true
+        unevaluatedProperties: false
+      securityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        title: Konfiguration für die Container-Sicherheitsrichtlinie
+        default:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 2666
+        unevaluatedProperties: false
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: Rechenressourcengrenzen, die auf den MAS anzuwenden sind
+                default: 500m
+              memory:
+                title: RAM Ressourcengrenzen, die auf den MAS anzuwenden sind
+                default: 200Mi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf den MAS anzuwenden sind
+                default: 300m
+              memory:
+                title: Anforderungen an RAM Ressourcen, die auf den MAS anzuwenden sind
+                default: 50Mi
+        unevaluatedProperties: false
+      livenessProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        properties:
+          periodSeconds:
+            default: 10
+          httpGet:
+            properties:
+              path:
+                default: /health
+              port:
+                default: metrics
+        unevaluatedProperties: false
+      readinessProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        properties:
+          periodSeconds:
+            default: 3
+          httpGet:
+            properties:
+              path:
+                default: /health
+              port:
+                default: metrics
+        unevaluatedProperties: false
+      startupProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        properties:
+          failureThreshold:
+            default: 6
+          httpGet:
+            properties:
+              path:
+                default: /health
+              port:
+                default: metrics
+        unevaluatedProperties: false
+    required:
+      - enabled
+      - image
+      - uri
+      - postgresql
+      - paths
+      - masPaths
+      - upstream_oauth2_provider
+      - clients
+      - passwords
+      - account
+      - policy
+      - rate_limiting
+      - email
+      - extraVolumes
+      - extraVolumeMounts
+      - podSecurityContext
+      - securityContext
+      - resources
+      - livenessProbe
+      - readinessProbe
+      - startupProbe
+    unevaluatedProperties: false
+  contentscanner:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        title: Aktivieren des Matrix-Content-Scanner
+        description: Mittelsmann zwischen AV und Matrix-Synapse
+        default: false
+      allowed_mimetypes:
+        type: ["null", "array"]
+        title: Liste der zulässigen MIME-Typen
+        description: >-
+          Falls angegeben, darf `blocked_mimetypes` nicht ebenfalls angegeben werden.
+          Wenn eine Datei einen MIME-Typ hat, der nicht in dieser Liste enthalten ist,
+          wird ihr Scan als fehlgeschlagen betrachtet.
+          Nicht erkannte Binärdateien werden als „application/octet-stream“ betrachtet.
+          Nicht erkannte Textdateien werden als „text/plain“ betrachtet.
+          Optional, standardmäßig werden alle MIME-Typen zugelassen.
+        items:
+          type: string
+        default: null
+      blocked_mimetypes:
+        type: ["null", "array"]
+        minItems: 1
+        title: Liste der blockierten MIME-Typen
+        description: >-
+          Falls angegeben, darf `allowed_mimetypes` nicht ebenfalls angegeben werden.
+          Falls angegeben, führt eine Datei, deren MIME-Typ auf dieser
+          Liste steht, zu einem Scan, der als fehlgeschlagen gilt.
+          Nicht erkannte Binärdateien werden als `application/octet-stream` betrachtet.
+          Nicht erkannte Textdateien werden als `text/plain` betrachtet.dann
+        items:
+          type: string
+        default: null
+      max_file_size:
+        type: string
+        title: Die maximale zwischenspeicherbare Dateigröße
+        description: >-
+          Wenn eine Datei größer als diese Größe ist, wird eine Kopie davon
+          nicht zwischengespeichert, selbst wenn der Scan erfolgreich ist.
+          Wenn die Datei erneut angefordert wird, wird sie erneut vom Homeserver
+          heruntergeladen, aber nicht auf die Festplatte geschrieben oder gescannt.
+        default: "100MB"
+      max_cache_size:
+        type: integer
+        title: Maximale Anzahl von Ergebnissen, die im Cache gespeichert werden können
+        description: >-
+          Wenn mehr Dateien gescannt werden, bevor vorhandene Elemente ihre TTL erreichen,
+          werden die zuletzt aufgerufenen entfernt.
+        default: 2048
+      ttl:
+        type: string
+        title: >-
+          Die maximale Zeit, die ein Eintrag im Cache verbleibt, bevor er entfernt wird
+        default: "1d"
+      extraVolumes:
+        type: array
+        title: >-
+          Zusätzliche in den Matrix-Content-Scanner zu mountende Datenträger (Volumes)
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Volume.schema.json
+          type: object
+          unevaluatedProperties: false
+        examples:
+          - - name: custom-scanscript
+              configMap:
+                name: custom-scanscript
+                defaultMode: 493
+                items:
+                  - key: script.sh
+                    path: script.sh
+      extraVolumeMounts:
+        type: array
+        title: >-
+          Zusätzliche in den Matrix-Content-Scanner zu mountende
+          Datenträgerpfade (Volumes)
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.VolumeMount.schema.json
+          type: object
+          unevaluatedProperties: false
+        examples:
+          - - name: custom-scanscript
+              mountPath: /opt/custom/
+              subMountPath: script.sh
+              readOnly: true
+      scanScript:
+        type: string
+        title: Names und Pfad des Scriptes welches zum Scannen ausgeführt wird
+        description: >-
+          Das Script muss in der ConfigMap `contentscanner.existingConfigmap`
+          enthalten sein.
+
+
+          Wenn kein Schadcode gefunden wurde, muss das Script den Exit-Code 0
+          zurück geben.
+
+
+          Siehe:
+          https://github.com/element-hq/matrix-content-scanner-python/blob/da1783c6bce638c3f616fb061425520fc19863a6/config.sample.yaml#L22-L26
+        default: /opt/scanner.sh
+      image:
+        $ref: "#/$defs/image"
+        type: object
+        title: Konfiguration des Image/Repository
+        default:
+          registry: registry.opencode.de
+          repository: >-
+            bwi/bundesmessenger/backend/container-images/matrix-content-scanner
+          pullPolicy: IfNotPresent
+        required:
+          - registry
+          - repository
+          - tag
+          - pullPolicy
+        unevaluatedProperties: false
+      replicaCount:
+        type: integer
+        default: 1
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        title: Ressourcen-Konfiguration für den Content-Scanner
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf den
+                  Matrix-Content-Scanner-Container anzuwenden sind
+                default: 500m
+              memory:
+                title: >-
+                  RAM Ressourcengrenzen, die auf den
+                  Matrix-Content-Scanner-Container anzuwenden sind
+                default: 1Gi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf den
+                  Matrix-Content-Scanner-Container anzuwenden sind
+                default: 300m
+              memory:
+                title: >-
+                  Anforderungen an RAM Ressourcen, die auf den
+                  Matrix-Content-Scanner-Container anzuwenden sind
+                default: 500Mi
+        unevaluatedProperties: false
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        title: Informationen zum Sicherheitskontext, die der Pod übernehmen soll
+        default:
+          runAsUser: 1334
+          runAsGroup: 1334
+          fsGroup: 1334
+        unevaluatedProperties: false
+      securityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        title: Konfiguration für die Container-Sicherheitsrichtlinie
+        default:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+        unevaluatedProperties: false
+    oneOf:
+      - properties:
+          allowed_mimetypes:
+            type: "null"
+          blocked_mimetypes:
+            type: "null"
+      - properties:
+          allowed_mimetypes:
+            type: array
+          blocked_mimetypes:
+            type: "null"
+        required:
+          - allowed_mimetypes
+      - properties:
+          allowed_mimetypes:
+            type: "null"
+          blocked_mimetypes:
+            type: array
+        required:
+          - blocked_mimetypes
+    required:
+      - enabled
+      - extraVolumes
+      - extraVolumeMounts
+      - scanScript
+      - image
+      - replicaCount
+      - resources
+      - podSecurityContext
+      - securityContext
+    unevaluatedProperties: false
+  schadcodescanner:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      clamavImage:
+        $ref: "#/$defs/image"
+        type: object
+        title: Konfiguration des ClamAV-Image/Repository
+        default:
+          registry: registry.opencode.de
+          repository: bwi/bundesmessenger/backend/container-images/clamav
+          pullPolicy: IfNotPresent
+        required:
+          - registry
+          - repository
+          - tag
+          - pullPolicy
+        unevaluatedProperties: false
+      icapImage:
+        $ref: "#/$defs/image"
+        type: object
+        title: Konfiguration des C-ICAP-Server-Image/Repository
+        default:
+          registry: registry.opencode.de
+          repository: bwi/bundesmessenger/backend/container-images/icap
+          pullPolicy: IfNotPresent
+        required:
+          - registry
+          - repository
+          - tag
+          - pullPolicy
+        unevaluatedProperties: false
+      persistence:
+        type: object
+        properties:
+          enabled:
+            type: boolean
+          existingClaim:
+            type: string
+          storageClass:
+            type: string
+          accessMode:
+            type: string
+            minLength: 1
+          size:
+            type: string
+            minLength: 1
+        required:
+          - enabled
+          - existingClaim
+          - storageClass
+          - accessMode
+          - size
+        unevaluatedProperties: false
+      extraEnv:
+        type: array
+      service:
+        type: object
+        properties:
+          port:
+            type: number
+        required:
+          - port
+        unevaluatedProperties: false
+      freshclam:
+        type: object
+        properties:
+          mirrors:
+            type: array
+        required:
+          - mirrors
+        unevaluatedProperties: false
+      replicaCount:
+        type: number
+      autoscaling:
+        type: object
+        properties:
+          enabled:
+            type: boolean
+          minReplicas:
+            type: number
+          maxReplicas:
+            type: number
+          targetCPUUtilizationPercentage:
+            type: number
+          targetMemoryUtilizationPercentage:
+            type: number
+        required:
+          - enabled
+          - minReplicas
+          - maxReplicas
+          - targetCPUUtilizationPercentage
+          - targetMemoryUtilizationPercentage
+        unevaluatedProperties: false
+      limits:
+        type: object
+        properties:
+          fileSize:
+            type: number
+          scanSize:
+            type: number
+          connectionQueueLength:
+            type: number
+          maxThreads:
+            type: number
+          sendBufTimeout:
+            type: number
+        required:
+          - fileSize
+          - scanSize
+          - connectionQueueLength
+          - maxThreads
+          - sendBufTimeout
+        unevaluatedProperties: false
+      resourcesClamav:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf den ClamAV-Container anzuwenden sind
+                default: 1500m
+              memory:
+                title: >-
+                  RAM Ressourcengrenzen, die auf den ClamAV-Container anzuwenden sind
+                default: 4Gi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf den
+                  ClamAV-Container anzuwenden sind
+                default: 300m
+              memory:
+                title: >-
+                  Anforderungen an RAM Ressourcen, die auf den ClamAV-Container
+                  anzuwenden sind
+                default: 2Gi
+        unevaluatedProperties: false
+      resourcesCicap:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf den C-Icap-Container anzuwenden sind
+                default: 500m
+              memory:
+                title: >-
+                  RAM Ressourcengrenzen, die auf den C-Icap-Container anzuwenden sind
+                default: 100Mi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf den
+                  C-Icap-Container anzuwenden sind
+                default: 300m
+              memory:
+                title: >-
+                  Anforderungen an RAM Ressourcen, die auf den C-Icap-Container
+                  anzuwenden sind
+                default: 50Mi
+        unevaluatedProperties: false
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        title: Informationen zum Sicherheitskontext, die der Pod übernehmen soll
+        default:
+          runAsNonRoot: true
+          fsGroup: 1111
+        unevaluatedProperties: false
+      clamavSecurityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        title: >-
+          Konfiguration für die Container-Sicherheitsrichtlinie des ClamAV-Containers
+        default:
+          readOnlyRootFilesystem: true
+          runAsGroup: 1111
+          runAsUser: 1111
+        unevaluatedProperties: false
+      icapSecurityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        title: Konfiguration für die Container-Sicherheitsrichtlinie des ICAP-Containers
+        default:
+          readOnlyRootFilesystem: true
+          runAsGroup: 1112
+          runAsUser: 1112
+        unevaluatedProperties: false
+    required:
+      - enabled
+      - clamavImage
+      - icapImage
+      - persistence
+      - extraEnv
+      - service
+      - freshclam
+      - replicaCount
+      - autoscaling
+      - limits
+      - resourcesClamav
+      - resourcesCicap
+      - podSecurityContext
+      - clamavSecurityContext
+      - icapSecurityContext
+    unevaluatedProperties: false
+  synapse_admin:
+    type: object
+    title: Konfiguration für Synapse Admin
+    properties:
+      enabled:
+        type: boolean
+        title: Aktivieren des Synapse-Admin-Moduls
+      uri:
+        type: ["null", "string"]
+        minLength: 1
+        title: URI für die Admin GUI, zwingend notwendig
+      image:
+        $ref: "#/$defs/image"
+        type: object
+        title: Konfiguration des Image vom Modul
+        default:
+          registry: registry.opencode.de
+          repository: bwi/bundesmessenger/backend/container-images/synapse-admin
+          pullPolicy: IfNotPresent
+        required:
+          - registry
+          - repository
+          - tag
+          - pullPolicy
+        unevaluatedProperties: false
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        title: Ressourcen-Konfiguration für den Synapse-Admin-Server
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf den Synapse-Admin Server
+                  anzuwenden sind
+                default: 50m
+              memory:
+                title: >-
+                  RAM Ressourcengrenzen, die auf den Synapse-Admin Server
+                  anzuwenden sind
+                default: 50Mi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf den Synapse-Admin
+                  Server anzuwenden sind
+                default: 5m
+              memory:
+                title: >-
+                  Anforderungen an RAM Ressourcen, die auf den Synapse-Admin
+                  Server anzuwenden sind
+                default: 15Mi
+        unevaluatedProperties: false
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        title: Informationen zum Sicherheitskontext, die der Pod übernehmen soll
+        default:
+          runAsUser: 1111
+          runAsGroup: 1111
+        unevaluatedProperties: false
+      securityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        title: Konfiguration für die Container-Sicherheitsrichtlinie
+        default:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+        unevaluatedProperties: false
+      extraVolumes:
+        type: array
+        title: Zusätzliche in den Synapse Admin einzuhängende Datenträger (Volumes)
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Volume.schema.json
+          type: object
+          unevaluatedProperties: false
+        default: []
+        examples:
+          - - name: confnginx
+              emptyDir: {}
+            - name: lognginx
+              emptyDir: {}
+            - name: runnginx
+              emptyDir: {}
+            - name: tmpnginx
+              emptyDir: {}
+            - name: backgrounds
+              persistentVolumeClaim:
+                claimName: element-backgrounds
+      extraVolumeMounts:
+        type: array
+        title: >-
+          Zusätzliche in den Synapse Admin einzuhängende Datenträgerpfade
+          (Volume-Mounts)
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.VolumeMount.schema.json
+          type: object
+          unevaluatedProperties: false
+        default: []
+        examples:
+          - - name: confnginx
+              mountPath: /etc/nginx/conf.d/
+            - name: lognginx
+              mountPath: /var/log/nginx/
+            - name: runnginx
+              mountPath: /var/run/
+            - name: tmpnginx
+              mountPath: /var/cache/nginx/
+    if:
+      properties:
+        enabled:
+          const: true
+    then:
+      properties:
+        uri:
+          type: string
+    required:
+      - enabled
+      - image
+      - resources
+      - podSecurityContext
+      - securityContext
+      - extraVolumes
+      - extraVolumeMounts
+    unevaluatedProperties: false
+  adminPortal:
+    type: object
+    title: Konfiguration für Admin-Portal
+    properties:
+      enabled:
+        type: boolean
+        title: Aktivieren des Admin-Portal-Moduls
+        default: false
+      uri:
+        type: ["null", "string"]
+        title: URI für das Admin-Portal, zwingend notwendig
+        default: null
+      TLSverify:
+        type: boolean
+        title: Aktivieren der TLS Zertifikatsüberprüfung
+        default: false
+      logLevelCore:
+        type: string
+        enum:
+          - DEBUG
+          - INFO
+          - WARNING
+          - ERROR
+          - CRITICAL
+          - NOTSET
+          - OFF
+        title: LogLevel der Core-Komponente vom Admin-Portal
+        description: >-
+          Benötigt, um das LogLevel der Komponente zu steuern und unnötige
+          Details auszublenden.
+        default: INFO
+      logLevelAudit:
+        type: string
+        enum:
+          - DEBUG
+          - INFO
+          - WARNING
+          - ERROR
+          - CRITICAL
+          - NOTSET
+          - OFF
+        title: LogLevel der Audit-Komponente vom Admin-Portal
+        description: >-
+          Benötigt, um das LogLevel der Komponente zu steuern und unnötige
+          Details auszublenden.
+        default: OFF
+      coreImage:
+        $ref: "#/$defs/image"
+        type: object
+        title: Konfiguration des Image vom Core- bzw. Backend-Modul
+        default:
+          registry: registry.opencode.de
+          repository: bwi/bundesmessenger/backend/container-images/bumap-core
+          tag: 1.0.0-jammy
+          pullPolicy: IfNotPresent
+        required:
+          - registry
+          - repository
+          - tag
+          - pullPolicy
+        unevaluatedProperties: false
+      uiImage:
+        $ref: "#/$defs/image"
+        type: object
+        title: Konfiguration des Image vom UI-Modul
+        default:
+          registry: registry.opencode.de
+          repository: bwi/bundesmessenger/backend/container-images/bumap-ui
+          tag: 1.0.0-jammy
+          pullPolicy: IfNotPresent
+        required:
+          - registry
+          - repository
+          - tag
+          - pullPolicy
+        unevaluatedProperties: false
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        title: Ressourcen-Konfiguration für alle Admin-Portal Module
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind
+                default: 150m
+              memory:
+                title: >-
+                  RAM-Ressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind
+                default: 100Mi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf die Admin-Portal
+                  Pods anzuwenden sind
+                default: 5m
+              memory:
+                title: >-
+                  Anforderungen an RAM-Ressourcen, die auf den Admin-Portal Pods
+                  anzuwenden sind
+                default: 15Mi
+        unevaluatedProperties: false
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        title: Informationen zum Sicherheitskontext, die der Pod übernehmen soll
+        default:
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+          runAsGroup: 1001
+          runAsUser: 1001
+        unevaluatedProperties: false
+      securityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        title: Konfiguration für die Container-Sicherheitsrichtlinie des Containers
+        default:
+          capabilities:
+            drop:
+              - ALL
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        unevaluatedProperties: false
+    required:
+      - enabled
+      - uri
+      - coreImage
+      - uiImage
+      - resources
+      - podSecurityContext
+      - securityContext
+    unevaluatedProperties: false
+  webclient:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      uri:
+        type: ["null", "string"]
+        minLength: 1
+        default: null
+      image:
+        $ref: "#/$defs/image"
+        type: object
+        title: Konfiguration für das Image vom Element-Webclient
+        default:
+          registry: registry.opencode.de
+          repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
+          pullPolicy: IfNotPresent
+        required:
+          - registry
+          - repository
+          - tag
+          - pullPolicy
+        unevaluatedProperties: false
+      displayName:
+        type: string
+        title: Anzeigename des Servers in Webclients
+        default: Messenger deiner Organisation
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        title: Ressourcen-Konfiguration für den Webclient-Server
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf den webclient-server anzuwenden sind
+                default: 150m
+              memory:
+                title: >-
+                  RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind
+                default: 100Mi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf den
+                  webclient-server anzuwenden sind
+                default: 50m
+              memory:
+                title: >-
+                  Anforderungen an RAM Ressourcen, die auf den webclient-server
+                  anzuwenden sind
+                default: 45Mi
+        unevaluatedProperties: false
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        title: Informationen zum Sicherheitskontext, die der Pod übernehmen soll
+        default:
+          runAsUser: 1111
+          runAsGroup: 1111
+        unevaluatedProperties: false
+      securityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        title: Konfiguration für die Container-Sicherheitsrichtlinie
+        default:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+        unevaluatedProperties: false
+    if:
+      properties:
+        enabled:
+          const: true
+    then:
+      required:
+        - uri
+    required:
+      - enabled
+      - image
+      - displayName
+      - resources
+      - podSecurityContext
+      - securityContext
+    unevaluatedProperties: false
+  call:
+    type: object
+    title: Konfiguration für BundesMessenger-Call
+    description: >-
+      Der BundesMessenger-Call Client ist derzeit im Beta-Status. Er ermöglicht
+      Video-Chats. Die Video-Chats funktionieren via WebRTC und LiveKit SFU. Die
+      SFU muss sperat bereit gestellt werden. Der Client wird nicht mit der
+      konfigurierten URL direkt aufgerufen, sondern integriert sich in den
+      WebClient. Die URL wird für die Integration jedoch benötigt.
+    properties:
+      enabled:
+        type: boolean
+        title: BundesMessenger-Call im Deployment aktivieren
+        default: false
+      uri:
+        type: ["null", "string"]
+        title: URL für den Call, zwingend notwendig
+        default: null
+      livekit:
+        type: object
+        title: Konfiguration mit denen der LiveKit Server erreicht werden kann
+        description: >-
+          Key und Secret müssen mit den Angabe im LiveKit Server überein stimmen.
+        properties:
+          url:
+            type: string
+            title: URL des LiveKit Servers
+            default: wss://livekit.example.com
+          key:
+            type: string
+            title: Schlüssel für den LiveKit Servers
+            default: devkey
+          secret:
+            type: string
+            title: Secret des LiveKit Servers
+            default: secret
+        required:
+          - url
+          - key
+          - secret
+        unevaluatedProperties: false
+      existingSecret:
+        type: ["null", "string"]
+        title: Bestehendes Secret, das anstelle statischer Angaben verwendet wird
+        default: null
+      secretKeys:
+        type: object
+        title: Namen der Schlüssel in dem existingSecret
+        description: Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
+        properties:
+          livekitUrl:
+            type: string
+            title: Verweisname zur URL des LiveKit Servers
+            default: livekit-url
+          livekitKey:
+            type: string
+            title: Verweisname zum Schlüssel für den LiveKit Servers
+            default: livekit-key
+          livekitSecret:
+            type: string
+            title: Verweisname zum Secret des LiveKit Servers
+            default: livekit-secret
+        required:
+          - livekitUrl
+          - livekitKey
+          - livekitSecret
+        unevaluatedProperties: false
+      client:
+        type: object
+        title: Konfiguration für Client vom BundesMessenger-Call
+        properties:
+          image:
+            $ref: "#/$defs/image"
+            type: object
+            title: >-
+              Repository/Image-Konfiguration für den Client vom BundesMessenger-Call
+            default:
+              registry: registry.opencode.de
+              repository: >-
+                bwi/bundesmessenger/backend/container-images/bundesmessenger-call
+              pullPolicy: IfNotPresent
+            required:
+              - registry
+              - repository
+              - tag
+              - pullPolicy
+            unevaluatedProperties: false
+          podSecurityContext:
+            $ref: "#/$defs/podSecurityContext"
+            type: object
+            default:
+              runAsUser: 1021
+              fsGroup: 2666
+              runAsGroup: 1021
+            unevaluatedProperties: false
+          securityContext:
+            $ref: "#/$defs/securityContext"
+            type: object
+            default:
+              capabilities:
+                drop:
+                  - ALL
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+            unevaluatedProperties: false
+          resources:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+            type: object
+            title: Ressourcen für den Client vom BundesMessenger-Call
+            properties:
+              limits:
+                properties:
+                  cpu:
+                    title: >-
+                      Rechenressourcengrenzen, die auf den BundesMessenger-Call
+                      anzuwenden sind
+                    default: 100m
+                  memory:
+                    title: >-
+                      RAM Ressourcengrenzen, die auf den BundesMessenger-Call
+                      anzuwenden sind
+                    default: 90Mi
+              requests:
+                properties:
+                  cpu:
+                    title: >-
+                      Anforderungen an Rechenressourcen, die auf den
+                      BundesMessenger-Call anzuwenden sind
+                    default: 50m
+                  memory:
+                    title: >-
+                      Anforderungen an RAM Ressourcen, die auf den
+                      BundesMessenger-Call anzuwenden sind
+                    default: 45Mi
+            unevaluatedProperties: false
+        required:
+          - image
+          - podSecurityContext
+          - securityContext
+          - resources
+        unevaluatedProperties: false
+      jwtService:
+        type: object
+        properties:
+          image:
+            $ref: "#/$defs/image"
+            type: object
+            title: Repository/Image-Konfiguration für das Image vom LiveKit JWT Service
+            default:
+              registry: registry.opencode.de
+              repository: >-
+                bwi/bundesmessenger/backend/container-images/bundesmessenger-call
+              pullPolicy: IfNotPresent
+            required:
+              - registry
+              - repository
+              - tag
+              - pullPolicy
+            unevaluatedProperties: false
+          replicaCount:
+            type: integer
+            title: Replica-Count
+            default: 1
+          extraEnv:
+            type: array
+            title: Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+            default: []
+            examples:
+              - - name: NO_PROXY
+                  value: 127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8
+                - name: HTTPS_PROXY
+                  value: https://proxyuser@proxyserver:proxyport
+                - name: HTTP_PROXY
+                  value: http://proxyuser@proxyserver:proxyport
+          podSecurityContext:
+            $ref: "#/$defs/podSecurityContext"
+            type: object
+            default:
+              runAsUser: 1021
+              fsGroup: 2666
+              runAsGroup: 1021
+            unevaluatedProperties: false
+          securityContext:
+            $ref: "#/$defs/securityContext"
+            type: object
+            default:
+              capabilities:
+                drop:
+                  - ALL
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+            unevaluatedProperties: false
+          resources:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+            type: object
+            title: Ressourcen für den Client vom BundesMessenger-Call
+            properties:
+              limits:
+                properties:
+                  cpu:
+                    title: >-
+                      Rechenressourcengrenzen, die auf den LiveKit-JWT-Server
+                      anzuwenden sind
+                    default: 100m
+                  memory:
+                    title: >-
+                      RAM Ressourcengrenzen, die auf den LiveKit-JWT-Server
+                      anzuwenden sind
+                    default: 50Mi
+              requests:
+                properties:
+                  cpu:
+                    title: >-
+                      Anforderungen an Rechenressourcen, die auf den
+                      LiveKit-JWT-Server anzuwenden sind
+                    default: 50m
+                  memory:
+                    title: >-
+                      Anforderungen an RAM Ressourcen, die auf den
+                      LiveKit-JWT-Server anzuwenden sind
+                    default: 25Mi
+            unevaluatedProperties: false
+          nodeSelector:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/nodeSelector
+            type: object
+            title: Node Selektor Konfiguration für den Container
+            default: {}
+            unevaluatedProperties: false
+          tolerations:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/tolerations
+            type: array
+            title: Tolerations/Tains Konfiguration für den Container
+            default: []
+            unevaluatedProperties: false
+          affinity:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/affinity
+            type: object
+            title: Affinitäts-Konfiguration für den Container
+            default: {}
+            unevaluatedProperties: false
+        required:
+          - image
+          - replicaCount
+          - extraEnv
+          - podSecurityContext
+          - securityContext
+          - resources
+          - nodeSelector
+          - tolerations
+          - affinity
+        unevaluatedProperties: false
+    required:
+      - enabled
+      - livekit
+      - secretKeys
+      - client
+      - jwtService
+    unevaluatedProperties: false
+  additionalConfig:
+    type: object
+    title: zusätzliche Konfigurationen für den BundesMessenger
+    description: >-
+      Konfigurationen, die übergreifend sind und nicht nur eine einzelne
+      Komponenten betreffen. Die Abschnitte `config` und `extraConfig` betreffen
+      Einstellungen, die direkt in die Konfiguration von Synapse eingehen. Die
+      Abschnitte `wellknown` oder `webclient` betreffen bevorzugt diese
+      Komponenten direkt. Die Einstellungen, die hier statt finden, greifen
+      komponentenübergreifend, z.B. alle Clients (auch die mobilen Apps) und
+      nicht nur den Webclient.
+    properties:
+      verifyJWT:
+        type: array
+        title: Liste an JWTs, die dem Client bereit gestellt werden
+        description: >-
+          Wird verwendet, um die Infrastruktur als legitim auszuweisen. Die JWTs
+          werden via `<public_baseurl>/_bum/configure/v1/verify` abgerufen.
+        items:
+          type: string
+        default: []
+      dsgvoExport:
+        type: object
+        properties:
+          enabled:
+            type: boolean
+          serviceAccount:
+            type: object
+            properties:
+              create:
+                type: boolean
+              name:
+                type: ["null", "boolean"]
+                title: Name des ServiceAccounts für den dsgo-exporter-job
+                default: null
+                examples:
+                  - non-default-dsgvo-exporter-name
+            required:
+              - create
+            unevaluatedProperties: false
+        required:
+          - enabled
+          - serviceAccount
+        unevaluatedProperties: false
+      locationSharing:
+        type: object
+        properties:
+          enabled:
+            type: boolean
+            default: false
+          map_style_url:
+            type: ["null", "string"]
+          map_style_config:
+            type: ["null", "object"]
+            properties:
+              version:
+                type: ["null", "number"]
+              name:
+                type: ["null", "string"]
+                minLength: 1
+              sources:
+                type: ["null", "object"]
+                properties:
+                  wms_topplus:
+                    type: ["null", "object"]
+                    properties:
+                      type:
+                        type: ["null", "string"]
+                        minLength: 1
+                      tiles:
+                        type: ["null", "array"]
+                        items:
+                          properties: {}
+                      tileSize:
+                        type: ["null", "number"]
+                      attribution:
+                        type: ["null", "string"]
+                        minLength: 1
+                    unevaluatedProperties: true
+                unevaluatedProperties: true
+              layers:
+                type: ["null", "array"]
+                minItems: 1
+                items:
+                  properties:
+                    id:
+                      type: ["null", "string"]
+                      minLength: 1
+                    source:
+                      type: ["null", "string"]
+                      minLength: 1
+                    source-layer:
+                      type: ["null", "string"]
+                      minLength: 1
+                    type:
+                      type: ["null", "string"]
+                      minLength: 1
+                uniqueItems: true
+            unevaluatedProperties: true
+        if:
+          properties:
+            enabled:
+              const: true
+        then:
+          required:
+            - map_style_config
+        required:
+          - enabled
+        unevaluatedProperties: false
+      maintenance:
+        type: object
+        default: {}
+        unevaluatedProperties: true
+    required:
+      - verifyJWT
+      - dsgvoExport
+      - locationSharing
+      - maintenance
+    unevaluatedProperties: false
+  networkpolicies:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      fwProxyList:
+        type: array
+        items:
+          type: string
+        default: []
+      egressIpBlock:
+        type: array
+        items:
+          type: string
+        default: []
+      dnsLabel:
+        type: string
+        minLength: 1
+        default: kube-dns
+      ingressNamespace:
+        type: string
+        minLength: 1
+        default: default
+      postgres:
+        type: object
+        properties:
+          externalPostgresIP:
+            type: ["null", "string"]
+            default: null
+          labelselector:
+            type: string
+            minLength: 1
+            default: "app.kubernetes.io/name: postgresql"
+        required:
+          - labelselector
+        unevaluatedProperties: false
+    required:
+      - enabled
+      - fwProxyList
+      - egressIpBlock
+      - dnsLabel
+      - ingressNamespace
+      - postgres
+    unevaluatedProperties: false
+  tests:
+    type: object
+    properties:
+      image:
+        $ref: "#/$defs/image"
+        type: object
+        title: Konfiguration für das Image der Tests
+        default:
+          registry: registry.opencode.de
+          repository: bwi/bundesmessenger/backend/container-images/wget
+          pullPolicy: IfNotPresent
+        required:
+          - registry
+          - repository
+          - tag
+          - pullPolicy
+        unevaluatedProperties: false
+      annotations:
+        type: object
+        properties:
+          helm.sh/hook-delete-policy:
+            type: string
+            minLength: 1
+        required:
+          - helm.sh/hook-delete-policy
+        unevaluatedProperties: false
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        title: Informationen zum Sicherheitskontext, die der Pod übernehmen soll
+        default:
+          runAsUser: 1001
+          runAsGroup: 1001
+        unevaluatedProperties: false
+      securityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        title: Konfiguration für die Container-Sicherheitsrichtlinie
+        default:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1001
+          runAsGroup: 1001
+        unevaluatedProperties: false
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        title: Resource-Konfiguration für Tests
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: Rechenressourcengrenzen, die für Tests anzuwenden sind
+                default: 100m
+              memory:
+                title: RAM Ressourcengrenzen, die für Tests anzuwenden sind
+                default: 32Mi
+          requests:
+            properties:
+              cpu:
+                title: Anforderungen an Rechenressourcen, die für Tests anzuwenden sind
+                default: 50m
+              memory:
+                title: Anforderungen an RAM Ressourcen, die für Tests anzuwenden sind
+                default: 16Mi
+        unevaluatedProperties: false
+    required:
+      - image
+      - annotations
+      - podSecurityContext
+      - securityContext
+      - resources
+    unevaluatedProperties: false
+  demomode:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      serviceAccount:
+        type: object
+        properties:
+          create:
+            type: boolean
+          name:
+            type: ["null", "boolean"]
+            title: Name des ServiceAccounts für den demomode-job.
+            default: null
+            examples:
+              - non-default-demomode-name
+        required:
+          - create
+        unevaluatedProperties: false
+      mode:
+        type: string
+        enum:
+          - complete
+          - defined
+          - federation
+      interval:
+        type: string
+      existingClaim:
+        type: string
+      postgresqldump:
+        type: string
+      sqldump:
+        type: string
+    if:
+      properties:
+        enabled:
+          const: true
+    then:
+      required:
+        - mode
+    required:
+      - enabled
+      - serviceAccount
+      - mode
+      - interval
+      - existingClaim
+      - postgresqldump
+      - sqldump
+    unevaluatedProperties: false
+patternProperties:
+  ^x-: true
+allOf:
+  - oneOf:
+      - properties:
+          redis:
+            properties:
+              enabled:
+                const: true
+      - properties:
+          redis:
+            properties:
+              enabled:
+                const: false
+          externalRedis:
+            oneOf:
+              - properties:
+                  existingSecret:
+                    type: string
+                  password:
+                    type: "null"
+                requires:
+                  - existingSecret
+              - properties:
+                  existingSecret:
+                    type: "null"
+                  password:
+                    type: string
+                requires:
+                  - password
+  - oneOf:
+      - properties:
+          postgresql:
+            properties:
+              enabled:
+                const: true
+      - properties:
+          postgresql:
+            properties:
+              enabled:
+                const: false
+          externalPostgresql:
+            oneOf:
+              - properties:
+                  existingSecret:
+                    type: string
+                  password:
+                    type: "null"
+                required:
+                  - existingSecret
+              - properties:
+                  existingSecret:
+                    type: "null"
+                  password:
+                    type: string
+                required:
+                  - password
+required:
+  - image
+  - serverName
+  - dataPrivacyUrl
+  - imprintUrl
+  - adminAPIServerName
+  - monitoring
+  - serviceAccount
+  - argoCD
+  - signingkey
+  - ipv4Only
+  - config
+  - extraConfig
+  - extraSecrets
+  - synapse
+  - workers
+  - persistence
+  - volumePermissions
+  - service
+  - sygnal
+  - wellknown
+  - confighub
+  - postgresql
+  - externalPostgresql
+  - redis
+  - externalRedis
+  - ingress
+  - mas
+  - contentscanner
+  - schadcodescanner
+  - synapse_admin
+  - webclient
+  - call
+  - additionalConfig
+  - networkpolicies
+  - tests
+  - demomode
+unevaluatedProperties: false
+$defs:
+  image:
+    type: object
+    properties:
+      registry:
+        type: string
+        minLength: 1
+      repository:
+        type: string
+        minLength: 1
+      tag:
+        type: string
+        minLength: 1
+      pullPolicy:
+        title: Image-Pull-Policy
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/imagePullPolicy
+        default: IfNotPresent
+        enum:
+          - Always
+          - Never
+          - IfNotPresent
+    required:
+      - registry
+      - repository
+      - tag
+      - pullPolicy
+  pullSecrets:
+    type: array
+    title: Array von imagePullSecrets
+    default: []
+    items:
+      $ref: >-
+        https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalObjectReference.schema.json
+      type: object
+  podSecurityContext:
+    $ref: >-
+      https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSecurityContext.schema.json
+    type: object
+    properties:
+      runAsUser:
+        minimum: 1001
+        maximum: 60000
+      runAsGroup:
+        minimum: 1001
+        maximum: 60000
+      fsGroup:
+        minimum: 1001
+        maximum: 60000
+  securityContext:
+    $ref: >-
+      https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SecurityContext.schema.json
+    type: object
+    properties:
+      runAsUser:
+        minimum: 1001
+        maximum: 60000
+  worker:
+    type: object
+    properties:
+      enabled:
+        type: boolean
+        default: false
+      replicaCount:
+        type: integer
+        description: >-
+          DEFAULT Die Anzahl der Worker-Replikate. Beachten Sie, dass einige
+          Worker eine besondere Behandlung erfordern. Siehe dazu die
+          Dokumentation:
+          https://element-hq.github.io/synapse/latest/workers.html
+
+
+          Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer
+          als autoscaling.minReplicas oder wenn nicht gesetzt, dann wird
+          autoscaling.minReplicas übernommen.
+        default: 1
+        minimum: 0
+      listeners:
+        type: array
+        title: Entsprechende Endpunkte für den Worker
+        items:
+          type: string
+          enum:
+            - client
+            - consent
+            - federation
+            - keys
+            - media
+            - metrics
+            - openid
+            - replication
+            - static
+            - health
+        default:
+          - media
+      csPaths:
+        type: array
+        title: >-
+          Pfade für die Ingress-Konfiguration des Workers, Client-Server-Kommunikation
+        items:
+          type: string
+        default: []
+      paths:
+        type: array
+        title: >-
+          Pfade für die Ingress-Konfiguration des Workers, Server-Server-Kommunikation
+        items:
+          type: string
+        default: []
+      autoscaling:
+        type: object
+        title: Schalte das HPA für die Container ein.
+        description: >-
+          Dazu muss entsprechende Konfiguration in die separaten Sektionen
+          eingefügt werden.
+
+          Hinweis: Kann für alle spezifischen Worker benutzt werden. Eine
+          Ausnahme besteht für Stream Writer Worker mit "listeners:
+          [replication]".
+          https://element-hq.github.io/synapse/latest/workers.html#stream-writers
+
+          Auf Grund der Synapse und HPA Architektur ist dies nicht möglich. Wenn
+          diese Worker genutzt werden, wird empfohlen die Anzahl der worker
+          manuell via "replicaCount" zu konfigurieren.
+        properties:
+          enabled:
+            type: boolean
+            default: false
+          minReplicas:
+            type: integer
+            title: Minimale Anzahl der Worker-Container
+            default: 2
+          maxReplicas:
+            type: integer
+            title: Maximale Anzahl der Worker-Container
+            default: 10
+          targetCPUUtilizationPercentage:
+            type: integer
+            title: Prozentsatz für CPU-Auslastung um Scaling zu auszulösen
+            default: 80
+          targetMemoryUtilizationPercentage:
+            type: integer
+            title: Prozentsatz für RAM-Auslastung um Scaling zu auszulösen
+            default: 80
+        required:
+          - enabled
+          - minReplicas
+          - maxReplicas
+          - targetCPUUtilizationPercentage
+          - targetMemoryUtilizationPercentage
+        unevaluatedProperties: false
+      strategy:
+        type: object
+        properties:
+          type:
+            type: string
+            enum:
+              - RollingUpdate
+              - Recreate
+            description: >-
+              DEFAULT gilt für alle Synapse-Worker-Container.
+
+
+              Nur wirklich anwendbar, wenn das Deployment ein RWO PV
+              angehängt hat (z.B. Media Repository).
+
+
+              Da Replikate = 1 sind, kann eine Aktualisierung "hängen
+              bleiben", da der vorherige Container mit dem PV verbunden
+              bleibt und der "neu-aufgebaute" Container nie starten kann.
+              Das Ändern der Strategie auf "Recreate" wird den einzelnen
+              vorherigen Container beenden, so dass der neue, ankommende
+              Container sich mit dem PV verbinden kann.
+            default: RollingUpdate
+        required:
+          - type
+        unevaluatedProperties: false
+      extraConfig:
+        type: object
+        description: Zusätzliche Konfiguration für die Worker
+        default: {}
+        unevaluatedProperties: true
+      annotations:
+        type: object
+        title: Annotations
+        description: DEFAULT sind auf alle Synapse-Worker-Container anzuwenden.
+        default: {}
+        unevaluatedProperties: true
+      extraEnv:
+        type: array
+        title: Zusätzliche Umgebungsvariablen
+        description: DEFAULT sind auf alle Synapse-Worker-Container anzuwenden.
+        items:
+          type: object
+          properties:
+            name:
+              type: string
+            value:
+              type: string
+          required:
+            - name
+            - value
+          unevaluatedProperties: false
+        default: []
+        examples:
+          - name: LD_PRELOAD
+            value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+          - name: SYNAPSE_CACHE_FACTOR
+            value: "1.0"
+      volumes:
+        type: array
+        title: Zusätzliche Volumes für den Worker
+        description: >-
+          DEFAULT gilt für alle Synapse-Worker-Container. Nützlich für das
+          Media-Repo oder zum Hinzufügen von Python-Modulen. Daher besser im
+          entsprechenden Konfigurationsteil der spez. Worker.
+        default: []
+      volumeMounts:
+        type: array
+        title: Zusätzliche zu mountende Datenträgerpfade
+        description: DEFAULT gilt für alle Synapse-Worker-Container.
+        default: []
+      extraCommands:
+        type: array
+        title: Zusätzliche Befehle, die beim Starten von Synapse ausgeführt werden
+        description: DEFAULT gilt für alle Synapse-Worker-Container.
+        items:
+          type: string
+        default: []
+        examples:
+          - - apt-get update -yqq && apt-get install patch -yqq
+            - patch -d/usr/local/lib/python3.10/site-packages/synapse -p2 < /synapse/patches/something.patch
+      podSecurityContext:
+        $ref: "#/$defs/podSecurityContext"
+        type: object
+        title: Informationen zum Pod-Sicherheitskontext
+        description: DEFAULT gilt für alle Synapse-Worker-Container.
+        default:
+          runAsUser: 2666
+          runAsNonRoot: true
+          runAsGroup: 2666
+          fsGroup: 2666
+        unevaluatedProperties: false
+      securityContext:
+        $ref: "#/$defs/securityContext"
+        type: object
+        title: Konfiguration für die Container-Sicherheitsrichtlinie
+        description: DEFAULT gilt für alle Synapse-Worker-Container.
+        default:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 2666
+        unevaluatedProperties: false
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        properties:
+          limits:
+            properties:
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf alle
+                  Synapse-Worker-Container anzuwenden sind
+                description: >-
+                  DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen
+                  gesondert zu verwalten.
+                default: 600m
+              memory:
+                title: >-
+                  RAM Ressourcengrenzen, die auf alle
+                  Synapse-Worker-Container anzuwenden sind
+                description: >-
+                  DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen
+                  gesondert zu verwalten.
+                default: 768Mi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf alle
+                  Synapse-Worker-Container anzuwenden sind
+                description: >-
+                  DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen
+                  gesondert zu verwalten.
+                default: 100m
+              memory:
+                title: >-
+                  Anforderungen an RAM Ressourcen, die auf alle
+                  Synapse-Worker-Container anzuwenden sind
+                description: >-
+                  DEFAULT gilt für alle Synapse-Worker-Container. Empfohlen
+                  gesondert zu verwalten.
+                default: 150Mi
+        unevaluatedProperties: false
+      livenessProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        title: Healthcheck
+        properties:
+          periodSeconds:
+            default: 10
+          httpGet:
+            properties:
+              path:
+                default: /health
+              port:
+                default: metrics
+        unevaluatedProperties: false
+      readinessProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        title: Bereitschaftscheck
+        properties:
+          periodSeconds:
+            default: 3
+          httpGet:
+            properties:
+              path:
+                default: /health
+              port:
+                default: metrics
+        unevaluatedProperties: false
+      startupProbe:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Probe.schema.json
+        type: object
+        title: Startup-Check
+        properties:
+          failureThreshold:
+            default: 6
+          httpGet:
+            properties:
+              path:
+                default: /health
+              port:
+                default: metrics
+        unevaluatedProperties: false
+      nodeSelector:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/nodeSelector
+        type: object
+        title: >-
+          Node Selektor Konfiguration, die auf alle Synapse-Worker-Container
+          anzuwenden sind
+        description: DEFAULT gilt für alle Synapse-Worker-Container.
+        default: {}
+        unevaluatedProperties: false
+      tolerations:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/tolerations
+        type: array
+        title: >-
+          Tolerations/Tains Konfiguration, die auf alle
+          Synapse-Worker-Container anzuwenden sind
+        description: DEFAULT gilt für alle Synapse-Worker-Container.
+        default: []
+        unevaluatedProperties: false
+      affinity:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/affinity
+        type: object
+        default: {}
+        unevaluatedProperties: false
+    required:
+      - enabled
+      - replicaCount
+      - listeners
+      - csPaths
+      - paths
+      - autoscaling
+      - strategy
+      - extraConfig
+      - annotations
+      - extraEnv
+      - volumes
+      - volumeMounts
+      - extraCommands
+      - podSecurityContext
+      - securityContext
+      - resources
+      - livenessProbe
+      - readinessProbe
+      - startupProbe
+      - nodeSelector
+      - tolerations
+      - affinity
+    unevaluatedProperties: false

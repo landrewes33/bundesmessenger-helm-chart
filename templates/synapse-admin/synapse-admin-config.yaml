@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.synapse_admin.enabled }}
 {{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
@@ -46,7 +46,7 @@ data:
       index index.html index.htm index.nginx-debian.html;
 
       server_name _;
-      
+
       # X-Header for CORS-Policy
       include /etc/nginx/conf.d/cors_headers.conf;
 

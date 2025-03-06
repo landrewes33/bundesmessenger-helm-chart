@@ -10,9 +10,8 @@ image:
   # ursprünglich: "repository: matrixdotorg/synapse"
   repository: bwi/bundesmessenger/backend/container-images/synapse
 
-  # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
-  # @default -- wird im Chart.yaml gesetzt
-  # tag: ""
+  # -- (string) Verwendete Version des Synapse-Abbilds.
+  tag: 1.120.2-jammy-production
 
   # -- (list) Optional kann ein Array von imagePullSecrets angegeben werden.
   # Secrets müssen manuell im Namensraum angelegt werden.
@@ -20,7 +19,6 @@ image:
   # Beispiel:
   # pullSecrets:
   #   - name: myRegistryKeySecretName
-  # @default -- nicht gesetzt
   pullSecrets: []
 
   # -- (string) Pullpolicy für das konfigurierte Image
@@ -76,25 +74,25 @@ monitoring:
   # `kubectl get Prometheus --all-namespaces -o jsonpath='{.items[*].spec.podMonitorSelector.matchLabels}'`
   labels: {}
 
-# -- (string) Anzeigename des Servers in Webclients
-# @default -- Messenger deiner Organisation
-displayName: "Messenger deiner Organisation"
-
-## Erstellen eines ServiceAccounts, samt gewünschter Annotations
-## oder Nutzung eines vorhandenen ServiceAccounts.
-## Es werden darüber hinaus noch weitere ServiceAccounts angelegt, z.B. für den Signing-Key Job oder Redis.
-## Der ServiceAccount für Redis kann via `redis.serviceAccount.name` konfiguriert werden.
-##
+# -- (object) Erstellen eines ServiceAccounts, samt gewünschter Annotations.
+# Beinhaltet gewünschte Annotations oder Nutzung eines vorhandenen
+# ServiceAccounts. Es werden darüber hinaus noch weitere ServiceAccounts
+# angelegt, z.B. für den Signing-Key Job oder Redis. Der ServiceAccount für
+# Redis kann via `redis.serviceAccount.name` konfiguriert werden.
 serviceAccount:
+  # -- (boolean) Aktivierung der Erstellung eines ServiceAccounts.
   create: true
+  # -- (object) Setzen von Annotations für den ServiceAccount
+  # Beispiel: eks.amazonaws.com/role-arn: arn:aws:iam::000000000000:role/matrix-synapse
   annotations: {}
-    # eks.amazonaws.com/role-arn: arn:aws:iam::000000000000:role/matrix-synapse
+  # -- (string|null) Name des ServiceAccounts für das Deployment.
+  # Falls null, wird der Release-Name benutzt.
   # name: non-default-service-name
 
-## Manuelle Aktivierung bei Nutzung von ArgoCD.
-# Sollte durch `.Capabilities.APIVersions.Has "argoproj.io/v1alpha1"` erkannt werden,
-# kann hier aber erzwungen werden.
-# argoCD: true
+# -- (boolean) Manuelle Aktivierung bei Nutzung von ArgoCD.
+# Sollte durch `.Capabilities.APIVersions.Has "argoproj.io/v1alpha1"` erkannt
+# werden, kann hier aber erzwungen werden.
+argoCD: false
 
 # Standardwerte für alle Pods.
 # Alle `podSecurityContext`-Schlüssel in dieser Datei verwenden die Werte aus
@@ -128,15 +126,18 @@ signingkey:
   ##
   ## Sollte nach dem initialen Durchlauf deaktiviert werden, um Upgrades zu beschleunigen.
 
+  # -- (object) ServiceAccounts für den signingkey-Job.
   serviceAccount:
+    # -- (boolean) Aktivierung der Erstellung eines ServiceAccounts.
     create: true
-    # -- (string) Name des ServiceAccounts für den signingkey-job.
-    # name: non-default-signingkeyjob-name
+    # -- (string|null) Name des ServiceAccounts für den signingkey-Job.
+    # Null für die Verwendung eines Standardnamens für den ServiceAccount.
+    # name: signingkey-serviceaccount
 
+  # -- (bool) Mit dem Job wird zur Installation ein Signierschlüssel erzeugt.
+  # Nach der Erstellung des Keys oder bei manueller Einbindung eines Keys (`extraConfig.old_signing_keys`)
+  # sollte der Job deaktiviert werden.
   job:
-    # -- (bool) Mit dem Job wird zur Installation ein Signierschlüssel erzeugt.
-    # Nach der Erstellung des Keys oder bei manueller Einbindung eines Keys (`extraConfig.old_signing_keys`)
-    # sollte der Job deaktiviert werden.
     enabled: true
 
     ## -- (list) Annotations to apply to the signing-key-job.
@@ -152,9 +153,8 @@ signingkey:
       # ursprünglich: "repository: matrixdotorg/synapse"
       # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen (empfohlen)
       repository: bwi/bundesmessenger/backend/container-images/synapse
-      # -- (string) Tag zum überschreiben, standardmäßig wird die Anwendungsversion (Chart.yaml) verwendet
-      # @default -- wird im Chart.yaml gesetzt
-      # tag: ""
+      # -- (string) Verwendete Version des Synapse-Abbilds.
+      tag: 1.120.2-jammy-production
       # -- (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
     # -- (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.
@@ -224,8 +224,8 @@ ipv4Only: true
 ## Ref: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
 ##
 config:
-  # -- (string) Die öffentlich zugängliche URL für die Synapse-Instanz
-  # lautet standardmäßig `https://<publicServerName>`
+  # -- (string|null) Die öffentlich zugängliche URL für die Synapse-Instanz.
+  # Lautet standardmäßig `https://<publicServerName>`.
   # Beispiel:
   # publicBaseurl: "https://matrix.example.com"
 
@@ -266,9 +266,9 @@ config:
 
   ## Schützen Sie die Registrierung mit recaptcha. (optional)
   ##
-  # recaptcha:
-  #   publicKey: ""
-  #   privateKey: ""
+  recaptcha:
+    publicKey: null
+    privateKey: null
 
   # -- (bool) Registrierungskonfiguration, beachten Sie, dass die Registrierung mit dem
   # containerinternen Werkzeug register_new_matrix_user immer möglich ist. Synapse-Admin kann dafür genutzt werden.
@@ -303,6 +303,15 @@ config:
 # Vorkonfiguriert nach Best Practise BWI GmbH:
 # Ref: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
 extraConfig:
+  # -- (map) Durch das automatische Annehmen von Einladungen wird gesteuert, ob Benutzern eine Einladungsanfrage
+  # angezeigt wird oder ob sie stattdessen automatisch einem Raum beitreten, wenn sie eine Einladung erhalten.
+  # Es muss sicher gestellt werden, dass der Worker existent ist.
+  auto_accept_invites:
+    enabled: true
+    only_for_direct_messages: true
+    only_from_local_users: true
+
+  # (object) Vorherige Signing-Keys.
   # old_signing_keys:
   #   "ed25519:id": { key: "base64string", expired_ts: 123456789123 }
   # -- (string) Maximale Dateigröße für Uploads von Medien.
@@ -314,8 +323,8 @@ extraConfig:
   # -- (object) Angabe wann Medien von Repository gelöscht werden. Für die Zeitdauer gilt
   # das Datum des letzten Zugriffs / Downloads.
   media_retention:
-    # -- (string) Zeitdauer wie lange eigene Medien vorgehalten werden. Wenn sie gelöscht
-    # werden, sind sie für den Benutzer nicht mehr abrufbar.
+    # -- (string) Zeitdauer wie lange eigene Medien vorgehalten werden.
+    # Wenn sie gelöscht werden, sind sie für den Benutzer nicht mehr abrufbar.
     # local_media_lifetime: 180d
     # -- (string) Zeitdauer wie lange Medien von fremden Servern im Cache vorgehalten werden.
     # Bei Bedarf werden diese vom remote Server erneut heruntergeladen.
@@ -347,6 +356,8 @@ extraConfig:
     enabled: true
     # -- (bool) Suche alle Nutzer, eingeschaltet
     search_all_users: true
+  # -- (bool) Nutzer können Anzeigenamen ändern, abgeschaltet
+  enable_set_displayname: false
   # -- (bool) Nur Raummitglieder können einen Alias für einen Raum konfigurieren.
   require_membership_for_aliases: true
   # -- (string) Meldet und löscht alle Geräte, auf die länger als die angegebene Zeitspanne
@@ -417,6 +428,8 @@ extraConfig:
     enabled: false
   # -- (bool) dynamisches Vorschaubild, eingeschaltet
   dynamic_thumbnails: true
+  # -- (object) Experimentelle Features.
+  experimental_features: {}
 ########################################
 ## Konfigurationen für Föderation
 ########################################
@@ -666,9 +679,12 @@ synapse:
 ##
 workers:
 
-  # Standardkonfiguration, diese wird an alle Worker vererbt und kann auch
-  # für jeden Workertyp überschrieben werden.
-  default:
+  # -- (object) Standardkonfiguration für Worker.
+  # Wird an alle Worker vererbt und kann für jeden Workertyp überschrieben werden.
+  default: &workerDefault
+    # -- (boolean) DEFAULT Worker aktivieren.
+    enabled: false
+
     # -- (int) DEFAULT Die Anzahl der Worker-Replikate.
     # Beachten Sie, dass einige Worker eine besondere Behandlung erfordern.
     # Siehe dazu die Dokumentation: https://element-hq.github.io/synapse/latest/workers.html
@@ -697,9 +713,9 @@ workers:
     extraEnv: []
 
     # -- (list) Zusätzliche Volumes, die dem Worker hinzugefügt werden sollen.
-    # DEFAULT gilt für alle Synapse-Worker-Container.
-    # Nützlich für das Medien-Repo oder zum Hinzufügen von Python-Modulen.
-    # Daher besser im entsprechenden Konfigurationsteil der spez. Worker
+    # DEFAULT gilt für alle Synapse-Worker-Container. Nützlich für das
+    # Media-Repo oder zum Hinzufügen von Python-Modulen. Daher besser im
+    # entsprechenden Konfigurationsteil der spez. Worker.
     volumes: []
 
     # -- (list) Zusätzliche zu mountende Datenträgerpfade (siehe volumes)
@@ -793,12 +809,39 @@ workers:
     # DEFAULT gilt für alle Synapse-Worker-Container.
     affinity: {}
 
+    # -- (list) Entsprechende Endpunkte für den Worker.
+    listeners: []
+    # -- (list) Pfade für die Ingress-Konfiguration des Workers, Client-Server-Kommunikation.
+    csPaths: []
+    # -- (list) Pfade für die Ingress-Konfiguration des Workers, Server-Server-Kommunikation.
+    paths: []
+
+    # -- (object) Konfiguration für das Auto-Scaling der Applikation.
+    autoscaling:
+      # -- (bool) schalte das HPA für die Container ein.
+      # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden.
+      # Hinweis: Kann für alle spezifischen Worker benutzt werden.
+      # Eine Ausnahme besteht für Stream Writer Worker mit "listeners: [replication]".
+      # https://element-hq.github.io/synapse/latest/workers.html#stream-writers
+      # Auf Grund der Synapse und HPA Architektur ist dies nicht möglich. Wenn diese Worker genutzt werden,
+      # wird empfohlen die Anzahl der worker manuell via "replicaCount" zu konfigurieren.
+      enabled: false
+      # -- (int) minimale Anzahl der Worker-Container
+      minReplicas: 2
+      # -- (int) maximale Anzahl der Worker-Container
+      maxReplicas: 10
+      # -- (int) Prozentsatz für CPU-Auslastung um Scaling zu triggern
+      targetCPUUtilizationPercentage: 80
+      # -- (int) Prozentsatz für RAM-Auslastung um Scaling zu triggern
+      targetMemoryUtilizationPercentage: 80
+
   ## Der generische Worker kann für die meisten Endpunkte verwendet werden.
   ## Seien Sie vorsichtig, wenn Sie die Sync-Endpunkte aktivieren, da sie große Mengen an
   ## Ressourcen verbrauchen können. Weitere Informationen finden Sie unter der obigen Informations-URL.
   ## Ein angemessener Lastausgleich mit der K8s-Ingress-Ressource ist möglicherweise nicht möglich.
   ##
   generic_worker:
+    <<: *workerDefault
     # -- (bool) Aktivieren von Workern
     enabled: true
     # -- (list) entsprechende Endpunkte für den generischen Worker
@@ -942,6 +985,7 @@ workers:
   ## https://element-hq.github.io/synapse/latest/workers.html#load-balancing
 
   federation_reader:
+    <<: *workerDefault
     # -- (bool) Aktiviere spez. Worker für Föderationsanfragen
     # Wenn dieser Worker genutzt wird, können die URLs aus dem
     # generic_worker entfernt werden.
@@ -975,26 +1019,40 @@ workers:
       ## Inbound federation transaction request
       - "/_matrix/federation/(v1|v2)/send/"
 
+  # -- (object) Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen.
+  # (pusher-worker -> Sygnal -> Push-Provider (Apple od. Google))
+  # Ein lokaler Sygnal-Service und -Container ist Bestandteil des Helm-Charts.
+  # Die Pusher-Worker werden als `pusher_instances` in die Synapse-Konfiguration
+  # übernommen.
   pusher:
-    # -- (bool) Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen.
-    # (pusher-worker -> Sygnal -> Push-Provider (Apple od. Google))
-    # Ein lokaler Sygnal-Service und Container ist Bestandteil des Helm Charts.
+    <<: *workerDefault
     enabled: false
 
+  # -- (object) Worker für das Senden von Daten an registrierte Anwendungsdienste.
+  # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden. Diese
+  # wird als `notify_appservices_from_worker` in die Synapse-Konfiguration
+  # übernommen.
   appservice:
-    # -- (bool) Dieser Worker sorgt für das Senden von Daten an registrierte Anwendungsdienste.
-    # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+    <<: *workerDefault
     enabled: false
 
+  # -- (object) Sender von Verbundverkehr (federation traffic) an andere Matrix-Server.
+  # Die Föderationssender-Worker werden als `federation_sender_instances` in die
+  # Synapse-Konfiguration übernommen.
   federation_sender:
-    # -- (bool) Dieser Worker sendet Verbundverkehrs (federation traffic)
-    # an andere Matrix-Server.
+    <<: *workerDefault
+    # -- (bool) Aktivieren der Föderationssender-Worker.
     enabled: false
 
+  # -- (object) Worker zur Bereitstellung und Speicherung von Medien.
+  # Einer der Worker wird als `media_instance_running_background_jobs` in die
+  # Synapse-Konfiguration übernommen.
+  #
+  # Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit
+  # Hintergrundaufgaben.
   media_repository:
+    <<: *workerDefault
     # -- (bool) Aktivieren des Media-Worker
-    # Dieser Worker kümmert sich um die Bereitstellung und Speicherung von Medien.
-    # Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit Hintergrundaufgaben.
     enabled: true
     # -- (list) Zusätzliche Listener für Media-Worker
     listeners: [media]
@@ -1030,12 +1088,16 @@ workers:
     extraConfig:
       enable_media_repo: true
 
-  ## Dieser Worker aktualisiert das Benutzerverzeichnis und kann auch darin suchen
-  ## Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der Worker optional.
+  # -- (object) Dieser Worker aktualisiert das Benutzerverzeichnis und kann darin suchen.
+  # Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der
+  # Worker optional.
+  #
+  # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden. Diese
+  # wird als `update_user_directory_from_worker` in die Synapse-Konfiguration
+  # übernommen.
   user_dir:
-    # -- (bool) Aktivieren des Nutzersuch-Workers
-    # Hinweis: Damit kann Last vom generischen bzw. Haupt-Worker genommen werden
-    # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+    <<: *workerDefault
+    # -- (bool) Aktivieren des Nutzersuch-Workers.
     enabled: false
     # -- (list) Zusätzliche Listener für NutzerSuch-Worker
     listeners: [client]
@@ -1044,13 +1106,16 @@ workers:
     csPaths:
       - "/_matrix/client/(r0|v3|unstable)/user_directory/search$"
 
+  # (object) -- Konfiguration des Background-Workers.
+  # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden. Diese
+  # wird als `run_background_tasks_on` in die Synapse-Konfiguration übernommen.
   background_worker:
-    # -- (bool) Aktivieren des Background-Workers
-    # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden.
+    <<: *workerDefault
+    # -- (bool) Aktivieren des Background-Workers.
     enabled: false
 
 persistence:
-  # -- (bool) Aktivieren der Persistenz-Konfiguration für die Medien-Repository-Funktion.
+  # -- (bool) Aktivieren der Persistenz-Konfiguration für die Media-Repository-Funktion.
   # Diese PVC wird entweder in Synapse oder einem media_repo-Worker eingehängt.
   # Hinweis: Wenn Sie in der Lage sein wollen, dies zu skalieren, müssen Sie den
   # accessMode auf RWX/ReadWriteMany setzen.
@@ -1087,6 +1152,11 @@ volumePermissions:
     tag: latest-jammy-production
     # -- (string) da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung
     pullPolicy: IfNotPresent
+    # -- (array) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
+    # pullSecrets:
+    #   - name: myRegistryKeySecretName
+    pullSecrets: []
 
   # -- (map) Ressourcen des Init-Containers zur Rechtekorrektur
   # Hier keine gesetzt, da kurzlebig und von Hause aus klein
@@ -1125,14 +1195,13 @@ sygnal:
     tag: 0.15.1-jammy-production
     pullPolicy: IfNotPresent
 
-  # -- (string) Proxy, falls benötigt um die Push-Services zu erreichen.
-  # Auskommentieren oder leer lassen für die Benutzung ohne Proxy.
-  # Die Angabe des Zielports beim Proxy ist für die Generierung der
-  # Network Policies zwingend erforderlich
-  proxy: ""
+  # -- (string|null) Proxy, falls benötigt um die Push-Services zu erreichen.
+  # Auskommentieren oder null für die Benutzung ohne Proxy. Die Angabe des
+  # Zielports beim Proxy ist für die Generierung der Network-Policies zwingend
+  # erforderlich.
+  proxy: null
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
-  # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
   # weitere Beispiele:
   #  fsGroup: 27
   #  runAsGroup: 2000
@@ -1176,6 +1245,13 @@ sygnal:
       # -- (string) Zu verwendende Konfiguration für den Port des Bereitschaftscheck
       port: sygnal-port
 
+  # -- (object|null) Startup-Check.
+  # startupProbe:
+  #   failureThreshold: 6
+  #   httpGet:
+  #     path: /health
+  #     port: metrics
+
   # -- (object) Node Selektor Konfiguration für Sygnal-Container.
   nodeSelector: {}
 
@@ -1194,34 +1270,30 @@ sygnal:
   apps: {}
 
   # -- (string) Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält.
-  # Die Schlüssel des Secrets sind die Dateinamen, welche unter `sygnal.apps`
-  # mit dem Präfix `/secrets` referenziert werden.
+  # Nähere Infos unter ./docs/sygnal_push.md#einbindung-von-secrets
+
   existingSecret: "sygnal"
 
-  # -- (string) iOS-Key Dateiname
+  # -- (string|null) iOS-Key Dateiname
   # Wenn iOS Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
   # Bei Nutzung von iOS-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
   # Durch Filename-Vergabe wird der unten angegebene ioskey geladen.
-  # Beispiel:
   # ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus der APNS-Sektion
   # der vorhergehenden Apps-Konfiguration übereinstimmen!
-  ioskey_filename: ""
-  # -- (string) iOS-Key Datei-Inhalt. Die Zeichenkette muss in Base64 kodiert sein.
-  # Beispiel:
+  # -- (string|null) iOS-Key Datei-Inhalt. Die Zeichenkette muss in Base64 kodiert sein.
   # ioskey_keyvalue: 'HIER KÖNNTE IHR KEY STEHEN'
-  ioskey_keyvalue: ""
 
-  # -- (string) FCM-Key Dateiname
+  # -- (string|null) FCM-Key Dateiname
   # bei Nutzung von FCM-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
   # Wenn FCM Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
-  # Durch Filename-Vergabe wird der unten angegebene FCM-Service-Account-File geladen
-  # Beispiel:
-  #    fcmkey_filename: de.opencode.dvs.bundesmessenger.json <<-- muss zwingend mit dem service_account_file-Dateinamen
+  # Durch Filename-Vergabe wird der unten angegebene FCM-Service-Account-File geladen.
+  # fcmkey_filename: de.opencode.dvs.bundesmessenger.json <<-- muss zwingend mit dem service_account_file-Dateinamen
   # aus der gcm-Sektion der vorhergehenden Apps-Konfiguration übereinstimmen!
-  fcmkey_filename: ""
-  # -- (string) FCM-Key Service Account File Inhalt
-  #    fcmkey_keyvalue: 'HIER KÖNNTE IHR SERVICE ACCOUNT FILE INHALT STEHEN'
-  fcmkey_keyvalue: {}
+  # -- (object|null) FCM-Key Service Account File Inhalt
+  # fcmkey_keyvalue:
+  #   type: "service_account"
+  #   project_id: "bundesmessenger"
+  #   ...
 
 
 ######################################################################################
@@ -1235,17 +1307,28 @@ wellknown:
   # -- (bool) Aktivierung des Wellknown-Container
   enabled: true
 
-  # -- (object) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
-  # Beispiel:
-  #  m.server: matrix.example.com:443
-  server: {}
+  # -- (string|null) DNS-Name des Wellknown-Servers.
+  # Falls nicht gesetzt, wird der öffentliche Servername verwendet.
+  # host: wellknown.example.org
+
+  # -- (integer) Port des Wellknown-Servers.
+  port: 443
+
+  # -- (object|null) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
+  # Falls null, wird für `m.server` der Homeserver-Name (`publicServerName`,
+  # sonst `serverName`) mit Port 443 verwendet.
+  # server:
+  #   m.server: matrix.example.com:443
 
   # -- (object) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
   # Die Angabe des Objektes "de.bwi": {"data_privacy_url": "https://example.com/privacy",
   # "imprintUrl": "https://example.com/imprint"} ist verpflichtend,
   # wenn keine .Values.dataPrivacyUrl und .Values.imprintUrl angegeben wurde
   # und auf den WellKnown-Server verzichtet wird.
-  # Beispiel:
+  # Alle Angaben, welche die selben Schlüssel wie in der Standardkonfiguration
+  # setzen, überschreiben unsere generierte client.json. Zusätzliche Angaben
+  # werden hinzugefügt.
+  # Beispiel des Standards:
   #  io.element.e2ee:
   #    secure_backup_required: true
   #    secure_backup_setup_methods: ["passphrase"]
@@ -1256,6 +1339,9 @@ wellknown:
   #    data_privacy_url: https://example.com/privacy
   #    imprintUrl: https://example.com/imprint
   client: {}
+
+  # -- (integer) Replica-Count.
+  replicaCount: 1
 
   # -- (map) Zusätzliche Daten, die unter .well-known/matrix/<data> bereitgestellt werden
   # Dictionaries werden in JSON umgewandelt, einfache Strings werden direkt ausgeliefert
@@ -1273,14 +1359,16 @@ wellknown:
   htdocsPath: /usr/share/nginx/html
 
   # -- (map) Das Webserver Image
-  # optional:
-  # pullSecrets:
-  #   - myRegistryKeySecretName
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/nginx
-    tag: 1.18.0-6ubuntu14.4-jammy-production
+    tag: 1.18.0-6ubuntu14.5-jammy-production
     pullPolicy: IfNotPresent
+    # -- (array) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
+    # pullSecrets:
+    #   - name: myRegistryKeySecretName
+    pullSecrets: []
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
@@ -1328,6 +1416,9 @@ confighub:
   # -- (bool) Aktivierung des ConfigHub-Container
   enabled: true
 
+  # -- (integer) Replica-Count.
+  replicaCount: 1
+
   # -- (map) Zusätzliche Daten, die unter /_matrix/cconfig/<data> bereitgestellt werden
   # Dictionaries werden in JSON umgewandelt, einfache Strings werden direkt ausgeliefert
   # Beispiel siehe wellknown-Konfiguration
@@ -1338,14 +1429,16 @@ confighub:
   htdocsPath: /usr/share/nginx/html
 
   # -- (map) Das Webserver Image
-  # optional:
-  # pullSecrets:
-  #   - myRegistryKeySecretName
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/nginx
-    tag: 1.18.0-6ubuntu14.4-jammy-production
+    tag: 1.18.0-6ubuntu14.5-jammy-production
     pullPolicy: IfNotPresent
+    # -- (array) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
+    # pullSecrets:
+    #   - name: myRegistryKeySecretName
+    pullSecrets: []
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
@@ -1383,60 +1476,74 @@ confighub:
 
 
 ######################################################################################
-##          Konfiguration für Postgres Server
+##          Konfiguration des internen PostgreSQL-Servers
 ######################################################################################
-## Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht,
-## Wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie
-## enabled auf false setzen und den externalPostgresql-Block konfigurieren.
+## Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und
+## schnelle Möglichkeit, Demo- und Testsysteme des BundesMessengers aufzusetzen.
+## Nicht empfohlen ist die Aktivierung für Produktivsysteme.
+##
+## Empfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen
+## Sie `postgresql.enabled` auf `false` und konfigurieren Sie den
+## `externalPostgresql`-Block.
 
 postgresql:
-  # -- (bool) Diese Konfiguration ist für die Einrichtung des intern bereitgestellten Postgres-Servers gedacht,
-  # Wenn Sie stattdessen einen vorhandenen Server verwenden wollen, sollten Sie
-  # enabled auf false setzen und den externalPostgresql-Block konfigurieren.
-  # @default -- false da externe DB vorausgesetzt wird
+  # -- (bool) Aktivieren des internen PostgreSQL-Servers.
+  # Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern
+  # vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled`
+  # auf `false` und konfigurieren Sie den `externalPostgresql`-Block.
   enabled: false
 
-  # -- (map) Das PostgreSQL Image
-  # @default -- WIRD NICHT EMPFOHLEN!!
+  # -- (object) Das zu verwendende PostgreSQL-Container-Abbild.
   image:
     registry: docker.io
     repository: bitnami/postgresql
     tag: "16"
+    # -- (array) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
     # pullSecrets: ["myRegistryKeySecretName"]
+    pullSecrets: []
+    pullPolicy: IfNotPresent
 
+  # (object) -- Authentifizierung gegenüber dem internen PostgreSQL-Server.
   auth:
-    # -- (string) Name für PostgreSQL-DB
+    # -- (string) Name der PostgreSQL-Datenbank.
     database: synapse_db
 
-    # -- (string) Name für PostgreSQL Nutzer
+    # -- (string) Name des PostgreSQL-Nutzers.
     username: synapse
 
-    # -- (string) Passwort für PostgreSQL Nutzer
+    # -- (string|null) Passwort für PostgreSQL Nutzer
     password: synapse
 
-    # -- (string) Bestehendes Secret das anstelle eines statischen Passwortes
-    # verwendet wird
-    existingSecret: ""
+    # -- (string) Name des Secrets, in dem das PostgreSQL-Passwort steht.
+    # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen
+    # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
+    existingSecret: postgresql
     secretKeys:
-      # -- (string) Schlüssel, der das Datenbank-Passwort enthält.
+      # -- (string) Verweis im `existingSecret` auf das Datenbank-Passwort.
       # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
       userPasswordKey: password
-      # -- (string) Schlüssel, der das PostgreSQL enthält.
+      # -- (string) Verweis im `existingSecret` auf das Passwort des postgres-Nutzers.
       # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
       adminPasswordKey: postgres-password
 
-  # -- (int) PostgreSQL container port
   containerPorts:
+    # -- (integer) Port des PostgreSQL-Containers.
     postgresql: 5432
 
   primary:
+    service:
+      ports:
+        # -- (integer) Port des PostgreSQL-Service.
+        postgresql: 5432
+
     initdb:
       # -- (string) Extra Argumente zur Initialisierung der Datenbank
       args: "--lc-collate=C --lc-ctype=C --encoding=UTF8"
 
-    # -- (string) Extra Konfiguration der Datenbank
-    # die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder Synapse-
-    # Prozess seine Verbindungen zur Datenbank hält
+    # -- (string) Extra Konfiguration der Datenbank.
+    # Die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder
+    # Synapse-Prozess seine Verbindungen zur Datenbank hält.
     extendedConfiguration: |
       max_connections = 1024
 
@@ -1457,8 +1564,8 @@ postgresql:
         # -- (string) Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind.
         memory: 256Mi
 
-  # -- (list) Zusätzliche Argumente für die Datenbankverbindung
-  # ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+  # -- (object) Zusätzliche Argumente für die Datenbankverbindung.
+  # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
   extraArgs: {}
 
 # -- (map) Ein extern konfigurierter Postgres-Server, der für die Datenbank von Synapse verwendet wird.
@@ -1474,24 +1581,26 @@ externalPostgresql:
   # -- (string) Name für PostgreSQL Nutzer
   username: synapse
 
-  # -- (string) Passwort für PostgreSQL Nutzer
-  password: synapse
+  # -- (string|null) Passwort für PostgreSQL Nutzer
+  password: null
 
-  # -- (string) Der Name eines bestehenden Secrets mit Postgresql-Anmeldedaten
-  existingSecret: ""
+  # -- (string|null) Der Name eines bestehenden Secrets mit Postgresql-Anmeldedaten
+  existingSecret: null
 
   # -- (string) Passwortschlüssel, der aus dem bestehenden Secret abgerufen wird
   existingSecretPasswordKey: password
 
-  # sslmode: prefer
+  # -- (string) Verwendeter SSL-Modus.
+  # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+  sslmode: prefer
 
-  # -- (list) Zusätzliche Argumente für die Datenbankverbindung
-  # ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+  # -- (object) Zusätzliche Argumente für die Datenbankverbindung.
+  # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
   extraArgs: {}
 
 
 ######################################################################################
-##          Konfiguration für Redis Server
+##          Konfiguration des Redis-Servers
 ######################################################################################
 ## Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
 ## Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie
@@ -1501,32 +1610,46 @@ externalPostgresql:
 ## Dokument docs/redis_sysctl_tuning.md beschrieben.
 
 redis:
+  # -- (bool) Aktivieren des internen Redis-Servers.
+  # Hinweis: Durch Setzten auf `true`, wird der `externalRedis`-Block ignoriert.
+  enabled: true
+
+  # -- (object) Das verwendete Redis-Image.
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/redis
     tag: 5_6.0.16-1ubuntu1-jammy-production
+    # -- (array) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
     # pullSecrets: ["myRegistryKeySecretName"]
-  # -- (bool) Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
-  # Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie enabled auf
-  # false setzen und den externalRedis-Block konfigurieren.
-  enabled: true
-  # -- (map) Konfiguration für Authentifikation gegen Redis
-  # Oder verwenden Sie ein bestehendes Geheimnis mit "redis-password"-Schlüssel
-  # anstelle eines statischen Passworts.
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+
+  # -- (map) Authentifikation gegenüber Redis.
+  # Verwenden Sie ein bestehendes Secret mit `redis-password`-Eintrag anstelle
+  # eines statischen Passworts.
   auth:
+    # -- (boolean) Aktivieren der Authentifikation.
     enabled: true
-    password: synapse
-    existingSecret: ""
+    # -- (string|null) Password für Redis.
+    # Ist der Wert null, wird stattdessen `existingSecret` verwendet.
+    password: null
+    # -- (string) Name des Secrets mit dem Redis-Passwort.
+    # Existiert noch kein Kubernetes Secret mit dem angegebenen Namen, wird es
+    # mit einem zufälligen Passwort automatisch generiert.
+    existingSecret: redis
+    # -- (string) Verweis im `existingSecret` auf das Redis-Passwort.
+    # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
     existingSecretPasswordKey: redis-password
 
   # -- (string) Form der Architektur des Deployments
   architecture: standalone
   master:
     kind: StatefulSet
+    # -- (object) Persistenzkonfiguration des Redis.
+    # Beachten Sie, dass Synapse Redis nur als Synchronisierungsdienstprogramm
+    # verwendet, so dass keine Daten jemals persistiert werden müssen.
     persistence:
-      # -- (bool) Persistenzkonfiration des Redis
-      # Beachten Sie, dass Synapse redis nur als Synchronisierungsdienstprogramm verwendet, so dass keine
-      # Daten jemals persistiert werden müssen.
       enabled: false
     service:
       ports:
@@ -1555,9 +1678,9 @@ redis:
 externalRedis:
   host: redis
   port: 6379
-  password: synapse
+  password: null
 
-  existingSecret: ""
+  existingSecret: null
   existingSecretPasswordKey: redis-password
 
 
@@ -1599,6 +1722,11 @@ ingress:
   # Bsp: nginx.ingress.kubernetes.io/whitelist-source-range: "192.168.10.0/24, 10.10.12.0/24, 10.0.0.1"
   annotationsAdminAPI: {}
 
+  # -- (map) Annotations zur Konfiguration des Ingress für das Admin-Portal.
+  # Dies ermöglicht z.B. das Konfigurieren eines IP-Filters für den administrativen Zugriff.
+  # Bsp: nginx.ingress.kubernetes.io/whitelist-source-range: "192.168.10.0/24, 10.10.12.0/24, 10.0.0.1"
+  annotationsAdminPortal: {}
+
   # -- (list) Hosts, die der Ingress-Konfiguration für die Verarbeitung von
   # Client-to-Server-API-Anfragepfade hinzugefügt werden sollen.
   # Hinweis: serverName bzw. publicServerName wird einbezogen, wenn includeServerName gesetzt ist. (default)
@@ -1638,7 +1766,7 @@ ingress:
   paths: []
 
   # -- (list) Zusätzliche Pfade, die zu den Client-zu-Server Blöcken hinzugefügt werden sollen
-  # Werden vor dem `/_matrix` und `/_synapse` Catch-all-Pfade eingefügt.
+  # Werden vor den `/_matrix` und `/_synapse` Catch-all-Pfaden eingefügt.
   # Beispiele:
   #  # K8s 1.19+
   #  - path: /_matrix/media
@@ -1707,10 +1835,23 @@ mas:
   # Diese wird nicht automatisch angelegt und muss bereit gestellt werden.
   # https://matrix-org.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
   postgresql:
+    # -- (string|null) Host für PostgreSQL-DB von MAS.
+    # Falls ungesetzt, wird die Haupt-PostgreSQL-Instanz verwendet.
+    # host: masdb.example.org
+    # -- (integer) Port für PostgreSQL-DB von MAS.
     port: 5432
+    # -- (string) DB-Name für PostgreSQL-DB von MAS.
     database: mas_synapse
+    # -- (string) Nutzername für PostgreSQL-DB von MAS.
     username: massynapse
+    # -- (string) Password für PostgreSQL Nutzer von MAS.
     password: mas-synapse
+    # -- (string) Verwendeter SSL-Modus.
+    # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+    sslmode: prefer
+    # -- (object) Zusätzliche Optionen für MAS PostgreSQL.
+    # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+    extraArgs: {}
 
   # -- (list) Diese URLs ersetzen bzw. überlagern die URLs vom Synapse.
   # D.h., dass diese URLs vom MAS anstatt von Synapse beantwortet werden müssen.
@@ -1933,6 +2074,44 @@ contentscanner:
   # Mittelsmann zwischen AV und Matrix-Synapse
   enabled: false
 
+  # -- (list|null) Liste der zulässigen MIME-Typen.
+  # Falls angegeben, darf `blocked_mimetypes` nicht ebenfalls angegeben werden.
+  # Wenn eine Datei einen MIME-Typ hat, der nicht in dieser Liste enthalten ist,
+  # wird ihr Scan als fehlgeschlagen betrachtet. Eine Liste aller MIME-Typen
+  # findet man unter
+  # https://www.iana.org/assignments/media-types/media-types.xhtml
+  #
+  # Nicht erkannte Binärdateien werden als „application/octet-stream“ betrachtet.
+  # Nicht erkannte Textdateien werden als „text/plain“ betrachtet.
+  # Falls beide (`allowd_mimetypes` und `blocked_mimetypes`) nicht angegeben,
+  # werden alle MIME-Typen zugelassen.
+  # allowed_mimetypes:
+  #   - text/plain
+
+  # -- (list|null) Liste der blockierten MIME-Typen.
+  # Falls angegeben, darf `allowed_mimetypes` nicht ebenfalls angegeben werden.
+  # Falls angegeben, führt eine Datei, deren MIME-Typ auf dieser Liste steht, zu einem Scan, der
+  # als fehlgeschlagen gilt.
+  # Nicht erkannte Binärdateien werden als `application/octet-stream` betrachtet.
+  # Nicht erkannte Textdateien werden als `text/plain` betrachtet.Bin
+  # blocked_mimetypes:
+  #   - text/plain
+
+  # -- (string) Die maximale zwischenspeicherbare Dateigröße.
+  # Wenn eine Datei größer als diese Größe ist, wird eine Kopie davon
+  # nicht zwischengespeichert, selbst wenn der Scan erfolgreich ist.
+  # Wenn die Datei erneut angefordert wird, wird sie erneut vom Homeserver
+  # heruntergeladen, aber nicht auf die Festplatte geschrieben oder gescannt.
+  max_file_size: "100MB"
+
+  # -- (int) Maximale Anzahl von Ergebnissen, die im Cache gespeichert werden können.
+  # Wenn mehr Dateien gescannt werden, bevor vorhandene Elemente ihre TTL erreichen,
+  # werden die zuletzt aufgerufenen entfernt.
+  max_cache_size: 2048
+
+  # -- (string) Die maximale Zeit, die ein Eintrag im Cache verbleibt, bevor er entfernt wird.
+  ttl: 1d
+
   # -- (list) Zusätzliche in den Matrix-Content-Scanner zu mountende Datenträger (Volumes)
   # Beispiel:
   #  - name: custom-scanscript
@@ -1962,7 +2141,7 @@ contentscanner:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/matrix-content-scanner
-    tag: 1.1.0-jammy-production
+    tag: 1.2.1-jammy-production
     pullPolicy: IfNotPresent
 
   replicaCount: 1
@@ -2004,7 +2183,7 @@ schadcodescanner:
   clamavImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/clamav
-    tag: 0.103.9_dfsg-0ubuntu0.22.04.1-jammy-production
+    tag: 0.103.12_dfsg-0ubuntu0.22.04.1-jammy-production
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
   icapImage:
@@ -2137,8 +2316,8 @@ schadcodescanner:
 synapse_admin:
   # -- (bool) Aktivieren des Synapse-Admin-Moduls
   enabled: false
-  # -- (string) URI für die Admin GUI, zwingend notwendig
-  uri: ""
+  # -- (string|null) URI für die Admin GUI, zwingend notwendig
+  uri: null
   # -- (map) Konfiguration des Image vom Modul
   image:
     registry: registry.opencode.de
@@ -2170,29 +2349,86 @@ synapse_admin:
   securityContext:
     <<: *defaultSecurityContext
 
-    ## Configuration for mounting additional volumes into the application container.
-    ## AKTUELL in Prüfung:
-    # extraVolumes:
-    #   - name: confnginx
-    #     emptyDir: {}
-    #   - name: lognginx
-    #     emptyDir: {}
-    #   - name: runnginx
-    #     emptyDir: {}
-    #   - name: tmpnginx
-    #     emptyDir: {}
-    #  #- name: backgrounds
-    #  #  persistentVolumeClaim:
-    #  #    claimName: element-backgrounds
-    # extraVolumeMounts:
-    #   - name: confnginx
-    #     mountPath: /etc/nginx/conf.d/
-    #   - name: lognginx
-    #     mountPath: /var/log/nginx/
-    #   - name: runnginx
-    #     mountPath: /var/run/
-    #   - name: tmpnginx
-    #     mountPath: /var/cache/nginx/
+  # -- (object) Zusätzliche in den Synapse Admin einzuhängende Datenträger (Volumes).
+  # Beispiel:
+  # extraVolumes:
+  #   - name: confnginx
+  #     emptyDir: {}
+  #   - name: lognginx
+  #     emptyDir: {}
+  #   - name: runnginx
+  #     emptyDir: {}
+  #   - name: tmpnginx
+  #     emptyDir: {}
+  #   - name: backgrounds
+  #     persistentVolumeClaim:
+  #       claimName: element-backgrounds
+  extraVolumes: []
+
+  # -- (object) Zusätzliche in den Synapse Admin einzuhängende Datenträgerpfade (Volume-Mounts).
+  # Beispiel:
+  # extraVolumeMounts:
+  #   - name: confnginx
+  #     mountPath: /etc/nginx/conf.d/
+  #   - name: lognginx
+  #     mountPath: /var/log/nginx/
+  #   - name: runnginx
+  #     mountPath: /var/run/
+  #   - name: tmpnginx
+  #     mountPath: /var/cache/nginx/
+  extraVolumeMounts: []
+
+
+######################################################################################
+##          Konfiguration für Admin-Portal
+######################################################################################
+
+adminPortal:
+  # -- (bool) Aktivieren des Admin-Portal-Moduls
+  enabled: false
+  # -- (string) URI für das Admin-Portal, zwingend notwendig
+  uri: ""
+  # -- (bool) Aktivieren der TLS Zertifikatsüberprüfung
+  TLSverify: true
+  # -- (string) LogLevel Core-Komponente
+  logLevelCore: "INFO"
+  # -- (string) LogLevel Audit-Komponente
+  logLevelAudit: "OFF"
+  # -- (map) Konfiguration des Image vom Core- bzw. Backend-Modul
+  coreImage:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/bumap-core
+    tag: 1.0.1-jammy-production
+    pullPolicy: IfNotPresent
+  # -- (map) Konfiguration des Image vom UI-Modul
+  uiImage:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/bumap-ui
+    tag: 1.0.0-jammy-production
+    pullPolicy: IfNotPresent
+
+  ## Ressourcen Konfiguration für alle Admin-Portal Module.
+  resources:
+    limits:
+      # -- (string) Rechenressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind.
+      cpu: 150m
+      # -- (string) RAM Ressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind.
+      memory: 100Mi
+    requests:
+      # -- (string) Anforderungen an Rechenressourcen, die auf die Admin-Portal Pods anzuwenden sind.
+      cpu: 5m
+      # -- (string) Anforderungen an RAM Ressourcen, die auf den Admin-Portal Pods anzuwenden sind.
+      memory: 15Mi
+
+  # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    runAsGroup: 1001
+    runAsUser: 1001
+
+  # -- (map) Konfiguration für die Container-Sicherheitsrichtlinie des Containers
+  securityContext:
+    <<: *defaultSecurityContext
 
 
 ######################################################################################
@@ -2202,14 +2438,17 @@ synapse_admin:
 webclient:
   # -- (bool) Element-Webclient im Deployment aktivieren
   enabled: false
-  # -- (string) URL für den Webclient, zwingend notwendig
-  uri: ""
+  # -- (string|null) URL für den Webclient, zwingend notwendig
+  uri: null
   # -- (map) Konfiguration für das Image vom Element-Webclient
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
     tag: 2.21.0-jammy-production
     pullPolicy: IfNotPresent
+
+  # -- (string) Anzeigename des Servers in Webclients.
+  displayName: Messenger deiner Organisation
 
   # -- (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
@@ -2305,8 +2544,11 @@ call:
     image:
       registry: ghcr.io
       repository: element-hq/lk-jwt-service
-      tag: sha-e3a1a01
+      tag: 0.2.0
       pullPolicy: IfNotPresent
+
+    # -- (integer) Replica-Count.
+    replicaCount: 1
 
     # -- (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
     # Beispiel:
@@ -2374,7 +2616,7 @@ additionalConfig:
 
     serviceAccount:
       create: true
-      # -- (string) Name des ServiceAccounts für den dsgo-exporter-job.
+      # -- (string|null) Name des ServiceAccounts für den dsgo-exporter-job.
       # name: non-default-dsgvo-exporter-name
 
   locationSharing:
@@ -2545,8 +2787,8 @@ demomode:
 
   serviceAccount:
     create: true
-  # -- (string) Name des ServiceAccounts für den demomode-job.
-  # name: non-default-demomode-name
+    # -- (string|null) Name des ServiceAccounts für den demomode-job.
+    # name: non-default-demomode-name
 
   # -- (string) Auswahl des Demomodus
   # Folgende Möglichkeiten:

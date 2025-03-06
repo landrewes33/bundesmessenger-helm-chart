@@ -1,0 +1,270 @@
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+suite: PostgreSQL authentication
+templates:
+  - deployment.yaml
+  - configuration.yaml
+  - demomode/demomode.yaml
+  - secrets.yaml
+  - signing-key-job.yaml
+set:
+  serverName: example.org
+tests:
+  - it: ensures internal PostgreSQL works with existingSecret
+    set:
+      postgresql.enabled: true
+      postgresql.auth.existingSecret: postgresql-secret
+      postgresql.auth.secretKeys.userPasswordKey: lepass
+      # Using null here would cause Helm to *coalesce* it with the property in
+      # the values.yaml – effectively removing the property. The result would be
+      # *merged* with the subchart’s value, resulting in the use of the
+      # postgresql subchart’s default, which is of type `string`. To work around
+      # this issue and get the Next Best Thing™, values.schema.json is relaxed
+      # to allow simple emptiness for these properties. This workaround
+      # especially guards from the subtleties of a values.yaml coalesced with
+      # itself.
+      #
+      # Coalesce vs. merge:
+      # https://github.com/helm/helm/blob/d1e9c022c68e36112aa40f6983d4d27e67501cf4/pkg/chartutil/coalesce.go#L252-L293
+      #
+      postgresql.auth.password: ""
+    asserts:
+      - template: deployment.yaml
+        contains:
+          path: spec.template.spec.containers[?(@.name=="synapse")].env
+          content:
+            name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql-secret
+                key: lepass
+      - template: secrets.yaml
+        documentSelector:
+          path: metadata.name
+          value: RELEASE-NAME-bundesmessenger
+        matchRegex:
+          path: stringData['config.yaml']
+          pattern: 'password: "@@POSTGRES_PASSWORD@@"'
+  - it: ensures internal PostgreSQL password is treated as Secret
+    set:
+      postgresql.enabled: true
+      postgresql.auth.existingSecret: postgresql-secret
+      postgresql.auth.secretKeys.userPasswordKey: lepass
+      postgresql.auth.password: P455W02D
+    asserts:
+      - template: deployment.yaml
+        contains:
+          path: spec.template.spec.containers[?(@.name=="synapse")].env
+          content:
+            name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql-secret
+                key: lepass
+      - template: secrets.yaml
+        documentIndex: 0
+        matchRegex:
+          path: stringData['config.yaml']
+          pattern: 'password: "@@POSTGRES_PASSWORD@@"'
+  - it: ensures external PostgreSQL works with existingSecret
+    set:
+      postgresql.enabled: false
+      externalPostgresql.existingSecret: postgresql-secret
+      externalPostgresql.existingSecretPasswordKey: lepass
+      externalPostgresql.password: null
+    asserts:
+      - template: deployment.yaml
+        contains:
+          path: spec.template.spec.containers[?(@.name=="synapse")].env
+          content:
+            name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql-secret
+                key: lepass
+      - template: secrets.yaml
+        documentIndex: 0
+        matchRegex:
+          path: stringData['config.yaml']
+          pattern: 'password: "@@POSTGRES_PASSWORD@@"'
+  - it: ensures external PostgreSQL works with password
+    set:
+      postgresql.enabled: false
+      externalPostgresql.existingSecret: null
+      externalPostgresql.password: P455W02D
+    asserts:
+      - template: deployment.yaml
+        notContains:
+          any: true
+          path: spec.template.spec.containers[?(@.name=="synapse")].env
+          content:
+            name: POSTGRES_PASSWORD
+      - template: secrets.yaml
+        documentIndex: 0
+        matchRegex:
+          path: stringData['config.yaml']
+          pattern: 'password: "P455W02D"'
+  - it: ensures external PostgreSQL errors on password and externalSecret
+    set:
+      postgresql.enabled: false
+      externalPostgresql.existingSecret: postgresql-secret
+      externalPostgresql.password: P455W02D
+    asserts:
+      - failedTemplate: {}
+  - it: ensures external PostgreSQL errors without credentials
+    set:
+      postgresql.enabled: false
+      externalPostgresql.existingSecret: null
+      externalPostgresql.password: null
+    asserts:
+      - failedTemplate: {}
+---
+suite: PostgreSQL Secret generation
+templates:
+  - secrets.yaml
+set:
+  postgresql.auth.secretKeys.userPasswordKey: password-key
+  postgresql.auth.secretKeys.adminPasswordKey: admin-password-key
+tests:
+  - it: ensures internal PostgreSQL Secret if required
+    set:
+      postgresql.enabled: true
+      postgresql.auth.existingSecret: postgresql-secret
+      postgresql.auth.password: ""
+    documentSelector:
+      path: metadata.name
+      value: postgresql-secret
+    asserts:
+      - containsDocument:
+          kind: Secret
+          apiVersion: v1
+          name: postgresql-secret
+          any: true
+      - matchRegex:
+          path: stringData.password-key
+          pattern: '^[a-zA-z0-9]{42}$'
+      - matchRegex:
+          path: stringData.admin-password-key
+          pattern: '^[a-zA-z0-9]{42}$'
+  - it: ensures internal PostgreSQL errors if no existingSecret is given
+    set:
+      postgresql.enabled: true
+      postgresql.auth.existingSecret: ""
+    asserts:
+      - failedTemplate: {}
+  - it: ensures no internal PostgreSQL Secret if not required
+    set:
+      postgresql.enabled: false
+      externalPostgresql.existingSecret: postgresql-secret
+    asserts:
+      - containsDocument:
+          kind: Secret
+          name: postgresql-secret
+        not: true
+---
+suite: PostgreSQL Secret migration
+templates:
+  - secrets.yaml
+set:
+  postgresql.enabled: true
+  postgresql.auth.secretKeys.userPasswordKey: password-key
+  postgresql.auth.secretKeys.adminPasswordKey: admin-password-key
+kubernetesProvider:
+  scheme:
+    v1/Secret:
+      gvr:
+        version: v1
+        resource: secrets
+      namespaced: true
+  objects:
+    # The old Helm-managed Secret from postgresql.
+    - apiVersion: v1
+      kind: Secret
+      metadata:
+        name: RELEASE-NAME-postgresql
+        namespace: NAMESPACE
+      data:
+        password: bGVwYXNzd29yZA==  # lepassword
+        postgres-password: aXRzbWVhZG1pbg==  # itsmeadmin
+      type: Opaque
+tests:
+  - it: ensures internal PostgreSQL Secret is migrated
+    set:
+      postgresql.auth.existingSecret: postgresql-secret
+      postgresql.auth.password: ""
+      postgresql.auth.postgresPassword: ""
+    documentSelector:
+      path: metadata.name
+      value: postgresql-secret
+    asserts:
+      - template: secrets.yaml
+        equal:
+          path: stringData.password-key
+          value: lepassword
+      - template: secrets.yaml
+        equal:
+          path: stringData.admin-password-key
+          value: itsmeadmin
+  - it: ensures internal PostgreSQL Secret legacy config has precedence
+    set:
+      postgresql.auth.existingSecret: postgresql-secret
+      postgresql.auth.password: synapse-more-important
+      postgresql.auth.postgresPassword: admin-more-important
+    documentSelector:
+      path: metadata.name
+      value: postgresql-secret
+    asserts:
+      - template: secrets.yaml
+        equal:
+          path: stringData.password-key
+          value: synapse-more-important
+      - template: secrets.yaml
+        equal:
+          path: stringData.admin-password-key
+          value: admin-more-important
+---
+suite: PostgreSQL Secret consistency
+templates:
+  - secrets.yaml
+set:
+  postgresql.enabled: true
+  postgresql.auth.secretKeys.userPasswordKey: password-key
+  postgresql.auth.secretKeys.adminPasswordKey: admin-password-key
+kubernetesProvider:
+  scheme:
+    v1/Secret:
+      gvr:
+        version: v1
+        resource: secrets
+      namespaced: true
+  objects:
+    # An already existing Secret.
+    - apiVersion: v1
+      kind: Secret
+      metadata:
+        name: postgresql-secret
+        namespace: NAMESPACE
+      data:
+        password-key: bGVwYXNzd29yZA==  # lepassword
+        admin-password-key: aXRzbWVhZG1pbg==  # itsmeadmin
+      type: Opaque
+tests:
+  - it: ensures internal PostgreSQL Secret is consistent (user pass)
+    set:
+      postgresql.auth.existingSecret: postgresql-secret
+      postgresql.auth.password: synapse-changed
+    asserts:
+      - failedTemplate: {}
+  - it: ensures internal PostgreSQL Secret is consistent (admin pass)
+    set:
+      postgresql.auth.existingSecret: postgresql-secret
+      postgresql.auth.postgresPassword: admin-changed
+    asserts:
+      - failedTemplate: {}
+  - it: ensures internal PostgreSQL Secret succeeds if consistent
+    set:
+      postgresql.auth.existingSecret: postgresql-secret
+      postgresql.auth.password: lepassword
+      postgresql.auth.postgresPassword: itsmeadmin
+    asserts:
+      - notFailedTemplate: {}

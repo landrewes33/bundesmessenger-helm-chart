@@ -127,6 +127,20 @@ yq "(
 )" "$chart_file" | diff -B "$chart_file" - | patch "$chart_file" -
 # keep blank lines in YAML: https://github.com/mikefarah/yq/issues/515#issuecomment-1113420114
 
+printf "\nUpdate values.schema.json\n"
+# shellcheck disable=SC2016
+sed -i 's|'\
+'"$id":\s*"https://schema.bundesmessenger.dev/bum/develop/values.schema.json"|'\
+'"$id": "https://schema.bundesmessenger.dev/bum/v'"$nextVersion"'/values.schema.json"|'\
+    "$scriptDir/../values.schema.json"
+
+printf "\nUpdate values.schema.yaml\n"
+# shellcheck disable=SC2016
+sed -i 's|'\
+'$id:\s*https://schema.bundesmessenger.dev/bum/develop/values.schema.json|'\
+'$id: https://schema.bundesmessenger.dev/bum/v'"$nextVersion"'/values.schema.json|'\
+    "$scriptDir/../values.schema.yaml"
+
 printf "\n================================================================================\n"
 printf "Commit\n"
 
@@ -134,7 +148,9 @@ git add --no-all \
     "$chart_file" \
     "$scriptDir/../changelog.d/"* \
     "$scriptDir/versions/v${nextVersion}.yaml" \
-    "$scriptDir/../docs/versions/v${nextVersion}.md"
+    "$scriptDir/../docs/versions/v${nextVersion}.md" \
+    "$scriptDir/../values.schema.json" \
+    "$scriptDir/../values.schema.yaml"
 git commit -a -m "Setting version for the release ${nextVersion}"
 
 printf "\n================================================================================\n"
@@ -151,11 +167,6 @@ fi
 
 printf "\n================================================================================\n"
 printf "Cherry pick or add other commits now. Done? "
-read -r yn
-
-printf "\n================================================================================\n"
-printf "CI pipeline updates helm-docs (\"✍ helm-docs\") and adds a commit.\n"
-printf "It needs some time… Did it finish? (enter) "
 read -r yn
 
 printf "\n================================================================================\n"

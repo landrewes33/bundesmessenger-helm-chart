@@ -13,3 +13,12 @@ homeserver.prod.yaml
 /bin
 /.m2
 /helm-package
+# JS
+node_modules/
+# Python
+.mypy_cache/
+.venv/
+# Folder for local files not to be managed by Git
+/local/
+# Other
+/schemacache

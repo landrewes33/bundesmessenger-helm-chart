@@ -1,9 +1,11 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
+suite: Admin Ingress
 templates:
   - ingress-admin.yaml
 set:
   adminAPIServerName: admin-api.example.org
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures an Ingress if enabled
     set:

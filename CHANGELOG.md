@@ -7,6 +7,156 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.12.0 (2025-03-06)
+
+### ⚠️ Versionshinweise
+
+- In diesem Release des Helm Charts ist das erste Mal eine Version des
+  [BundesMessenger
+  Admin-Portal](https://gitlab.opencode.de/bwi/bundesmessenger/admin-portal)
+  enthalten.
+  Dieses kann ab sofort getestet werden. Das Portal wird in Zukunft
+  Synapse-Admin ablösen,
+  wenn es von den Features den notwendigen Umfang erreicht hat.
+  Es wird derzeit nicht automatisch aktiviert und muss durch
+  den Administrator im Deployment manuell aktiviert werden
+  (`adminPortal.enabled`).
+  Wenn sich dies in Zukunft ändert, wird es eine Information in den Release
+  Notes geben.
+  Da es die erste Version des Admin-Portals ist, sind in Zukunft noch
+  Änderungen am Deployment
+  oder dem Portal zu erwarten, z.B. die Veröffentlichung in einem eigenen
+  Sub-Chart. (!285)
+- Diese Veröffentlichung des BundesMessengers aktiviert die Prüfung der
+  Helm-Konfiguration [gegen ihr Schema](values.schema.yaml). Damit erkennt und
+  meldet Helm strukturelle Fehler und Typfehler in der Konfiguration.
+
+  Da es sich um eine neue Funktion handelt, kann es passieren, dass gültige
+  Konfigurationen fälschlicherweise nicht akzeptiert werden. Eine schnelle
+  Möglichkeit zur einmaligen Umgehung der Überprüfung bietet dann die
+  Kommandozeilenoption `--skip-schema-validation` von Helm. Bitte gebt uns in
+  einem solchen Fall Rückmeldung über einen unserer
+  [Kommunikationskanäle](README.md#kontakt-und-austausch) – dann können wir das
+  Schema dauerhaft und für alle BuM-Nutzer korrigieren. (!407)
+- Dieses Release migriert Secrets der internen Redis und PostgreSQL Subcharts.
+  In
+  den meisten Fällen ist keine weitere Maßnahme erforderlich. Eine Ausnahme
+  stellt
+  der Fall dar, dass in der eigenen Konfiguration `existingSecret: ""`
+  angegeben ist. Dann muss dieser Wert auf einen Namen, wie zum Beispiel
+  `redis`
+  oder `postgresql` geändert werden. Falls ein Secret mit dem neu angegebenen
+  Namen nicht existiert, wird es dann erstellt. (!644)
+
+### ✨ Features
+
+- Hinzufügen des [BundesMessenger
+  Admin-Portals](https://gitlab.opencode.de/bwi/bundesmessenger/admin-portal).
+  (!285)
+- Hinzufügen eines JSON-Schema für das values.yaml. (!407, !590, !617, !619,
+  !641)
+- Eigene Einträge in die Well-Known client.json überlagern nun die
+  Standardkonfiguration, statt sie wie bisher zu ersetzen. (!561)
+- Konfiguration von
+  [`auto_accept_invites`](https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#auto_accept_invites).
+  Für Direktnachrichten zwischen lokalen Benutzern müssen Benutzer keine
+  Einladung mehr annehmen. (!580)
+- Upload des Schemas ins OpenCoDE-Backend und korrekte Rückführung in den
+  develop-Branch. (!589)
+- Hinzufügen von optional konfigurierbaren Schaltern für den MCS. (!640)
+- Image `ghcr.io/element-hq/lk-jwt-service` auf Version `0.2.0` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/clamav`
+  auf Version `0.103.12_dfsg-0ubuntu0.22.04.1-jammy-production` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/matrix-content-scanner`
+  auf Version `1.2.1` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx` auf
+  Version `1.18.0-6ubuntu14.5-jammy-production` aktualisiert.
+
+### 🐛 Bugfixes
+
+- Behebt ein Problem in dem Einstellungen für den Call Client nicht richtig
+  gesetzt werden. (!553)
+- Behebung doppelter Konfigurationsschlüssel bei experimentellen Features.
+  (!583)
+- Korrektur der Einbindung vom TempDir-Mount für temporäres Verzeichnis unter
+  '/tmp' für alle Worker-Typen. (!615)
+- Verwenden des Generic-Worker-Typs für alle Worker. (!622)
+- Aufnehmen einiger bestehender Konfigurationsoptionen ins Schema. (!623)
+- Ermöglichen der Angabe aller Konfigurationsoptionen aus den Redis- und
+  PostgreSQL-Subcharts. (!627)
+- Beheben eines Problems bei dem MAS ein falsches Datenbankkennwort benutzt
+  hat. (!657)
+- Behebt ein Problem mit ClamAV und LogFile-Schalter der auf `/dev/stdout`
+  gestellt war. (!658)
+
+### 📚 Dokumentation
+
+- Hinzufügen der Dokumentation zur Verwendung von `sygnal.existingSecret`.
+  (!613)
+- Dokumentieren der Möglichkeiten zur
+  [Nutzerverwaltung](./docs/nutzerverwaltung.md). (!632)
+- Dokumentation der BundesMessenger [Secrets](./docs/Secrets.md). (!633)
+
+### 📝 Weitere Änderungen
+
+- Umstrukturierung des Templates beim Umgang mit Redis-Geheimnissen. (!508)
+- Umstrukturierung des Templates beim Umgang mit PostgreSQL-Geheimnissen.
+  (!518)
+- Zusammenführen von Tests in einzelne Testdatei für Well-known. (!587)
+- Prüfung zusätzlicher Verzeichnisse auf korrekte Urheberrechtshinweise. (!591)
+- Übernehmen der Standardwerte für Worker direkt in der values.yaml. (!592)
+- Interne Zusammenfassung der `publicServerName`-Logik an einer zentralen
+  Stelle. (!593, !618)
+- Hinzufügen von Unit-Tests für Worker. (!594)
+- Vereinheitlichung der Unittest-Suite-Namen. (!595)
+- Bündeln aller referenzierten Schemata in einer Hauptdatei. (!608)
+- Korrektur des Tags für das Livekit-JWT-Service-Image. (!612)
+- Hinzufügen des Schalters `enable_set_displayname` mit Default-Wert `false`,
+  um ein Ändern des Nutzernamen durch Nutzer abzuschalten. (!614)
+- Sicherstellen der Einzigartigkeit von Workern via Schema. (!621)
+- Setzten der internen Einstellung `worker_replication_secret` in einem Secret.
+  (!626)
+- Erstellen von Secrets für die internen PostgreSQL- und Redis-Instanzen.
+  (!644)
+- Hinzufügen von ClamAV zum Renovate-Bot. (!649)
+- Korrektur des Release-Prozess. (!651)
+- Hinzufügen von Nginx zum Renovate-Bot. (!652)
+- Robustere Commit-Logik für die CI. (!654)
+- Ergänzen der `.gitignore`- und `.helmignore`-Dateien. (!656)
+- Explizites Angeben der verwendeten Synapse-Version in der values.yaml. (!665)
+- `$CACHE_DOCKER/alpine/helm` in der CI-Pipeline auf Version `3.17.1`
+  aktualisiert.
+- `$CACHE_DOCKER/aquasec/trivy` in der CI-Pipeline auf Version `0.59.1`
+  aktualisiert.
+- `$CACHE_DOCKER/library/docker` in der CI-Pipeline auf Version `28`
+  aktualisiert.
+- `$CACHE_DOCKER/sonarsource/sonar-scanner-cli` in der CI-Pipeline auf Version
+  `11.2` aktualisiert.
+- `$CACHE_GITLAB/gitlab-org/release-cli` in der CI-Pipeline auf Version
+  `v0.22.0` aktualisiert.
+- `check-jsonschema` in der CI-Pipeline auf Version `0.31.1` aktualisiert.
+- `kindest/node` in der CI-Pipeline auf aktuelles Patch-Level aktualisiert.
+- `kubernetes-sigs/kind` in der CI-Pipeline auf Version `v0.27.0` aktualisiert.
+- `kubernetes-sigs/kustomize` in der CI-Pipeline auf Version `5.6.0`
+  aktualisiert.
+- `kyverno/kyverno` in der CI-Pipeline auf Version `v1.13.4` aktualisiert.
+- `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
+  `v0.80.1` aktualisiert.
+- `registry-1.docker.io/alpine/helm` in der CI-Pipeline auf Version `3.17.0`
+  aktualisiert.
+- `registry-1.docker.io/aquasec/trivy` in der CI-Pipeline auf Version `0.58.2`
+  aktualisiert.
+- `registry.gitlab.com/gitlab-org/release-cli` in der CI-Pipeline auf Version
+  `v0.21.0` aktualisiert.
+
+### 🦖 Abkündigungen und Bereinigungen
+
+- Entfernen der `standard_values.md`. Die Dokumentation der BuM
+  Helm-Konfiguration ist weiterhin in der `values.yaml` zu finden. (!588)
+
 ## BundesMessenger Helm Chart 1.11.0 (2024-12-12)
 
 ### ⚠️ Versionshinweise

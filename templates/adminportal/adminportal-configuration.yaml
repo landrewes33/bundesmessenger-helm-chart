@@ -1,0 +1,69 @@
+{{/* SPDX-FileCopyrightText: 2024–2025 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if .Values.adminPortal.enabled }}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "adminportal") -}}
+{{- $component := "adminportal" -}}
+{{- $coreName := "synapse-core" -}}
+{{- $uiName := "synapse-ui" -}}
+{{- $apiPath := "/synapse-core" -}}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-{{ $coreName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}-{{ $coreName }}
+data:
+  BUMAP_CORE_APP_CONFIG_API_URL: ""
+  BUMAP_CORE_COMMON_BASE_PATH: "{{ $apiPath }}"
+  {{/* URL via Ingress, as the routing to the workers is required */}}
+  BUMAP_CORE_SYNAPSE_ADMIN_API_URL: "https://{{ .Values.adminAPIServerName }}"
+  BUMAP_CORE_SYNAPSE_VERIFY_TLS_CERT: "{{ .Values.adminPortal.TLSverify }}"
+  BUMAP_CORE_LOGGING_CORE: "{{ .Values.adminPortal.logLevelCore }}"
+  BUMAP_CORE_LOGGING_AUDIT: "{{ .Values.adminPortal.logLevelAudit }}"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-{{ $uiName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}-{{ $uiName }}
+data:
+  admin-ui.conf: |
+    server {
+      listen 8080 default_server;
+      {{- if not .Values.ipv4Only }}
+      listen [::]:8080 default_server;
+      {{- end }}
+      server_name _;
+      rewrite_log on;
+
+      root /usr/share/nginx/html;
+
+      # livenessProbe auf /status, logging deaktiviert
+      location /status {
+        return 200;
+        access_log off;
+      }
+
+      location / {
+        # X-Header for CORS-Policy
+        include /etc/nginx/conf.d/cors_headers.conf;
+        add_header Access-Control-Allow-Headers "Origin, X-Requested-With, Content-Type, Accept, Authorization";
+        add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
+        # add_header Access-Control-Allow-Origin "*";
+
+        try_files $uri /$uri /index.html;
+      }
+    }
+  env.js: |
+    window.env = {
+      BUMAP_CORE_URL: "{{ $apiPath }}",
+    }
+{{- end }}

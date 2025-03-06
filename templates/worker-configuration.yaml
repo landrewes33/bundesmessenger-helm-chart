@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- $any := false }}
 {{- range $worker, $config := .Values.workers }}
@@ -23,15 +23,15 @@ data:
 {{- range $worker, $config := .Values.workers -}}
   {{- if $config.enabled -}}
     {{- $name := $worker | replace "_" "-" }}
-    {{- $app := $config.app | default $worker }}
 
     {{- /* check that workers do not have replicaCount > 1 */}}
-    {{- if and (gt ($config.replicaCount | default $default.replicaCount | int) 1) (has $app $uniqueApps) -}}
-    {{-   fail (printf "Replica count must be 1 for worker %s." $app) -}}
+    {{- $isUnique := le ($config.replicaCount | default $default.replicaCount | int) 1 }}
+    {{- if and (has $worker $uniqueApps) (not $isUnique) }}
+      {{- fail (printf "Replica count must be 1 for worker %s." $worker) }}
     {{- end }}
 
   {{ $name }}.worker: |
-    worker_app: "synapse.app.{{ $config.app | default "generic_worker" }}"
+    worker_app: synapse.app.generic_worker
 
     worker_name: "@@HOSTNAME@@"
 

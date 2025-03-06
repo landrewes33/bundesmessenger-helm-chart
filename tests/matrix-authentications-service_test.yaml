@@ -1,10 +1,13 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
+suite: MAS
 templates:
   - matrix-authentication-service/matrix-authentication-service-deployment.yaml
   - matrix-authentication-service/matrix-authentication-service-configuration.yaml
   - matrix-authentication-service/matrix-authentication-service-ingress.yaml
   - secrets.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a StatefulSet if enabled
     template: matrix-authentication-service/matrix-authentication-service-deployment.yaml

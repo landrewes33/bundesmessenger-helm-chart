@@ -39,22 +39,6 @@ elif [ ${#count_versions} -eq 0 ]; then
   exit 1
 fi
 
-# Umgang mit Helm dependencies erfolgt in einem späteren Release
-## update Chart.yaml
-#
-## Synpase Tag wird über die Chart.yaml gesteuert.
-#export chart_content=$(echo "$chart_content" | yq '.appVersion = "'$(echo "$version_content" | yq '.images[] | select(.name == "Synapse") | .version')'"')
-#
-#export chart_content=$(echo "$chart_content" | yq '.version = "'$version'"')
-#
-## Dependencies aus der version.yaml importieren und die condition setzen
-#export helm_version_content=$(echo "$version_content" | yq '.helm')
-#chart_content=$(echo "$chart_content" | yq '.dependencies = env(helm_version_content)')
-#chart_content=$(echo "$chart_content" | yq 'with(.dependencies[]; .condition = .name + ".enabled")')
-#
-## Leere Zeilen im YAML erhalten: https://github.com/mikefarah/yq/issues/515#issuecomment-1113420114
-#yq '. = env(chart_content)' $chart_file | diff -B $chart_file - | patch $chart_file -
-
 
 # update values.yaml
 loop_var=$(echo "$mapping_content" | yq '.[].path')

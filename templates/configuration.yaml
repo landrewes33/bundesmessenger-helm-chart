@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{-  $recommendedLogging := (dict) -}}
 {{- if .Values.config.useRecommendedLogging -}}
@@ -48,7 +48,7 @@ data:
     ## Server ##
 
     server_name: {{ required "You need to specify a serverName" .Values.serverName | quote }}
-    public_baseurl: {{ .Values.config.publicBaseurl | default (printf "https://%s" (.Values.publicServerName | default .Values.serverName)) | quote }}
+    public_baseurl: {{ include "matrix-synapse.publicBaseURL" . | quote }}
     pid_file: /homeserver.pid
     web_client: False
     soft_file_limit: 0
@@ -125,7 +125,7 @@ data:
 
     media_store_path: "/synapse/data/media"
     uploads_path: "/synapse/data/uploads"
-    {{- if .Values.config.recaptcha }}
+    {{- if and .Values.config.recaptcha.privateKey .Values.config.recaptcha.publicKey }}
 
     ## Captcha ##
 
@@ -153,42 +153,40 @@ data:
     trusted_key_servers: {{- .Values.config.trustedKeyServers | toYaml | nindent 6 }}
 
     ## Workers ##
-    # Add a random shared secret to authenticate traffic.
-    worker_replication_secret: {{ randAlphaNum 24 | quote }}
 
     {{- $default := .Values.workers.default }}
     {{- range $worker, $config := .Values.workers }}
       {{- if $config.enabled }}
         {{- $name := $worker | replace "_" "-" }}
 
-        {{- if or (eq $worker "pusher") (eq ($config.app | default "") "pusher") }}
+        {{- if eq $worker "pusher" }}
     # For pusher worker
     pusher_instances:
       {{- range $i, $e := until ($config.replicaCount | default $default.replicaCount | int) }}
       - {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-{{ $i }}
       {{- end }}
 
-        {{- else if or (eq $worker "appservice") (eq ($config.app | default "") "appservice") }}
+        {{- else if eq $worker "appservice" }}
     # For appservice worker
     notify_appservices_from_worker: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-0
 
-        {{- else if or (eq $worker "federation_sender") (eq ($config.app | default "") "federation_sender") }}
+        {{- else if eq $worker "federation_sender" }}
     # For federation_sender worker
     federation_sender_instances:
       {{- range $i, $e := until ($config.replicaCount | default $default.replicaCount | int) }}
       - {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-{{ $i }}
       {{- end }}
 
-        {{- else if or (eq $worker "media_repository") (eq ($config.app | default "") "media_repository") }}
+        {{- else if eq $worker "media_repository" }}
     # For media_repository worker
     enable_media_repo: false
     media_instance_running_background_jobs: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-0
 
-        {{- else if or (eq $worker "user_dir") (eq ($config.app | default "") "user_dir") }}
+        {{- else if eq $worker "user_dir" }}
     # For user_dir worker
     update_user_directory_from_worker: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-0
 
-        {{- else if or (eq $worker "background_worker") (eq ($config.app | default "") "background_worker") }}
+        {{- else if eq $worker "background_worker" }}
     # For background worker
     run_background_tasks_on: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}-0
 

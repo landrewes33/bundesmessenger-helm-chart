@@ -1,8 +1,11 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
+suite: Schadcodescanner
 templates:
   - schadcodescanner/schadcodescanner-deployment.yaml
   - schadcodescanner/schadcodescanner-configuration.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a StatefulSet if enabled
     template: schadcodescanner/schadcodescanner-deployment.yaml

@@ -1,8 +1,15 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.synapse_admin.enabled }}
 {{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
 {{- $component := "synapse-admin" -}}
+
+{{- if and .Values.synapse_admin.enabled .Values.adminPortal.enabled -}}
+  {{- if eq .Values.synapse_admin.uri .Values.adminPortal.uri -}}
+    {{- fail ".Values.synapse_admin.uri must not be .Values.adminPortal.uri" }}
+  {{- end -}}
+{{- end -}}
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -60,7 +67,7 @@ spec:
           - name: nginx-conf
             mountPath: /etc/nginx/nginx.conf
             subPath: nginx.conf
-            readOnly: true            
+            readOnly: true
           - name: nginx-conf-d
             mountPath: /etc/nginx/conf.d
             readOnly: true

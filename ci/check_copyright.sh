@@ -10,7 +10,15 @@ BASEDIR=$(dirname "$0")
 
 # Rewrite template license headers
 find "$BASEDIR/../templates" -name "*.yaml" -exec sh -c \
-    "$BASEDIR/../scripts/rewrite-license-header.sh \"\$1\"" \
+    "$BASEDIR/../scripts/rewrite-license-header.sh helm \"\$1\"" \
+sh {} ';'
+# Rewrite tests license headers
+find "$BASEDIR/../tests" -name "*.yaml" -exec sh -c \
+    "$BASEDIR/../scripts/rewrite-license-header.sh yaml \"\$1\"" \
+sh {} ';'
+# Rewrite scripts license headers
+find "$BASEDIR/../scripts" -name "*.sh" -exec sh -c \
+    "$BASEDIR/../scripts/rewrite-license-header.sh sh \"\$1\"" \
 sh {} ';'
 # Print all modifications
 git diff

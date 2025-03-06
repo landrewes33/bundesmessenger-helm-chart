@@ -1,8 +1,7 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.webclient.enabled }}
 {{- $webclientName := include "matrix-synapse.externalname" (dict "global" . "external" "webclient") -}}
-{{- $displayName := .Values.webclient.displayName | default "Messenger deiner Organisation" }}
 # The config.json file is to be put into Kubernetes as a config file in such a way that
 # the element web instance can read it.
 
@@ -20,12 +19,14 @@ data:
     {
       "default_server_config": {
         "m.homeserver": {
-          "base_url": "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}",
-          "server_name": {{ $displayName | quote }}
+          "base_url": {{ include "matrix-synapse.publicServerURL" . | quote }},
+          "server_name": {{ .Values.webclient.displayName | quote }}
         }
       },
       "enable_presence_by_hs_url": {
-        "{{- printf "https://%s" (.Values.publicServerName | default .Values.serverName) }}": {{ .Values.extraConfig.presence.enabled | default false }}
+        {{ include "matrix-synapse.publicServerURL" . | quote }}: {{
+            .Values.extraConfig.presence.enabled | default false
+          }}
       },
       {{- if .Values.call.enabled }}
       "element_call": {
@@ -34,15 +35,15 @@ data:
         "participant_limit": 5,
         "brand": "BundesMessenger Call"
       },
+      "features": {
+        "feature_group_calls": true
+      },
       {{- end -}}
       {{- if .Values.additionalConfig.locationSharing.enabled }}
       "bwi_setting_defaults": {
         "BwiFeature.locationShareTypesEnabled": ["Pin"],
         "BwiFeature.disableGeolocation": false,
         "BwiFeature.hideOSMLink": true
-      },
-      "features": {
-        "feature_group_calls": true
       },
       {{- end }}
       "permalink_prefix": "{{- printf "https://%s" .Values.webclient.uri }}",

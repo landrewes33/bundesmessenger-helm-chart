@@ -39,6 +39,10 @@ synapse_admin:
   enabled: true
   uri: admin-client.example.org
 
+adminPortal:
+  enabled: true
+  uri: admin-portal.example.org
+
 webclient:
   enabled: true
   uri: web.example.org
@@ -78,6 +82,8 @@ wellknown:
 
 postgresql:
   enabled: true
+  auth:
+    existingSecret: postgresql-secret
 
 networkpolicies:
   enabled: true

@@ -1,8 +1,11 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
+suite: Matrix Content Scanner
 templates:
   - matrix-content-scanner/contentscanner-deployment.yaml
   - matrix-content-scanner/contentscanner-configuration.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a StatefulSet if enabled
     template: matrix-content-scanner/contentscanner-deployment.yaml
@@ -22,3 +25,121 @@ tests:
       - containsDocument:
           kind: StatefulSet
         not: true
+---
+suite: Matrix Content Scanner config
+templates:
+  - matrix-content-scanner/contentscanner-deployment.yaml
+  - matrix-content-scanner/contentscanner-configuration.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
+  contentscanner.enabled: true
+tests:
+  - it: ensures all required config options are written
+    template: matrix-content-scanner/contentscanner-configuration.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*max_file_size:)'
+      - matchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*max_size:)'
+      - matchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*ttl:)'
+  - it: ensures all config options are passed trough
+    template: matrix-content-scanner/contentscanner-configuration.yaml
+    documentIndex: 0
+    set:
+      contentscanner.max_file_size: 42MB
+      contentscanner.max_cache_size: 4096
+      contentscanner.ttl: 3d
+    asserts:
+      - matchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*max_file_size: 42MB)'
+      - matchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*max_size: 4096)'
+      - matchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*ttl: 3d)'
+---
+suite: Matrix Content Scanner MIME types
+templates:
+  - matrix-content-scanner/contentscanner-deployment.yaml
+  - matrix-content-scanner/contentscanner-configuration.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
+  contentscanner.enabled: true
+tests:
+  - it: ensures all MIME types are allowed by default
+    template: matrix-content-scanner/contentscanner-configuration.yaml
+    documentIndex: 0
+    set:
+      contentscanner.allowed_mimetypes: null
+      contentscanner.blocked_mimetypes: null
+    asserts:
+      - notMatchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*allowed_mimetypes:)'
+      - notMatchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*blocked_mimetypes:)'
+  - it: ensures the MIME types allowlist
+    template: matrix-content-scanner/contentscanner-configuration.yaml
+    documentIndex: 0
+    set:
+      contentscanner.allowed_mimetypes:
+        - text/plain
+        - image/svg
+      contentscanner.blocked_mimetypes: null
+    asserts:
+      - matchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*allowed_mimetypes:\n\s*- text/plain\n\s*- image/svg)'
+      - notMatchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*blocked_mimetypes:)'
+  - it: ensures the MIME types blocklist
+    template: matrix-content-scanner/contentscanner-configuration.yaml
+    documentIndex: 0
+    set:
+      contentscanner.allowed_mimetypes: null
+      contentscanner.blocked_mimetypes:
+        - application/yaml
+        - application/wasm
+    asserts:
+      - notMatchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*allowed_mimetypes:)'
+      - matchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*blocked_mimetypes:\n\s*- application/yaml\n\s*- application/wasm)'
+  - it: ensures all MIME types are blocked on an empty allowlist
+    template: matrix-content-scanner/contentscanner-configuration.yaml
+    documentIndex: 0
+    set:
+      contentscanner.allowed_mimetypes: []
+      contentscanner.blocked_mimetypes: null
+    asserts:
+      - matchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*allowed_mimetypes:\s*\[\])'
+      - notMatchRegex:
+          path: data['config.yaml']
+          pattern: '(?m:^\s*blocked_mimetypes:)'
+  - it: ensures an error on an empty MIME types blocklist
+    set:
+      contentscanner.allowed_mimetypes: null
+      contentscanner.blocked_mimetypes: []
+    asserts:
+      - failedTemplate: {}
+  - it: ensures allowed_mimetypes and blocked_mimetypes are mutually exclusive
+    set:
+      contentscanner.allowed_mimetypes:
+        - video/jpeg2000
+      contentscanner.blocked_mimetypes:
+        - text/css
+    asserts:
+      - failedTemplate: {}

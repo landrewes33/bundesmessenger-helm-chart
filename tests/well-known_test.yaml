@@ -1,16 +1,18 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
+suite: Well-Known deployment
 templates:
   - well-known/well-known-deployment.yaml
   - well-known/well-known-configuration.yaml
   - nginx-conf.yaml
+set:
+  wellknown.enabled: true
+  dataPrivacyUrl: yes-i-have-read-and-understand.example.com
+  imprintUrl: acme.noreply.example.com
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment if enabled
     template: well-known/well-known-deployment.yaml
-    set:
-      wellknown.enabled: true
-      dataPrivacyUrl: yes-i-have-read-and-understand.example.com
-      imprintUrl: acme.noreply.example.com
     asserts:
       - containsDocument:
           kind: Deployment
@@ -25,3 +27,72 @@ tests:
       - containsDocument:
           kind: Deployment
         not: true
+  - it: ensures a pull secret is passed in
+    template: well-known/well-known-deployment.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      wellknown.image.pullSecrets:
+        - name: a-little-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
+---
+suite: Well-Known default values
+templates:
+  - well-known/well-known-configuration.yaml
+set:
+  wellknown.client:
+    org.matrix.msc3814: "true"
+  dataPrivacyUrl: https://dsgvo.example.org
+  imprintUrl: https://impressum.example.org
+  externalPostgresql.existingSecret: postgresql
+tests:
+  - it: ensures standard values are not dropped
+    template: well-known/well-known-configuration.yaml
+    asserts:
+      - matchRegex:
+          path: data["client.json"]
+          pattern: "\"de.bwi\":"
+  - it: ensures additional value is part of well-known-file
+    template: well-known/well-known-configuration.yaml
+    asserts:
+      - matchRegex:
+          path: data["client.json"]
+          pattern: "\"org.matrix.msc3814\":"
+
+---
+suite: Well-Known overrides
+templates:
+  - well-known/well-known-configuration.yaml
+set:
+  dataPrivacyUrl: https://dsgvo.example.org
+  imprintUrl: https://impressum.example.org
+  wellknown.client:
+    m.homeserver:
+      base_url: https://happy.place.example.org
+  externalPostgresql.existingSecret: postgresql
+tests:
+  - it: ensures value is present and overwritten
+    template: well-known/well-known-configuration.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: data["client.json"]
+          pattern: "\"m.homeserver\":"
+      - matchRegex:
+          path: data["client.json"]
+          pattern: "\"base_url\": \"https://happy.place.example.org\""
+  - it: ensures other standard values is set
+    template: well-known/well-known-configuration.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: data["client.json"]
+          pattern: "\"io.element.e2ee\":"
+      - matchRegex:
+          path: data["client.json"]
+          pattern: "\"secure_backup_required\": true"

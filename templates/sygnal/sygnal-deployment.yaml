@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.sygnal.enabled }}
 {{- $sygnalName := include "matrix-synapse.externalname" (dict "global" . "external" "sygnal") -}}
@@ -25,7 +25,7 @@ spec:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/sygnal/sygnal-configuration.yaml") . | sha256sum }}
         checksum/fcmkey: {{ .Values.sygnal.fcmkey_keyvalue | toPrettyJson | sha256sum }}
-        checksum/ioskey: {{ .Values.sygnal.ioskey_keyvalue | sha256sum }}
+        checksum/ioskey: {{ .Values.sygnal.ioskey_keyvalue | default "" | sha256sum }}
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}

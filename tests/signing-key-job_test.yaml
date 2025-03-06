@@ -1,7 +1,10 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
+suite: Signing Key generation
 templates:
   - signing-key-job.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Job if enabled
     set:
@@ -15,6 +18,8 @@ tests:
   - it: ensures no Job if disabled
     set:
       signingkey.job.enabled: false
+      signingkey.existingSecret: very-signing
+      signingkey.existingSecretKey: much.key
     asserts:
       - containsDocument:
           kind: Job

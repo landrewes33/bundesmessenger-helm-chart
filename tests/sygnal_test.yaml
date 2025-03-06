@@ -1,8 +1,11 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
+suite: Sygnal
 templates:
   - sygnal/sygnal-deployment.yaml
   - sygnal/sygnal-configuration.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment if enabled
     template: sygnal/sygnal-deployment.yaml
@@ -22,6 +25,14 @@ tests:
       - containsDocument:
           kind: Deployment
         not: true
+---
+suite: Sygnal secrets
+templates:
+  - sygnal/sygnal-deployment.yaml
+  - sygnal/sygnal-configuration.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
+tests:
   - it: ensures a Secret on legacy options
     template: sygnal/sygnal-configuration.yaml
     set:

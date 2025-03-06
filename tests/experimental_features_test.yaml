@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2024 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
-suite: ensures experimental_features is not part of other configurations
+suite: Experimental Features leakage
 templates:
   - configuration.yaml
   - secrets.yaml
@@ -12,6 +12,7 @@ set:
   extraConfig:
     experimental_features:
       new_feature: true
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures experimental_features is not part of normal configuration file
     template: configuration.yaml
@@ -27,7 +28,7 @@ tests:
           pattern: "experimental_features:"
 
 ---
-suite: ensures experimental_features is part of the configuration
+suite: Experimental Features configuration
 templates:
   - secrets.yaml
 set:
@@ -37,6 +38,7 @@ set:
   extraConfig:
     experimental_features:
       new_feature: true
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures experimental_features is set for call
     template: secrets.yaml
@@ -70,12 +72,15 @@ tests:
           pattern: "new_feature: true"
 
 ---
-suite: ensures experimental_features is set correctly
+suite: Experimental Features overrides
 templates:
   - secrets.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures experimental_features overwritten for call
     template: secrets.yaml
+    documentIndex: 0
     set:
       call.enabled: true
       call.uri: call.example.org
@@ -104,6 +109,6 @@ tests:
       - matchRegex:
           path: stringData["experimental-features.yaml"]
           pattern: "msc3861:"
-      # - notMatchRegex:
-      #     path: stringData["experimental-features.yaml"]
-      #     pattern: "msc3861: dummy"
+      - notMatchRegex:
+          path: stringData["experimental-features.yaml"]
+          pattern: "msc3861: dummy"

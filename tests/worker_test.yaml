@@ -1,0 +1,253 @@
+# SPDX-FileCopyrightText: 2025 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+suite: Worker
+templates:
+  - worker-deployment.yaml
+  - configuration.yaml
+  - worker-configuration.yaml
+  - secrets.yaml
+  - signing-key-job.yaml
+set:
+  serverName: explosives.acme.example.com
+  externalPostgresql.existingSecret: postgresql
+tests:
+  - it: ensures all StatefulSets if enabled
+    template: worker-deployment.yaml
+    set:
+      workers.generic_worker.enabled: true
+      workers.federation_reader.enabled: true
+      workers.pusher.enabled: true
+      workers.appservice.enabled: true
+      workers.federation_sender.enabled: true
+      workers.media_repository.enabled: true
+      workers.user_dir.enabled: true
+      workers.background_worker.enabled: true
+    asserts:
+      - documentSelector:
+          path: kind
+          value: StatefulSet
+          matchMany: true
+        matchRegex:
+          path: metadata.name
+          pattern: >-
+            RELEASE-NAME-(generic-worker|federation-reader|pusher|appservice|federation-sender|media-repository|user-dir|background-worker)
+      - containsDocument:
+          kind: StatefulSet
+          apiVersion: apps/v1
+          name: RELEASE-NAME-generic-worker
+          any: true
+      - containsDocument:
+          kind: StatefulSet
+          apiVersion: apps/v1
+          name: RELEASE-NAME-federation-reader
+          any: true
+      - containsDocument:
+          kind: StatefulSet
+          apiVersion: apps/v1
+          name: RELEASE-NAME-pusher
+          any: true
+      - containsDocument:
+          kind: StatefulSet
+          apiVersion: apps/v1
+          name: RELEASE-NAME-appservice
+          any: true
+      - containsDocument:
+          kind: StatefulSet
+          apiVersion: apps/v1
+          name: RELEASE-NAME-federation-sender
+          any: true
+      - containsDocument:
+          kind: StatefulSet
+          apiVersion: apps/v1
+          name: RELEASE-NAME-media-repository
+          any: true
+      - containsDocument:
+          kind: StatefulSet
+          apiVersion: apps/v1
+          name: RELEASE-NAME-user-dir
+          any: true
+      - containsDocument:
+          kind: StatefulSet
+          apiVersion: apps/v1
+          name: RELEASE-NAME-background-worker
+          any: true
+  - it: ensures no StatefulSet if all disabled
+    template: worker-deployment.yaml
+    set:
+      workers.generic_worker.enabled: false
+      workers.federation_reader.enabled: false
+      workers.pusher.enabled: false
+      workers.appservice.enabled: false
+      workers.federation_sender.enabled: false
+      workers.media_repository.enabled: false
+      workers.user_dir.enabled: false
+      workers.background_worker.enabled: false
+    asserts:
+      - containsDocument:
+          kind: StatefulSet
+        not: true
+---
+suite: Worker autoscaling
+templates:
+  - worker-deployment.yaml
+  - configuration.yaml
+  - worker-configuration.yaml
+  - secrets.yaml
+  - signing-key-job.yaml
+set:
+  serverName: paints.acme.example.org
+  externalPostgresql.existingSecret: postgresql
+tests:
+  - it: ensures a HorizontalPodAutoscaler if autoscaling is enabled
+    template: worker-deployment.yaml
+    set:
+      workers.generic_worker.autoscaling.enabled: true
+    asserts:
+      - containsDocument:
+          kind: HorizontalPodAutoscaler
+          apiVersion: autoscaling/v2
+          name: hpa-RELEASE-NAME-generic-worker
+          any: true
+  - it: ensures no Deployment if disabled
+    template: worker-deployment.yaml
+    set:
+      workers.generic_worker.autoscaling.enabled: false
+    asserts:
+      - containsDocument:
+          kind: DeploHorizontalPodAutoscaleryment
+        not: true
+---
+suite: Worker replicas
+templates:
+  - worker-deployment.yaml
+  - configuration.yaml
+  - worker-configuration.yaml
+  - secrets.yaml
+  - signing-key-job.yaml
+set:
+  serverName: parachutes.acme.example.com
+  externalPostgresql.existingSecret: postgresql
+tests:
+  - it: ensures replicas get set
+    template: worker-deployment.yaml
+    set:
+      workers.generic_worker.autoscaling.enabled: false
+      workers.generic_worker.autoscaling.minReplicas: 8
+      workers.generic_worker.autoscaling.maxReplicas: 20
+      workers.generic_worker.replicaCount: 6
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: RELEASE-NAME-generic-worker
+        equal:
+          path: spec.replicas
+          value: 6
+  - it: ensures replicas are not below autoscaler range
+    template: worker-deployment.yaml
+    set:
+      workers.generic_worker.autoscaling.enabled: true
+      workers.generic_worker.autoscaling.minReplicas: 8
+      workers.generic_worker.autoscaling.maxReplicas: 20
+      workers.generic_worker.replicaCount: 6
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: RELEASE-NAME-generic-worker
+        equal:
+          path: spec.replicas
+          value: 8
+  - it: ensures replicas can exceed autoscaler range
+    template: worker-deployment.yaml
+    set:
+      workers.generic_worker.autoscaling.enabled: true
+      workers.generic_worker.autoscaling.minReplicas: 8
+      workers.generic_worker.autoscaling.maxReplicas: 20
+      workers.generic_worker.replicaCount: 42
+    asserts:
+      - documentSelector:
+          path: metadata.name
+          value: RELEASE-NAME-generic-worker
+        equal:
+          path: spec.replicas
+          value: 42
+---
+suite: Worker custom definition
+templates:
+  - worker-deployment.yaml
+  - configuration.yaml
+  - worker-configuration.yaml
+  - secrets.yaml
+  - signing-key-job.yaml
+set:
+  serverName: custom.acme.example.org
+  externalPostgresql.existingSecret: postgresql
+tests:
+  - it: ensures a custom worker is configured and deployed
+    template: worker-deployment.yaml
+    set:
+      workers:
+        custom_worker:
+          enabled: true
+          replicaCount: 1
+          strategy:
+            type: RollingUpdate
+          extraConfig: {}
+          annotations: {}
+          extraEnv: []
+          volumes: []
+          volumeMounts: []
+          extraCommands: []
+          podSecurityContext:
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+            fsGroup: 2666
+            runAsGroup: 2666
+            runAsUser: 2666
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsUser: 2666
+          resources:
+            limits:
+              cpu: 600m
+              memory: 768Mi
+            requests:
+              cpu: 100m
+              memory: 150Mi
+          livenessProbe:
+            periodSeconds: 10
+            httpGet:
+              path: /health
+              port: metrics
+          readinessProbe:
+            periodSeconds: 3
+            httpGet:
+              path: /health
+              port: metrics
+          startupProbe:
+            failureThreshold: 6
+            httpGet:
+              path: /health
+              port: metrics
+          nodeSelector: {}
+          tolerations: []
+          affinity: {}
+          listeners: []
+          csPaths: []
+          paths: []
+          autoscaling:
+            enabled: false
+            minReplicas: 2
+            maxReplicas: 10
+            targetCPUUtilizationPercentage: 80
+            targetMemoryUtilizationPercentage: 80
+    asserts:
+      - containsDocument:
+          kind: StatefulSet
+          apiVersion: apps/v1
+          name: RELEASE-NAME-custom-worker
+          any: true
