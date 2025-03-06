@@ -1,1 +1,0 @@
-Hinzufügen von optional konfigurierbaren Schaltern für den MCS.

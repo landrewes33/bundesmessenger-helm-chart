@@ -1,1 +1,0 @@
-Hinzufügen des Schalters `enable_set_displayname` mit Default-Wert `false`, um ein Ändern des Nutzernamen durch Nutzer abzuschalten.
