@@ -1,1 +1,0 @@
-Behebt ein Problem mit ClamAV und LogFile-Schalter der auf `/dev/stdout` gestellt war.
