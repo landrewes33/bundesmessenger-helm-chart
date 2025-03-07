@@ -1362,7 +1362,7 @@ wellknown:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/nginx
-    tag: 1.18.0-6ubuntu14.5-jammy-production
+    tag: 1.18.0-6ubuntu14.6-jammy-production
     pullPolicy: IfNotPresent
     # -- (array) Liste von Kubernetes Pull-Secrets.
     # Beispiel:
@@ -1432,7 +1432,7 @@ confighub:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/nginx
-    tag: 1.18.0-6ubuntu14.5-jammy-production
+    tag: 1.18.0-6ubuntu14.6-jammy-production
     pullPolicy: IfNotPresent
     # -- (array) Liste von Kubernetes Pull-Secrets.
     # Beispiel:
