@@ -1833,7 +1833,7 @@ mas:
   uri: ""
   # -- (object) Zugangsdaten für die benötigte PostreSQL-Datenbank.
   # Diese wird nicht automatisch angelegt und muss bereit gestellt werden.
-  # https://matrix-org.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
+  # https://element-hq.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
   postgresql:
     # -- (string|null) Host für PostgreSQL-DB von MAS.
     # Falls ungesetzt, wird die Haupt-PostgreSQL-Instanz verwendet.
@@ -1875,16 +1875,16 @@ mas:
   # -- (list) Konfiguration eines Upstream Authentification Providers zur Delegierung
   # der Authentifizierung. Die Angaben werden automatisch in die Konfiguration unter
   # `upstream_oauth2.providers` bereit gestellt.
-  # https://matrix-org.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
-  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#upstream_oauth2
+  # https://element-hq.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#upstream_oauth2
   upstream_oauth2_provider: []
 
   # -- (list) OIDC Clients, die zusätzlich zum Synypase Client konfiguriert werden.
-  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#clients
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#clients
   clients: []
 
   # -- (object)
-  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#passwords
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords
   passwords:
     # Whether to enable the password database.
     # If disabled, users will only be able to log in using upstream OIDC providers
@@ -1898,7 +1898,7 @@ mas:
         algorithm: argon2id
 
   # -- (object)
-  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#account
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#account
   account:
     # -- (bool) Whether users are allowed to change their email addresses. default: true
     email_change_allowed: false
@@ -1922,7 +1922,7 @@ mas:
 
   # -- (object) Zusätzliche Policy Konfiguration für MAS.
   # Die Angaben werden automatisch in die Konfiguration unter `policy.data` bereit gestellt.
-  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#policy
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#policy
   policy:
     admin_users: []
 
@@ -1938,7 +1938,7 @@ mas:
       require_number: true
 
    # -- (object)
-   # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting
+   # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting
   rate_limiting:
     # Limits how many account recovery attempts are allowed.
     # These limits can protect against e-mail spam.
@@ -1986,7 +1986,7 @@ mas:
       per_second: 0.0008
 
   # -- (object) Zusätzliche E-Mail Konfiguration für MAS.
-  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#email
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#email
   email:
     # Default transport: don't send any emails
     transport: blackhole

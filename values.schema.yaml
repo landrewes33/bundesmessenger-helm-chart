@@ -426,7 +426,7 @@ properties:
         title: Schützen Sie die Registrierung mit recaptcha
         description: >-
           Die Verwendung ist optional. Ref:
-          https://matrix-org.github.io/synapse/latest/CAPTCHA_SETUP.html
+          https://element-hq.github.io/synapse/latest/CAPTCHA_SETUP.html
         properties:
           publicKey:
             type: ["null", "string"]
@@ -3251,9 +3251,9 @@ properties:
           `upstream_oauth2.providers` bereit gestellt.
 
 
-          https://matrix-org.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
+          https://element-hq.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
 
-          https://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#upstream_oauth2
+          https://element-hq.github.io/matrix-authentication-service/usage/configuration.html#upstream_oauth2
         items:
           properties:
             providers:
@@ -3269,7 +3269,7 @@ properties:
           Werden zusätzlich zum Synypase Client konfiguriert.
 
 
-          https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#clients
+          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#clients
         items:
           type: object
           unevaluatedProperties: true
@@ -3277,7 +3277,7 @@ properties:
         type: object
         title: Passwords.
         description: >-
-          https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#passwords
+          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords
         properties:
           enabled:
             type: boolean
@@ -3308,7 +3308,7 @@ properties:
         type: object
         title: Account.
         description: >-
-          https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#account
+          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#account
         properties:
           email_change_allowed:
             type: boolean
@@ -3344,7 +3344,7 @@ properties:
           `policy.data` bereit gestellt.
 
 
-          https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#policy
+          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#policy
         properties:
           admin_users:
             type: array
@@ -3377,13 +3377,13 @@ properties:
         type: object
         title: Rate-limiting.
         description: >-
-          https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting
+          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting
         unevaluatedProperties: true
       email:
         type: object
         title: Zusätzliche E-Mail Konfiguration für MAS
         description: >-
-          https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#email
+          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#email
         properties:
           transport:
             type: string

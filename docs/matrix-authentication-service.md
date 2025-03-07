@@ -114,5 +114,5 @@ den benötigten Werten und umfangreiche Beispiele finden sich in der
 
 ## Weiterführende Links
 
-- [Dokumentation des Herstellers](https://matrix-org.github.io/matrix-authentication-service/)
+- [Dokumentation des Herstellers](https://element-hq.github.io/matrix-authentication-service/)
 - [Github Repository mit schematischer Darstellung](https://github.com/matrix-org/matrix-authentication-service/tree/main?tab=readme-ov-file#oauth20--openid-connect-provider-for-matrix-homeservers)
