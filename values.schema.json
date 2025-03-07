@@ -486,7 +486,7 @@
         "recaptcha": {
           "type": "object",
           "title": "Schützen Sie die Registrierung mit recaptcha",
-          "description": "Die Verwendung ist optional. Ref: https://matrix-org.github.io/synapse/latest/CAPTCHA_SETUP.html",
+          "description": "Die Verwendung ist optional. Ref: https://element-hq.github.io/synapse/latest/CAPTCHA_SETUP.html",
           "properties": {
             "publicKey": {
               "type": [
@@ -3819,7 +3819,7 @@
         "upstream_oauth2_provider": {
           "type": "array",
           "title": "Konfiguration eines Upstream Authentification Providers zur Delegierung der Authentifizierung",
-          "description": "Die Angaben werden automatisch in die Konfiguration unter `upstream_oauth2.providers` bereit gestellt.\n\nhttps://matrix-org.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider\nhttps://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#upstream_oauth2",
+          "description": "Die Angaben werden automatisch in die Konfiguration unter `upstream_oauth2.providers` bereit gestellt.\n\nhttps://element-hq.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider\nhttps://element-hq.github.io/matrix-authentication-service/usage/configuration.html#upstream_oauth2",
           "items": {
             "properties": {
               "providers": {
@@ -3836,7 +3836,7 @@
         "clients": {
           "type": "array",
           "title": "OIDC Clients",
-          "description": "Werden zusätzlich zum Synypase Client konfiguriert.\n\nhttps://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#clients",
+          "description": "Werden zusätzlich zum Synypase Client konfiguriert.\n\nhttps://element-hq.github.io/matrix-authentication-service/reference/configuration.html#clients",
           "items": {
             "type": "object",
             "unevaluatedProperties": true
@@ -3845,7 +3845,7 @@
         "passwords": {
           "type": "object",
           "title": "Passwords.",
-          "description": "https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#passwords",
+          "description": "https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords",
           "properties": {
             "enabled": {
               "type": "boolean",
@@ -3885,7 +3885,7 @@
         "account": {
           "type": "object",
           "title": "Account.",
-          "description": "https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#account",
+          "description": "https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#account",
           "properties": {
             "email_change_allowed": {
               "type": "boolean",
@@ -3922,7 +3922,7 @@
         "policy": {
           "type": "object",
           "title": "Zusätzliche Policy Konfiguration für MAS",
-          "description": "Die Angaben werden automatisch in die Konfiguration unter `policy.data` bereit gestellt.\n\nhttps://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#policy",
+          "description": "Die Angaben werden automatisch in die Konfiguration unter `policy.data` bereit gestellt.\n\nhttps://element-hq.github.io/matrix-authentication-service/reference/configuration.html#policy",
           "properties": {
             "admin_users": {
               "type": "array",
@@ -3964,13 +3964,13 @@
         "rate_limiting": {
           "type": "object",
           "title": "Rate-limiting.",
-          "description": "https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting",
+          "description": "https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting",
           "unevaluatedProperties": true
         },
         "email": {
           "type": "object",
           "title": "Zusätzliche E-Mail Konfiguration für MAS",
-          "description": "https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#email",
+          "description": "https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#email",
           "properties": {
             "transport": {
               "type": "string",

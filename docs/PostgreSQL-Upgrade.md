@@ -28,7 +28,7 @@ werden, sodass keine Daten verloren gehen, die in diesem Zeitraum anfallen. Die
 Konfiguration des Wartungsmodus sollte `blocking: true` beinhalten und kann über
 [additionalConfig.maintenance](../values.yaml#:~:text=maintenance:%20{})
 angepasst werden. Zusätzlich zu dem client-seitigen Wartungsmodus, setzt
-[`extraConfig.hs_disabled`](https://matrix-org.github.io/synapse/develop/usage/configuration/config_documentation.html#hs_disabled-and-hs_disabled_message)
+[`extraConfig.hs_disabled`](https://element-hq.github.io/synapse/develop/usage/configuration/config_documentation.html#hs_disabled-and-hs_disabled_message)
 den Homeserver selbst in einen sicheren Zustand.
 
 > 📌 **Hinweis** – Die Befehle sind angelehnt an die Anweisung zur Installation der
