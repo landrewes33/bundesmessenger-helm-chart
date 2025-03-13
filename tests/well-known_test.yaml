@@ -10,6 +10,7 @@ set:
   dataPrivacyUrl: yes-i-have-read-and-understand.example.com
   imprintUrl: acme.noreply.example.com
   externalPostgresql.existingSecret: postgresql
+  serverName: example.org
 tests:
   - it: ensures a Deployment if enabled
     template: well-known/well-known-deployment.yaml
@@ -41,6 +42,23 @@ tests:
           content:
             name: a-little-secret
 ---
+suite: Well-Known configuration server
+templates:
+  - well-known/well-known-configuration.yaml
+set:
+  wellknown.enabled: true
+  wellknown.port: 554
+  dataPrivacyUrl: yes-i-have-read-and-understand.example.com
+  imprintUrl: acme.noreply.example.com
+  externalPostgresql.existingSecret: postgresql
+  serverName: example.org
+tests:
+  - it: ensures correct rendering of m.server
+    asserts:
+      - matchRegex:
+          path: data["server.json"]
+          pattern: '(?m:"m\.server":\s*"example.org:554")'
+---
 suite: Well-Known default values
 templates:
   - well-known/well-known-configuration.yaml
@@ -50,6 +68,7 @@ set:
   dataPrivacyUrl: https://dsgvo.example.org
   imprintUrl: https://impressum.example.org
   externalPostgresql.existingSecret: postgresql
+  serverName: example.org
 tests:
   - it: ensures standard values are not dropped
     template: well-known/well-known-configuration.yaml
@@ -75,6 +94,7 @@ set:
     m.homeserver:
       base_url: https://happy.place.example.org
   externalPostgresql.existingSecret: postgresql
+  serverName: example.org
 tests:
   - it: ensures value is present and overwritten
     template: well-known/well-known-configuration.yaml
