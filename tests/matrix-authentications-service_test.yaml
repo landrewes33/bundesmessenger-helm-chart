@@ -28,6 +28,23 @@ tests:
       - containsDocument:
           kind: StatefulSet
         not: true
+  - it: ensures upstream_oauth2.providers
+    template: secrets.yaml
+    documentSelector:
+      path: metadata.name
+      value: RELEASE-NAME-matrix-authentication-service
+    set:
+      mas.enabled: true
+      mas.upstream_oauth2_provider:
+        - id: 0VALID111ULID222
+    asserts:
+      - matchRegex:
+          path: stringData['mas-secret.yaml']
+          pattern: "(?ms:\
+            ^\\s*upstream_oauth2:.*?\
+            ^\\s*  providers:.*?\
+            ^\\s*    - id: 0VALID111ULID222\n.*?\
+            )"
   - it: ensures an Ingress if (mas enabled, ingress enabled)
     template: matrix-authentication-service/matrix-authentication-service-ingress.yaml
     set:

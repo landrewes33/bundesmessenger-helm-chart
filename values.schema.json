@@ -3821,15 +3821,16 @@
           "title": "Konfiguration eines Upstream Authentification Providers zur Delegierung der Authentifizierung",
           "description": "Die Angaben werden automatisch in die Konfiguration unter `upstream_oauth2.providers` bereit gestellt.\n\nhttps://matrix-org.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider\nhttps://matrix-org.github.io/matrix-authentication-service/usage/configuration.html#upstream_oauth2",
           "items": {
+            "type": "object",
             "properties": {
-              "providers": {
-                "type": "object",
-                "unevaluatedProperties": true
+              "id": {
+                "type": "string"
               }
             },
             "required": [
-              "providers"
-            ]
+              "id"
+            ],
+            "unevaluatedProperties": true
           },
           "default": []
         },
