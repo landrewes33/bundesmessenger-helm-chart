@@ -87,7 +87,9 @@ Args:
 publicServerName.
 */}}
 {{- define "matrix-synapse.publicServerName" -}}
-{{- .Values.publicServerName | default .Values.serverName }}
+{{- .Values.publicServerName | default .Values.serverName | required
+  "Es muss einen öffentlichen Server-Namen geben."
+}}
 {{- end -}}
 
 {{/*

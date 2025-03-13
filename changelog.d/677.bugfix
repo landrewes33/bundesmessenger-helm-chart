@@ -1,0 +1,1 @@
+Korrektur der fehlerhaften `server.json` Darstellung. Behebt [#42](https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/issues/42). Dank an Dimitri Schwarz (dimitri.schwarz@muenchen.de)!

@@ -39,6 +39,7 @@ set:
     experimental_features:
       new_feature: true
   externalPostgresql.existingSecret: postgresql
+  serverName: example.org
 tests:
   - it: ensures experimental_features is set for call
     template: secrets.yaml
@@ -77,6 +78,7 @@ templates:
   - secrets.yaml
 set:
   externalPostgresql.existingSecret: postgresql
+  serverName: example.org
 tests:
   - it: ensures experimental_features overwritten for call
     template: secrets.yaml
