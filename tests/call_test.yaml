@@ -8,6 +8,7 @@ templates:
 set:
   call.uri: call.example.org
   externalPostgresql.existingSecret: postgresql
+  serverName: example.org
 tests:
   - it: ensures a Deployment if enabled
     template: call/client-deployment.yaml

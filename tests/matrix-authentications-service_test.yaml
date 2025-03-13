@@ -8,6 +8,7 @@ templates:
   - secrets.yaml
 set:
   externalPostgresql.existingSecret: postgresql
+  serverName: example.org
 tests:
   - it: ensures a StatefulSet if enabled
     template: matrix-authentication-service/matrix-authentication-service-deployment.yaml

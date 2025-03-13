@@ -9,6 +9,7 @@ templates:
 set:
   webclient.uri: webclient.example.org
   externalPostgresql.existingSecret: postgresql
+  serverName: example.org
 tests:
   - it: ensures a Deployment if enabled
     template: webclient/webclient-deployment.yaml

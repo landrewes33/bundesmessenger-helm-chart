@@ -68,7 +68,7 @@ data:
             (.Values.wellknown.host
               | default (include "matrix-synapse.publicServerName" .)
             )
-            (.Values.wellknown.port | default 443)
+            (int .Values.wellknown.port | default 443)
           )
       | toPrettyJson
       | nindent 4
