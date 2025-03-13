@@ -3255,12 +3255,13 @@ properties:
 
           https://element-hq.github.io/matrix-authentication-service/usage/configuration.html#upstream_oauth2
         items:
+          type: object
           properties:
-            providers:
-              type: object
-              unevaluatedProperties: true
+            id:
+              type: string
           required:
-            - providers
+            - id
+          unevaluatedProperties: true
         default: []
       clients:
         type: array
