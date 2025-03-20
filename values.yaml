@@ -2295,7 +2295,6 @@ schadcodescanner:
     <<: *defaultSecurityContext
     runAsUser: 1111
     runAsGroup: 1111
-    readOnlyRootFilesystem: true
 
   # -- (map) Konfiguration für die C-ICAP-Container-Sicherheitsrichtlinie
   # weitere Möglichkeiten:
@@ -2306,7 +2305,6 @@ schadcodescanner:
     <<: *defaultSecurityContext
     runAsUser: 1112
     runAsGroup: 1112
-    readOnlyRootFilesystem: true
 
 
 ######################################################################################
