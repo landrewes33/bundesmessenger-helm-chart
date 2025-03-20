@@ -130,14 +130,14 @@ yq "(
 printf "\nUpdate values.schema.json\n"
 # shellcheck disable=SC2016
 sed -i 's|'\
-'"$id":\s*"https://schema.bundesmessenger.dev/bum/develop/values.schema.json"|'\
+'"$id":\s*"https://schema.bundesmessenger.dev/bum/[^/]*/values.schema.json"|'\
 '"$id": "https://schema.bundesmessenger.dev/bum/v'"$nextVersion"'/values.schema.json"|'\
     "$scriptDir/../values.schema.json"
 
 printf "\nUpdate values.schema.yaml\n"
 # shellcheck disable=SC2016
 sed -i 's|'\
-'$id:\s*https://schema.bundesmessenger.dev/bum/develop/values.schema.json|'\
+'$id:\s*https://schema.bundesmessenger.dev/bum/[^/]*/values.schema.json|'\
 '$id: https://schema.bundesmessenger.dev/bum/v'"$nextVersion"'/values.schema.json|'\
     "$scriptDir/../values.schema.yaml"
 
@@ -153,21 +153,22 @@ git add --no-all \
     "$scriptDir/../values.schema.yaml"
 git commit -a -m "Setting version for the release ${nextVersion}"
 
+
+printf "\n================================================================================\n"
+printf "Cherry-pick or add other commits now. Done? "
+read -r yn
+
 printf "\n================================================================================\n"
 printf "Done, push the branch \"%s/v%s\"? (YES/no) " "$branchprefix" "$nextVersion"
 read -r doPush
 
-if [ "${doPush:-yes}" = "yes" ]; then
+case $doPush in [Yy]*|"")
     printf "Pushing branch \"%s/v%s\".\n" "$branchprefix" "$nextVersion"
     git push -u origin "$branchprefix/v$nextVersion"
-else
+;;*)
     printf "Not pushing, do not forget to push manually!\n"
-fi
+esac
 
-
-printf "\n================================================================================\n"
-printf "Cherry pick or add other commits now. Done? "
-read -r yn
 
 printf "\n================================================================================\n"
 printf "Create CHANGELOG and review it.\n"
