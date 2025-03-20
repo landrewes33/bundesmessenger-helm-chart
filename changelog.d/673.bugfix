@@ -1,1 +1,0 @@
-Zulassen von Nullwerten in `podSecurityContext` und `securityContext`. Dank an Dimitri Schwarz (dimitri.schwarz@muenchen.de) für die hilfreiche [Rückmeldung zum Schema](https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/issues/41)!
