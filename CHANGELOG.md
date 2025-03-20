@@ -7,6 +7,26 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.12.1 (2025-03-20)
+
+### 🐛 Bugfixes
+
+- Zulassen von Nullwerten in `podSecurityContext` und `securityContext`. Dank
+  an Dimitri Schwarz (dimitri.schwarz@muenchen.de) für die hilfreiche
+  [Rückmeldung zum
+  Schema](https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/issues/41)!
+  (!673)
+- Korrektur der fehlerhaften `server.json` Darstellung. Behebt
+  [#42](https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/issues/42).
+  Dank an Dimitri Schwarz (dimitri.schwarz@muenchen.de)! (!677)
+- Korrektur des Schemas für `mas.upstream_oauth2_provider`. Behebt
+  [#41](https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/issues/42).
+  Dank an Dimitri Schwarz (dimitri.schwarz@muenchen.de)! (!679)
+
+### 📝 Weitere Änderungen
+
+- Korrektur eines Release-Jobs für das Schema des HelmCharts. (!671)
+
 ## BundesMessenger Helm Chart 1.12.0 (2025-03-06)
 
 ### ⚠️ Versionshinweise
