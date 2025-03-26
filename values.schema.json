@@ -3824,11 +3824,31 @@
             "type": "object",
             "properties": {
               "id": {
+                "type": "string",
+                "pattern": "^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26}$"
+              },
+              "client_id": {
+                "type": "string"
+              },
+              "token_endpoint_auth_method": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "client_secret_basic",
+                  "client_secret_post",
+                  "client_secret_jwt",
+                  "private_key_jwt"
+                ]
+              },
+              "scope": {
                 "type": "string"
               }
             },
             "required": [
-              "id"
+              "id",
+              "client_id",
+              "token_endpoint_auth_method",
+              "scope"
             ],
             "unevaluatedProperties": true
           },
