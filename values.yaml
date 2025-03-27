@@ -2442,7 +2442,7 @@ webclient:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.21.0-jammy-production
+    tag: 2.22.0-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (string) Anzeigename des Servers in Webclients.
