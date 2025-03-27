@@ -1027,6 +1027,21 @@
           "description": "Raumsuche",
           "default": true
         },
+        "room_list_publication_rules": {
+          "type": [
+            "null",
+            "array"
+          ],
+          "title": "Veröffentlichungsrechte für die Raumübersicht",
+          "default": [
+            {
+              "action": "allow",
+              "alias": "*",
+              "room_id": "*",
+              "user_id": "*"
+            }
+          ]
+        },
         "opentracing": {
           "type": [
             "null",

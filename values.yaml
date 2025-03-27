@@ -420,6 +420,13 @@ extraConfig:
     enabled: true
   # -- (bool) Raumsuche, eingeschaltet
   enable_room_list_search: true
+  # -- (list) Veröffentlichungsrechte für die Raumübersicht.
+  room_list_publication_rules:
+    - action: allow
+      alias: '*'
+      room_id: '*'
+      user_id: '*'
+
   opentracing:
     # -- (bool) OpenTracing ist ein Werkzeug, das einen Einblick
     # in den kausalen Zusammenhang der Arbeit in und zwischen Servern gibt.
