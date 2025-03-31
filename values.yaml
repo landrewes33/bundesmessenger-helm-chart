@@ -11,7 +11,7 @@ image:
   repository: bwi/bundesmessenger/backend/container-images/synapse
 
   # -- (string) Verwendete Version des Synapse-Abbilds.
-  tag: 1.120.2-jammy-production
+  tag: 1.127.1-jammy-production
 
   # -- (list) Optional kann ein Array von imagePullSecrets angegeben werden.
   # Secrets müssen manuell im Namensraum angelegt werden.
@@ -154,7 +154,7 @@ signingkey:
       # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen (empfohlen)
       repository: bwi/bundesmessenger/backend/container-images/synapse
       # -- (string) Verwendete Version des Synapse-Abbilds.
-      tag: 1.120.2-jammy-production
+      tag: 1.127.1-jammy-production
       # -- (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
     # -- (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.
@@ -420,6 +420,13 @@ extraConfig:
     enabled: true
   # -- (bool) Raumsuche, eingeschaltet
   enable_room_list_search: true
+  # -- (list) Veröffentlichungsrechte für die Raumübersicht.
+  room_list_publication_rules:
+    - action: allow
+      alias: '*'
+      room_id: '*'
+      user_id: '*'
+
   opentracing:
     # -- (bool) OpenTracing ist ein Werkzeug, das einen Einblick
     # in den kausalen Zusammenhang der Arbeit in und zwischen Servern gibt.
@@ -1362,7 +1369,7 @@ wellknown:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/nginx
-    tag: 1.18.0-6ubuntu14.5-jammy-production
+    tag: 1.18.0-6ubuntu14.6-jammy-production
     pullPolicy: IfNotPresent
     # -- (array) Liste von Kubernetes Pull-Secrets.
     # Beispiel:
@@ -1432,7 +1439,7 @@ confighub:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/nginx
-    tag: 1.18.0-6ubuntu14.5-jammy-production
+    tag: 1.18.0-6ubuntu14.6-jammy-production
     pullPolicy: IfNotPresent
     # -- (array) Liste von Kubernetes Pull-Secrets.
     # Beispiel:
@@ -1833,7 +1840,7 @@ mas:
   uri: ""
   # -- (object) Zugangsdaten für die benötigte PostreSQL-Datenbank.
   # Diese wird nicht automatisch angelegt und muss bereit gestellt werden.
-  # https://matrix-org.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
+  # https://element-hq.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
   postgresql:
     # -- (string|null) Host für PostgreSQL-DB von MAS.
     # Falls ungesetzt, wird die Haupt-PostgreSQL-Instanz verwendet.
@@ -1875,16 +1882,16 @@ mas:
   # -- (list) Konfiguration eines Upstream Authentification Providers zur Delegierung
   # der Authentifizierung. Die Angaben werden automatisch in die Konfiguration unter
   # `upstream_oauth2.providers` bereit gestellt.
-  # https://matrix-org.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
-  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#upstream_oauth2
+  # https://element-hq.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#upstream_oauth2
   upstream_oauth2_provider: []
 
   # -- (list) OIDC Clients, die zusätzlich zum Synypase Client konfiguriert werden.
-  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#clients
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#clients
   clients: []
 
   # -- (object)
-  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#passwords
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords
   passwords:
     # Whether to enable the password database.
     # If disabled, users will only be able to log in using upstream OIDC providers
@@ -1898,7 +1905,7 @@ mas:
         algorithm: argon2id
 
   # -- (object)
-  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#account
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#account
   account:
     # -- (bool) Whether users are allowed to change their email addresses. default: true
     email_change_allowed: false
@@ -1922,7 +1929,7 @@ mas:
 
   # -- (object) Zusätzliche Policy Konfiguration für MAS.
   # Die Angaben werden automatisch in die Konfiguration unter `policy.data` bereit gestellt.
-  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#policy
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#policy
   policy:
     admin_users: []
 
@@ -1938,7 +1945,7 @@ mas:
       require_number: true
 
    # -- (object)
-   # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting
+   # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting
   rate_limiting:
     # Limits how many account recovery attempts are allowed.
     # These limits can protect against e-mail spam.
@@ -1986,7 +1993,7 @@ mas:
       per_second: 0.0008
 
   # -- (object) Zusätzliche E-Mail Konfiguration für MAS.
-  # https://matrix-org.github.io/matrix-authentication-service/reference/configuration.html#email
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#email
   email:
     # Default transport: don't send any emails
     transport: blackhole
@@ -2442,7 +2449,7 @@ webclient:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.21.0-jammy-production
+    tag: 2.22.0-jammy-production
     pullPolicy: IfNotPresent
 
   # -- (string) Anzeigename des Servers in Webclients.
@@ -2542,7 +2549,7 @@ call:
     image:
       registry: ghcr.io
       repository: element-hq/lk-jwt-service
-      tag: 0.2.0
+      tag: 0.2.1
       pullPolicy: IfNotPresent
 
     # -- (integer) Replica-Count.

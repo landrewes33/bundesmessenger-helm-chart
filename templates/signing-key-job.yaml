@@ -102,14 +102,13 @@ metadata:
     {{- if not $insideArgoCD }}
   annotations:
     helm.sh/hook: pre-install
-    helm.sh/hook-delete-policy: hook-succeeded
     {{- end }}
     {{- with .Values.signingkey.job.annotations }}
       {{- toYaml . | nindent 4 }}
     {{- end }}
   {{- end }}
 spec:
-  ttlSecondsAfterFinished: 0
+  ttlSecondsAfterFinished: 3600
   template:
     metadata:
       labels:

@@ -69,6 +69,7 @@ schadcodescanner:
 
 signingkey:
   podSecurityContext:
+    runAsUser: null
     runAsGroup: null
     fsGroup: null
   securityContext:
