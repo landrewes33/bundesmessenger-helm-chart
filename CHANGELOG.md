@@ -7,6 +7,55 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.13.0 (2025-03-31)
+
+Schließt die Sicherheitslücke
+[CVE-2025-30355](https://www.cve.org/CVERecord?id=CVE-2025-30355).
+
+### ✨ Features
+
+- Image `ghcr.io/element-hq/lk-jwt-service` auf Version `0.2.1` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web`
+  auf Version `2.22.0` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx` auf
+  Version `1.18.0-6ubuntu14.6-jammy-production` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse`
+  auf Version `1.127.1` aktualisiert.
+
+### 📚 Dokumentation
+
+- Aktualisierung der Links zu Docs von Element. (!672)
+- Korrektur der Beispielkonfiguration für OpenShift. (!685)
+- Hinzufügen einer Dokumentation zur Nutzung oder Deaktiverung des
+  Schadcodescanners. (!687)
+
+### 📝 Weitere Änderungen
+
+- Stellt den `develop` Branch auch auf OpenCoDE zur Verfügung. (!668)
+- Hinzufügen eines Unittests für das Deployment-Abbild. (!676)
+- Vorhalten des Signing-Key-Jobs nach dessen Abschluss für eine Stunde. (!678)
+- Verbesserungen am Release-Skript. (!683)
+- Korrektur eines Release-Jobs für das Schema des HelmCharts. (!684)
+- Beibehalten der bisherigen Standardkonfiguration von
+  `room_list_publication_rules`. (!694)
+- `$CACHE_DOCKER/alpine/helm` in der CI-Pipeline auf Version `3.17.2`
+  aktualisiert.
+- `$CACHE_DOCKER/aquasec/trivy` in der CI-Pipeline auf Version `0.60.0`
+  aktualisiert.
+- `$CACHE_DOCKER/sonarsource/sonar-scanner-cli` in der CI-Pipeline auf Version
+  `11.3` aktualisiert.
+- `$CACHE_GHCR/tcort/markdown-link-check` in der CI-Pipeline auf Version
+  `3.13.7` aktualisiert.
+- `$CACHE_GITLAB/gitlab-org/release-cli` in der CI-Pipeline auf Version
+  `v0.23.0` aktualisiert.
+- `check-jsonschema` in der CI-Pipeline auf Version `0.31.3` aktualisiert.
+- `kindest/node` in der CI-Pipeline auf aktuelles Patch-Level aktualisiert.
+- `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
+  `v0.81.0` aktualisiert.
+
 ## BundesMessenger Helm Chart 1.12.1 (2025-03-20)
 
 ### 🐛 Bugfixes
