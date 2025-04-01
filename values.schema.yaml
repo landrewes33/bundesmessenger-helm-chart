@@ -4583,7 +4583,7 @@ properties:
         title: Liste an JWTs, die dem Client bereit gestellt werden
         description: >-
           Wird verwendet, um die Infrastruktur als legitim auszuweisen. Die JWTs
-          werden via `<public_baseurl>/_bum/configure/v1/verify` abgerufen.
+          werden via `<public_baseurl>/_bum/client/v1/verify` abgerufen.
         items:
           type: string
         default: []
