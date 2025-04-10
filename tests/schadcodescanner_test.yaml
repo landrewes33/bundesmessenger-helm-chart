@@ -26,6 +26,25 @@ tests:
       - containsDocument:
           kind: StatefulSet
         not: true
+  - it: ensures a pull secret is passed in
+    template: schadcodescanner/schadcodescanner-deployment.yaml
+    documentIndex: 0
+    set:
+      schadcodescanner.enabled: true
+      contentscanner.enabled: true
+      schadcodescanner.clamavImage.pullSecrets:
+        - name: a-little-secret
+      schadcodescanner.icapImage.pullSecrets:
+        - name: a-medium-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-medium-secret
   - it: requires contentscanner to be enabled
     template: schadcodescanner/schadcodescanner-deployment.yaml
     set:

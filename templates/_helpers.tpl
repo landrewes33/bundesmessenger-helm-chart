@@ -229,8 +229,23 @@ Pull secrets
 {{- define "matrix-synapse.imagePullSecrets" -}}
 {{- with concat
     .Values.image.pullSecrets
+    .Values.signingkey.job.generateImage.pullSecrets
+    .Values.signingkey.job.publishImage.pullSecrets
     .Values.volumePermissions.image.pullSecrets
+    .Values.sygnal.image.pullSecrets
     .Values.wellknown.image.pullSecrets
+    .Values.confighub.image.pullSecrets
+    .Values.mas.image.pullSecrets
+    .Values.contentscanner.image.pullSecrets
+    .Values.schadcodescanner.clamavImage.pullSecrets
+    .Values.schadcodescanner.icapImage.pullSecrets
+    .Values.synapse_admin.image.pullSecrets
+    .Values.adminPortal.coreImage.pullSecrets
+    .Values.adminPortal.uiImage.pullSecrets
+    .Values.webclient.image.pullSecrets
+    .Values.call.client.image.pullSecrets
+    .Values.call.jwtService.image.pullSecrets
+    .Values.tests.image.pullSecrets
 -}}
 imagePullSecrets:
   {{- . | toYaml | nindent 2 }}

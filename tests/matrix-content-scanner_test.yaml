@@ -25,6 +25,18 @@ tests:
       - containsDocument:
           kind: StatefulSet
         not: true
+  - it: ensures a pull secret is passed in
+    template: matrix-content-scanner/contentscanner-deployment.yaml
+    documentIndex: 0
+    set:
+      contentscanner.enabled: true
+      contentscanner.image.pullSecrets:
+        - name: a-little-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
 ---
 suite: Matrix Content Scanner config
 templates:

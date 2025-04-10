@@ -28,6 +28,19 @@ tests:
       - containsDocument:
           kind: StatefulSet
         not: true
+  - it: ensures a pull secret is passed in
+    template: >-
+      matrix-authentication-service/matrix-authentication-service-deployment.yaml
+    documentIndex: 0
+    set:
+      mas.enabled: true
+      mas.image.pullSecrets:
+        - name: a-little-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
   - it: ensures upstream_oauth2.providers
     template: secrets.yaml
     documentSelector:

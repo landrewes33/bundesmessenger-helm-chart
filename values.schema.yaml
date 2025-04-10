@@ -15,8 +15,6 @@ properties:
       tag:
         title: Verwendete Version des Synapse-Abbilds
       pullSecrets:
-        $ref: "#/$defs/pullSecrets"
-        type: array
         title: Secrets müssen manuell im Namensraum angelegt werden
         description: >-
           ref:
@@ -29,6 +27,7 @@ properties:
     required:
       - registry
       - repository
+      - tag
       - pullSecrets
       - pullPolicy
     unevaluatedProperties: false
@@ -204,12 +203,15 @@ properties:
                 default: bwi/bundesmessenger/backend/container-images/synapse
               tag:
                 title: Verwendete Version des Synapse-Abbilds
+              pullSecrets:
+                default: []
               pullPolicy:
                 title: PullPolicy für das Image vom Signing-Key-Job
                 default: IfNotPresent
             required:
               - registry
               - repository
+              - pullSecrets
               - pullPolicy
             unevaluatedProperties: false
           publishImage:
@@ -221,11 +223,13 @@ properties:
             default:
               registry: registry.opencode.de
               repository: bwi/bundesmessenger/backend/container-images/kubectl
+              pullSecrets: []
               pullPolicy: IfNotPresent
             required:
               - registry
               - repository
               - tag
+              - pullSecrets
               - pullPolicy
             unevaluatedProperties: false
         required:
@@ -1840,28 +1844,26 @@ properties:
             default: 0
         unevaluatedProperties: false
       image:
+        $ref: "#/$defs/image"
         type: object
-        allOf:
-          - $ref: "#/$defs/image"
-            title: Image zur Rechtebereinigung
-            properties:
-              registry:
-                default: registry.opencode.de
-              repository:
-                default: bwi/bundesmessenger/backend/container-images/ubuntu
-              tag:
-                title: Tag des Images zur Rechtebereinigung
-                description: >-
-                  Hinweis: Noch kein finaler Tag, build version 10 als
-                  Alternative zu latest.
-              pullPolicy:
-                description: >-
-                  Da latest-Tag, PullPolicy immer für das zu nutzende Image zur
-                  Rechtebereinigung.
-                default: IfNotPresent
-          - properties:
-              pullSecrets:
-                $ref: "#/$defs/pullSecrets"
+        title: Image zur Rechtebereinigung
+        properties:
+          registry:
+            default: registry.opencode.de
+          repository:
+            default: bwi/bundesmessenger/backend/container-images/ubuntu
+          tag:
+            title: Tag des Images zur Rechtebereinigung
+            description: >-
+              Hinweis: Noch kein finaler Tag, build version 10 als
+              Alternative zu latest.
+          pullSecrets:
+            default: []
+          pullPolicy:
+            description: >-
+              Da latest-Tag, PullPolicy immer für das zu nutzende Image zur
+              Rechtebereinigung.
+            default: IfNotPresent
         required:
           - registry
           - repository
@@ -1936,11 +1938,13 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/sygnal
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       proxy:
@@ -2252,23 +2256,20 @@ properties:
           Nützlich, wenn ein anderes Image ausgeführt wird.
         default: /usr/share/nginx/html
       image:
+        $ref: "#/$defs/image"
         type: object
-        allOf:
-          - $ref: "#/$defs/image"
-            title: Das Webserver Image
-            default:
-              registry: registry.opencode.de
-              repository: bwi/bundesmessenger/backend/container-images/nginx
-              pullPolicy: IfNotPresent
-          - properties:
-              pullSecrets:
-                $ref: "#/$defs/pullSecrets"
+        title: Das Webserver Image
+        default:
+          registry: registry.opencode.de
+          repository: bwi/bundesmessenger/backend/container-images/nginx
+          pullSecrets: []
+          pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
-          - pullPolicy
           - pullSecrets
+          - pullPolicy
         unevaluatedProperties: false
       podSecurityContext:
         $ref: "#/$defs/podSecurityContext"
@@ -2384,22 +2385,20 @@ properties:
           "/usr/share/nginx/html" (nginx).
         default: /usr/share/nginx/html
       image:
-        allOf:
-          - $ref: "#/$defs/image"
-            type: object
-            title: ConfigHub Webserver-Image
-            default:
-              registry: registry.opencode.de
-              repository: bwi/bundesmessenger/backend/container-images/nginx
-              pullPolicy: IfNotPresent
-          - properties:
-              pullSecrets:
-                $ref: "#/$defs/pullSecrets"
-                type: array
-                title: Liste von Kubernetes Pull-Secrets.
-                default: []
-                examples:
-                  - - name: myRegistryKeySecretName
+        $ref: "#/$defs/image"
+        type: object
+        title: ConfigHub Webserver-Image
+        properties:
+          pullSecrets:
+            title: Liste von Kubernetes Pull-Secrets.
+            default: []
+            examples:
+              - - name: myRegistryKeySecretName
+        default:
+          registry: registry.opencode.de
+          repository: bwi/bundesmessenger/backend/container-images/nginx
+          pullSecrets: []
+          pullPolicy: IfNotPresent
         required:
           - registry
           - repository
@@ -2503,7 +2502,7 @@ properties:
           `externalPostgresql`-Block.
         default: false
       image:
-        $ref: "#/$defs/image"
+        $ref: "#/$defs/bitnamiImage"
         type: object
         title: Das zu verwendende PostgreSQL-Container-Abbild
         properties:
@@ -2768,7 +2767,7 @@ properties:
           Hinweis: Durch Setzten auf `true`, wird der `externalRedis`-Block ignoriert.
         default: true
       image:
-        $ref: "#/$defs/image"
+        $ref: "#/$defs/bitnamiImage"
         type: object
         title: Das verwendete Redis-Image
         properties:
@@ -3150,11 +3149,13 @@ properties:
         default:
           registry: ghcr.io
           repository: element-hq/matrix-authentication-service
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       uri:
@@ -3660,11 +3661,13 @@ properties:
           registry: registry.opencode.de
           repository: >-
             bwi/bundesmessenger/backend/container-images/matrix-content-scanner
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       replicaCount:
@@ -3762,11 +3765,13 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/clamav
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       icapImage:
@@ -3776,11 +3781,13 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/icap
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       persistence:
@@ -3983,11 +3990,13 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/synapse-admin
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       resources:
@@ -4149,11 +4158,13 @@ properties:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/bumap-core
           tag: 1.0.0-jammy
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       uiImage:
@@ -4164,11 +4175,13 @@ properties:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/bumap-ui
           tag: 1.0.0-jammy
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       resources:
@@ -4248,11 +4261,13 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       displayName:
@@ -4399,11 +4414,13 @@ properties:
               registry: registry.opencode.de
               repository: >-
                 bwi/bundesmessenger/backend/container-images/bundesmessenger-call
+              pullSecrets: []
               pullPolicy: IfNotPresent
             required:
               - registry
               - repository
               - tag
+              - pullSecrets
               - pullPolicy
             unevaluatedProperties: false
           podSecurityContext:
@@ -4472,11 +4489,13 @@ properties:
               registry: registry.opencode.de
               repository: >-
                 bwi/bundesmessenger/backend/container-images/bundesmessenger-call
+              pullSecrets: []
               pullPolicy: IfNotPresent
             required:
               - registry
               - repository
               - tag
+              - pullSecrets
               - pullPolicy
             unevaluatedProperties: false
           replicaCount:
@@ -4756,11 +4775,13 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/wget
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       annotations:
@@ -4966,6 +4987,42 @@ required:
   - demomode
 unevaluatedProperties: false
 $defs:
+  bitnamiImage:
+    type: object
+    properties:
+      registry:
+        type: string
+        minLength: 1
+      repository:
+        type: string
+        minLength: 1
+      tag:
+        type: string
+        minLength: 1
+      pullSecrets:
+        type: array
+        title: Namen der verwendeten Pull-Secrets
+        default: []
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalObjectReference.schema.json
+          type: object
+      pullPolicy:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/imagePullPolicy
+        type: string
+        enum:
+          - Always
+          - Never
+          - IfNotPresent
+        title: Image-Pull-Policy
+        default: IfNotPresent
+    required:
+      - registry
+      - repository
+      - tag
+      - pullSecrets
+      - pullPolicy
   image:
     type: object
     properties:
@@ -4978,28 +5035,30 @@ $defs:
       tag:
         type: string
         minLength: 1
+      pullSecrets:
+        type: array
+        title: Die verwendeten Pull-Secrets
+        default: []
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalObjectReference.schema.json
+          type: object
       pullPolicy:
-        title: Image-Pull-Policy
         $ref: >-
           https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/imagePullPolicy
-        default: IfNotPresent
+        type: string
         enum:
           - Always
           - Never
           - IfNotPresent
+        title: Image-Pull-Policy
+        default: IfNotPresent
     required:
       - registry
       - repository
       - tag
+      - pullSecrets
       - pullPolicy
-  pullSecrets:
-    type: array
-    title: Array von imagePullSecrets
-    default: []
-    items:
-      $ref: >-
-        https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalObjectReference.schema.json
-      type: object
   podSecurityContext:
     $comment: Nullable version of io.k8s.api.core.v1.PodSecurityContext.
     # $ref: >-

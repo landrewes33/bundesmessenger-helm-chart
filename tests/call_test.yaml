@@ -28,6 +28,18 @@ tests:
       - containsDocument:
           kind: Deployment
         not: true
+  - it: ensures a pull secret is passed in
+    template: call/client-deployment.yaml
+    documentIndex: 0
+    set:
+      call.enabled: true
+      call.client.image.pullSecrets:
+        - name: a-little-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
   - it: ensures an Ingress if (call enabled, ingress enabled)
     template: call/ingress.yaml
     set:
@@ -66,3 +78,43 @@ tests:
       - containsDocument:
           kind: Ingress
         not: true
+---
+suite: Call JWT Service
+templates:
+  - templates/call/jwtService-deployment.yaml
+  - templates/call/jwtService-secrets.yaml
+set:
+  call.uri: call.example.org
+  externalPostgresql.existingSecret: postgresql
+  serverName: example.org
+tests:
+  - it: ensures a Deployment if enabled
+    template: templates/call/jwtService-deployment.yaml
+    set:
+      call.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: RELEASE-NAME-call-jwt-service
+          any: true
+  - it: ensures no Deployment if disabled
+    template: templates/call/jwtService-deployment.yaml
+    set:
+      call.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Deployment
+        not: true
+  - it: ensures a pull secret is passed in
+    template: templates/call/jwtService-deployment.yaml
+    documentIndex: 0
+    set:
+      call.enabled: true
+      call.jwtService.image.pullSecrets:
+        - name: a-little-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
