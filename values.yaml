@@ -155,6 +155,7 @@ signingkey:
       repository: bwi/bundesmessenger/backend/container-images/synapse
       # -- (string) Verwendete Version des Synapse-Abbilds.
       tag: 1.127.1-jammy-production
+      pullSecrets: []
       # -- (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
     # -- (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.
@@ -163,6 +164,7 @@ signingkey:
       registry: registry.opencode.de
       repository: bwi/bundesmessenger/backend/container-images/kubectl
       tag: 1.31.3-jammy-production
+      pullSecrets: []
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
@@ -1200,6 +1202,7 @@ sygnal:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/sygnal
     tag: 0.15.1-jammy-production
+    pullSecrets: []
     pullPolicy: IfNotPresent
 
   # -- (string|null) Proxy, falls benötigt um die Push-Services zu erreichen.
@@ -1832,6 +1835,7 @@ mas:
     repository: element-hq/matrix-authentication-service
     # Tag mit "-debug" um shell zu haben
     tag: 0.12.0-debug
+    pullSecrets: []
     pullPolicy: IfNotPresent
 
   # -- (string) URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider
@@ -2149,6 +2153,7 @@ contentscanner:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/matrix-content-scanner
     tag: 1.2.1-jammy-production
+    pullSecrets: []
     pullPolicy: IfNotPresent
 
   replicaCount: 1
@@ -2191,12 +2196,14 @@ schadcodescanner:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/clamav
     tag: 0.103.12_dfsg-0ubuntu0.22.04.1-jammy-production
+    pullSecrets: []
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des C-ICAP-Server-Image/Repository
   icapImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/icap
     tag: 1_0.5.6-2build1-jammy-production
+    pullSecrets: []
     pullPolicy: IfNotPresent
     # -- (map) Konfiguration des persistenten Speichers für ClamAV
     # empfohlen: ExistingClaim mit ReadWriteMany-Volume anzugeben, so dass mehrere Pods die ClamAV-DB nutzen können. (TBD: freshclam darf dann nur einmal laufen: Abfrage PID)
@@ -2328,6 +2335,7 @@ synapse_admin:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/synapse-admin
     tag: 0.9.1-jammy-production
+    pullSecrets: []
     pullPolicy: IfNotPresent
 
   ## Ressourcen Konfiguration für Synapse-Admin Server.
@@ -2404,12 +2412,14 @@ adminPortal:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bumap-core
     tag: 1.0.1-jammy-production
+    pullSecrets: []
     pullPolicy: IfNotPresent
   # -- (map) Konfiguration des Image vom UI-Modul
   uiImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bumap-ui
     tag: 1.0.0-jammy-production
+    pullSecrets: []
     pullPolicy: IfNotPresent
 
   ## Ressourcen Konfiguration für alle Admin-Portal Module.
@@ -2450,6 +2460,7 @@ webclient:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
     tag: 2.22.0-jammy-production
+    pullSecrets: []
     pullPolicy: IfNotPresent
 
   # -- (string) Anzeigename des Servers in Webclients.
@@ -2519,6 +2530,7 @@ call:
       registry: registry.opencode.de
       repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-call
       tag: 0.4.0-jammy-production
+      pullSecrets: []
       pullPolicy: IfNotPresent
 
     # -- (object) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
@@ -2550,6 +2562,7 @@ call:
       registry: ghcr.io
       repository: element-hq/lk-jwt-service
       tag: 0.2.3
+      pullSecrets: []
       pullPolicy: IfNotPresent
 
     # -- (integer) Replica-Count.
@@ -2749,6 +2762,7 @@ tests:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/wget
     tag: 1.21.2-jammy-production
+    pullSecrets: []
     pullPolicy: IfNotPresent
 
   # -- (map) Annotations, die zusätzlich auf die Tests anzuwenden sind.

@@ -25,6 +25,18 @@ tests:
       - containsDocument:
           kind: Deployment
         not: true
+  - it: ensures a pull secret is passed in
+    template: synapse-admin/synapse-admin-deployment.yaml
+    documentIndex: 0
+    set:
+      synapse_admin.enabled: true
+      synapse_admin.image.pullSecrets:
+        - name: a-little-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
   - it: ensures an Ingress if (synapse_admin enabled, ingress enabled)
     template: synapse-admin/synapse-admin-ingress.yaml
     set:

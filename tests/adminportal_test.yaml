@@ -33,3 +33,24 @@ tests:
       - containsDocument:
           kind: Deployment
         not: true
+  - it: ensures a pull secret is passed in
+    template: adminportal/adminportal-deployment.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+      matchMany: true
+    set:
+      adminPortal.enabled: true
+      adminPortal.coreImage.pullSecrets:
+        - name: a-little-secret
+      adminPortal.uiImage.pullSecrets:
+        - name: a-medium-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-medium-secret
