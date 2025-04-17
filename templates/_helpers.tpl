@@ -567,3 +567,12 @@ Set MAS default uri
   {{- .Values.mas.uri | default (include "matrix-synapse.publicServerName" .) }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Whether Helm is running inside ArgoCD.
+*/}}
+{{- define "matrix-synapse.insideArgoCD" -}}
+{{- if or .Values.argoCD (.Capabilities.APIVersions.Has "argoproj.io/v1alpha1") }}
+  {{- "true" }}
+{{- end }}
+{{- end -}}
