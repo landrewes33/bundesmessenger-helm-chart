@@ -1,6 +1,6 @@
 {{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
-{{- $insideArgoCD := (or .Values.argoCD (.Capabilities.APIVersions.Has "argoproj.io/v1alpha1")) }}
+{{- $insideArgoCD := include "matrix-synapse.insideArgoCD" . }}
 {{- $secretName := include "matrix-synapse.workername" (dict "global" . "worker" "signingkey") }}
 
 {{- if .Values.signingkey.job.enabled }}
