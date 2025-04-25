@@ -65,8 +65,7 @@ data:
 
           # X-Header for CORS-Policy
           # include /etc/nginx/conf.d/cors_headers.conf;
-          # do not set Content-Security-Policy
-          add_header X-Frame-Options SAMEORIGIN;
+          # do not set Content-Security-Policy and X-Frame-Options
           add_header X-Content-Type-Options nosniff;
           add_header X-XSS-Protection "1; mode=block";
       }
