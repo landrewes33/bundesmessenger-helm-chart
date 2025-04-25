@@ -44,13 +44,6 @@ data:
 
       root /app/;
 
-      # X-Header for CORS-Policy
-      # include /etc/nginx/conf.d/cors_headers.conf;
-      # do not set Content-Security-Policy
-      add_header X-Frame-Options SAMEORIGIN;
-      add_header X-Content-Type-Options nosniff;
-      add_header X-XSS-Protection "1; mode=block";
-
       server_name _;
 
       # livenessProbe auf /status, logging deaktiviert
@@ -70,7 +63,12 @@ data:
 
           try_files $uri /$uri /index.html;
 
-          include /etc/nginx/conf.d/cors_headers.conf;
+          # X-Header for CORS-Policy
+          # include /etc/nginx/conf.d/cors_headers.conf;
+          # do not set Content-Security-Policy
+          add_header X-Frame-Options SAMEORIGIN;
+          add_header X-Content-Type-Options nosniff;
+          add_header X-XSS-Protection "1; mode=block";
       }
 
       # assets can be cached because they have hashed filenames
