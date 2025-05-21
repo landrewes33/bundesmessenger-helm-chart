@@ -1445,7 +1445,7 @@
                   "default": "/health"
                 },
                 "port": {
-                  "default": "metrics"
+                  "default": "health"
                 }
               }
             }
@@ -1465,7 +1465,7 @@
                   "default": "/health"
                 },
                 "port": {
-                  "default": "metrics"
+                  "default": "health"
                 }
               }
             }
@@ -4107,7 +4107,7 @@
                   "default": "/health"
                 },
                 "port": {
-                  "default": "metrics"
+                  "default": "health"
                 }
               }
             }
@@ -4127,7 +4127,7 @@
                   "default": "/health"
                 },
                 "port": {
-                  "default": "metrics"
+                  "default": "health"
                 }
               }
             }

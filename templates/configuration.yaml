@@ -117,6 +117,20 @@ data:
         resources:
           - names: [replication]
             compress: false
+
+      - port: 9099
+        tls: false
+        {{- if $.Values.ipv4Only }}
+        bind_addresses: ['0.0.0.0']
+        {{- else }}
+        bind_addresses: ['::']
+        {{- end }}
+        type: http
+
+        resources:
+          - names: [health]
+            compress: false
+
     {{- if .Values.config.extraListeners }}
       {{ .Values.config.extraListeners | toYaml | nindent 6 }}
     {{- end }}

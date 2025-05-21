@@ -152,6 +152,9 @@ spec:
             - name: metrics
               containerPort: 9090
               protocol: TCP
+            - name: health
+              containerPort: 9099
+              protocol: TCP
           {{- if $config.listeners }}
             {{- if without $config.listeners "replication" }}
             - name: listener
