@@ -1133,7 +1133,7 @@ properties:
               path:
                 default: /health
               port:
-                default: metrics
+                default: health
         unevaluatedProperties: false
       readinessProbe:
         $ref: >-
@@ -1147,7 +1147,7 @@ properties:
               path:
                 default: /health
               port:
-                default: metrics
+                default: health
         unevaluatedProperties: false
       startupProbe:
         $ref: >-
@@ -3498,7 +3498,7 @@ properties:
               path:
                 default: /health
               port:
-                default: metrics
+                default: health
         unevaluatedProperties: false
       readinessProbe:
         $ref: >-
@@ -3512,7 +3512,7 @@ properties:
               path:
                 default: /health
               port:
-                default: metrics
+                default: health
         unevaluatedProperties: false
       startupProbe:
         $ref: >-

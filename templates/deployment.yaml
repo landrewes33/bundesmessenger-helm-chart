@@ -166,6 +166,9 @@ spec:
             - name: metrics
               containerPort: 9090
               protocol: TCP
+            - name: health
+              containerPort: 9099
+              protocol: TCP
           {{- with .Values.synapse.livenessProbe }}
           livenessProbe:
             {{- . | toYaml | nindent 12 }}
