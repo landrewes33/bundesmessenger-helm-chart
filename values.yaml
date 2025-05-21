@@ -2466,6 +2466,9 @@ webclient:
   # (string) Anzeigename des Servers in Webclients.
   displayName: Messenger deiner Organisation
 
+  # (list) Weitere Umgebungsvariablen für den Webclient-Container.
+  extraEnv: []
+
   # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   # weitere Möglichkeiten:
   #  fsGroup: 1001
@@ -2477,6 +2480,11 @@ webclient:
   # (map) Konfiguration für die Container-Sicherheitsrichtlinie
   securityContext:
     <<: *defaultSecurityContext
+
+  # (list) Weitere Speicherbereiche für den Webclient-Pod.
+  extraVolumes: []
+  # (list) Weitere Speicher-Einhängepunkte für den Webclient-Container.
+  extraVolumeMounts: []
 
   ## Ressource Konfiguration für webclient-server.
   resources:
@@ -2533,6 +2541,9 @@ call:
       pullSecrets: []
       pullPolicy: IfNotPresent
 
+    # (list) Weitere Umgebungsvariablen für den Call-Container.
+    extraEnv: []
+
     # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
     podSecurityContext:
       <<: *defaultPodSecurityContext
@@ -2542,6 +2553,11 @@ call:
     # (map) Konfiguration für die Container-Sicherheitsrichtlinie
     securityContext:
       <<: *defaultSecurityContext
+
+    # (list) Weitere Speicherbereiche für den Call-Pod.
+    extraVolumes: []
+    # (list) Weitere Speicher-Einhängepunkte für den Call-Container.
+    extraVolumeMounts: []
 
     ## Ressource Konfiguration für BundesMessenger-Call.
     resources:

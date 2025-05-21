@@ -5068,6 +5068,12 @@
           "title": "Anzeigename des Servers in Webclients",
           "default": "Messenger deiner Organisation"
         },
+        "extraEnv": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
+          "type": "array",
+          "title": "Weitere Umgebungsvariablen für den Webclient-Container",
+          "default": []
+        },
         "resources": {
           "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json",
           "type": "object",
@@ -5119,6 +5125,18 @@
             "runAsNonRoot": true
           },
           "unevaluatedProperties": false
+        },
+        "extraVolumes": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes",
+          "type": "array",
+          "title": "Weitere Speicherbereiche für den Webclient-Pod",
+          "default": []
+        },
+        "extraVolumeMounts": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts",
+          "type": "array",
+          "title": "Weitere Speicher-Einhängepunkte für den Webclient-Container",
+          "default": []
         }
       },
       "if": {
@@ -5137,9 +5155,12 @@
         "enabled",
         "image",
         "displayName",
+        "extraEnv",
         "resources",
         "podSecurityContext",
-        "securityContext"
+        "securityContext",
+        "extraVolumes",
+        "extraVolumeMounts"
       ],
       "unevaluatedProperties": false
     },
@@ -5248,6 +5269,12 @@
               ],
               "unevaluatedProperties": false
             },
+            "extraEnv": {
+              "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
+              "type": "array",
+              "title": "Weitere Umgebungsvariablen für den Call-Container",
+              "default": []
+            },
             "podSecurityContext": {
               "$ref": "#/$defs/podSecurityContext",
               "type": "object",
@@ -5271,6 +5298,18 @@
                 "readOnlyRootFilesystem": true
               },
               "unevaluatedProperties": false
+            },
+            "extraVolumes": {
+              "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes",
+              "type": "array",
+              "title": "Weitere Speicherbereiche für den Call-Pod",
+              "default": []
+            },
+            "extraVolumeMounts": {
+              "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts",
+              "type": "array",
+              "title": "Weitere Speicher-Einhängepunkte für den Call-Container",
+              "default": []
             },
             "resources": {
               "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json",
@@ -5307,8 +5346,11 @@
           },
           "required": [
             "image",
+            "extraEnv",
             "podSecurityContext",
             "securityContext",
+            "extraVolumes",
+            "extraVolumeMounts",
             "resources"
           ],
           "unevaluatedProperties": false
@@ -7063,6 +7105,32 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ClusterTrustBundleProjection.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ConfigMapKeySelector.schema.json": {
+      "description": "Selects a key from a ConfigMap.",
+      "properties": {
+        "key": {
+          "default": "",
+          "description": "The key to select.",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+          "type": "string"
+        },
+        "optional": {
+          "description": "Specify whether the ConfigMap or its key must be defined",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "type": "object",
+      "x-kubernetes-map-type": "atomic",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ConfigMapKeySelector.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ConfigMapProjection.schema.json": {
       "description": "Adapts a ConfigMap into a projected volume.\n\nThe contents of the target ConfigMap's Data field will be presented in a projected volume as files using the keys in the Data field as the file names, unless the items element is populated with specific mappings of keys to paths. Note that this is identical to a configmap volume source without the default mode.",
       "properties": {
@@ -7484,6 +7552,74 @@
       "type": "object",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EmptyDirVolumeSource.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EnvVar.schema.json": {
+      "description": "EnvVar represents an environment variable present in a Container.",
+      "properties": {
+        "name": {
+          "default": "",
+          "description": "Name of the environment variable. Must be a C_IDENTIFIER.",
+          "type": "string"
+        },
+        "value": {
+          "description": "Variable references $(VAR_NAME) are expanded using the previously defined environment variables in the container and any service environment variables. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will produce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless of whether the variable exists or not. Defaults to \"\".",
+          "type": "string"
+        },
+        "valueFrom": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.EnvVarSource.schema.json"
+            }
+          ],
+          "description": "Source for the environment variable's value. Cannot be used if value is not empty."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EnvVar.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EnvVarSource.schema.json": {
+      "description": "EnvVarSource represents a source for the value of an EnvVar.",
+      "properties": {
+        "configMapKeyRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.ConfigMapKeySelector.schema.json"
+            }
+          ],
+          "description": "Selects a key of a ConfigMap."
+        },
+        "fieldRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.ObjectFieldSelector.schema.json"
+            }
+          ],
+          "description": "Selects a field of the pod: supports metadata.name, metadata.namespace, `metadata.labels['<KEY>']`, `metadata.annotations['<KEY>']`, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP, status.podIPs."
+        },
+        "resourceFieldRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.ResourceFieldSelector.schema.json"
+            }
+          ],
+          "description": "Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported."
+        },
+        "secretKeyRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecretKeySelector.schema.json"
+            }
+          ],
+          "description": "Selects a key of a secret in the pod's namespace"
+        }
+      },
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EnvVarSource.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EphemeralVolumeSource.schema.json": {
       "description": "Represents an ephemeral volume that is handled by a normal storage driver.",
@@ -9378,6 +9514,32 @@
       ],
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SeccompProfile.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SecretKeySelector.schema.json": {
+      "description": "SecretKeySelector selects a key of a Secret.",
+      "properties": {
+        "key": {
+          "default": "",
+          "description": "The key of the secret to select from.  Must be a valid secret key.",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+          "type": "string"
+        },
+        "optional": {
+          "description": "Specify whether the Secret or its key must be defined",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "key"
+      ],
+      "type": "object",
+      "x-kubernetes-map-type": "atomic",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SecretKeySelector.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SecretProjection.schema.json": {
       "description": "Adapts a secret into a projected volume.\n\nThe contents of the target Secret's Data field will be presented in a projected volume as files using the keys in the Data field as the file names. Note that this is identical to a secret volume source without the default mode.",

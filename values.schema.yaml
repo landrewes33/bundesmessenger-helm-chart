@@ -4274,6 +4274,12 @@ properties:
         type: string
         title: Anzeigename des Servers in Webclients
         default: Messenger deiner Organisation
+      extraEnv:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
+        type: array
+        title: Weitere Umgebungsvariablen für den Webclient-Container
+        default: []
       resources:
         $ref: >-
           https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
@@ -4319,6 +4325,18 @@ properties:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
         unevaluatedProperties: false
+      extraVolumes:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes
+        type: array
+        title: Weitere Speicherbereiche für den Webclient-Pod
+        default: []
+      extraVolumeMounts:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts
+        type: array
+        title: Weitere Speicher-Einhängepunkte für den Webclient-Container
+        default: []
     if:
       properties:
         enabled:
@@ -4330,9 +4348,12 @@ properties:
       - enabled
       - image
       - displayName
+      - extraEnv
       - resources
       - podSecurityContext
       - securityContext
+      - extraVolumes
+      - extraVolumeMounts
     unevaluatedProperties: false
   call:
     type: object
@@ -4423,6 +4444,12 @@ properties:
               - pullSecrets
               - pullPolicy
             unevaluatedProperties: false
+          extraEnv:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
+            type: array
+            title: Weitere Umgebungsvariablen für den Call-Container
+            default: []
           podSecurityContext:
             $ref: "#/$defs/podSecurityContext"
             type: object
@@ -4441,6 +4468,18 @@ properties:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
             unevaluatedProperties: false
+          extraVolumes:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes
+            type: array
+            title: Weitere Speicherbereiche für den Call-Pod
+            default: []
+          extraVolumeMounts:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts
+            type: array
+            title: Weitere Speicher-Einhängepunkte für den Call-Container
+            default: []
           resources:
             $ref: >-
               https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
@@ -4474,8 +4513,11 @@ properties:
             unevaluatedProperties: false
         required:
           - image
+          - extraEnv
           - podSecurityContext
           - securityContext
+          - extraVolumes
+          - extraVolumeMounts
           - resources
         unevaluatedProperties: false
       jwtService:
