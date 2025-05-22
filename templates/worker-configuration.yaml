@@ -48,6 +48,19 @@ data:
         resources:
           - names: [metrics]
             compress: false
+
+      - port: 9099
+        tls: false
+        {{- if $.Values.ipv4Only }}
+        bind_addresses: ['0.0.0.0']
+        {{- else }}
+        bind_addresses: ['::']
+        {{- end }}
+        type: http
+
+        resources:
+          - names: [health]
+            compress: false
     {{- if $config.listeners }}
       {{- if has "replication" $config.listeners }}
 
@@ -65,7 +78,6 @@ data:
           - names: [replication]
             compress: false
       {{- end }}
-
 
       - port: 8083
         tls: false
