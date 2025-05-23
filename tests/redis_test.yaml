@@ -83,6 +83,7 @@ tests:
                 name: redis-secret
                 key: lepass
       - template: secrets.yaml
+        documentIndex: 0
         matchRegex:
           path: stringData['config.yaml']
           pattern: 'password: "@@REDIS_PASSWORD@@"'

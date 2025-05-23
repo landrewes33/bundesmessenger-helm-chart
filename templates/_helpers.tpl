@@ -568,6 +568,69 @@ Set MAS default uri
 {{- end }}
 {{- end -}}
 
+
+{{/* Legacy in-config registration shared secret.
+
+Empty if secret is not given in config.
+*/}}
+{{- define "matrix-synapse.registrationSharedSecret" -}}
+{{- if kindIs "string" .Values.config.registrationSharedSecret }}
+  {{- .Values.config.registrationSharedSecret }}
+{{- end }}
+{{- end -}}
+
+{{/* Name of the Secret containing Synapse’s registration shared secret.
+
+Empty if no existingSecret is specified.
+*/}}
+{{- define "matrix-synapse.registrationSharedSecret.secretName" -}}
+{{- if kindIs "map" .Values.config.registrationSharedSecret }}
+  {{- .Values.config.registrationSharedSecret.existingSecret }}
+{{- end }}
+{{- end -}}
+
+{{/* Key to the registration shared secret contained in the Synapse Secret.
+
+Empty if no existingSecret is specified.
+*/}}
+{{- define "matrix-synapse.registrationSharedSecret.secretKey" -}}
+{{- if kindIs "map" .Values.config.registrationSharedSecret }}
+  {{- .Values.config.registrationSharedSecret.existingSecretKey }}
+{{- end }}
+{{- end -}}
+
+
+{{/* Legacy in-config macaroon secret key.
+
+Empty if secret is not given in config.
+*/}}
+{{- define "matrix-synapse.macaroonSecretKey" -}}
+{{- if kindIs "string" .Values.config.macaroonSecretKey }}
+  {{- .Values.config.macaroonSecretKey }}
+{{- end }}
+{{- end -}}
+
+{{/* Name of the Secret containing Synapse’s macaroon secret key.
+
+Empty if no existingSecret is specified.
+*/}}
+{{- define "matrix-synapse.macaroonSecretKey.secretName" -}}
+{{- if kindIs "map" .Values.config.macaroonSecretKey }}
+  {{- .Values.config.macaroonSecretKey.existingSecret }}
+{{- end }}
+{{- end -}}
+
+{{/* Key to the macaroon secret key contained in the Synapse Secret.
+
+Empty if no existingSecret is specified.
+*/}}
+{{- define "matrix-synapse.macaroonSecretKey.secretKey" -}}
+{{- if kindIs "map" .Values.config.macaroonSecretKey }}
+  {{- .Values.config.macaroonSecretKey.existingSecretKey }}
+{{- end }}
+{{- end -}}
+
+
 {{/*
 Whether Helm is running inside ArgoCD.
 */}}
