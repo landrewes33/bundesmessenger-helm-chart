@@ -2674,9 +2674,24 @@ properties:
         title: Zusätzliche Argumente für die Datenbankverbindung
         description: >-
           Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+        properties:
+          sslmode:
+            type: string
+            enum:
+              - disable
+              - allow
+              - prefer
+              - require
+              - verify-ca
+              - verify-full
+            title: Verwendeter SSL-Modus
+            description: >-
+              https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+            default: prefer
         additionalProperties:
           type: ["null", "string", "number", "integer", "boolean"]
-        default: {}
+        required:
+          - sslmode
         unevaluatedProperties: false
     required:
       - enabled
@@ -2724,32 +2739,35 @@ properties:
         type: ["null", "string"]
         title: Passwortschlüssel
         description: Wird aus dem bestehenden Secret abgerufen.
-      sslmode:
-        type: string
-        enum:
-          - disable
-          - allow
-          - prefer
-          - require
-          - verify-ca
-          - verify-full
-        title: Verwendeter SSL-Modus.
-        description: >-
-          https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
-        default: prefer
       extraArgs:
         type: object
         title: Zusätzliche Argumente für die Datenbankverbindung
         description: >-
-          ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
-        default: {}
+          Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+        properties:
+          sslmode:
+            type: string
+            enum:
+              - disable
+              - allow
+              - prefer
+              - require
+              - verify-ca
+              - verify-full
+            title: Verwendeter SSL-Modus
+            description: >-
+              https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+            default: prefer
+        additionalProperties:
+          type: ["null", "string", "number", "integer", "boolean"]
+        required:
+          - sslmode
         unevaluatedProperties: false
     required:
       - host
       - port
       - database
       - username
-      - sslmode
       - extraArgs
     unevaluatedProperties: false
   redis:
@@ -3194,34 +3212,70 @@ properties:
             minLength: 1
             title: Password für PostgreSQL Nutzer von MAS
             default: mas-synapse
-          sslmode:
-            type: string
-            enum:
-              - disable
-              - allow
-              - prefer
-              - require
-              - verify-ca
-              - verify-full
-            title: Verwendeter SSL-Modus
-            description: >-
-              https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
-            default: prefer
+          min_connections:
+            type: integer
+            default: 0
+          max_connections:
+            type: integer
+            default: 10
+          connect_timeout:
+            type: integer
+            default: 30
+          idle_timeout:
+            type: integer
+            default: 600
+          max_lifetime:
+            type: integer
+            default: 1800
           extraArgs:
             type: object
-            title: Zusätzliche Optionen für MAS PostgreSQL
+            title: Zusätzliche Argumente für die MAS Datenbankverbindung
             description: >-
               https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+            properties:
+              sslmode:
+                type: string
+                enum:
+                  - disable
+                  - allow
+                  - prefer
+                  - require
+                  - verify-ca
+                  - verify-full
+                title: Verwendeter SSL-Modus
+                description: >-
+                  https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+                default: prefer
+              sslrootcert:
+                type: ["null", "string"]
+                default: null
+                examples:
+                  - /path/to/ca.pem
+              sslcert:
+                type: ["null", "string"]
+                default: null
+                examples:
+                  - /path/to/cert.pem
+              sslkey:
+                type: ["null", "string"]
+                default: null
+                examples:
+                  - /path/to/key.pem
             additionalProperties:
-              type: string
-            default: {}
+              type: ["null", "string", "number", "integer", "boolean"]
+            required:
+              - sslmode
             unevaluatedProperties: false
         required:
           - port
           - database
           - username
           - password
-          - sslmode
+          - min_connections
+          - max_connections
+          - connect_timeout
+          - idle_timeout
+          - max_lifetime
           - extraArgs
         unevaluatedProperties: false
       paths:
