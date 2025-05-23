@@ -450,17 +450,86 @@ properties:
           Synapse-Admin/Admin-Portal kann dafür genutzt werden
         default: false
       registrationSharedSecret:
-        type: ["null", "string"]
+        type: ["null", "object", "string"]
+        title: Geheimnis zum Registrieren neuer Nutzer
         description: >-
           Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge
-          gesetzt, wenn er nicht angegeben wird
-        default: null
+          gesetzt, wenn er nicht angegeben ist.
+        properties:
+          existingSecret:
+            type: string
+            minLength: 1
+            default: synapse
+          existingSecretKey:
+            type: string
+            minLength: 1
+            default: registration-shared-secret
+        required:
+          - existingSecret
+          - existingSecretKey
+        unevaluatedProperties: false
       macaroonSecretKey:
-        type: ["null", "string"]
+        type: ["null", "object", "string"]
+        title: Macaroon-Schlüssel für diverse Signaturen
         description: >-
-          Es wird dringend empfohlen, diesen Wert auf einen secure value
-          (secret) zu setzen
-        default: null
+          Verwendet wird der Macaroon-Schlüssel zum Generieren und Überprüfen von
+
+          - Access-Tokens von Gastnutzern,
+
+          - Login-Tokens während SSO-Logins und
+
+          - Abmeldelinks in Emails.
+
+
+          Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge
+          gesetzt, wenn er nicht angegeben ist.
+        properties:
+          existingSecret:
+            type: string
+            minLength: 1
+            default: synapse
+          existingSecretKey:
+            type: string
+            minLength: 1
+            default: macaroon-secret-key
+        required:
+          - existingSecret
+          - existingSecretKey
+        unevaluatedProperties: false
+      formSecret:
+        type: object
+        title: Geheimnis zum Generieren und Überprüfen von AGB-Bestätigungslinks
+        description: >-
+          Existiert das Secret mit dem angegebenen Namen noch nicht, so wird es
+          automatisch generiert.
+        properties:
+          existingSecret:
+            type: string
+            minLength: 1
+          existingSecretKey:
+            type: string
+            minLength: 1
+        required:
+          - existingSecret
+          - existingSecretKey
+        unevaluatedProperties: false
+      workerReplicationSecret:
+        type: object
+        title: Geheimnis zur Kommunikation zwischen Workern
+        description: >-
+          Existiert das Secret mit dem angegebenen Namen noch nicht, so wird es
+          automatisch generiert.
+        properties:
+          existingSecret:
+            type: string
+            minLength: 1
+          existingSecretKey:
+            type: string
+            minLength: 1
+        required:
+          - existingSecret
+          - existingSecretKey
+        unevaluatedProperties: false
       extraListeners:
         type: array
         description: Extra listener
@@ -489,6 +558,7 @@ properties:
       - enable_metrics
       - recaptcha
       - enableRegistration
+      - formSecret
       - extraListeners
       - trustedKeyServers
     unevaluatedProperties: false

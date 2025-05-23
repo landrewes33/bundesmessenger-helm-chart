@@ -233,8 +233,40 @@ spec:
           configMap:
             name: {{ include "matrix-synapse.workername" (dict "global" $ "worker" "workers") }}
         - name: secrets
-          secret:
-            secretName: {{ include "matrix-synapse.fullname" $ }}
+          projected:
+            sources:
+              - secret:
+                  name: {{ include "matrix-synapse.fullname" $ }}
+              {{ if and
+                  ($secretName := include "matrix-synapse.registrationSharedSecret.secretName" $)
+                  ($secretKey := include "matrix-synapse.registrationSharedSecret.secretKey" $)
+              }}
+              - secret:
+                  name: {{ $secretName }}
+                  items:
+                    - key: {{ $secretKey }}
+                      path: registration
+              {{- end }}
+              {{ if and
+                  ($secretName := include "matrix-synapse.macaroonSecretKey.secretName" $)
+                  ($secretKey := include "matrix-synapse.macaroonSecretKey.secretKey" $)
+              }}
+              - secret:
+                  name: {{ $secretName }}
+                  items:
+                    - key: {{ $secretKey }}
+                      path: macaroon
+              {{- end }}
+              - secret:
+                  name: {{ $.Values.config.formSecret.existingSecret }}
+                  items:
+                    - key: {{ $.Values.config.formSecret.existingSecretKey }}
+                      path: form-secret
+              - secret:
+                  name: {{ $.Values.config.workerReplicationSecret.existingSecret }}
+                  items:
+                    - key: {{ $.Values.config.workerReplicationSecret.existingSecretKey }}
+                      path: worker-replication-secret  
         - name: signingkey
           secret:
             secretName: {{ $.Values.signingkey.existingSecret | default (include "matrix-synapse.workername" (dict "global" $ "worker" "signingkey")) | quote }}

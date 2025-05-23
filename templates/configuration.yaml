@@ -155,6 +155,16 @@ data:
     enable_registration: {{ .Values.config.enableRegistration | default false }}
     {{- end }}
 
+    {{- if include "matrix-synapse.registrationSharedSecret.secretName" . }}
+    registration_shared_secret_path: /synapse/secrets/registration
+    {{- end }}
+
+    {{- if include "matrix-synapse.macaroonSecretKey.secretName" . }}
+    macaroon_secret_key_path: /synapse/secrets/macaroon
+    {{- end }}
+
+    form_secret_path: /synapse/secrets/form-secret
+
     ## Metrics ###
 
     enable_metrics: {{ .Values.config.enable_metrics | default true }}
@@ -167,6 +177,8 @@ data:
     trusted_key_servers: {{- .Values.config.trustedKeyServers | toYaml | nindent 6 }}
 
     ## Workers ##
+
+    worker_replication_secret_path: /synapse/secrets/worker-replication-secret
 
     {{- $default := .Values.workers.default }}
     {{- range $worker, $config := .Values.workers }}

@@ -277,11 +277,38 @@ config:
   # @default -- false
   enableRegistration: false
 
-  # (string) Hinweis: Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge gesetzt, wenn er nicht angegeben wird.
-  registrationSharedSecret: ""
+  # -- (map|string|null) Geheimnis zum Registrieren neuer Nutzer.
+  # Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge gesetzt, wenn
+  # er nicht angegeben ist.
+  registrationSharedSecret:
+    existingSecret: synapse
+    existingSecretKey: registration-shared-secret
 
-  # (string) Hinweis: Es wird dringend empfohlen, diesen Wert auf einen secure value (secret) zu setzen.
-  macaroonSecretKey: ""
+  # -- (map|string|null) Macaroon-Schlüssel für diverse Signaturen.
+  # Verwendet wird der Macaroon-Schlüssel zum Generieren und Überprüfen von
+  # - Access-Tokens von Gastnutzern,
+  # - Login-Tokens während SSO-Logins und
+  # - Abmeldelinks in Emails.
+  #
+  # Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge gesetzt, wenn
+  # er nicht angegeben ist.
+  macaroonSecretKey:
+    existingSecret: synapse
+    existingSecretKey: macaroon-secret-key
+
+  # -- (map) Geheimnis zum Generieren und Überprüfen von AGB-Bestätigungslinks.
+  # Existiert das Secret mit dem angegebenen Namen noch nicht, so wird es
+  # automatisch generiert.
+  formSecret:
+    existingSecret: synapse
+    existingSecretKey: form-secret
+
+  # -- (map) Geheimnis zur Kommunikation zwischen Workern.
+  # Existiert das Secret mit dem angegebenen Namen noch nicht, so wird es
+  # automatisch generiert.
+  workerReplicationSecret:
+    existingSecret: synapse
+    existingSecretKey: worker-replication-secret
 
   # (list) Extra listener
   extraListeners: []
