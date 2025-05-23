@@ -356,19 +356,8 @@ Set postgresql database
 {{- end -}}
 
 {{/*
-Set postgresql sslmode
-*/}}
-{{- define "matrix-synapse.postgresql.sslmode" -}}
-{{- if .Values.postgresql.enabled -}}
-  {{- .Values.postgresql.sslmode | default "prefer" }}
-{{- else -}}
-  {{- .Values.externalPostgresql.sslmode | default "prefer" }}
-{{- end -}}
-{{- end -}}
+PostgreSQL extra arguments for establishing a database connection.
 
-
-{{/*
-Set postgresql extra args
 Refer to https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 for a list of options that can be passed.
 */}}
@@ -490,6 +479,27 @@ Check networkpolicy requirements TBD CHECK POSTGRES
 {{- end }}
 
 {{/*
+MAS PostgreSQL connection URI.
+
+https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS
+*/}}
+{{- define "matrix-synapse.maspostgresql.uri" -}}
+{{- $argsPercentEncoded := list }}
+{{- range $k, $v := .Values.mas.postgresql.extraArgs }}
+  {{- $arg := printf "%s=%s" (urlquery $k) (urlquery $v) }}
+  {{- $argsPercentEncoded = append $argsPercentEncoded $arg }}
+{{- end }}
+{{- printf "postgresql://%s:%s@%s:%s/%s?%s"
+  (urlquery (include "matrix-synapse.maspostgresql.username" .))
+  (urlquery (include "matrix-synapse.maspostgresql.password" .))
+  (include "matrix-synapse.maspostgresql.host" .)
+  (include "matrix-synapse.maspostgresql.port" .)
+  (urlquery (include "matrix-synapse.maspostgresql.database" .))
+  (join "&" $argsPercentEncoded)
+}}
+{{- end -}}
+
+{{/*
 Set MAS postgresql username
 */}}
 {{- define "matrix-synapse.maspostgresql.username" -}}
@@ -534,29 +544,6 @@ Defaults to `matrix-synapse.postgresql.port`.
 {{- if .Values.mas.enabled -}}
   {{- .Values.mas.postgresql.port | default (include "matrix-synapse.postgresql.port" .) -}}
 {{- end -}}
-{{- end -}}
-
-{{/*
-Set MAS postgresql sslmode
-*/}}
-{{- define "matrix-synapse.maspostgresql.sslmode" -}}
-  {{- if .Values.mas.enabled -}}
-{{- .Values.mas.postgresql.sslmode | default "prefer" }}
-  {{- end -}}
-{{- end -}}
-
-
-{{/*
-Set MAS postgresql extra args
-Refer to https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-for a list of options that can be passed.
-*/}}
-{{- define "matrix-synapse.maspostgresql.extraArgs" -}}
-  {{- if .Values.mas.enabled -}}
-    {{- with .Values.mas.postgresql.extraArgs }}
-{{- . | toYaml }}
-    {{- end }}
-  {{- end -}}
 {{- end -}}
 
 {{/*

@@ -1603,7 +1603,10 @@ postgresql:
 
   # (map) Zusätzliche Argumente für die Datenbankverbindung.
   # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
-  extraArgs: {}
+  extraArgs:
+    # Verwendeter SSL-Modus.
+    # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+    sslmode: prefer
 
 # (map) Ein extern konfigurierter Postgres-Server, der für die Datenbank von Synapse verwendet wird.
 # Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf "C" eingestellt sein.
@@ -1627,13 +1630,12 @@ externalPostgresql:
   # (string) Passwortschlüssel, der aus dem bestehenden Secret abgerufen wird
   existingSecretPasswordKey: password
 
-  # (string) Verwendeter SSL-Modus.
-  # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
-  sslmode: prefer
-
   # (map) Zusätzliche Argumente für die Datenbankverbindung.
   # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
-  extraArgs: {}
+  extraArgs:
+    # -- (string) Verwendeter SSL-Modus.
+    # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+    sslmode: prefer
 
 
 ######################################################################################
@@ -1884,12 +1886,20 @@ mas:
     username: massynapse
     # (string) Password für PostgreSQL Nutzer von MAS.
     password: mas-synapse
-    # (string) Verwendeter SSL-Modus.
-    # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
-    sslmode: prefer
-    # (map) Zusätzliche Optionen für MAS PostgreSQL.
+    min_connections: 0
+    max_connections: 10
+    connect_timeout: 30
+    idle_timeout: 600
+    max_lifetime: 1800
+    # (map) Zusätzliche Argumente für die MAS Datenbankverbindung.
     # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-    extraArgs: {}
+    extraArgs:
+      # -- (string) Verwendeter SSL-Modus.
+      # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+      sslmode: prefer
+      # sslrootcert: /path/to/ca.pem
+      # sslcert: /path/to/cert.pem
+      # sslkey: /path/to/key.pem
 
   # (list) Diese URLs ersetzen bzw. überlagern die URLs vom Synapse.
   # D.h., dass diese URLs vom MAS anstatt von Synapse beantwortet werden müssen.
