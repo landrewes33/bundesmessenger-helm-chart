@@ -27,9 +27,8 @@ workers:
       test-annotation: default-workers
   generic_worker:
     replicaCount: 1
-    # Kubernetes v1.23+.
-    # autoscaling:
-    #  enabled: true
+    autoscaling:
+      enabled: true
   appservice:
     enabled: true
   pusher:
@@ -87,14 +86,6 @@ postgresql:
 
 networkpolicies:
   enabled: true
-
-# optional pullSecrets
-# image:
-#   pullSecrets:
-#     - name: bum-git
-# redis:
-#   image:
-#     pullSecrets: bum-git
 
 # only to validate template
 demomode:
