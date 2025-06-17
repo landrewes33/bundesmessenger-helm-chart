@@ -1,5 +1,5 @@
 resources:
-- ../../richtlinien-umsetzung-kyverno/policies
+- ../../richtlinien-umsetzung-kyverno/igbvc-richtlinien
 
 patches:
 - path: disable-require-unique-uid-per-workload.yaml
