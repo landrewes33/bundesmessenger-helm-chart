@@ -7,6 +7,9 @@
 # - $1: Path to input file / Kyverno Report
 # - $2: Path to output file / JSON Gitlab SAST Report
 
+# shellcheck disable=SC3040
+set -euo pipefail
+
 if [ "$#" -ne 2 ]
 then
   echo "Incorrect number of arguments"
@@ -42,7 +45,11 @@ severities='[.] |
         "severity_" + (.policy // "Unknown") + "=" + .severity
     ) | join(" ") | sub("-","_")
 '
-serverity_envs=$(yq eval-all "$severities" richtlinien-umsetzung-kyverno/policies/*.yaml)
+cd richtlinien-umsetzung-kyverno/igbvc-richtlinien
+serverity_envs=$(
+    yq -0 ea '.resources[]' kustomization.yaml | xargs -0 yq ea "$severities"
+)
+cd ../..
 # shellcheck disable=SC2086
 export ${serverity_envs?}
 
@@ -64,7 +71,7 @@ query='.results |
             "class":.resources[0].kind + "/" + .resources[0].name
         },
         "id":.rule + "-" + .policy + "-" + .resources[0].kind + "-" + .resources[0].name,
-        "severity":"${severity_" + .policy + "}" | sub("-","_") | envsubst
+        "severity":"${severity_" + .policy + "}" | sub("-","_") | envsubst(ne,nu)
     } |
     del(.resources) |
     del(.timestamp) |
