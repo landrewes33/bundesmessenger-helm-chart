@@ -4253,7 +4253,7 @@ properties:
           - ERROR
           - CRITICAL
           - NOTSET
-          - OFF
+          - "OFF"
         title: LogLevel der Core-Komponente vom Admin-Portal
         description: >-
           Benötigt, um das LogLevel der Komponente zu steuern und unnötige
@@ -4268,12 +4268,12 @@ properties:
           - ERROR
           - CRITICAL
           - NOTSET
-          - OFF
+          - "OFF"
         title: LogLevel der Audit-Komponente vom Admin-Portal
         description: >-
           Benötigt, um das LogLevel der Komponente zu steuern und unnötige
           Details auszublenden.
-        default: OFF
+        default: "OFF"
       coreImage:
         $ref: "#/$defs/image"
         type: object
