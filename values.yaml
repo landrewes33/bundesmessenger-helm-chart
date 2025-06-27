@@ -2371,7 +2371,7 @@ synapse_admin:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/synapse-admin
-    tag: 0.9.1-jammy-production
+    tag: 0.11.1-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 
