@@ -163,7 +163,7 @@ signingkey:
     publishImage:
       registry: registry.opencode.de
       repository: bwi/bundesmessenger/backend/container-images/kubectl
-      tag: 1.33.1-jammy-production
+      tag: 1.33.2-jammy-production
       pullSecrets: []
       pullPolicy: IfNotPresent
 
