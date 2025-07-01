@@ -1,0 +1,1 @@
+Angeben eines Abbilds für kubectl-Container: aus `signingkey.job.publishImage` wird `kubectlImage`.

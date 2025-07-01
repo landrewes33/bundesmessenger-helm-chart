@@ -229,8 +229,8 @@ Pull secrets
 {{- define "matrix-synapse.imagePullSecrets" -}}
 {{- with concat
     .Values.image.pullSecrets
+    .Values.kubectlImage.pullSecrets
     .Values.signingkey.job.generateImage.pullSecrets
-    .Values.signingkey.job.publishImage.pullSecrets
     .Values.volumePermissions.image.pullSecrets
     .Values.sygnal.image.pullSecrets
     .Values.wellknown.image.pullSecrets

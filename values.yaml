@@ -94,6 +94,14 @@ serviceAccount:
 # werden, kann hier aber erzwungen werden.
 argoCD: false
 
+# -- (map) Abbild vom im Chart verwendeten `kubectl`-Container.
+kubectlImage:
+  registry: registry.opencode.de
+  repository: bwi/bundesmessenger/backend/container-images/kubectl
+  tag: 1.33.2-jammy-production
+  pullSecrets: []
+  pullPolicy: IfNotPresent
+
 # Standardwerte für alle Pods.
 # Alle `podSecurityContext`-Schlüssel in dieser Datei verwenden die Werte aus
 # dem hier definierten YAML-Anchor.
@@ -157,14 +165,6 @@ signingkey:
       tag: 1.127.1-jammy-production
       pullSecrets: []
       # (string) PullPolicy für das Image vom Signing-Key-Job
-      pullPolicy: IfNotPresent
-    # (map) Repository/Image Konfiguration für den Upload des generierten Signing-Schlüssels.
-    # finaler Tag kann sich noch ändern
-    publishImage:
-      registry: registry.opencode.de
-      repository: bwi/bundesmessenger/backend/container-images/kubectl
-      tag: 1.33.2-jammy-production
-      pullSecrets: []
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.

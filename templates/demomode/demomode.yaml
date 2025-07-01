@@ -162,7 +162,12 @@ spec:
           serviceAccountName: {{ include "matrix-synapse.demomodeServiceAccountName" . }}
           initContainers:
             - name: scale-down
-              image: "{{ printf "%s/%s:%s" .Values.signingkey.job.publishImage.registry .Values.signingkey.job.publishImage.repository (.Values.signingkey.job.publishImage.tag | default "latest") }}"
+              image: {{ quote (printf "%s/%s:%s"
+                .Values.kubectlImage.registry
+                .Values.kubectlImage.repository
+                .Values.kubectlImage.tag
+              )}}
+              imagePullPolicy: {{ .Values.kubectlImage.pullPolicy }}
               command:
                 - sh
                 - -c
@@ -203,7 +208,12 @@ spec:
                   pg_dump -h {{ include "matrix-synapse.postgresql.host" . }} -U $POSTGRES_USER $POSTGRES_DB > /opt/sql/$DUMPDB
           containers:
             - name: save-synapse-media
-              image: "{{ printf "%s/%s:%s" .Values.signingkey.job.publishImage.registry .Values.signingkey.job.publishImage.repository (.Values.signingkey.job.publishImage.tag | default "latest") }}"
+              image: {{ quote (printf "%s/%s:%s"
+                .Values.kubectlImage.registry
+                .Values.kubectlImage.repository
+                .Values.kubectlImage.tag
+              )}}
+              imagePullPolicy: {{ .Values.kubectlImage.pullPolicy }}
               command:
                 - sh
                 - -c
@@ -260,7 +270,12 @@ spec:
           serviceAccountName: {{ include "matrix-synapse.demomodeServiceAccountName" . }}
           initContainers:
             - name: scale-down
-              image: "{{ printf "%s/%s:%s" .Values.signingkey.job.publishImage.registry .Values.signingkey.job.publishImage.repository (.Values.signingkey.job.publishImage.tag | default "latest") }}"
+              image: {{ quote (printf "%s/%s:%s"
+                .Values.kubectlImage.registry
+                .Values.kubectlImage.repository
+                .Values.kubectlImage.tag
+              )}}
+              imagePullPolicy: {{ .Values.kubectlImage.pullPolicy }}
               command:
                 - sh
                 - -c
@@ -309,7 +324,12 @@ spec:
                   echo "done"
           containers:
             - name: reset-synapse-rollout
-              image: "{{ printf "%s/%s:%s" .Values.signingkey.job.publishImage.registry .Values.signingkey.job.publishImage.repository (.Values.signingkey.job.publishImage.tag | default "latest") }}"
+              image: {{ quote (printf "%s/%s:%s"
+                .Values.kubectlImage.registry
+                .Values.kubectlImage.repository
+                .Values.kubectlImage.tag
+              )}}
+              imagePullPolicy: {{ .Values.kubectlImage.pullPolicy }}
               command:
                 - sh
                 - -c

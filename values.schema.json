@@ -148,6 +148,25 @@
       "description": "Sollte durch `.Capabilities.APIVersions.Has \"argoproj.io/v1alpha1\"` erkannt werden, kann hier aber erzwungen werden.",
       "default": false
     },
+    "kubectlImage": {
+      "$ref": "#/$defs/image",
+      "type": "object",
+      "title": "Abbild vom im Chart verwendeten `kubectl`-Container",
+      "default": {
+        "registry": "registry.opencode.de",
+        "repository": "bwi/bundesmessenger/backend/container-images/kubectl",
+        "pullSecrets": [],
+        "pullPolicy": "IfNotPresent"
+      },
+      "required": [
+        "registry",
+        "repository",
+        "tag",
+        "pullSecrets",
+        "pullPolicy"
+      ],
+      "unevaluatedProperties": false
+    },
     "signingkey": {
       "type": "object",
       "title": "Die Quelle des von Synapse im Verbund verwendeten Signierschlüssels",
@@ -229,32 +248,12 @@
                 "pullPolicy"
               ],
               "unevaluatedProperties": false
-            },
-            "publishImage": {
-              "$ref": "#/$defs/image",
-              "type": "object",
-              "title": "Repository/Image-Konfiguration für den Upload des generierten Signing-Schlüssels",
-              "default": {
-                "registry": "registry.opencode.de",
-                "repository": "bwi/bundesmessenger/backend/container-images/kubectl",
-                "pullSecrets": [],
-                "pullPolicy": "IfNotPresent"
-              },
-              "required": [
-                "registry",
-                "repository",
-                "tag",
-                "pullSecrets",
-                "pullPolicy"
-              ],
-              "unevaluatedProperties": false
             }
           },
           "required": [
             "enabled",
             "annotations",
-            "generateImage",
-            "publishImage"
+            "generateImage"
           ],
           "unevaluatedProperties": false
         },
@@ -6242,6 +6241,7 @@
     "monitoring",
     "serviceAccount",
     "argoCD",
+    "kubectlImage",
     "signingkey",
     "ipv4Only",
     "config",
