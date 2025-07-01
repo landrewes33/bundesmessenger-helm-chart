@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2024–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.additionalConfig.dsgvoExport.enabled -}}
 {{- if semverCompare ">=1.21.0" .Capabilities.KubeVersion.Version -}}
@@ -75,7 +75,12 @@ spec:
           serviceAccountName: {{ include "matrix-synapse.dsgvoExportServiceAccountName" . }}
           containers:
             - name: dsgvo-exporter
-              image: "{{ printf "%s/%s:%s" .Values.signingkey.job.publishImage.registry .Values.signingkey.job.publishImage.repository (.Values.signingkey.job.publishImage.tag | default "latest") }}"
+              image: {{ quote (printf "%s/%s:%s"
+                .Values.kubectlImage.registry
+                .Values.kubectlImage.repository
+                .Values.kubectlImage.tag
+              )}}
+              imagePullPolicy: {{ .Values.kubectlImage.pullPolicy }}
               command:
                 - sh
                 - -c

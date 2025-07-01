@@ -14,7 +14,7 @@
   app: Matrix-Content-Scanner
 - path: signingkey.job.generateImage
   app: Synapse
-- path: signingkey.job.publishImage
+- path: kubectlImage
   app: Kubectl
 - path: wellknown.image
   app: Nginx

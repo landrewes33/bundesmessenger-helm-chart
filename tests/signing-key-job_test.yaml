@@ -22,17 +22,11 @@ tests:
     set:
       signingkey.job.generateImage.pullSecrets:
         - name: a-little-secret
-      signingkey.job.publishImage.pullSecrets:
-        - name: a-medium-secret
     asserts:
       - contains:
           path: spec.template.spec.imagePullSecrets
           content:
             name: a-little-secret
-      - contains:
-          path: spec.template.spec.imagePullSecrets
-          content:
-            name: a-medium-secret
   - it: ensures no Job if disabled
     set:
       signingkey.job.enabled: false
