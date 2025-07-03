@@ -118,3 +118,19 @@ tests:
           path: spec.template.spec.imagePullSecrets
           content:
             name: a-little-secret
+  - it: Should not create the secret when disabled
+    template: templates/call/jwtService-secrets.yaml
+    set:
+      call.enabled: true
+      call.existingSecret: "use_own_secret"
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: Should create the secret when enabled
+    template: templates/call/jwtService-secrets.yaml
+    set:
+      call.enabled: true
+      call.existingSecret: ""
+    asserts:
+      - hasDocuments:
+          count: 1
