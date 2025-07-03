@@ -108,7 +108,6 @@ metadata:
     {{- end }}
   {{- end }}
 spec:
-  ttlSecondsAfterFinished: 3600
   template:
     metadata:
       labels:
