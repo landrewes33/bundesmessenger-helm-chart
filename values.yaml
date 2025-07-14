@@ -11,7 +11,7 @@ image:
   repository: bwi/bundesmessenger/backend/container-images/synapse
 
   # (string) Verwendete Version des Synapse-Abbilds.
-  tag: 1.127.1-jammy-production
+  tag: 1.133.0-jammy-production
 
   # (list) Optional kann ein Array von imagePullSecrets angegeben werden.
   # Secrets müssen manuell im Namensraum angelegt werden.
@@ -162,7 +162,7 @@ signingkey:
       # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen (empfohlen)
       repository: bwi/bundesmessenger/backend/container-images/synapse
       # (string) Verwendete Version des Synapse-Abbilds.
-      tag: 1.127.1-jammy-production
+      tag: 1.133.0-jammy-production
       pullSecrets: []
       # (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
