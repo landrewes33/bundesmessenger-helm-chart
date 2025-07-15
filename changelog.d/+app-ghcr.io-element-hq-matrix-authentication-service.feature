@@ -1,1 +1,1 @@
-Image `ghcr.io/element-hq/matrix-authentication-service` auf Version `0.16.0` aktualisiert.
+Image `ghcr.io/element-hq/matrix-authentication-service` auf Version `0.18.0` aktualisiert.
