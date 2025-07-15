@@ -487,30 +487,6 @@
           "description": "Metriken erfassen",
           "default": true
         },
-        "recaptcha": {
-          "type": "object",
-          "title": "Schützen Sie die Registrierung mit recaptcha",
-          "description": "Die Verwendung ist optional. Ref: https://element-hq.github.io/synapse/latest/CAPTCHA_SETUP.html",
-          "properties": {
-            "publicKey": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "minLength": 1,
-              "default": null
-            },
-            "privateKey": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "minLength": 1,
-              "default": null
-            }
-          },
-          "unevaluatedProperties": false
-        },
         "enableRegistration": {
           "type": "boolean",
           "title": "Registrierungskonfiguration",
@@ -641,7 +617,6 @@
         "extraLoggers",
         "reportStats",
         "enable_metrics",
-        "recaptcha",
         "enableRegistration",
         "formSecret",
         "extraListeners",
