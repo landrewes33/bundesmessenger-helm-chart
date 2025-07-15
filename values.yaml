@@ -1863,7 +1863,7 @@ mas:
     registry: ghcr.io
     repository: element-hq/matrix-authentication-service
     # Tag mit "-debug" um shell zu haben
-    tag: 0.16.0-debug
+    tag: 0.18.0-debug
     pullSecrets: []
     pullPolicy: IfNotPresent
 
