@@ -2556,17 +2556,18 @@ call:
   # (map) Konfiguration mit denen der LiveKit Server erreicht werden kann.
   # Key und Secret müssen mit den Angabe im LiveKit Server überein stimmen.
   livekit:
+    # (string) URL des LiveKit Servers.
     url: "wss://livekit.example.com"
-    key: "devkey"
-    secret: "secret"
+    # key: "devkey"
+    # secret: "secret"
 
-  # (string) Bestehendes Secret das anstelle statischer Angaben verwendet wird
-  existingSecret: ""
-  # (map) Namen der Schlüssel in dem existingSecret.
-  # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
+  # (string) Name vom Livekit-Secret.
+  existingSecret: call
+  # (map) Verweise auf Livekit-Schlüssel und -Geheimnis.
   secretKeys:
-    livekitUrl: livekit-url
+    # (string) Verweis im `existingSecret` auf den Livekit-Schlüssel.
     livekitKey: livekit-key
+    # (string) Verweis im `existingSecret` auf das Livekit-Geheimnis.
     livekitSecret: livekit-secret
 
   # (map) Konfiguration für Client vom BundesMessenger-Call
