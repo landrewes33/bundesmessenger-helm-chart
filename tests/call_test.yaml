@@ -82,7 +82,7 @@ tests:
 suite: Call JWT Service
 templates:
   - templates/call/jwtService-deployment.yaml
-  - templates/call/jwtService-secrets.yaml
+  - secrets.yaml
 set:
   call.uri: call.example.org
   externalPostgresql.existingSecret: postgresql
@@ -118,19 +118,27 @@ tests:
           path: spec.template.spec.imagePullSecrets
           content:
             name: a-little-secret
-  - it: Should not create the secret when disabled
-    template: templates/call/jwtService-secrets.yaml
+  - it: Should not create the Secret when in-config secret is not given.
+    template: secrets.yaml
     set:
       call.enabled: true
       call.existingSecret: "use_own_secret"
+      # call.livekit.key: null
+      # call.livekit.secret: null
     asserts:
-      - hasDocuments:
-          count: 0
-  - it: Should create the secret when enabled
-    template: templates/call/jwtService-secrets.yaml
+      - notEqual:
+          path: metadata.name
+          value: use_own_secret
+  - it: Should create the Secret when in-config secret is given.
+    template: secrets.yaml
     set:
       call.enabled: true
-      call.existingSecret: ""
+      call.existingSecret: "use_own_secret"
+      call.livekit.key: k3y
+      call.livekit.secret: s3cret
     asserts:
-      - hasDocuments:
-          count: 1
+      - containsDocument:
+          kind: Secret
+          apiVersion: v1
+          name: use_own_secret
+          any: true

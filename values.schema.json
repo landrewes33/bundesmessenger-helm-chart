@@ -5363,54 +5363,85 @@
               "default": "wss://livekit.example.com"
             },
             "key": {
-              "type": "string",
+              "type": [
+                "null",
+                "string"
+              ],
               "title": "Schlüssel für den LiveKit Servers",
-              "default": "devkey"
+              "minLength": 1,
+              "default": null,
+              "examples": [
+                "devkey"
+              ]
             },
             "secret": {
-              "type": "string",
+              "type": [
+                "null",
+                "string"
+              ],
               "title": "Secret des LiveKit Servers",
-              "default": "secret"
+              "minLength": 1,
+              "default": null,
+              "examples": [
+                "secret"
+              ]
             }
           },
+          "oneOf": [
+            {
+              "properties": {
+                "key": {
+                  "type": "string"
+                },
+                "secret": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "key",
+                "secret"
+              ]
+            },
+            {
+              "properties": {
+                "key": {
+                  "type": "null"
+                },
+                "secret": {
+                  "type": "null"
+                }
+              }
+            }
+          ],
           "required": [
-            "url",
-            "key",
-            "secret"
+            "url"
           ],
           "unevaluatedProperties": false
         },
         "existingSecret": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "title": "Bestehendes Secret, das anstelle statischer Angaben verwendet wird",
-          "default": null
+          "type": "string",
+          "title": "Name vom Livekit-Secret",
+          "minLength": 1,
+          "default": "call"
         },
         "secretKeys": {
           "type": "object",
-          "title": "Namen der Schlüssel in dem existingSecret",
-          "description": "Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.",
+          "title": "Verweise auf Livekit-Schlüssel und -Geheimnis",
           "properties": {
-            "livekitUrl": {
-              "type": "string",
-              "title": "Verweisname zur URL des LiveKit Servers",
-              "default": "livekit-url"
-            },
             "livekitKey": {
               "type": "string",
-              "title": "Verweisname zum Schlüssel für den LiveKit Servers",
+              "title": "Verweis im `existingSecret` auf den Livekit-Schlüssel",
+              "minLength": 1,
               "default": "livekit-key"
             },
             "livekitSecret": {
               "type": "string",
-              "title": "Verweisname zum Secret des LiveKit Servers",
+              "title": "Verweis im `existingSecret` auf das Livekit-Geheimnis",
+              "minLength": 1,
               "default": "livekit-secret"
             }
           },
           "required": [
-            "livekitUrl",
             "livekitKey",
             "livekitSecret"
           ],
@@ -5668,6 +5699,7 @@
       "required": [
         "enabled",
         "livekit",
+        "existingSecret",
         "secretKeys",
         "client",
         "jwtService"
