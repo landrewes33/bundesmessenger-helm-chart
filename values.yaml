@@ -967,6 +967,7 @@ workers:
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     paths:
       ## Federation requests
+      - "/_matrix/federation/v1/version$"
       - "/_matrix/federation/(v1|v2)/event/"
       - "/_matrix/federation/(v1|v2)/state/"
       - "/_matrix/federation/(v1|v2)/state_ids/"
@@ -1031,6 +1032,7 @@ workers:
     # (string) Server-Side Pfade für die Ingress-Konfiguration des Föderations-Workers
     # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
     paths:
+      - "/_matrix/federation/v1/version$"
       - "/_matrix/federation/(v1|v2)/event/"
       - "/_matrix/federation/(v1|v2)/state/"
       - "/_matrix/federation/(v1|v2)/state_ids/"
