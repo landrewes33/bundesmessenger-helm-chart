@@ -139,13 +139,6 @@ data:
 
     media_store_path: "/synapse/data/media"
     uploads_path: "/synapse/data/uploads"
-    {{- if and .Values.config.recaptcha.privateKey .Values.config.recaptcha.publicKey }}
-
-    ## Captcha ##
-
-    recaptcha_public_key: {{ .Values.config.recaptcha.publicKey | quote }}
-    enable_registration_captcha: true
-    {{- end }}
 
     ## Registration ##
 
