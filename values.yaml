@@ -2577,7 +2577,7 @@ call:
     image:
       registry: registry.opencode.de
       repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-call
-      tag: 0.6.0-jammy-production
+      tag: 0.4.0-jammy-production
       pullSecrets: []
       pullPolicy: IfNotPresent
 

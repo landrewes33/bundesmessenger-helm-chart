@@ -1,1 +1,0 @@
-Image `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-call` auf Version `0.6.0` aktualisiert.
