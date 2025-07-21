@@ -168,7 +168,7 @@ signingkey:
       pullPolicy: IfNotPresent
 
   ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
-  # existingSecret: secret-name
+  # existingSecret: signingkey
   # existingSecretKey: signing.key
 
   # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.

@@ -264,7 +264,10 @@
           ],
           "minLength": 1,
           "description": "Signierschlüssel-Secret, das im Voraus erstellt wurde",
-          "default": null
+          "default": null,
+          "examples": [
+            "signingkey"
+          ]
         },
         "existingSecretKey": {
           "type": [
@@ -273,7 +276,10 @@
           ],
           "minLength": 1,
           "description": "Signing.key im Signierschlüssel-Secret",
-          "default": null
+          "default": null,
+          "examples": [
+            "signing.key"
+          ]
         },
         "podSecurityContext": {
           "$ref": "#/$defs/podSecurityContext",
