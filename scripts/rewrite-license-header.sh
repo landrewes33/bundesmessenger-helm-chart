@@ -51,7 +51,7 @@ fi
 if ! grep -q "SPDX-FileCopyrightText:.*BWI GmbH" "$FILENAME"; then
     echo "$FILENAME: BWI copyright not found. Adding…"
     # shellcheck disable=SC2059
-    sed -i "1 i$(printf "$COMMENT "SPDX-FileCopyrightText: BWI GmbH)" "$FILENAME"
+    sed -i "1 i$(printf "$COMMENT" "SPDX-FileCopyrightText: BWI GmbH")" "$FILENAME"
 fi
 # Write copyright year range to file
 # shellcheck disable=SC2059
