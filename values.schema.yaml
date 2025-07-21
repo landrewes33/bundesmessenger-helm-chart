@@ -241,11 +241,15 @@ properties:
         description: >-
           Signierschlüssel-Secret, das im Voraus erstellt wurde
         default: null
+        examples:
+          - signingkey
       existingSecretKey:
         type: ["null", "string"]
         minLength: 1
         description: Signing.key im Signierschlüssel-Secret
         default: null
+        examples:
+          - signing.key
       podSecurityContext:
         $ref: "#/$defs/podSecurityContext"
         type: object

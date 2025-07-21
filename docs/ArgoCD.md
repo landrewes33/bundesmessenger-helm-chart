@@ -13,11 +13,18 @@ automatischen Generierung von Secrets.
 Damit der BundesMessenger erfolgreich installiert werden kann, müssen alle
 verwendeten Secrets extern angelegt werden. Die anzulegenden Secrets und
 Secret-Schlüssel kann man über die Suche nach *existingSecret* in der
-[values.yaml](../values.yaml) finden.
+[values.yaml](../values.yaml) finden. Das Skript
+[initialize-secrets.sh](../scripts/initialize-secrets.sh) bietet eine einfache
+Möglichkeit, alle benötigten Secrets anzulegen. Es dokumentiert außerdem die
+Struktur der Secrets und gibt Aufschluss über die zu verwendenden Schlüssel und
+Werte.
 
 Die für den BundesMessenger empfohlene Art Secrets anzulegen ist über das
 Anbinden eine Vault-Lösung, beispielsweise mithilfe des [External Secrets
 Operators](https://external-secrets.io).
+
+Für eine Einführung zum Einsatz von Secrets im BundesMessenger siehe
+[Secrets.md](./Secrets.md).
 
 ## Erzwingen der Anpassungen für ArgoCD
 
