@@ -1,4 +1,7 @@
 #!/bin/sh
+# SPDX-FileCopyrightText: 2025 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+#
 # Generate Kubernetes Secrets for the BundesMessenger.
 
 # shellcheck disable=SC3040
