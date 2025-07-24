@@ -25,6 +25,17 @@ tests:
       - containsDocument:
           kind: Deployment
         not: true
+  - it: ensures a pull secret is passed in
+    template: sygnal/sygnal-deployment.yaml
+    set:
+      sygnal.enabled: true
+      sygnal.image.pullSecrets:
+        - name: a-little-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
 ---
 suite: Sygnal secrets
 templates:

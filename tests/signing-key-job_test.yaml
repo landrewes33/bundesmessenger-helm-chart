@@ -15,6 +15,18 @@ tests:
           apiVersion: batch/v1
           name: RELEASE-NAME-signingkey-job
           any: true
+  - it: ensures a pull secret is passed in
+    documentSelector:
+      path: kind
+      value: Job
+    set:
+      signingkey.job.generateImage.pullSecrets:
+        - name: a-little-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
   - it: ensures no Job if disabled
     set:
       signingkey.job.enabled: false

@@ -1,0 +1,16 @@
+#!/bin/sh
+# Regenerate the JSON Schema and add it to the commit.
+#
+# Install with
+# 
+#   ln -s ../../scripts/hooks/pre-commit .git/hooks/pre-commit
+#
+
+# Use staged version of values.schema.yaml to regenerate values.schema.json.
+git show :values.schema.yaml | scripts/gen-values-json.sh - || exit 0
+
+# Check if values.schema.json has unstaged modifications.
+if ! git diff --quiet values.schema.json; then
+    git add values.schema.json
+    >&2 echo "💡 Added regenerated values.schema.json to commit."
+fi

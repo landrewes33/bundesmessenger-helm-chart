@@ -41,6 +41,7 @@ tests:
           path: spec.template.spec.imagePullSecrets
           content:
             name: a-little-secret
+
 ---
 suite: Well-Known configuration server
 templates:
@@ -58,6 +59,7 @@ tests:
       - matchRegex:
           path: data["server.json"]
           pattern: '(?m:"m\.server":\s*"example.org:554")'
+
 ---
 suite: Well-Known default values
 templates:
@@ -82,6 +84,15 @@ tests:
       - matchRegex:
           path: data["client.json"]
           pattern: "\"org.matrix.msc3814\":"
+  - it: ensures additional msc4143 call settings
+    template: well-known/well-known-configuration.yaml
+    set:
+      call.enabled: true
+      call.uri: calluri.example.org
+    asserts:
+      - matchRegex:
+          path: data["client.json"]
+          pattern: '"org\.matrix\.msc4143\.rtc_foci"\s*:\s*\[\s*{\s*"livekit_service_url"\s*:\s*"https://calluri\.example\.org",\s*"type"\s*:\s*"livekit"\s*}\s*\]'
 
 ---
 suite: Well-Known overrides

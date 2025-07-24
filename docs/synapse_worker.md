@@ -114,17 +114,17 @@ workers:
       periodSeconds: 10
       httpGet:
         path: /health
-        port: metrics
+        port: health
     readinessProbe:
       periodSeconds: 3
       httpGet:
         path: /health
-        port: metrics
+        port: health
     startupProbe:
       failureThreshold: 6
       httpGet:
         path: /health
-        port: metrics
+        port: health
     nodeSelector: {}
     tolerations: []
     affinity: {}
@@ -194,17 +194,17 @@ Angaben um der Definition als Worker zu bestehen.
       periodSeconds: 10
       httpGet:
         path: /health
-        port: metrics
+        port: health
     readinessProbe:
       periodSeconds: 3
       httpGet:
         path: /health
-        port: metrics
+        port: health
     startupProbe:
       failureThreshold: 6
       httpGet:
         path: /health
-        port: metrics
+        port: health
     nodeSelector: {}
     tolerations: []
     affinity: {}

@@ -229,8 +229,23 @@ Pull secrets
 {{- define "matrix-synapse.imagePullSecrets" -}}
 {{- with concat
     .Values.image.pullSecrets
+    .Values.kubectlImage.pullSecrets
+    .Values.signingkey.job.generateImage.pullSecrets
     .Values.volumePermissions.image.pullSecrets
+    .Values.sygnal.image.pullSecrets
     .Values.wellknown.image.pullSecrets
+    .Values.confighub.image.pullSecrets
+    .Values.mas.image.pullSecrets
+    .Values.contentscanner.image.pullSecrets
+    .Values.schadcodescanner.clamavImage.pullSecrets
+    .Values.schadcodescanner.icapImage.pullSecrets
+    .Values.synapse_admin.image.pullSecrets
+    .Values.adminPortal.coreImage.pullSecrets
+    .Values.adminPortal.uiImage.pullSecrets
+    .Values.webclient.image.pullSecrets
+    .Values.call.client.image.pullSecrets
+    .Values.call.jwtService.image.pullSecrets
+    .Values.tests.image.pullSecrets
 -}}
 imagePullSecrets:
   {{- . | toYaml | nindent 2 }}
@@ -341,19 +356,8 @@ Set postgresql database
 {{- end -}}
 
 {{/*
-Set postgresql sslmode
-*/}}
-{{- define "matrix-synapse.postgresql.sslmode" -}}
-{{- if .Values.postgresql.enabled -}}
-  {{- .Values.postgresql.sslmode | default "prefer" }}
-{{- else -}}
-  {{- .Values.externalPostgresql.sslmode | default "prefer" }}
-{{- end -}}
-{{- end -}}
+PostgreSQL extra arguments for establishing a database connection.
 
-
-{{/*
-Set postgresql extra args
 Refer to https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
 for a list of options that can be passed.
 */}}
@@ -475,6 +479,27 @@ Check networkpolicy requirements TBD CHECK POSTGRES
 {{- end }}
 
 {{/*
+MAS PostgreSQL connection URI.
+
+https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS
+*/}}
+{{- define "matrix-synapse.maspostgresql.uri" -}}
+{{- $argsPercentEncoded := list }}
+{{- range $k, $v := .Values.mas.postgresql.extraArgs }}
+  {{- $arg := printf "%s=%s" (urlquery $k) (urlquery $v) }}
+  {{- $argsPercentEncoded = append $argsPercentEncoded $arg }}
+{{- end }}
+{{- printf "postgresql://%s:%s@%s:%s/%s?%s"
+  (urlquery (include "matrix-synapse.maspostgresql.username" .))
+  (urlquery (include "matrix-synapse.maspostgresql.password" .))
+  (include "matrix-synapse.maspostgresql.host" .)
+  (include "matrix-synapse.maspostgresql.port" .)
+  (urlquery (include "matrix-synapse.maspostgresql.database" .))
+  (join "&" $argsPercentEncoded)
+}}
+{{- end -}}
+
+{{/*
 Set MAS postgresql username
 */}}
 {{- define "matrix-synapse.maspostgresql.username" -}}
@@ -522,33 +547,82 @@ Defaults to `matrix-synapse.postgresql.port`.
 {{- end -}}
 
 {{/*
-Set MAS postgresql sslmode
-*/}}
-{{- define "matrix-synapse.maspostgresql.sslmode" -}}
-  {{- if .Values.mas.enabled -}}
-{{- .Values.mas.postgresql.sslmode | default "prefer" }}
-  {{- end -}}
-{{- end -}}
-
-
-{{/*
-Set MAS postgresql extra args
-Refer to https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-for a list of options that can be passed.
-*/}}
-{{- define "matrix-synapse.maspostgresql.extraArgs" -}}
-  {{- if .Values.mas.enabled -}}
-    {{- with .Values.mas.postgresql.extraArgs }}
-{{- . | toYaml }}
-    {{- end }}
-  {{- end -}}
-{{- end -}}
-
-{{/*
 Set MAS default uri
 */}}
 {{- define "matrix-synapse.masUri" -}}
 {{- if .Values.mas.enabled }}
   {{- .Values.mas.uri | default (include "matrix-synapse.publicServerName" .) }}
+{{- end }}
+{{- end -}}
+
+
+{{/* Legacy in-config registration shared secret.
+
+Empty if secret is not given in config.
+*/}}
+{{- define "matrix-synapse.registrationSharedSecret" -}}
+{{- if kindIs "string" .Values.config.registrationSharedSecret }}
+  {{- .Values.config.registrationSharedSecret }}
+{{- end }}
+{{- end -}}
+
+{{/* Name of the Secret containing Synapse’s registration shared secret.
+
+Empty if no existingSecret is specified.
+*/}}
+{{- define "matrix-synapse.registrationSharedSecret.secretName" -}}
+{{- if kindIs "map" .Values.config.registrationSharedSecret }}
+  {{- .Values.config.registrationSharedSecret.existingSecret }}
+{{- end }}
+{{- end -}}
+
+{{/* Key to the registration shared secret contained in the Synapse Secret.
+
+Empty if no existingSecret is specified.
+*/}}
+{{- define "matrix-synapse.registrationSharedSecret.secretKey" -}}
+{{- if kindIs "map" .Values.config.registrationSharedSecret }}
+  {{- .Values.config.registrationSharedSecret.existingSecretKey }}
+{{- end }}
+{{- end -}}
+
+
+{{/* Legacy in-config macaroon secret key.
+
+Empty if secret is not given in config.
+*/}}
+{{- define "matrix-synapse.macaroonSecretKey" -}}
+{{- if kindIs "string" .Values.config.macaroonSecretKey }}
+  {{- .Values.config.macaroonSecretKey }}
+{{- end }}
+{{- end -}}
+
+{{/* Name of the Secret containing Synapse’s macaroon secret key.
+
+Empty if no existingSecret is specified.
+*/}}
+{{- define "matrix-synapse.macaroonSecretKey.secretName" -}}
+{{- if kindIs "map" .Values.config.macaroonSecretKey }}
+  {{- .Values.config.macaroonSecretKey.existingSecret }}
+{{- end }}
+{{- end -}}
+
+{{/* Key to the macaroon secret key contained in the Synapse Secret.
+
+Empty if no existingSecret is specified.
+*/}}
+{{- define "matrix-synapse.macaroonSecretKey.secretKey" -}}
+{{- if kindIs "map" .Values.config.macaroonSecretKey }}
+  {{- .Values.config.macaroonSecretKey.existingSecretKey }}
+{{- end }}
+{{- end -}}
+
+
+{{/*
+Whether Helm is running inside ArgoCD.
+*/}}
+{{- define "matrix-synapse.insideArgoCD" -}}
+{{- if or .Values.argoCD (.Capabilities.APIVersions.Has "argoproj.io/v1alpha1") }}
+  {{- "true" }}
 {{- end }}
 {{- end -}}

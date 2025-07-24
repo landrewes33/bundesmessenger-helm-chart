@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://schema.bundesmessenger.dev/bum/v1.13.0/values.schema.json
+$id: https://schema.bundesmessenger.dev/bum/v1.14.0/values.schema.json
 type: object
 title: BundesMessenger Helm-Konfiguration
 properties:
@@ -15,8 +15,6 @@ properties:
       tag:
         title: Verwendete Version des Synapse-Abbilds
       pullSecrets:
-        $ref: "#/$defs/pullSecrets"
-        type: array
         title: Secrets müssen manuell im Namensraum angelegt werden
         description: >-
           ref:
@@ -29,6 +27,7 @@ properties:
     required:
       - registry
       - repository
+      - tag
       - pullSecrets
       - pullPolicy
     unevaluatedProperties: false
@@ -130,6 +129,22 @@ properties:
       Sollte durch `.Capabilities.APIVersions.Has "argoproj.io/v1alpha1"`
       erkannt werden, kann hier aber erzwungen werden.
     default: false
+  kubectlImage:
+    $ref: "#/$defs/image"
+    type: object
+    title: Abbild vom im Chart verwendeten `kubectl`-Container
+    default:
+      registry: registry.opencode.de
+      repository: bwi/bundesmessenger/backend/container-images/kubectl
+      pullSecrets: []
+      pullPolicy: IfNotPresent
+    required:
+      - registry
+      - repository
+      - tag
+      - pullSecrets
+      - pullPolicy
+    unevaluatedProperties: false
   signingkey:
     type: object
     title: Die Quelle des von Synapse im Verbund verwendeten Signierschlüssels
@@ -204,35 +219,21 @@ properties:
                 default: bwi/bundesmessenger/backend/container-images/synapse
               tag:
                 title: Verwendete Version des Synapse-Abbilds
+              pullSecrets:
+                default: []
               pullPolicy:
                 title: PullPolicy für das Image vom Signing-Key-Job
                 default: IfNotPresent
             required:
               - registry
               - repository
-              - pullPolicy
-            unevaluatedProperties: false
-          publishImage:
-            $ref: "#/$defs/image"
-            type: object
-            title: >-
-              Repository/Image-Konfiguration für den Upload des generierten
-              Signing-Schlüssels
-            default:
-              registry: registry.opencode.de
-              repository: bwi/bundesmessenger/backend/container-images/kubectl
-              pullPolicy: IfNotPresent
-            required:
-              - registry
-              - repository
-              - tag
+              - pullSecrets
               - pullPolicy
             unevaluatedProperties: false
         required:
           - enabled
           - annotations
           - generateImage
-          - publishImage
         unevaluatedProperties: false
       existingSecret:
         type: ["null", "string"]
@@ -240,11 +241,15 @@ properties:
         description: >-
           Signierschlüssel-Secret, das im Voraus erstellt wurde
         default: null
+        examples:
+          - signingkey
       existingSecretKey:
         type: ["null", "string"]
         minLength: 1
         description: Signing.key im Signierschlüssel-Secret
         default: null
+        examples:
+          - signing.key
       podSecurityContext:
         $ref: "#/$defs/podSecurityContext"
         type: object
@@ -421,22 +426,6 @@ properties:
         type: boolean
         description: Metriken erfassen
         default: true
-      recaptcha:
-        type: object
-        title: Schützen Sie die Registrierung mit recaptcha
-        description: >-
-          Die Verwendung ist optional. Ref:
-          https://element-hq.github.io/synapse/latest/CAPTCHA_SETUP.html
-        properties:
-          publicKey:
-            type: ["null", "string"]
-            minLength: 1
-            default: null
-          privateKey:
-            type: ["null", "string"]
-            minLength: 1
-            default: null
-        unevaluatedProperties: false
       enableRegistration:
         type: boolean
         title: Registrierungskonfiguration
@@ -446,17 +435,86 @@ properties:
           Synapse-Admin/Admin-Portal kann dafür genutzt werden
         default: false
       registrationSharedSecret:
-        type: ["null", "string"]
+        type: ["null", "object", "string"]
+        title: Geheimnis zum Registrieren neuer Nutzer
         description: >-
           Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge
-          gesetzt, wenn er nicht angegeben wird
-        default: null
+          gesetzt, wenn er nicht angegeben ist.
+        properties:
+          existingSecret:
+            type: string
+            minLength: 1
+            default: synapse
+          existingSecretKey:
+            type: string
+            minLength: 1
+            default: registration-shared-secret
+        required:
+          - existingSecret
+          - existingSecretKey
+        unevaluatedProperties: false
       macaroonSecretKey:
-        type: ["null", "string"]
+        type: ["null", "object", "string"]
+        title: Macaroon-Schlüssel für diverse Signaturen
         description: >-
-          Es wird dringend empfohlen, diesen Wert auf einen secure value
-          (secret) zu setzen
-        default: null
+          Verwendet wird der Macaroon-Schlüssel zum Generieren und Überprüfen von
+
+          - Access-Tokens von Gastnutzern,
+
+          - Login-Tokens während SSO-Logins und
+
+          - Abmeldelinks in Emails.
+
+
+          Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge
+          gesetzt, wenn er nicht angegeben ist.
+        properties:
+          existingSecret:
+            type: string
+            minLength: 1
+            default: synapse
+          existingSecretKey:
+            type: string
+            minLength: 1
+            default: macaroon-secret-key
+        required:
+          - existingSecret
+          - existingSecretKey
+        unevaluatedProperties: false
+      formSecret:
+        type: object
+        title: Geheimnis zum Generieren und Überprüfen von AGB-Bestätigungslinks
+        description: >-
+          Existiert das Secret mit dem angegebenen Namen noch nicht, so wird es
+          automatisch generiert.
+        properties:
+          existingSecret:
+            type: string
+            minLength: 1
+          existingSecretKey:
+            type: string
+            minLength: 1
+        required:
+          - existingSecret
+          - existingSecretKey
+        unevaluatedProperties: false
+      workerReplicationSecret:
+        type: object
+        title: Geheimnis zur Kommunikation zwischen Workern
+        description: >-
+          Existiert das Secret mit dem angegebenen Namen noch nicht, so wird es
+          automatisch generiert.
+        properties:
+          existingSecret:
+            type: string
+            minLength: 1
+          existingSecretKey:
+            type: string
+            minLength: 1
+        required:
+          - existingSecret
+          - existingSecretKey
+        unevaluatedProperties: false
       extraListeners:
         type: array
         description: Extra listener
@@ -483,8 +541,8 @@ properties:
       - extraLoggers
       - reportStats
       - enable_metrics
-      - recaptcha
       - enableRegistration
+      - formSecret
       - extraListeners
       - trustedKeyServers
     unevaluatedProperties: false
@@ -1129,7 +1187,7 @@ properties:
               path:
                 default: /health
               port:
-                default: metrics
+                default: health
         unevaluatedProperties: false
       readinessProbe:
         $ref: >-
@@ -1143,7 +1201,7 @@ properties:
               path:
                 default: /health
               port:
-                default: metrics
+                default: health
         unevaluatedProperties: false
       startupProbe:
         $ref: >-
@@ -1840,28 +1898,26 @@ properties:
             default: 0
         unevaluatedProperties: false
       image:
+        $ref: "#/$defs/image"
         type: object
-        allOf:
-          - $ref: "#/$defs/image"
-            title: Image zur Rechtebereinigung
-            properties:
-              registry:
-                default: registry.opencode.de
-              repository:
-                default: bwi/bundesmessenger/backend/container-images/ubuntu
-              tag:
-                title: Tag des Images zur Rechtebereinigung
-                description: >-
-                  Hinweis: Noch kein finaler Tag, build version 10 als
-                  Alternative zu latest.
-              pullPolicy:
-                description: >-
-                  Da latest-Tag, PullPolicy immer für das zu nutzende Image zur
-                  Rechtebereinigung.
-                default: IfNotPresent
-          - properties:
-              pullSecrets:
-                $ref: "#/$defs/pullSecrets"
+        title: Image zur Rechtebereinigung
+        properties:
+          registry:
+            default: registry.opencode.de
+          repository:
+            default: bwi/bundesmessenger/backend/container-images/ubuntu
+          tag:
+            title: Tag des Images zur Rechtebereinigung
+            description: >-
+              Hinweis: Noch kein finaler Tag, build version 10 als
+              Alternative zu latest.
+          pullSecrets:
+            default: []
+          pullPolicy:
+            description: >-
+              Da latest-Tag, PullPolicy immer für das zu nutzende Image zur
+              Rechtebereinigung.
+            default: IfNotPresent
         required:
           - registry
           - repository
@@ -1936,11 +1992,13 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/sygnal
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       proxy:
@@ -2252,23 +2310,20 @@ properties:
           Nützlich, wenn ein anderes Image ausgeführt wird.
         default: /usr/share/nginx/html
       image:
+        $ref: "#/$defs/image"
         type: object
-        allOf:
-          - $ref: "#/$defs/image"
-            title: Das Webserver Image
-            default:
-              registry: registry.opencode.de
-              repository: bwi/bundesmessenger/backend/container-images/nginx
-              pullPolicy: IfNotPresent
-          - properties:
-              pullSecrets:
-                $ref: "#/$defs/pullSecrets"
+        title: Das Webserver Image
+        default:
+          registry: registry.opencode.de
+          repository: bwi/bundesmessenger/backend/container-images/nginx
+          pullSecrets: []
+          pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
-          - pullPolicy
           - pullSecrets
+          - pullPolicy
         unevaluatedProperties: false
       podSecurityContext:
         $ref: "#/$defs/podSecurityContext"
@@ -2384,22 +2439,20 @@ properties:
           "/usr/share/nginx/html" (nginx).
         default: /usr/share/nginx/html
       image:
-        allOf:
-          - $ref: "#/$defs/image"
-            type: object
-            title: ConfigHub Webserver-Image
-            default:
-              registry: registry.opencode.de
-              repository: bwi/bundesmessenger/backend/container-images/nginx
-              pullPolicy: IfNotPresent
-          - properties:
-              pullSecrets:
-                $ref: "#/$defs/pullSecrets"
-                type: array
-                title: Liste von Kubernetes Pull-Secrets.
-                default: []
-                examples:
-                  - - name: myRegistryKeySecretName
+        $ref: "#/$defs/image"
+        type: object
+        title: ConfigHub Webserver-Image
+        properties:
+          pullSecrets:
+            title: Liste von Kubernetes Pull-Secrets.
+            default: []
+            examples:
+              - - name: myRegistryKeySecretName
+        default:
+          registry: registry.opencode.de
+          repository: bwi/bundesmessenger/backend/container-images/nginx
+          pullSecrets: []
+          pullPolicy: IfNotPresent
         required:
           - registry
           - repository
@@ -2503,7 +2556,7 @@ properties:
           `externalPostgresql`-Block.
         default: false
       image:
-        $ref: "#/$defs/image"
+        $ref: "#/$defs/bitnamiImage"
         type: object
         title: Das zu verwendende PostgreSQL-Container-Abbild
         properties:
@@ -2675,9 +2728,24 @@ properties:
         title: Zusätzliche Argumente für die Datenbankverbindung
         description: >-
           Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+        properties:
+          sslmode:
+            type: string
+            enum:
+              - disable
+              - allow
+              - prefer
+              - require
+              - verify-ca
+              - verify-full
+            title: Verwendeter SSL-Modus
+            description: >-
+              https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+            default: prefer
         additionalProperties:
           type: ["null", "string", "number", "integer", "boolean"]
-        default: {}
+        required:
+          - sslmode
         unevaluatedProperties: false
     required:
       - enabled
@@ -2725,32 +2793,35 @@ properties:
         type: ["null", "string"]
         title: Passwortschlüssel
         description: Wird aus dem bestehenden Secret abgerufen.
-      sslmode:
-        type: string
-        enum:
-          - disable
-          - allow
-          - prefer
-          - require
-          - verify-ca
-          - verify-full
-        title: Verwendeter SSL-Modus.
-        description: >-
-          https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
-        default: prefer
       extraArgs:
         type: object
         title: Zusätzliche Argumente für die Datenbankverbindung
         description: >-
-          ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
-        default: {}
+          Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+        properties:
+          sslmode:
+            type: string
+            enum:
+              - disable
+              - allow
+              - prefer
+              - require
+              - verify-ca
+              - verify-full
+            title: Verwendeter SSL-Modus
+            description: >-
+              https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+            default: prefer
+        additionalProperties:
+          type: ["null", "string", "number", "integer", "boolean"]
+        required:
+          - sslmode
         unevaluatedProperties: false
     required:
       - host
       - port
       - database
       - username
-      - sslmode
       - extraArgs
     unevaluatedProperties: false
   redis:
@@ -2768,7 +2839,7 @@ properties:
           Hinweis: Durch Setzten auf `true`, wird der `externalRedis`-Block ignoriert.
         default: true
       image:
-        $ref: "#/$defs/image"
+        $ref: "#/$defs/bitnamiImage"
         type: object
         title: Das verwendete Redis-Image
         properties:
@@ -3150,11 +3221,13 @@ properties:
         default:
           registry: ghcr.io
           repository: element-hq/matrix-authentication-service
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       uri:
@@ -3193,34 +3266,70 @@ properties:
             minLength: 1
             title: Password für PostgreSQL Nutzer von MAS
             default: mas-synapse
-          sslmode:
-            type: string
-            enum:
-              - disable
-              - allow
-              - prefer
-              - require
-              - verify-ca
-              - verify-full
-            title: Verwendeter SSL-Modus
-            description: >-
-              https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
-            default: prefer
+          min_connections:
+            type: integer
+            default: 0
+          max_connections:
+            type: integer
+            default: 10
+          connect_timeout:
+            type: integer
+            default: 30
+          idle_timeout:
+            type: integer
+            default: 600
+          max_lifetime:
+            type: integer
+            default: 1800
           extraArgs:
             type: object
-            title: Zusätzliche Optionen für MAS PostgreSQL
+            title: Zusätzliche Argumente für die MAS Datenbankverbindung
             description: >-
               https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+            properties:
+              sslmode:
+                type: string
+                enum:
+                  - disable
+                  - allow
+                  - prefer
+                  - require
+                  - verify-ca
+                  - verify-full
+                title: Verwendeter SSL-Modus
+                description: >-
+                  https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+                default: prefer
+              sslrootcert:
+                type: ["null", "string"]
+                default: null
+                examples:
+                  - /path/to/ca.pem
+              sslcert:
+                type: ["null", "string"]
+                default: null
+                examples:
+                  - /path/to/cert.pem
+              sslkey:
+                type: ["null", "string"]
+                default: null
+                examples:
+                  - /path/to/key.pem
             additionalProperties:
-              type: string
-            default: {}
+              type: ["null", "string", "number", "integer", "boolean"]
+            required:
+              - sslmode
             unevaluatedProperties: false
         required:
           - port
           - database
           - username
           - password
-          - sslmode
+          - min_connections
+          - max_connections
+          - connect_timeout
+          - idle_timeout
+          - max_lifetime
           - extraArgs
         unevaluatedProperties: false
       paths:
@@ -3268,8 +3377,24 @@ properties:
           properties:
             id:
               type: string
+              pattern: ^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26}$
+            client_id:
+              type: string
+            token_endpoint_auth_method:
+              type: string
+              enum:
+                - none
+                - client_secret_basic
+                - client_secret_post
+                - client_secret_jwt
+                - private_key_jwt
+            scope:
+              type: string
           required:
             - id
+            - client_id
+            - token_endpoint_auth_method
+            - scope
           unevaluatedProperties: true
         default: []
       clients:
@@ -3481,7 +3606,7 @@ properties:
               path:
                 default: /health
               port:
-                default: metrics
+                default: health
         unevaluatedProperties: false
       readinessProbe:
         $ref: >-
@@ -3495,7 +3620,7 @@ properties:
               path:
                 default: /health
               port:
-                default: metrics
+                default: health
         unevaluatedProperties: false
       startupProbe:
         $ref: >-
@@ -3644,11 +3769,13 @@ properties:
           registry: registry.opencode.de
           repository: >-
             bwi/bundesmessenger/backend/container-images/matrix-content-scanner
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       replicaCount:
@@ -3746,11 +3873,13 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/clamav
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       icapImage:
@@ -3760,11 +3889,13 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/icap
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       persistence:
@@ -3967,11 +4098,13 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/synapse-admin
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       resources:
@@ -4095,7 +4228,7 @@ properties:
         type: boolean
         title: Aktivieren der TLS Zertifikatsüberprüfung
         default: false
-      logLevelCore:
+      logLevel:
         type: string
         enum:
           - DEBUG
@@ -4104,27 +4237,12 @@ properties:
           - ERROR
           - CRITICAL
           - NOTSET
-          - OFF
+          - "OFF"
         title: LogLevel der Core-Komponente vom Admin-Portal
         description: >-
           Benötigt, um das LogLevel der Komponente zu steuern und unnötige
           Details auszublenden.
         default: INFO
-      logLevelAudit:
-        type: string
-        enum:
-          - DEBUG
-          - INFO
-          - WARNING
-          - ERROR
-          - CRITICAL
-          - NOTSET
-          - OFF
-        title: LogLevel der Audit-Komponente vom Admin-Portal
-        description: >-
-          Benötigt, um das LogLevel der Komponente zu steuern und unnötige
-          Details auszublenden.
-        default: OFF
       coreImage:
         $ref: "#/$defs/image"
         type: object
@@ -4133,11 +4251,13 @@ properties:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/bumap-core
           tag: 1.0.0-jammy
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       uiImage:
@@ -4148,13 +4268,84 @@ properties:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/bumap-ui
           tag: 1.0.0-jammy
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
+      auditLog:
+        type: object
+        properties:
+          logLevel:
+            type: string
+            enum:
+              - DEBUG
+              - INFO
+              - WARNING
+              - ERROR
+              - CRITICAL
+              - NOTSET
+              - "OFF"
+            title: Log-Level der Audit-Komponente vom Admin-Portal
+            description: Mögliche Werte sind "OFF" und "INFO".
+            default: "OFF"
+          database:
+            type: string
+            enum:
+              - sqlite
+            title: Datenbank für die Audit-Komponente
+            default: sqlite
+          sqlite:
+            type: object
+            properties:
+              persistence:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                    default: false
+                  existingClaim:
+                    type: ["null", "string"]
+                    minLength: 1
+                    title: Name des PersistentVolumeClaims
+                    description: >-
+                      Falls nicht gesetzt, wird dynamisch ein neuer PVC erstellt.
+                    default: null
+                    examples:
+                      - admin-portal
+                  storageClass:
+                    type: string
+                    title: Name der PVC Storage-Class
+                    description: >-
+                      Falls "-", wird die standard Storage-Class des Clusters verwendet.
+                    default: ""
+                  accessMode:
+                    type: string
+                    enum:
+                      - ReadWriteOnce
+                      - ReadWriteMany
+                      - ReadWriteOncePod
+                    title: PVC Zugriffsmodus
+                    default: ReadWriteOnce
+                  size:
+                    type: string
+                    title: Größe des zu nutzenden Volumes
+                    default: 1Gi
+                required:
+                  - enabled
+                  - storageClass
+                  - accessMode
+                  - size
+            required:
+              - persistence
+        required:
+          - logLevel
+          - database
+          - sqlite
       resources:
         $ref: >-
           https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
@@ -4209,8 +4400,11 @@ properties:
     required:
       - enabled
       - uri
+      - TLSverify
+      - logLevel
       - coreImage
       - uiImage
+      - auditLog
       - resources
       - podSecurityContext
       - securityContext
@@ -4232,17 +4426,25 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       displayName:
         type: string
         title: Anzeigename des Servers in Webclients
         default: Messenger deiner Organisation
+      extraEnv:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
+        type: array
+        title: Weitere Umgebungsvariablen für den Webclient-Container
+        default: []
       resources:
         $ref: >-
           https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
@@ -4288,6 +4490,18 @@ properties:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
         unevaluatedProperties: false
+      extraVolumes:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes
+        type: array
+        title: Weitere Speicherbereiche für den Webclient-Pod
+        default: []
+      extraVolumeMounts:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts
+        type: array
+        title: Weitere Speicher-Einhängepunkte für den Webclient-Container
+        default: []
     if:
       properties:
         enabled:
@@ -4299,9 +4513,12 @@ properties:
       - enabled
       - image
       - displayName
+      - extraEnv
       - resources
       - podSecurityContext
       - securityContext
+      - extraVolumes
+      - extraVolumeMounts
     unevaluatedProperties: false
   call:
     type: object
@@ -4332,41 +4549,56 @@ properties:
             title: URL des LiveKit Servers
             default: wss://livekit.example.com
           key:
-            type: string
+            type: ["null", "string"]
             title: Schlüssel für den LiveKit Servers
-            default: devkey
+            minLength: 1
+            default: null
+            examples:
+              - devkey
           secret:
-            type: string
+            type: ["null", "string"]
             title: Secret des LiveKit Servers
-            default: secret
+            minLength: 1
+            default: null
+            examples:
+              - secret
+        oneOf:
+          - properties:
+              key:
+                type: string
+              secret:
+                type: string
+            required:
+              - key
+              - secret
+          - properties:
+              key:
+                type: "null"
+              secret:
+                type: "null"
         required:
           - url
-          - key
-          - secret
         unevaluatedProperties: false
       existingSecret:
-        type: ["null", "string"]
-        title: Bestehendes Secret, das anstelle statischer Angaben verwendet wird
-        default: null
+        type: string
+        title: Name vom Livekit-Secret
+        minLength: 1
+        default: call
       secretKeys:
         type: object
-        title: Namen der Schlüssel in dem existingSecret
-        description: Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
+        title: Verweise auf Livekit-Schlüssel und -Geheimnis
         properties:
-          livekitUrl:
-            type: string
-            title: Verweisname zur URL des LiveKit Servers
-            default: livekit-url
           livekitKey:
             type: string
-            title: Verweisname zum Schlüssel für den LiveKit Servers
+            title: Verweis im `existingSecret` auf den Livekit-Schlüssel
+            minLength: 1
             default: livekit-key
           livekitSecret:
             type: string
-            title: Verweisname zum Secret des LiveKit Servers
+            title: Verweis im `existingSecret` auf das Livekit-Geheimnis
+            minLength: 1
             default: livekit-secret
         required:
-          - livekitUrl
           - livekitKey
           - livekitSecret
         unevaluatedProperties: false
@@ -4383,13 +4615,21 @@ properties:
               registry: registry.opencode.de
               repository: >-
                 bwi/bundesmessenger/backend/container-images/bundesmessenger-call
+              pullSecrets: []
               pullPolicy: IfNotPresent
             required:
               - registry
               - repository
               - tag
+              - pullSecrets
               - pullPolicy
             unevaluatedProperties: false
+          extraEnv:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
+            type: array
+            title: Weitere Umgebungsvariablen für den Call-Container
+            default: []
           podSecurityContext:
             $ref: "#/$defs/podSecurityContext"
             type: object
@@ -4408,6 +4648,18 @@ properties:
               allowPrivilegeEscalation: false
               readOnlyRootFilesystem: true
             unevaluatedProperties: false
+          extraVolumes:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes
+            type: array
+            title: Weitere Speicherbereiche für den Call-Pod
+            default: []
+          extraVolumeMounts:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts
+            type: array
+            title: Weitere Speicher-Einhängepunkte für den Call-Container
+            default: []
           resources:
             $ref: >-
               https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
@@ -4441,8 +4693,11 @@ properties:
             unevaluatedProperties: false
         required:
           - image
+          - extraEnv
           - podSecurityContext
           - securityContext
+          - extraVolumes
+          - extraVolumeMounts
           - resources
         unevaluatedProperties: false
       jwtService:
@@ -4456,11 +4711,13 @@ properties:
               registry: registry.opencode.de
               repository: >-
                 bwi/bundesmessenger/backend/container-images/bundesmessenger-call
+              pullSecrets: []
               pullPolicy: IfNotPresent
             required:
               - registry
               - repository
               - tag
+              - pullSecrets
               - pullPolicy
             unevaluatedProperties: false
           replicaCount:
@@ -4562,6 +4819,7 @@ properties:
     required:
       - enabled
       - livekit
+      - existingSecret
       - secretKeys
       - client
       - jwtService
@@ -4583,7 +4841,7 @@ properties:
         title: Liste an JWTs, die dem Client bereit gestellt werden
         description: >-
           Wird verwendet, um die Infrastruktur als legitim auszuweisen. Die JWTs
-          werden via `<public_baseurl>/_bum/configure/v1/verify` abgerufen.
+          werden via `<public_baseurl>/_bum/client/v1/verify` abgerufen.
         items:
           type: string
         default: []
@@ -4740,11 +4998,13 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/wget
+          pullSecrets: []
           pullPolicy: IfNotPresent
         required:
           - registry
           - repository
           - tag
+          - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
       annotations:
@@ -4920,6 +5180,7 @@ required:
   - monitoring
   - serviceAccount
   - argoCD
+  - kubectlImage
   - signingkey
   - ipv4Only
   - config
@@ -4950,6 +5211,42 @@ required:
   - demomode
 unevaluatedProperties: false
 $defs:
+  bitnamiImage:
+    type: object
+    properties:
+      registry:
+        type: string
+        minLength: 1
+      repository:
+        type: string
+        minLength: 1
+      tag:
+        type: string
+        minLength: 1
+      pullSecrets:
+        type: array
+        title: Namen der verwendeten Pull-Secrets
+        default: []
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalObjectReference.schema.json
+          type: object
+      pullPolicy:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/imagePullPolicy
+        type: string
+        enum:
+          - Always
+          - Never
+          - IfNotPresent
+        title: Image-Pull-Policy
+        default: IfNotPresent
+    required:
+      - registry
+      - repository
+      - tag
+      - pullSecrets
+      - pullPolicy
   image:
     type: object
     properties:
@@ -4962,28 +5259,30 @@ $defs:
       tag:
         type: string
         minLength: 1
+      pullSecrets:
+        type: array
+        title: Die verwendeten Pull-Secrets
+        default: []
+        items:
+          $ref: >-
+            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalObjectReference.schema.json
+          type: object
       pullPolicy:
-        title: Image-Pull-Policy
         $ref: >-
           https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/imagePullPolicy
-        default: IfNotPresent
+        type: string
         enum:
           - Always
           - Never
           - IfNotPresent
+        title: Image-Pull-Policy
+        default: IfNotPresent
     required:
       - registry
       - repository
       - tag
+      - pullSecrets
       - pullPolicy
-  pullSecrets:
-    type: array
-    title: Array von imagePullSecrets
-    default: []
-    items:
-      $ref: >-
-        https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalObjectReference.schema.json
-      type: object
   podSecurityContext:
     $comment: Nullable version of io.k8s.api.core.v1.PodSecurityContext.
     # $ref: >-

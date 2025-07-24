@@ -91,6 +91,16 @@ data:
     {{- $defaultClient = merge $defaultClient $_mas }}
     {{- end }}
 
+    {{- if .Values.call.enabled }}
+    {{- $_call := dict
+      "org.matrix.msc4143.rtc_foci" (list (dict
+        "livekit_service_url" (printf "https://%s" .Values.call.uri)
+        "type" "livekit"
+      ))
+    }}
+    {{- $defaultClient = merge $defaultClient $_call }}
+    {{- end }}
+
     {{- $defaultClient = merge $defaultClient (dict
       "io.element.e2ee" (dict
         "secure_backup_required" true

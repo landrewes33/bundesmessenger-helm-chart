@@ -117,6 +117,20 @@ data:
         resources:
           - names: [replication]
             compress: false
+
+      - port: 9099
+        tls: false
+        {{- if $.Values.ipv4Only }}
+        bind_addresses: ['0.0.0.0']
+        {{- else }}
+        bind_addresses: ['::']
+        {{- end }}
+        type: http
+
+        resources:
+          - names: [health]
+            compress: false
+
     {{- if .Values.config.extraListeners }}
       {{ .Values.config.extraListeners | toYaml | nindent 6 }}
     {{- end }}
@@ -125,13 +139,6 @@ data:
 
     media_store_path: "/synapse/data/media"
     uploads_path: "/synapse/data/uploads"
-    {{- if and .Values.config.recaptcha.privateKey .Values.config.recaptcha.publicKey }}
-
-    ## Captcha ##
-
-    recaptcha_public_key: {{ .Values.config.recaptcha.publicKey | quote }}
-    enable_registration_captcha: true
-    {{- end }}
 
     ## Registration ##
 
@@ -140,6 +147,16 @@ data:
     {{- else -}}
     enable_registration: {{ .Values.config.enableRegistration | default false }}
     {{- end }}
+
+    {{- if include "matrix-synapse.registrationSharedSecret.secretName" . }}
+    registration_shared_secret_path: /synapse/secrets/registration
+    {{- end }}
+
+    {{- if include "matrix-synapse.macaroonSecretKey.secretName" . }}
+    macaroon_secret_key_path: /synapse/secrets/macaroon
+    {{- end }}
+
+    form_secret_path: /synapse/secrets/form-secret
 
     ## Metrics ###
 
@@ -153,6 +170,8 @@ data:
     trusted_key_servers: {{- .Values.config.trustedKeyServers | toYaml | nindent 6 }}
 
     ## Workers ##
+
+    worker_replication_secret_path: /synapse/secrets/worker-replication-secret
 
     {{- $default := .Values.workers.default }}
     {{- range $worker, $config := .Values.workers }}

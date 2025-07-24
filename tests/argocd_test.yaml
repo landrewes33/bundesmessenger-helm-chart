@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: 2025 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+suite: ArgoCD
+templates:
+  - secrets.yaml
+tests:
+  - it: ensure test config creates Secrets
+    set: &baseTestCase
+      argoCD: false
+      redis.enabled: true
+      redis.auth.existingSecret: redis-secret
+      postgresql.enabled: true
+      postgresql.auth.existingSecret: postgresql-secret
+    asserts:
+      - containsDocument:
+          kind: Secret
+          apiVersion: v1
+          name: redis-secret
+          any: true
+      - containsDocument:
+          kind: Secret
+          apiVersion: v1
+          name: postgresql-secret
+          any: true
+  - it: ensures no external Secret is generated inside ArgoCD (explicit)
+    set:
+      <<: *baseTestCase
+      argoCD: true
+    asserts:
+      - notEqual:
+          path: metadata.name
+          value: redis-secret
+      - notEqual:
+          path: metadata.name
+          value: postgresql-secret
+  - it: ensures no external Secret is generated inside ArgoCD (capabilities)
+    set:
+      <<: *baseTestCase
+    capabilities:
+      apiVersions:
+        - argoproj.io/v1alpha1
+    asserts:
+      - notEqual:
+          path: metadata.name
+          value: redis-secret
+      - notEqual:
+          path: metadata.name
+          value: postgresql-secret

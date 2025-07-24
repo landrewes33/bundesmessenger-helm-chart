@@ -1,6 +1,6 @@
 {{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
-{{- $insideArgoCD := (or .Values.argoCD (.Capabilities.APIVersions.Has "argoproj.io/v1alpha1")) }}
+{{- $insideArgoCD := include "matrix-synapse.insideArgoCD" . }}
 {{- $secretName := include "matrix-synapse.workername" (dict "global" . "worker" "signingkey") }}
 
 {{- if .Values.signingkey.job.enabled }}
@@ -108,7 +108,6 @@ metadata:
     {{- end }}
   {{- end }}
 spec:
-  ttlSecondsAfterFinished: 3600
   template:
     metadata:
       labels:
@@ -165,8 +164,12 @@ spec:
           env:
             - name: SECRET_NAME
               value: {{ $secretName }}
-          image: "{{ printf "%s/%s:%s" .Values.signingkey.job.publishImage.registry .Values.signingkey.job.publishImage.repository ( .Values.signingkey.job.publishImage.tag | default "latest ") }}"
-          imagePullPolicy: {{ .Values.signingkey.job.publishImage.pullPolicy }}
+          image: {{ quote (printf "%s/%s:%s"
+            .Values.kubectlImage.registry
+            .Values.kubectlImage.repository
+            .Values.kubectlImage.tag
+          )}}
+          imagePullPolicy: {{ .Values.kubectlImage.pullPolicy }}
           securityContext:
             {{- toYaml .Values.signingkey.securityContext | nindent 12 }}
           name: signing-key-upload

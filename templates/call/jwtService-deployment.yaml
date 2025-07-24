@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.call.enabled }}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "call-jwt-service") -}}
@@ -22,7 +22,12 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/secrets: {{ include (print $.Template.BasePath "/call/jwtService-secrets.yaml") . | sha256sum }}
+        {{- with lookup "v1" "Secret" .Release.Namespace .Values.call.existingSecret }}
+        checksum/secrets: {{ sha256sum (toJson .) }}
+        {{- else }}
+        checksum/secrets: {{
+          sha256sum (include (print $.Template.BasePath "/secrets.yaml") .) }}
+        {{- end }}
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
@@ -35,35 +40,17 @@ spec:
         - name: lk-jwt-service
           env:
             - name: LIVEKIT_URL
-              valueFrom:
-                secretKeyRef:
-                  {{- if .Values.call.existingSecret }}
-                  name: {{ .Values.call.existingSecret }}
-                  key: {{ .Values.call.secretKeys.livekitUrl | default "livekit-url" }}
-                  {{- else }}
-                  name: {{ $name }}
-                  key: livekit-url
-                  {{- end }}
+              value: {{ .Values.call.livekit.url | quote }}
             - name: LIVEKIT_KEY
               valueFrom:
                 secretKeyRef:
-                  {{- if .Values.call.existingSecret }}
                   name: {{ .Values.call.existingSecret }}
-                  key: {{ .Values.call.secretKeys.livekitKey | default "livekit-key" }}
-                  {{- else }}
-                  name: {{ $name }}
-                  key: livekit-key
-                  {{- end }}
+                  key: {{ .Values.call.secretKeys.livekitKey }}
             - name: LIVEKIT_SECRET
               valueFrom:
                 secretKeyRef:
-                  {{- if .Values.call.existingSecret }}
                   name: {{ .Values.call.existingSecret }}
-                  key: {{ .Values.call.secretKeys.livekitSecret | default "livekit-secret" }}
-                  {{- else }}
-                  name: {{ $name }}
-                  key: livekit-secret
-                  {{- end }}
+                  key: {{ .Values.call.secretKeys.livekitSecret }}
           {{- with .Values.call.jwtService.extraEnv }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

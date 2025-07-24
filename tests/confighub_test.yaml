@@ -26,3 +26,16 @@ tests:
       - containsDocument:
           kind: Deployment
         not: true
+  - it: ensures a pull secret is passed in
+    template: confighub/confighub-deployment.yaml
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      confighub.image.pullSecrets:
+        - name: a-little-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret

@@ -28,6 +28,19 @@ tests:
       - containsDocument:
           kind: StatefulSet
         not: true
+  - it: ensures a pull secret is passed in
+    template: >-
+      matrix-authentication-service/matrix-authentication-service-deployment.yaml
+    documentIndex: 0
+    set:
+      mas.enabled: true
+      mas.image.pullSecrets:
+        - name: a-little-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
   - it: ensures upstream_oauth2.providers
     template: secrets.yaml
     documentSelector:
@@ -36,15 +49,98 @@ tests:
     set:
       mas.enabled: true
       mas.upstream_oauth2_provider:
-        - id: 0VALID111ULID222
+        - client_id: fake-cafebabecafebabe
+          id: 00000000000VA11D111V11D222
+          scope: openid email profile
+          token_endpoint_auth_method: client_secret_basic
     asserts:
       - matchRegex:
           path: stringData['mas-secret.yaml']
           pattern: "(?ms:\
             ^\\s*upstream_oauth2:.*?\
             ^\\s*  providers:.*?\
-            ^\\s*    - id: 0VALID111ULID222\n.*?\
+            ^\\s*    - client_id: fake-cafebabecafebabe\n.*?\
+            ^\\s*      id: 00000000000VA11D111V11D222\n.*?\
+            ^\\s*      scope: openid email profile\n.*?\
+            ^\\s*      token_endpoint_auth_method: client_secret_basic\n.*?\
             )"
+---
+suite: MAS config
+templates:
+  - matrix-authentication-service/matrix-authentication-service-deployment.yaml
+  - matrix-authentication-service/matrix-authentication-service-configuration.yaml
+  - matrix-authentication-service/matrix-authentication-service-ingress.yaml
+  - secrets.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
+  mas.enabled: true
+  serverName: example.org
+tests:
+  - it: ensures full config
+    template: secrets.yaml
+    documentSelector:
+      path: metadata.name
+      value: RELEASE-NAME-matrix-authentication-service
+    set:
+      mas:
+        postgresql:
+          host: different.mas.example.org
+          port: 1
+          database: mas
+          username: Frank
+          password: ididitmyway
+          min_connections: 3
+          max_connections: 20
+          connect_timeout: 60
+          idle_timeout: 1212
+          max_lifetime: 1818
+          extraArgs:
+            sslmode: require
+            sslrootcert: /path/to/ca.pem
+            sslcert: /path/to/cert.pem
+            sslkey: /path/to/key.pem
+    asserts:
+      - matchRegex:
+          path: stringData['mas-secret.yaml']
+          pattern: "(?ms:\
+            ^\\s*database:.*?\
+            ^\\s*  # host: \"different.mas.example.org\".*?\
+            ^\\s*  # port: 1.*?\
+            ^\\s*  # database: \"mas\".*?\
+            ^\\s*  # username: \"Frank\".*?\
+            ^\\s*  # password: \"ididitmyway\".*?\
+            ^\\s*  # ssl_mode: \"require\".*?\
+            ^\\s*  # ssl_ca_file: \"/path/to/ca.pem\".*?\
+            ^\\s*  # ssl_certificate_file: \"/path/to/cert.pem\".*?\
+            ^\\s*  # ssl_key_file: \"/path/to/key.pem\".*?\
+            ^\\s*  min_connections: 3.*?\
+            ^\\s*  max_connections: 20.*?\
+            ^\\s*  connect_timeout: 60.*?\
+            ^\\s*  idle_timeout: 1212.*?\
+            ^\\s*  max_lifetime: 1818.*?\
+            )"
+      - matchRegex:
+          path: stringData['mas-secret.yaml']
+          pattern: "(?ms:\
+            ^\\s*database:.*?\
+            ^\\s*  uri: \"\
+            postgresql://Frank:ididitmyway@different.mas.example.org:1/mas\
+            \\?sslcert=%2Fpath%2Fto%2Fcert.pem\
+            &sslkey=%2Fpath%2Fto%2Fkey.pem\
+            &sslmode=require\
+            &sslrootcert=%2Fpath%2Fto%2Fca.pem\
+            \")"
+---
+suite: MAS ingress
+templates:
+  - matrix-authentication-service/matrix-authentication-service-deployment.yaml
+  - matrix-authentication-service/matrix-authentication-service-configuration.yaml
+  - matrix-authentication-service/matrix-authentication-service-ingress.yaml
+  - secrets.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
+  serverName: example.org
+tests:
   - it: ensures an Ingress if (mas enabled, ingress enabled)
     template: matrix-authentication-service/matrix-authentication-service-ingress.yaml
     set:
