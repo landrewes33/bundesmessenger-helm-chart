@@ -1,6 +1,0 @@
-Die `sslmode`-Schalter für PostgreSQL-Verbindungsangaben wurden verschoben.
-Löschen Sie in Ihrer Konfiguration – falls vorhanden – die Schalter an der alten
-Stelle und fügen Sie diese bei Bedarf an der neuen Stelle ein:
-
-- `externalPostgresql.sslmode` → `externalPostgresql.extraArgs.sslmode`.
-- `mas.postgresql.sslmode` → `mas.postgresql.extraArgs.sslmode`.

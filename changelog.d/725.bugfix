@@ -1,1 +1,0 @@
-Erstellt kein Secret für Livekit, wenn `call.existingSecret` definiert ist.

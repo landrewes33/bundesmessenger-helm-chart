@@ -7,6 +7,125 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.14.0 (2025-07-24)
+
+### ⚠️ Versionshinweise
+
+- Die `sslmode`-Schalter für PostgreSQL-Verbindungsangaben wurden verschoben.
+  Löschen Sie in Ihrer Konfiguration – falls vorhanden – die Schalter an der
+  alten Stelle und fügen Sie diese bei Bedarf an der neuen Stelle ein:
+
+  - `externalPostgresql.sslmode` → `externalPostgresql.extraArgs.sslmode`.
+  - `mas.postgresql.sslmode` → `mas.postgresql.extraArgs.sslmode`. (!642)
+
+### ✨ Features
+
+- Erlauben von zusätzlichen Umgebungsvariablen und Volumes für Webclient und
+  Call-Client. (!727)
+- Hinzufügen der [Admin-API des Matrix Authentication
+  Service](https://element-hq.github.io/matrix-authentication-service/topics/admin-api.html)
+  zum Ingress von `adminAPIServerName`. (!729)
+- Admin-Portal auf aktuelle Version aktualisiert.
+- Image `ghcr.io/element-hq/lk-jwt-service` auf Version `0.2.3` aktualisiert.
+- Image `ghcr.io/element-hq/matrix-authentication-service` auf Version `0.18.0`
+  aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web`
+  auf Version `2.23.0` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/clamav`
+  auf Version `1.4.3_dfsg-0ubuntu0.22.04.1-jammy-production` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl`
+  auf Version `1.33.2` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse-admin`
+  auf Version `0.11.1` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse`
+  auf Version `1.133.0` aktualisiert.
+
+### 🐛 Bugfixes
+
+- Unterstützen von Pull-Secrets für alle Container-Abbilder. (!705)
+- Korrektur falscher Datumsangaben im Skript zur Überprüfung der
+  SPDX-Kopfzeilen. (!708, !712)
+- Behebt Probleme mit HTTP Headern im Call-Client. (!711, !713, !714)
+- Erstellt kein Secret für Livekit, wenn `call.existingSecret` definiert ist.
+  (!725)
+- Behebt eine fehlerhafte Konfiguration von
+  [MSC2965](https://github.com/matrix-org/matrix-spec-proposals/pull/2965) bei
+  der Verwendung vom MAS. (!770)
+
+### 📚 Dokumentation
+
+- Korrektur der Erklärung zum verifyJWT Pfad im Schema. (!702)
+- Angleichen von Typnamen in der values.yaml. (!703)
+- Dokumentieren der Erstinitialisierung von Kubernetes-Secrets. (!782, !806)
+
+### 📝 Weitere Änderungen
+
+- Hinzufügen von Werkzeugen zum einfacheren Verwalten des JSON-Schemas. (!660)
+- Nutzen von Kubernetes Secrets für Synapse-interne Geheimnisse. (!666)
+- Abschalten der automatischen Generierung von Secrets in ArgoCD. (!669)
+- Angeben eines Abbilds für kubectl-Container: aus
+  `signingkey.job.publishImage` wird `kubectlImage`. (!690)
+- Strengere Überprüfung des Schalters `mas.upstream_oauth2_provider`. (!692)
+- Korrektur der Merge-Back-Pipeline. (!699)
+- Korrektur falscher Datumsangaben im Skript zur Überprüfung der
+  SPDX-Kopfzeilen. (!706)
+- Nutzen des Health-Listener für den `/health` Endpunkt der
+  Synapse-Komponenten. (!724)
+- Fügt die notwendige Konfiguration für Call und MSC4143 zur Wellknown
+  `/.well-known/matrix/client` hinzu. (!728)
+- `$CACHE_GHCR/renovatebot/renovate` in der CI-Pipeline auf Version `40`
+  aktualisiert. (!734)
+- Überwachen des IGBvC-Kyverno-Repos mit Renovate. (!738)
+- Unterstützung für Digests in den Renovate-Changelogs. (!741)
+- Reaktivieren einer CI-Überprüfung mit ehemals fälschlichen Warnhinweisen.
+  (!744)
+- Anpassen der CI an die neue Struktur der Kyverno-Richtlinien. (!758)
+- Umstrukturieren der automatischen Erzeugung von Secrets. (!763, !779)
+- Beibehalten des Signingkey-Job anstatt ihn nach kurzer Zeit zu löschen.
+  (!764)
+- Sicheres Formatieren von „truthy“ YAML-Werten. (!769)
+- Umstrukturierung der Secret-Generierung für Call. (!787)
+- Korrektur eines Pipeline-Scripts für Copyright-Header. (!791)
+- Hinzufügen der Konfiguration von Renovate für CICD-Komponenten. (!793)
+- Ausgeben von mehr Log-Einträgen bei der CI Schema-Validerung. (!794)
+- Fixieren der Alpine-Version des CI Python-Abbilds. (!795)
+- Fügt den Endpunkt `/_matrix/federation/v1/version` den Workers hinzu. (!797)
+- `$CACHE_DOCKER/alpine/helm` in der CI-Pipeline auf Version `3.18.3`
+  aktualisiert.
+- `$CACHE_DOCKER/aquasec/trivy` in der CI-Pipeline auf Version `0.64.1`
+  aktualisiert.
+- `$CACHE_DOCKER/library/alpine` in der CI-Pipeline auf Version `3.22`
+  aktualisiert.
+- `$CACHE_GHCR/renovatebot/renovate` in der CI-Pipeline auf Version `41`
+  aktualisiert.
+- `$CACHE_GITLAB/gitlab-org/release-cli` in der CI-Pipeline auf Version
+  `v0.24.0` aktualisiert.
+- `$CACHE_QUAY/helmpack/chart-testing` in der CI-Pipeline auf Version `v3.13.0`
+  aktualisiert.
+- `check-jsonschema` in der CI-Pipeline auf Version `0.33.2` aktualisiert.
+-
+  `https://gitlab.opencode.de/ig-bvc/policy-entwicklung/richtlinien-umsetzung-kyverno`
+  in der CI-Pipeline auf Digest `adf079f` aktualisiert.
+- `jsonschema` in der CI-Pipeline auf Version `4.24.1` aktualisiert.
+- `kindest/node` in der CI-Pipeline auf aktuelles Patch-Level aktualisiert.
+- `kubernetes-sigs/kind` in der CI-Pipeline auf Version `v0.29.0` aktualisiert.
+- `kubernetes-sigs/kustomize` in der CI-Pipeline auf Version `5.7.0`
+  aktualisiert.
+- `kyverno/kyverno` in der CI-Pipeline auf Version `v1.14.4` aktualisiert.
+- `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
+  `v0.84.0` aktualisiert.
+
+### 🦖 Abkündigungen und Bereinigungen
+
+- Angeben des PostgreSQL `sslmode` nun als Option unter `extraArgs`. (!642)
+- Entfernen der Schalter für reCAPTCHA; das Setzen direkt per
+  Synapse-Konfiguration ist weiterhin unterstützt. (!798)
+
 ## BundesMessenger Helm Chart 1.13.0 (2025-03-31)
 
 Schließt die Sicherheitslücke
