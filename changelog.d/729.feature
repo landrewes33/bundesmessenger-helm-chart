@@ -1,1 +1,0 @@
-Hinzufügen der [Admin-API des Matrix Authentication Service](https://element-hq.github.io/matrix-authentication-service/topics/admin-api.html) zum Ingress von `adminAPIServerName`.

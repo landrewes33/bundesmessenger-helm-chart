@@ -1,1 +1,0 @@
-Angeben des PostgreSQL `sslmode` nun als Option unter `extraArgs`.

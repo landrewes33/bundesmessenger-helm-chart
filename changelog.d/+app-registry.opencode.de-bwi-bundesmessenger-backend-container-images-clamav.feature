@@ -1,1 +1,0 @@
-Image `registry.opencode.de/bwi/bundesmessenger/backend/container-images/clamav` auf Version `1.4.3_dfsg-0ubuntu0.22.04.1-jammy-production` aktualisiert.
