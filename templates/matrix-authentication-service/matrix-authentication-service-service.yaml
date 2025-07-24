@@ -1,0 +1,42 @@
+{{/* SPDX-FileCopyrightText: 2024–2025 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if .Values.mas.enabled }}
+{{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-authentication-service") -}}
+{{- $component := "matrix-authentication-service" -}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  selector:
+    {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+  ports:
+    - name: web
+      port: 8080
+      targetPort: web
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}-adminapi
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  selector:
+    {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+  ports:
+    - port: 8081
+      targetPort: adminapi
+      protocol: TCP
+      name: adminapi
+{{- end }}

@@ -54,11 +54,13 @@ dataPrivacyUrl: ""
 # @default -- Nicht gesetzt, aber Voraussetzung!
 imprintUrl: ""
 
-# (string) Der Servername für die Admin-API  "/_synapse/admin" und alle anderen
-# APIs, die für alle administrativen Konfigurationen im Ingress verwendet werden.
-# Wenn synapse_admin.enable ist und synapse_admin.uri unterschiedlich von adminAPIServerName,
-# dann wird dort nur der Synapse_admin erreichbar sein.
-# Schnittstellen zum konfigurieren, werden nur über adminAPIServerName zur Verfügung gestellt.
+# (string) Der Server-Name für Admin-APIs.
+# Unter diesem Namen werden die Admin-APIs von Synapse (`/_synapse/admin`), MAS
+# und weiteren Komponenten zur Verfügung gestellt.
+#
+# Ist `synapse_admin.enabled` und `synapse_admin.uri` von `adminAPIServerName`
+# verschieden, dann ist dort nur der Synapse-Admin erreichbar. Schnittstellen
+# zum Konfigurieren werden nur über `adminAPIServerName` zur Verfügung gestellt.
 # @default -- Nicht gesetzt, aber Voraussetzung!
 adminAPIServerName: ""
 
@@ -2106,7 +2108,6 @@ mas:
     failureThreshold: 6
     httpGet:
       # (string) Konfiguration des Pfads vom Startup-Check
-      # DEFAULT gilt für alle Synapse-Worker-Container.
       path: /health
       # (string) Konfiguration des Ports vom Startup-Check
       # DEFAULT gilt für alle Synapse-Worker-Container.

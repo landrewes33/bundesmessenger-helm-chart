@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2023–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2023–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "matrix-synapse.fullname" . -}}
@@ -80,6 +80,7 @@ spec:
   {{- end }}
 
   {{- if and $.Values.mas.enabled }}
+    {{- /* Path that must go to the MAS for compatibility reasons */}}
     {{- range $.Values.mas.paths }}
       {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
@@ -87,7 +88,7 @@ spec:
               service:
                 name: {{ $masName }}
                 port:
-                  number: 8080
+                  name: web
             pathType: ImplementationSpecific
             {{- else }}
           - path: {{ . | quote }}
@@ -95,10 +96,33 @@ spec:
               service:
                 name: {{ $masName }}
                 port:
-                  number: 8080
+                  name: web
             pathType: ImplementationSpecific
       {{- end }}
     {{- end }}
+
+    {{- /* Paths to the MAS admin api */}}
+    {{- $mas_adminapi := list "/api/" "/oauth2/" }}
+    {{- range $mas_adminapi }}
+      {{- if $.Values.ingress.traefikPaths }}
+          - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}
+            backend:
+              service:
+                name: {{ $masName }}-adminapi
+                port:
+                  name: adminapi
+            pathType: ImplementationSpecific
+      {{- else }}
+          - path: {{ . | quote }}
+            backend:
+              service:
+                name: {{ $masName }}-adminapi
+                port:
+                  name: adminapi
+            pathType: ImplementationSpecific
+      {{- end }}
+    {{- end }}
+
   {{- end }}
 
           - path: /_synapse

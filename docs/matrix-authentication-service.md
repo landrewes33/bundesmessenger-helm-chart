@@ -74,11 +74,6 @@ Der MAS hat seine eigene Kommandozeile zum anlegen von Benutzern.
 Diese werden im MAS benötigt, wenn die Authentifizierung nicht an einen weiteren
 Authentifizierungsprovider delegiert werden soll, sondern lokal
 am MAS mit Benutzername und Passwort erfolgt.
-Es wird zum aktuellen Zeitpunkt empfohlen direkt eine E-Mailadresse mit anzugeben,
-da die Option `mas.account.email_change_allowed: false` eine initial fehlende
-Adresse zwar anmahnt und den Benutzer später daraufhin weist, aber keine Änderung
-daran zulässt (auch kein hinzufügen, siehe [MAS#3112](https://github.com/matrix-org/matrix-authentication-service/issues/3112)
-und [MAS#1505](https://github.com/matrix-org/matrix-authentication-service/issues/1505)).
 
 Ohne Benutzerinteraktion
 
@@ -115,4 +110,4 @@ den benötigten Werten und umfangreiche Beispiele finden sich in der
 ## Weiterführende Links
 
 - [Dokumentation des Herstellers](https://element-hq.github.io/matrix-authentication-service/)
-- [Github Repository mit schematischer Darstellung](https://github.com/matrix-org/matrix-authentication-service/tree/main?tab=readme-ov-file#oauth20--openid-connect-provider-for-matrix-homeservers)
+- [Github Repository mit schematischer Darstellung](https://github.com/element-hq/matrix-authentication-service/tree/main?tab=readme-ov-file#oauth20--openid-connect-provider-for-matrix-homeservers)
