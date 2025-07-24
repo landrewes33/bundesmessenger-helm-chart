@@ -34,6 +34,7 @@ data:
           - address: '0.0.0.0:9090'
         {{- end }}
         proxy_protocol: false
+
       - name: health
         resources:
           - name: health
@@ -45,6 +46,19 @@ data:
           - address: '0.0.0.0:9099'
         {{- end }}
         proxy_protocol: false
+
+      - name: adminapi
+        resources:
+          - name: adminapi
+        binds:
+          # First option: listen to the given address
+        {{- if not .Values.ipv4Only }}
+          - address: '[::]:8081'
+        {{- else }}
+          - address: '0.0.0.0:8081'
+        {{- end }}
+        proxy_protocol: false
+
       # The name of the listener, used in logs and metrics
       - name: web
         # List of resources to serve
@@ -60,32 +74,18 @@ data:
           ## Serve the GraphQL API used by the frontend,
           ## and optionally the GraphQL playground
           - name: graphql
-          #  playground: true
+            playground: false
           ## Serve the given folder on the /assets/ path
           - name: assets
             path: /usr/local/share/mas-cli/assets
 
         # List of addresses and ports to listen to
         binds:
-          # First option: listen to the given address
         {{- if not .Values.ipv4Only }}
           - address: '[::]:8080'
         {{- else }}
           - address: '0.0.0.0:8080'
         {{- end }}
-
-          ## Second option: listen on the given host and port combination
-          #- host: localhost
-          #  port: 8081
-
-          ## Third option: listen on the given UNIX socket
-          #- socket: /tmp/mas.sock
-
-          ## Fourth option: grab an already open file descriptor given by the parent process
-          ## This is useful when using systemd socket activation
-          #- fd: 1
-          #  # Kind of socket that was passed, defaults to tcp
-          #  kind: tcp # or unix
 
         # Whether to enable the PROXY protocol on the listener
         proxy_protocol: false

@@ -75,6 +75,9 @@ spec:
             - name: health
               containerPort: 9099
               protocol: TCP
+            - name: adminapi
+              containerPort: 8081
+              protocol: TCP
           {{- with .Values.mas.livenessProbe }}
           livenessProbe:
             {{- . | toYaml | nindent 12 }}
@@ -125,22 +128,4 @@ spec:
       {{- with .Values.mas.extraVolumes }}
         {{- . | toYaml | nindent 8 }}
       {{- end }}
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ $name }}
-  namespace: {{ .Release.Namespace }}
-  labels:
-    {{- include "matrix-synapse.labels" . | nindent 4 }}
-    app.kubernetes.io/component: {{ $component }}
-spec:
-  selector:
-    {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
-    app.kubernetes.io/component: {{ $component }}
-  ports:
-    - name: "web"
-      port: 8080
-      targetPort: 8080
 {{- end }}
