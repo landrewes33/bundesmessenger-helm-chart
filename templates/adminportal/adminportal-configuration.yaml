@@ -22,8 +22,11 @@ data:
   {{/* URL via Ingress, as the routing to the workers is required */}}
   BUMAP_CORE_SYNAPSE_ADMIN_API_URL: "https://{{ .Values.adminAPIServerName }}"
   BUMAP_CORE_SYNAPSE_VERIFY_TLS_CERT: "{{ .Values.adminPortal.TLSverify }}"
-  BUMAP_CORE_LOGGING_CORE: "{{ .Values.adminPortal.logLevelCore }}"
-  BUMAP_CORE_LOGGING_AUDIT: "{{ .Values.adminPortal.logLevelAudit }}"
+  BUMAP_CORE_LOGGING_CORE: "{{ .Values.adminPortal.logLevel }}"
+  BUMAP_CORE_LOGGING_AUDIT: "{{ .Values.adminPortal.auditLog.logLevel }}"
+  AUDIT_LOG_DATABASE_NAME: "/app/log/audit_log_db"
+  AUDIT_LOG_DATABASE_TYPE: "{{ .Values.adminPortal.auditLog.database }}"
+  AUDIT_LOG_DATABASE_AUTO_MIGRATE: "true"
 
 ---
 apiVersion: v1
@@ -65,5 +68,6 @@ data:
   env.js: |
     window.env = {
       BUMAP_CORE_URL: "{{ $apiPath }}",
+      BUMAP_FEATURE_SUPPORT_APP_CONFIG: "false",
     }
 {{- end }}

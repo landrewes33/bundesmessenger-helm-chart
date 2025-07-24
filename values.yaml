@@ -2437,23 +2437,41 @@ adminPortal:
   # (bool) Aktivieren der TLS Zertifikatsüberprüfung
   TLSverify: true
   # (string) LogLevel Core-Komponente
-  logLevelCore: "INFO"
-  # (string) LogLevel Audit-Komponente
-  logLevelAudit: "OFF"
+  logLevel: "INFO"
   # (map) Konfiguration des Image vom Core- bzw. Backend-Modul
   coreImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bumap-core
-    tag: 1.0.1-jammy-production
+    tag: 1.1.0-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
   # (map) Konfiguration des Image vom UI-Modul
   uiImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bumap-ui
-    tag: 1.0.0-jammy-production
+    tag: 1.1.0-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
+
+  auditLog:
+    # (string) Log-Level der Audit-Komponente vom Admin-Portal.
+    # Mögliche Werte sind "OFF" und "INFO".
+    logLevel: "OFF"
+    # (string) Datenbank für die Audit-Komponente.
+    database: sqlite
+    sqlite:
+      persistence:
+        enabled: false
+        # (string|null) Name des PersistentVolumeClaims.
+        # Falls nicht gesetzt, wird dynamisch ein neuer PVC erstellt.
+        # existingClaim: admin-portal
+        # (string) Name der PVC Storage-Class.
+        # Falls "-", wird die standard Storage-Class des Clusters verwendet.
+        storageClass: ""
+        # (string) PVC Zugriffsmodus.
+        accessMode: ReadWriteOnce
+        # (string) Größe des zu nutzenden Volumes.
+        size: 1Gi
 
   ## Ressourcen Konfiguration für alle Admin-Portal Module.
   resources:

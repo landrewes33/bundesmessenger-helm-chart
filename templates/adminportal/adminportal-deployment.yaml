@@ -59,12 +59,32 @@ spec:
             path: {{ $apiPath }}/health
             port: admin-core
           periodSeconds: 10
+        {{- if eq .Values.adminPortal.auditLog.database "sqlite" }}
+        volumeMounts:
+          - name: audit-log
+            mountPath: /app/log/
+            subPath: audit_log_db.db
+            readOnly: false
+        {{- end }}
         envFrom:
           - configMapRef:
               name: {{ $name }}-{{ $coreName }}
         resources:
           {{- toYaml .Values.adminPortal.resources | nindent 10 }}
       restartPolicy: Always
+      {{- if eq .Values.adminPortal.auditLog.database "sqlite" }}
+      volumes:
+        - name: audit-log
+        {{- if .Values.adminPortal.auditLog.sqlite.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ default
+              $name .Values.adminPortal.auditLog.sqlite.persistence.existingClaim
+            }}
+        {{- else }}
+          emptyDir:
+            sizeLimit: 2Gi
+        {{- end }}
+      {{- end }}
 
 ---
 apiVersion: apps/v1

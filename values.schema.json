@@ -5037,7 +5037,7 @@
           "title": "Aktivieren der TLS Zertifikatsüberprüfung",
           "default": false
         },
-        "logLevelCore": {
+        "logLevel": {
           "type": "string",
           "enum": [
             "DEBUG",
@@ -5051,21 +5051,6 @@
           "title": "LogLevel der Core-Komponente vom Admin-Portal",
           "description": "Benötigt, um das LogLevel der Komponente zu steuern und unnötige Details auszublenden.",
           "default": "INFO"
-        },
-        "logLevelAudit": {
-          "type": "string",
-          "enum": [
-            "DEBUG",
-            "INFO",
-            "WARNING",
-            "ERROR",
-            "CRITICAL",
-            "NOTSET",
-            "OFF"
-          ],
-          "title": "LogLevel der Audit-Komponente vom Admin-Portal",
-          "description": "Benötigt, um das LogLevel der Komponente zu steuern und unnötige Details auszublenden.",
-          "default": "OFF"
         },
         "coreImage": {
           "$ref": "#/$defs/image",
@@ -5106,6 +5091,96 @@
             "pullPolicy"
           ],
           "unevaluatedProperties": false
+        },
+        "auditLog": {
+          "type": "object",
+          "properties": {
+            "logLevel": {
+              "type": "string",
+              "enum": [
+                "DEBUG",
+                "INFO",
+                "WARNING",
+                "ERROR",
+                "CRITICAL",
+                "NOTSET",
+                "OFF"
+              ],
+              "title": "Log-Level der Audit-Komponente vom Admin-Portal",
+              "description": "Mögliche Werte sind \"OFF\" und \"INFO\".",
+              "default": "OFF"
+            },
+            "database": {
+              "type": "string",
+              "enum": [
+                "sqlite"
+              ],
+              "title": "Datenbank für die Audit-Komponente",
+              "default": "sqlite"
+            },
+            "sqlite": {
+              "type": "object",
+              "properties": {
+                "persistence": {
+                  "type": "object",
+                  "properties": {
+                    "enabled": {
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "existingClaim": {
+                      "type": [
+                        "null",
+                        "string"
+                      ],
+                      "minLength": 1,
+                      "title": "Name des PersistentVolumeClaims",
+                      "description": "Falls nicht gesetzt, wird dynamisch ein neuer PVC erstellt.",
+                      "default": null,
+                      "examples": [
+                        "admin-portal"
+                      ]
+                    },
+                    "storageClass": {
+                      "type": "string",
+                      "title": "Name der PVC Storage-Class",
+                      "description": "Falls \"-\", wird die standard Storage-Class des Clusters verwendet.",
+                      "default": ""
+                    },
+                    "accessMode": {
+                      "type": "string",
+                      "enum": [
+                        "ReadWriteOnce",
+                        "ReadWriteMany",
+                        "ReadWriteOncePod"
+                      ],
+                      "title": "PVC Zugriffsmodus",
+                      "default": "ReadWriteOnce"
+                    },
+                    "size": {
+                      "type": "string",
+                      "title": "Größe des zu nutzenden Volumes",
+                      "default": "1Gi"
+                    }
+                  },
+                  "required": [
+                    "enabled",
+                    "storageClass",
+                    "accessMode",
+                    "size"
+                  ]
+                }
+              },
+              "required": [
+                "persistence"
+              ]
+            }
+          },
+          "required": [
+            "logLevel",
+            "database",
+            "sqlite"
+          ]
         },
         "resources": {
           "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json",
@@ -5172,8 +5247,11 @@
       "required": [
         "enabled",
         "uri",
+        "TLSverify",
+        "logLevel",
         "coreImage",
         "uiImage",
+        "auditLog",
         "resources",
         "podSecurityContext",
         "securityContext"
