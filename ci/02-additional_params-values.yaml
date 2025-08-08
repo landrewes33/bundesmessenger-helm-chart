@@ -87,10 +87,6 @@ postgresql:
 networkpolicies:
   enabled: true
 
-# only to validate template
-demomode:
-  enabled: true
-
 mas:
   enabled: true
   # upstream_oauth2_provider:

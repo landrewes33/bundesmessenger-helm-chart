@@ -95,10 +95,6 @@ spec:
               mountPath: /mas/config
             - name: tmpdir
               mountPath: /tmp
-          {{- if .Values.demomode.enabled }}
-            - name: demoscript
-              mountPath: /script
-          {{- end }}
           {{- with .Values.mas.extraVolumeMounts }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

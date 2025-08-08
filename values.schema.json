@@ -6130,80 +6130,6 @@
         "resources"
       ],
       "unevaluatedProperties": false
-    },
-    "demomode": {
-      "type": "object",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "default": false
-        },
-        "serviceAccount": {
-          "type": "object",
-          "properties": {
-            "create": {
-              "type": "boolean"
-            },
-            "name": {
-              "type": [
-                "null",
-                "boolean"
-              ],
-              "title": "Name des ServiceAccounts für den demomode-job.",
-              "default": null,
-              "examples": [
-                "non-default-demomode-name"
-              ]
-            }
-          },
-          "required": [
-            "create"
-          ],
-          "unevaluatedProperties": false
-        },
-        "mode": {
-          "type": "string",
-          "enum": [
-            "complete",
-            "defined",
-            "federation"
-          ]
-        },
-        "interval": {
-          "type": "string"
-        },
-        "existingClaim": {
-          "type": "string"
-        },
-        "postgresqldump": {
-          "type": "string"
-        },
-        "sqldump": {
-          "type": "string"
-        }
-      },
-      "if": {
-        "properties": {
-          "enabled": {
-            "const": true
-          }
-        }
-      },
-      "then": {
-        "required": [
-          "mode"
-        ]
-      },
-      "required": [
-        "enabled",
-        "serviceAccount",
-        "mode",
-        "interval",
-        "existingClaim",
-        "postgresqldump",
-        "sqldump"
-      ],
-      "unevaluatedProperties": false
     }
   },
   "patternProperties": {
@@ -6359,8 +6285,7 @@
     "call",
     "additionalConfig",
     "networkpolicies",
-    "tests",
-    "demomode"
+    "tests"
   ],
   "unevaluatedProperties": false,
   "$defs": {
