@@ -37,9 +37,7 @@ spec:
         securityContext:
           {{- toYaml .Values.webclient.securityContext | nindent 10 }}
         resources:
-          requests:
-            memory: 45Mi
-            cpu: 50m
+          {{- toYaml .Values.webclient.resources | nindent 10 }}
         command:
           - sh
           - -c
