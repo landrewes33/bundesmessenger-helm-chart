@@ -1,10 +1,11 @@
 # Nutzerverwaltung
 
 Zum Betrieb des BundesMessengers gehört das Anlegen, Verwalten und Sperren von
-Nutzern. Neben der Möglichkeit einer offenen Nutzerregistrierung kann die
-Nutzerverwaltung über externe IAM (Identity and Access Management)-Lösungen,
-Administrationssoftware wie den Synapse-Admin oder interne
-Synapse-Schnittstellen erfolgen:
+Nutzern. Empfohlenen ist die Nutzerverwaltung über eine externe IAM-Lösung
+(Identity and Access Management). Alternativ kann die Nutzerverwaltung über
+Administrationssoftware, wie den Synapse-Admin, oder direkt per
+Synapse-Schnittstelle erfolgen. Auch die Möglichkeit einer offenen
+Nutzerregistrierung existiert.
 
 - [IAM-Lösung](#iam-lösung) ⭐
 - [Anlegen von Nutzern auf dem Container mit `kubectl`](#anlegen-von-nutzern-auf-dem-container-mit-kubectl)
@@ -195,12 +196,16 @@ curl -X POST \
 ## Offene Registrierung
 
 Um Nutzern zu ermöglichen, ihre Konten selbst anzulegen und zu verwalten, kann
-die BundesMessenger-Konfiguration `config.enableRegistration` verwendet werden.
+die BundesMessenger-Konfiguration `extraConfig.enable_registration` verwendet
+werden. Zusätzlich muss zum Schutz der Installation vor Missbrauch eine
+Verifikationsmethode für die Registrierung aktiviert sein.
 
 ```yaml
-# Erlaube die selbstständige Registrierung von Nutzern.
-config:
-  enableRegistration: true
+extraConfig:
+  # Erlaube die selbstständige Registrierung von Nutzern.
+  enable_registration: true
+  # Festlegen der verwendeten Verifikationsmethode, bspw. Token-basiert.
+  registration_requires_token: true
 ```
 
 Weitere Details dazu gibt es in der Synapse-Dokumentation zu

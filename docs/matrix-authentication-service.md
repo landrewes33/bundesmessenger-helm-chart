@@ -51,7 +51,6 @@ Wellknown-Datei übernimmt.
 Es wird empfohlen, dies vom MAS übernehmen zu lassen
 3. Bereitstellen einer PostgreSQL-Datenbank für den MAS
 4. Konfiguration des Homeservers zur Nutzung des MAS
-    1. Deaktivierung von `config.enableRegistration` (übernimmt Helm Chart)
     1. Deaktivierung von `extraConfig.password_config.enabled` (übernimmt Helm Chart)
     1. Konfigurieren von `experimental_features.msc3861` mit
         `enabled:true`, `issuer`, `client_id`, `client_auth_method`,

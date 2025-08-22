@@ -268,11 +268,6 @@ config:
   # (bool) Metriken erfassen, eingeschaltet
   enable_metrics: true
 
-  # (bool) Registrierungskonfiguration, beachten Sie, dass die Registrierung mit dem
-  # containerinternen Werkzeug register_new_matrix_user immer möglich ist. Synapse-Admin kann dafür genutzt werden.
-  # @default -- false
-  enableRegistration: false
-
   # -- (map|string|null) Geheimnis zum Registrieren neuer Nutzer.
   # Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge gesetzt, wenn
   # er nicht angegeben ist.
@@ -412,6 +407,7 @@ extraConfig:
   # (map) Konfiguration für Login mit Passwort
   password_config:
     # (bool) Login mit Passwort erlauben, eingeschaltet
+    # Wird automatisch ausgeschaltet, falls `mas.enabled`.
     enabled: true
     # (bool) lokale Nutzerdatenbank, eingeschaltet
     # Wenn dies deaktiviert wird, müssen andere `password_providers` definiert werden.
