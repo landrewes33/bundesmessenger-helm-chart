@@ -58,6 +58,8 @@ spec:
           imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.mas.securityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.mas.resources | nindent 12 }}
       containers:
         - name: {{ $component }}
           command: ["mas-cli", "server", "--config=/mas/config/config.yaml"]

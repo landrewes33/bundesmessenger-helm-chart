@@ -2310,18 +2310,20 @@
         "resources": {
           "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json",
           "type": "object",
-          "title": "Ressourcen des Init-Containers zur Rechtekorrektur",
-          "description": "Hier keine gesetzt, da kurzlebig und von Hause aus klein.",
-          "default": {},
-          "examples": [
-            {
-              "resources": {
-                "requests": {
-                  "memory": "128Mi",
-                  "cpu": "100m"
-                }
-              }
+          "title": "Ressourcengrenzen des Init-Containers zur Rechtekorrektur",
+          "default": {
+            "limits": {
+              "memory": "128Mi",
+              "cpu": "500m"
+            },
+            "requests": {
+              "memory": "64Mi",
+              "cpu": "100m"
             }
+          },
+          "required": [
+            "limits",
+            "requests"
           ],
           "unevaluatedProperties": false
         }

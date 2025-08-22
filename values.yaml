@@ -1192,14 +1192,14 @@ volumePermissions:
     #   - name: myRegistryKeySecretName
     pullSecrets: []
 
-  # (map) Ressourcen des Init-Containers zur Rechtekorrektur
-  # Hier keine gesetzt, da kurzlebig und von Hause aus klein
-  # Beispiel:
-  # resources:
-  #   requests:
-  #     memory: 128Mi
-  #     cpu: 100m
-  resources: {}
+  # (map) Ressourcengrenzen des Init-Containers zur Rechtekorrektur.
+  resources:
+    limits:
+      memory: 128Mi
+      cpu: 500m
+    requests:
+      memory: 64Mi
+      cpu: 100m
 
 ## Konfiguration für den Hauptdienst von Synapse.
 ## Um TLS in Synapse selbst zu verwenden, fügen Sie einen TLS-Listener hinzu und ändern Sie die Ports

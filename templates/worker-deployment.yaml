@@ -45,7 +45,7 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configuration.yaml") $ | sha256sum }}
         checksum/worker-config: {{ include (print $.Template.BasePath "/worker-configuration.yaml") $ | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") $ | sha256sum }}
-        checksum/signing-key-job: {{ include (print $.Template.BasePath "/signing-key-job.yaml") $ | sha256sum }} 
+        checksum/signing-key-job: {{ include (print $.Template.BasePath "/signing-key-job.yaml") $ | sha256sum }}
         checksum/ca-secrets: {{ print $uniqCaSecrets | sha256sum }}
       {{- with $config.annotations }}
         {{- . | toYaml | nindent 8 }}
@@ -90,6 +90,8 @@ spec:
           image: {{ quote (printf "%s/%s:%s"
             $.Values.image.registry $.Values.image.repository $.Values.image.tag
           )}}
+          resources:
+            {{- $config.resources | toYaml | nindent 12 }}
           volumeMounts:
           - mountPath: "/tmp/"
             name: temp-worker-config
@@ -266,7 +268,7 @@ spec:
                   name: {{ $.Values.config.workerReplicationSecret.existingSecret }}
                   items:
                     - key: {{ $.Values.config.workerReplicationSecret.existingSecretKey }}
-                      path: worker-replication-secret  
+                      path: worker-replication-secret
         - name: signingkey
           secret:
             secretName: {{ $.Values.signingkey.existingSecret | default (include "matrix-synapse.workername" (dict "global" $ "worker" "signingkey")) | quote }}
