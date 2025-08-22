@@ -142,12 +142,6 @@ data:
 
     ## Registration ##
 
-    {{ if .Values.mas.enabled -}}
-    enable_registration: false
-    {{- else -}}
-    enable_registration: {{ .Values.config.enableRegistration | default false }}
-    {{- end }}
-
     {{- if include "matrix-synapse.registrationSharedSecret.secretName" . }}
     registration_shared_secret_path: /synapse/secrets/registration
     {{- end }}
@@ -215,7 +209,7 @@ data:
     {{ $extraConfig := .Values.extraConfig }}
     {{- if .Values.mas.enabled -}}
       {{ $passwordDict := dict "password_config" (dict "enabled" false) }}
-      {{ $extraConfig := mergeOverwrite $extraConfig $passwordDict }}
+      {{ $extraConfig = mergeOverwrite $extraConfig $passwordDict }}
     {{- end -}}
 
     {{- /* Entfernen von per default leeren Variable aus ExtraConfig Dictionary

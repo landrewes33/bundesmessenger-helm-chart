@@ -48,15 +48,7 @@ Gehen Sie sicher, dass {{  include "matrix-synapse.dsgvoExportServiceAccountName
 {{- end }}
 
 
-{{- if .Values.config.enableRegistration }}
-Sie können sich nun an Ihrer BundesMessenger Installation mit jedem kompatiblen
-Matrix-Client verbinden - und einen Account erstellen - sobald die Installation
-final fertig ist.
-
-Sie können auch einen initialen administrativen Administrator und weitere Accounts mit den folgenden Kommandos erstellen:
-{{- else }}
 Sie können einen initialen administrativen und weitere Accounts für den installierten BundesMessenger mit den folgenden Kommandos anlegen:
-{{- end }}
 {{ if and .Values.mas.enabled .Values.mas.passwords.enabled }}
 (Ersetzen Sie die Platzhalter NUTZER und PASSWORT mit gewünschten Inhalt.
 Der Benutzer muss in Kleinbuchstaben geschrieben sein und das Passwort die notwendige Komplexität erfüllen, 

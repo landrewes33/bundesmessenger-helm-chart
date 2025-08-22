@@ -1,0 +1,1 @@
+Entfernen des Schalters `config.enableRegistration`. Offene Registierung kann weiterhin verwendet werden ([Doku Nutzerverwaltung](./docs/nutzerverwaltung.md)).

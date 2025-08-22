@@ -426,14 +426,6 @@ properties:
         type: boolean
         description: Metriken erfassen
         default: true
-      enableRegistration:
-        type: boolean
-        title: Registrierungskonfiguration
-        description: >-
-          Beachten Sie, dass die Registrierung mit dem containerinternen
-          Werkzeug register_new_matrix_user immer möglich ist.
-          Synapse-Admin/Admin-Portal kann dafür genutzt werden
-        default: false
       registrationSharedSecret:
         type: ["null", "object", "string"]
         title: Geheimnis zum Registrieren neuer Nutzer
@@ -541,7 +533,6 @@ properties:
       - extraLoggers
       - reportStats
       - enable_metrics
-      - enableRegistration
       - formSecret
       - extraListeners
       - trustedKeyServers
