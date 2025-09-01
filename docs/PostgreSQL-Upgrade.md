@@ -73,7 +73,7 @@ spec:
         fsGroup: 1001
       containers:
         - name: postgresql-major-upgrade
-          image: docker.io/bitnami/postgresql:16
+          image: docker.io/bitnamilegacy/postgresql:16
           env:
             - name: PGHOST
               # Bei Bedarf anpassen
