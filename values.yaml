@@ -1527,7 +1527,7 @@ postgresql:
   # (map) Das zu verwendende PostgreSQL-Container-Abbild.
   image:
     registry: docker.io
-    repository: bitnami/postgresql
+    repository: bitnamilegacy/postgresql
     tag: "16"
     # (list) Liste von Kubernetes Pull-Secrets.
     # Beispiel:
