@@ -39,10 +39,6 @@ Gehen Sie sicher, dass {{  include "matrix-synapse.serviceAccountName" . }} als 
 Gehen Sie sicher, dass {{  include "matrix-synapse.signingkeyServiceAccountName" . }} als ServiceAccount vorhanden ist.
 {{- end }}
 
-{{- if not .Values.demomode.serviceAccount.create }}
-Gehen Sie sicher, dass {{  include "matrix-synapse.demomodeServiceAccountName" . }} als ServiceAccount vorhanden ist.
-{{- end }}
-
 {{- if not .Values.additionalConfig.dsgvoExport.serviceAccount.create }}
 Gehen Sie sicher, dass {{  include "matrix-synapse.dsgvoExportServiceAccountName" . }} als ServiceAccount vorhanden ist.
 {{- end }}

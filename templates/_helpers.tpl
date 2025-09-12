@@ -169,18 +169,6 @@ Create the name of the service account to use in signingkey job (pre-install)
 {{- end -}}
 
 {{/*
-Create the name of the service account to use in demomode job (if enabled)
-*/}}
-{{- define "matrix-synapse.demomodeServiceAccountName" -}}
-{{- if .Values.demomode.serviceAccount.create -}}
-    {{ default (include "matrix-synapse.externalname" (dict "global" . "external" "demomode")) .Values.demomode.serviceAccount.name }}
-{{- else -}}
-    {{/* Default name is ".Release.Name"-"demomode" */}}
-    {{ default (include "matrix-synapse.externalname" (dict "global" . "external" "demomode")) .Values.demomode.serviceAccount.name }}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Create the name of the service account to use in dsgvo-exporter job (if enabled)
 */}}
 {{- define "matrix-synapse.dsgvoExportServiceAccountName" -}}

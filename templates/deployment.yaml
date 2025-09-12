@@ -25,8 +25,6 @@
 {{- if not .Values.redis.auth.enabled -}}
   {{- fail "Redis without authentication is not supported by this chart" -}}
 {{- end -}}
-{{- $userconfigname :=  printf "%s-%s" (include "matrix-synapse.fullname" .) "users" }}
-{{- $adminconfigname := printf "%s-%s" (include "matrix-synapse.fullname" .) "admins" }}
 {{- $uniqCaSecrets := list }}
 {{- range .Values.extraConfig.federation_custom_ca_list }}
   {{- /* extract secret name from cert path - between first both slashes, put them in a list and make it unique */}}
@@ -54,7 +52,6 @@ spec:
     metadata:
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configuration.yaml") . | sha256sum }}
-        checksum/demomode: {{ include (print $.Template.BasePath "/demomode/demomode.yaml") . | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
         checksum/signing-key-job: {{ include (print $.Template.BasePath "/signing-key-job.yaml") . | sha256sum }}
         checksum/ca-secrets: {{ print $uniqCaSecrets | sha256sum }}
@@ -136,18 +133,6 @@ spec:
                   name: {{ $redisSecretName }}
                   key: {{ $redisSecretKey }}
           {{- end }}
-          {{- if .Values.demomode.enabled }}
-            - name: ADMINS
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ $adminconfigname }}
-                  key: admins.csv
-            - name: USERS
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ $userconfigname }}
-                  key: users.csv
-          {{- end }}
           {{- with .Values.synapse.extraEnv }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -198,10 +183,6 @@ spec:
           {{- range $uniqCaSecrets }}
             - name: {{ printf "fed-ca-%s" .  }}
               mountPath: /{{ . }}
-          {{- end }}
-          {{- if .Values.demomode.enabled }}
-            - name: demoscript
-              mountPath: /script
           {{- end }}
           {{- with .Values.synapse.extraVolumeMounts }}
             {{- . | toYaml | nindent 12 }}
@@ -285,12 +266,6 @@ spec:
         {{- end }}
         {{- with .Values.synapse.extraVolumes }}
           {{- . | toYaml | nindent 8 }}
-        {{- end }}
-        {{- if .Values.demomode.enabled }}
-        - name: demoscript
-          configMap:
-            name: {{ include "matrix-synapse.externalname" (dict "global" . "external" "demomode") }}-script
-            defaultMode: 0755
         {{- end }}
       {{- with .Values.synapse.nodeSelector }}
       nodeSelector:

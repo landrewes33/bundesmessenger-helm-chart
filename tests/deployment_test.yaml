@@ -4,7 +4,6 @@ suite: Deployment
 templates:
   - deployment.yaml
   - configuration.yaml
-  - demomode/demomode.yaml
   - secrets.yaml
   - signing-key-job.yaml
 set:
