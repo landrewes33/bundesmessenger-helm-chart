@@ -2364,7 +2364,7 @@
     "sygnal": {
       "type": "object",
       "title": "Konfiguration für Sygnal",
-      "description": "Reference: https://github.com/matrix-org/sygnal",
+      "description": "Reference: https://github.com/element-hq/sygnal",
       "properties": {
         "enabled": {
           "type": "boolean",

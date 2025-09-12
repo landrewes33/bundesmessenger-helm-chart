@@ -9,8 +9,8 @@ mit der Sie den Dienst aktivieren und nutzen können.
 Den Nutzern werden damit Benachrichtigungen bei neuen ungelesenen Nachrichten
 auf den mobilen Apps angezeigt.
 
-- Quelle: https://github.com/matrix-org/sygnal
-- Beispielkonfiguration: https://github.com/matrix-org/sygnal/blob/main/sygnal.yaml.sample
+- Quelle: https://github.com/element-hq/sygnal
+- Beispielkonfiguration: https://github.com/element-hq/sygnal/blob/main/sygnal.yaml.sample
 
 ## App-Typen
 

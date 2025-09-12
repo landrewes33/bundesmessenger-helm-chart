@@ -1213,7 +1213,7 @@ service:
 ######################################################################################
 ##          Konfiguration für Sygnal
 ######################################################################################
-## Reference: https://github.com/matrix-org/sygnal
+## Reference: https://github.com/element-hq/sygnal
 
 sygnal:
   # (bool) Aktivieren des Sygnal-Container
