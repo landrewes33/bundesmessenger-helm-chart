@@ -6,7 +6,8 @@ templates:
   - adminportal/adminportal-configuration.yaml
   - nginx-conf.yaml
 set:
-  uri: adminportal.example.com
+  adminPortal:
+    uri: adminportal.example.com
   externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment if enabled
