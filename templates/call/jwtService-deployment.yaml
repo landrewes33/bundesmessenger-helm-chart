@@ -33,6 +33,7 @@ spec:
         app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      automountServiceAccountToken: false
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.call.jwtService.podSecurityContext | nindent 8 }}
