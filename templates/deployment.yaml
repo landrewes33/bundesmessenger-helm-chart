@@ -70,6 +70,7 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      automountServiceAccountToken: false
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.synapse.podSecurityContext | nindent 8 }}

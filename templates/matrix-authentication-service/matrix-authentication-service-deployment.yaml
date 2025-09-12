@@ -32,6 +32,7 @@ spec:
       securityContext:
         {{- toYaml .Values.mas.podSecurityContext | nindent 8 }}
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      automountServiceAccountToken: false
       initContainers:
         - name: initconfig
           command:

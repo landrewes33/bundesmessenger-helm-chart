@@ -33,6 +33,7 @@ spec:
         app.kubernetes.io/component: {{ $component }}-{{ $coreName }}
     spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      automountServiceAccountToken: false
       securityContext:
         {{- .Values.adminPortal.podSecurityContext | toYaml | nindent 8 }}
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
@@ -113,6 +114,7 @@ spec:
         app.kubernetes.io/component: {{ $component }}-{{ $uiName }}
     spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      automountServiceAccountToken: false
       securityContext:
         {{- .Values.adminPortal.podSecurityContext | toYaml | nindent 8 }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
