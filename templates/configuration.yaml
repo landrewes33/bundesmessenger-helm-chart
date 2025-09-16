@@ -89,7 +89,12 @@ data:
         x_forwarded: true
 
         resources:
-          - names: [client, federation]
+          - names:
+            - client
+            - federation
+    {{- with .Values.config.extraMainListenerTypes -}}
+      {{ . | toYaml | nindent 12 }}
+    {{- end }}
             compress: false
 
       - port: 9090
@@ -228,10 +233,10 @@ data:
       {{ $caDict := dict "federation_custom_ca_list" ($caList) }}
       {{ $extraConfig := mustMergeOverwrite $extraConfig $caDict }}
     {{- end }}
-    
+
     {{/* Handled in built-in experimental_features.yaml. */}}
     {{ $extraConfig := omit $extraConfig "experimental_features" }}
-    
+
     {{- with $extraConfig }}
 
     ## Extra config ##
