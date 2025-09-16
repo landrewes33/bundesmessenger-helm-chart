@@ -130,6 +130,38 @@ tests:
             &sslmode=require\
             &sslrootcert=%2Fpath%2Fto%2Fca.pem\
             \")"
+  - it: use synapse main process
+    template: secrets.yaml
+    documentSelector:
+      path: metadata.name
+      value: RELEASE-NAME-matrix-authentication-service
+    set:
+      workers:
+        generic_worker:
+          enabled: false
+    asserts:
+      - matchRegex:
+          path: stringData['mas-secret.yaml']
+          pattern: "(?ms:\
+            ^\\s*matrix:.*?\
+            ^\\s*  endpoint: \"http://RELEASE-NAME-bundesmessenger:8008\".*?\
+            )"
+  - it: use synapse worker process
+    template: secrets.yaml
+    documentSelector:
+      path: metadata.name
+      value: RELEASE-NAME-matrix-authentication-service
+    set:
+      workers:
+        generic_worker:
+          enabled: true
+    asserts:
+      - matchRegex:
+          path: stringData['mas-secret.yaml']
+          pattern: "(?ms:\
+            ^\\s*matrix:.*?\
+            ^\\s*  endpoint: \"http://RELEASE-NAME-generic-worker:8083\".*?\
+            )"
 ---
 suite: MAS ingress
 templates:
