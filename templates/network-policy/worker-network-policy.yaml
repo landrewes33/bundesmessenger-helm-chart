@@ -1,6 +1,7 @@
 {{/* SPDX-FileCopyrightText: 2023–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.networkpolicies.enabled }}
+  {{- $worker_not_outbound := list "background_worker" "pusher" -}}
   {{- range $worker, $config := .Values.workers }}
     {{- if $config.enabled }}
 {{- $name := $worker | replace "_" "-" }}
@@ -86,20 +87,22 @@ spec:
       - protocol: TCP
         port: 8080
     {{- end }}
-    {{- if $.Values.networkpolicies.fwProxyList }}
-      {{- range $.Values.networkpolicies.fwProxyList }}
+    {{- if not (has $worker $worker_not_outbound) }}
+      {{- if $.Values.networkpolicies.fwProxyList }}
+        {{- range $.Values.networkpolicies.fwProxyList }}
     - to:
       - ipBlock:
           cidr: {{ (split ":" . )._0 | quote }}
         ports:
         - protcoll: TCP
           port: {{ (split ":" . )._1 | quote }}
-      {{- end }}
-    {{- else }}
+        {{- end }}
+      {{- else }}
     {{- /* Federation traffic to internet if no proxy is given */}}
     - to:
       - ipBlock:
           cidr: 0.0.0.0/0
+      {{- end }}
     {{- end }}
 ---
 apiVersion: networking.k8s.io/v1
