@@ -1,0 +1,1 @@
+Erlaubt dem Matrix Authentication Service die Kommunikation via Worker anstatt Main-Prozess.
