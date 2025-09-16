@@ -34,21 +34,29 @@ spec:
       - protocol: TCP
         port: 9093
     {{- if $.Values.postgresql.enabled }}
+    {{- /* internal postgresql from this chart */}}
     - to:
       - podSelector:
           matchLabels:
-            {{ $.Values.networkpolicies.postgres.labelselector | default "app.kubernetes.io/name: postgresql" }}
+            {{- $.Values.networkpolicies.postgres.selectorLabels | default (dict "app.kubernetes.io/name" "postgresql") | toYaml | nindent 12 }}
       ports:
       - protocol: TCP
         port: {{ $.Values.postgresql.containerPorts.postgresql | default 5432 }}
-    {{- else if $.Values.networkpolicies.postgres.labelselector }}
-      - podSelector:
-          matchLabels:
-            {{ $.Values.networkpolicies.postgres.labelselector }}
-    {{- else }}
+    {{- else if $.Values.networkpolicies.postgres.externalPostgresIP }}
+    {{- /* external postgresql outside cluster selected by IP
+          set an IP has higher priority than a label */}}
     - to:
       - ipBlock:
           cidr: "{{ $.Values.networkpolicies.postgres.externalPostgresIP }}/32"
+      ports:
+      - protocol: TCP
+        port: {{ $.Values.externalPostgresql.port | default 5432 }}
+    {{- else }}
+    {{- /* external postgresql inside cluster selected by label */}}
+    - to:
+      - podSelector:
+          matchLabels:
+           {{- $.Values.networkpolicies.postgres.selectorLabels | toYaml | nindent 12 }}
       ports:
       - protocol: TCP
         port: {{ $.Values.externalPostgresql.port | default 5432 }}

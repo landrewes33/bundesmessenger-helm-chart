@@ -13,3 +13,257 @@ tests:
       - containsDocument:
           kind: NetworkPolicy
         not: true
+
+---
+suite: Network Policies MAS
+templates:
+  - network-policy/matrix-authentication-service-network-policy.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
+  networkpolicies.enabled: true
+  mas.enabled: true
+tests:
+  - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels set to {}"
+    template: network-policy/matrix-authentication-service-network-policy.yaml
+    documentIndex: 0
+    set:
+      networkpolicies:
+        postgres:
+          selectorLabels: {}
+      postgresql:
+        enabled: true
+        containerPorts:
+          postgresql: 5433
+    asserts:
+      - equal:
+          path: spec.egress[1].ports[0].port
+          value: 5433
+      - equal:
+          path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
+          value: postgresql
+  - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels not set"
+    template: network-policy/matrix-authentication-service-network-policy.yaml
+    documentIndex: 0
+    set:
+      postgresql:
+        enabled: true
+        containerPorts:
+          postgresql: 5433
+    asserts:
+      - equal:
+          path: spec.egress[1].ports[0].port
+          value: 5433
+      - equal:
+          path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
+          value: postgresql
+  - it: "renders postgres egress rule when postgresql.enabled = false but selectorLabels are set"
+    template: network-policy/matrix-authentication-service-network-policy.yaml
+    documentIndex: 0
+    set:
+      networkpolicies:
+        postgres:
+          selectorLabels:
+            custom: postgres-db
+            app.kubernetes.io/name: null
+      postgresql:
+        enabled: false
+      externalPostgresql:
+        port: 15432
+    asserts:
+      - equal:
+          path: spec.egress[1].ports[0].port
+          value: 15432
+      - equal:
+          path: spec.egress[1].to[0].podSelector.matchLabels.custom
+          value: postgres-db
+      - notExists:
+          path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
+  - it: "renders postgres egress rule with ipBlock when no selectorLabels are set"
+    template: network-policy/matrix-authentication-service-network-policy.yaml
+    documentIndex: 0
+    set:
+      networkpolicies:
+        postgres:
+          selectorLabels: {}
+          externalPostgresIP: 10.1.2.3
+      postgresql:
+        enabled: false
+      externalPostgresql:
+        port: 25432
+    asserts:
+      - equal:
+          path: spec.egress[1].ports[0].port
+          value: 25432
+      - equal:
+          path: spec.egress[1].to[0].ipBlock.cidr
+          value: "10.1.2.3/32"
+
+---
+suite: Network Policies Worker
+templates:
+  - network-policy/worker-network-policy.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
+  networkpolicies.enabled: true
+tests:
+  - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels set to {}"
+    template: network-policy/worker-network-policy.yaml
+    documentIndex: 0
+    set:
+      networkpolicies:
+        postgres:
+          selectorLabels: {}
+      postgresql:
+        enabled: true
+        containerPorts:
+          postgresql: 5433
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+      - equal:
+          path: spec.egress[1].ports[0].port
+          value: 5433
+      - equal:
+          path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
+          value: postgresql
+  - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels not set"
+    template: network-policy/worker-network-policy.yaml
+    documentIndex: 0
+    set:
+      postgresql:
+        enabled: true
+        containerPorts:
+          postgresql: 5433
+    asserts:
+      - equal:
+          path: spec.egress[1].ports[0].port
+          value: 5433
+      - equal:
+          path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
+          value: postgresql
+  - it: "renders postgres egress rule when postgresql.enabled = false but selectorLabels are set"
+    template: network-policy/worker-network-policy.yaml
+    documentIndex: 0
+    set:
+      networkpolicies:
+        postgres:
+          selectorLabels:
+            custom: postgres-db
+            app.kubernetes.io/name: null
+      postgresql:
+        enabled: false
+      externalPostgresql:
+        port: 15432
+    asserts:
+      - equal:
+          path: spec.egress[1].ports[0].port
+          value: 15432
+      - equal:
+          path: spec.egress[1].to[0].podSelector.matchLabels.custom
+          value: postgres-db
+      - notExists:
+          path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
+  - it: "renders postgres egress rule with ipBlock when no selectorLabels are set"
+    template: network-policy/worker-network-policy.yaml
+    documentIndex: 0
+    set:
+      networkpolicies:
+        postgres:
+          selectorLabels: {}
+          externalPostgresIP: 10.1.2.3
+      postgresql:
+        enabled: false
+      externalPostgresql:
+        port: 25432
+    asserts:
+      - equal:
+          path: spec.egress[1].ports[0].port
+          value: 25432
+      - equal:
+          path: spec.egress[1].to[0].ipBlock.cidr
+          value: "10.1.2.3/32"
+
+---
+suite: Network Policies Main
+templates:
+  - network-policy/matrix-network-policy.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
+  networkpolicies.enabled: true
+tests:
+  - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels set to {}"
+    template: network-policy/matrix-network-policy.yaml
+    documentIndex: 0
+    set:
+      networkpolicies:
+        postgres:
+          selectorLabels: {}
+      postgresql:
+        enabled: true
+        containerPorts:
+          postgresql: 5433
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+      - equal:
+          path: spec.egress[0].ports[0].port
+          value: 5433
+      - equal:
+          path: spec.egress[0].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
+          value: postgresql
+  - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels not set"
+    template: network-policy/matrix-network-policy.yaml
+    documentIndex: 0
+    set:
+      postgresql:
+        enabled: true
+        containerPorts:
+          postgresql: 5433
+    asserts:
+      - equal:
+          path: spec.egress[0].ports[0].port
+          value: 5433
+      - equal:
+          path: spec.egress[0].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
+          value: postgresql
+  - it: "renders postgres egress rule when postgresql.enabled = false but selectorLabels are set"
+    template: network-policy/matrix-network-policy.yaml
+    documentIndex: 0
+    set:
+      networkpolicies:
+        postgres:
+          selectorLabels:
+            custom: postgres-db
+            app.kubernetes.io/name: null
+      postgresql:
+        enabled: false
+      externalPostgresql:
+        port: 15432
+    asserts:
+      - equal:
+          path: spec.egress[0].ports[0].port
+          value: 15432
+      - equal:
+          path: spec.egress[0].to[0].podSelector.matchLabels.custom
+          value: postgres-db
+      - notExists:
+          path: spec.egress[0].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
+  - it: "renders postgres egress rule with ipBlock when no selectorLabels are set"
+    template: network-policy/matrix-network-policy.yaml
+    documentIndex: 0
+    set:
+      networkpolicies:
+        postgres:
+          selectorLabels: {}
+          externalPostgresIP: 10.1.2.3
+      postgresql:
+        enabled: false
+      externalPostgresql:
+        port: 25432
+    asserts:
+      - equal:
+          path: spec.egress[0].ports[0].port
+          value: 25432
+      - equal:
+          path: spec.egress[0].to[0].ipBlock.cidr
+          value: "10.1.2.3/32"
