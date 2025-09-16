@@ -306,6 +306,12 @@ config:
   #  - port: 9000
   #    bind_addresses: ['::']
   #    type: manhole
+
+  ## Extra listener, die zum Listener des Hauptprozesses hinzugefügt werden können
+  ##
+  extraMainListenerTypes: []
+  #  - consent
+
 ########################################
 ## Konfigurationen für Föderation
 ########################################

@@ -593,6 +593,14 @@
           },
           "default": []
         },
+        "extraMainListenerTypes": {
+          "type": "array",
+          "description": "Extra listener, die zum Listener des Hauptprozesses hinzugefügt werden können",
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
         "trustedKeyServers": {
           "type": "array",
           "title": "Vertrauenswürdige Schlüssel-Server",
@@ -619,6 +627,7 @@
         "enable_metrics",
         "formSecret",
         "extraListeners",
+        "extraMainListenerTypes",
         "trustedKeyServers"
       ],
       "unevaluatedProperties": false

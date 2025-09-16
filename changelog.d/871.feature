@@ -1,0 +1,1 @@
+Erlaubt dem Synapse Main Prozess zusätzliche listener zu konfigurieren (`extraMainListenerTypes`), wie z.B. `consent`.
