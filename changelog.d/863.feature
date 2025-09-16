@@ -1,0 +1,1 @@
+Erlaubt eine generische Benutzung der Labels zum markieren der Datenbank in den Networkpolicies. Aus `networkpolicies.postgres.labelselector` wird `networkpolicies.postgres.selectorLabels`.

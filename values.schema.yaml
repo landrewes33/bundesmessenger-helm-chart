@@ -4966,12 +4966,15 @@ properties:
           externalPostgresIP:
             type: ["null", "string"]
             default: null
-          labelselector:
-            type: string
-            minLength: 1
-            default: "app.kubernetes.io/name: postgresql"
+          selectorLabels:
+            type: object
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/labels
+            default:
+              app.kubernetes.io/name: postgresql
+            unevaluatedProperties: false
         required:
-          - labelselector
+          - selectorLabels
         unevaluatedProperties: false
     required:
       - enabled
