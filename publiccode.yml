@@ -7,10 +7,10 @@ applicationSuite: BundesMessenger
 categories:
   - communications
   - collaboration
+developmentStatus: stable
+name: BundesMessenger Helm Chart
 description:
   de:
-    features:
-      - Messaging
     genericName: Messenger
     longDescription: |
       Das BundesMessenger Backend ist Bestandteil einer Sammlung von
@@ -26,38 +26,51 @@ description:
       eine Matrix homeserver Implementierung in Python auf Basis des [Matrix
       Protokolls](https://matrix.org/).
     shortDescription: BundesMessenger Backend Helm Chart
-developmentStatus: stable
-intendedAudience:
-  countries:
-    - de
-  scope:
-    - government
-    - local-authorities
-legal:
-  license: Apache-2.0
-  mainCopyrightOwner: BWI GmbH
-localisation:
-  availableLanguages:
-    - de
-  localisationReady: false
+    features:
+      - Messaging
+      - Direktnachrichten
+      - Chaträume
+      - Föderation
+      - Statusanzeige
+      - Umfragen
+      - Standort teilen
+      - Sprachnachrichten
+      - Emojis und Reaktionen
+      - Videokonferenzen (Huddles)
+      - Profilverwaltung
+      - Sicherheitsfunktionen
+      - Plattformübergreifend
+platforms:
+  - linux
+releaseDate: '2025-03-31'
+softwareType: standalone/backend
+url: 'https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart'
+logo: ./docs/images/bum_core_sw.svg
+dependsOn:
+  open:
+    - name: Kubernetes
+      optional: false
+      versionMin: 1.29.14
+softwareVersion: 1.13.0
 maintenance:
   contacts:
     - name: BWI GmbH
       email: bundesmessenger@bwi.de
   contractors:
     - name: BWI GmbH
-      until: '2025-12-31'
+      until: '2027-12-31'
       website: 'https://messenger.bwi.de/'
   type: internal
-name: BundesMessenger Helm Chart
-platforms:
-  - linux
-releaseDate: '2024-08-22'
-softwareType: standalone/backend
-url: 'https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart'
-logo: |-
-  https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/raw/main/docs/images/bum_core_sw.svg
-dependsOn:
-  open:
-    - name: Kubernetes
-      optional: false
+legal:
+  license: Apache-2.0
+  mainCopyrightOwner: BWI GmbH
+intendedAudience:
+  countries:
+    - de
+  scope:
+    - government
+    - local-authorities
+localisation:
+  availableLanguages:
+    - de
+  localisationReady: false
