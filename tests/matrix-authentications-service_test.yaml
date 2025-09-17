@@ -76,6 +76,16 @@ set:
   mas.enabled: true
   serverName: example.org
 tests:
+  - it: ensures configuration is set for MAS
+    template: secrets.yaml
+    documentIndex: 0
+    asserts:
+      - matchRegex:
+          path: stringData["config.yaml"]
+          pattern: "(?ms:\
+            ^\\s*matrix_authentication_service:.*?\
+            ^\\s*  enabled: true.*?\
+            )"
   - it: ensures full config
     template: secrets.yaml
     documentSelector:
