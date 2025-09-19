@@ -1359,10 +1359,8 @@
         "extraEnv": {
           "type": "array",
           "description": "Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-Pod anzuwenden sind.\n\nDies ist unter anderem für die Nutzung eines ausgehenden Proxies (https://element-hq.github.io/synapse/latest/setup/forward_proxy.html) notwendig.\n\nAchtung: U.U. sind die gleichen Einstellungen zusätzlich unter \"workers.default\" bzw. für den Sygnal selbst zu konfigurieren. Der Sygnal muss in der \"no_proxy\" Ausnahme enthalten sein, da Synapse ihn sonst versucht via Proxy zu erreichen. Für die BuM Apps ist dies \"push-local\".",
-          "items": {
-            "type": "object",
-            "unevaluatedProperties": false
-          },
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
+          "unevaluatedProperties": false,
           "default": [],
           "examples": [
             [
@@ -4641,7 +4639,8 @@
           "unevaluatedProperties": false
         },
         "extraEnv": {
-          "type": "array"
+          "type": "array",
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env"
         },
         "service": {
           "type": "object",
@@ -5647,6 +5646,7 @@
               "default": 1
             },
             "extraEnv": {
+              "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
               "type": "array",
               "title": "Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind",
               "default": [],
@@ -6737,22 +6737,8 @@
           "type": "array",
           "title": "Zusätzliche Umgebungsvariablen",
           "description": "DEFAULT sind auf alle Synapse-Worker-Container anzuwenden.",
-          "items": {
-            "type": "object",
-            "properties": {
-              "name": {
-                "type": "string"
-              },
-              "value": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "name",
-              "value"
-            ],
-            "unevaluatedProperties": false
-          },
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
+          "unevaluatedProperties": false,
           "default": [],
           "examples": [
             {
