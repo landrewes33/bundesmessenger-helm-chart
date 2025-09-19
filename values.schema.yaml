@@ -1055,9 +1055,9 @@ properties:
           Sygnal muss in der "no_proxy" Ausnahme enthalten sein, da Synapse ihn
           sonst versucht via Proxy zu erreichen. Für die BuM Apps ist dies
           "push-local".
-        items:
-          type: object
-          unevaluatedProperties: false
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
+        unevaluatedProperties: false
         default: []
         examples:
           - - name: LD_PRELOAD
@@ -3922,6 +3922,8 @@ properties:
         unevaluatedProperties: false
       extraEnv:
         type: array
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
       service:
         type: object
         properties:
@@ -4725,6 +4727,8 @@ properties:
             title: Replica-Count
             default: 1
           extraEnv:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
             type: array
             title: Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
             default: []
@@ -5658,17 +5662,9 @@ $defs:
         type: array
         title: Zusätzliche Umgebungsvariablen
         description: DEFAULT sind auf alle Synapse-Worker-Container anzuwenden.
-        items:
-          type: object
-          properties:
-            name:
-              type: string
-            value:
-              type: string
-          required:
-            - name
-            - value
-          unevaluatedProperties: false
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
+        unevaluatedProperties: false
         default: []
         examples:
           - name: LD_PRELOAD
