@@ -1,0 +1,1 @@
+Escape von Sonderzeichen in Postgres- und Redis-Passwörtern um Missinterpretation von `sed` zu verhindern.
