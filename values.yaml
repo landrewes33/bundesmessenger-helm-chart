@@ -2644,6 +2644,11 @@ call:
     #   value: "http://proxyuser@proxyserver:proxyport"
     extraEnv: []
 
+    # (list) Weitere Speicherbereiche für den LiveKit JWT Service-Pod.
+    extraVolumes: []
+    # (list) Weitere Speicher-Einhängepunkte für den LiveKit JWT Service-Container.
+    extraVolumeMounts: []
+
     # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
     podSecurityContext:
       <<: *defaultPodSecurityContext
