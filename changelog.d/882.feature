@@ -1,0 +1,1 @@
+Hinzufügen der Schalter `extraVolumes` und `extraVolumeMounts` für jwt-Service.

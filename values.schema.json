@@ -5667,6 +5667,18 @@
                 ]
               ]
             },
+            "extraVolumes": {
+              "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes",
+              "type": "array",
+              "title": "Weitere Speicherbereiche für den LiveKit JWT Service-Pod",
+              "default": []
+            },
+            "extraVolumeMounts": {
+              "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts",
+              "type": "array",
+              "title": "Weitere Speicher-Einhängepunkte für den LiveKit JWT Service-Container",
+              "default": []
+            },
             "podSecurityContext": {
               "$ref": "#/$defs/podSecurityContext",
               "type": "object",
@@ -5694,7 +5706,7 @@
             "resources": {
               "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json",
               "type": "object",
-              "title": "Ressourcen für den Client vom BundesMessenger-Call",
+              "title": "Ressourcen für den den LiveKit-JWT-Server",
               "properties": {
                 "limits": {
                   "properties": {
