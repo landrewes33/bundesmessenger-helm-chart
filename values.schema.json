@@ -6038,6 +6038,32 @@
             "selectorLabels"
           ],
           "unevaluatedProperties": false
+        },
+        "acme": {
+          "type": "object",
+          "title": "HTTP-Resolver für ACME/Let’s Encrypt",
+          "description": "Erlaubt die Kommunikation vom Ingress zum hier angegebenen Endpunkt (Pod + Port).",
+          "properties": {
+            "selectorLabels": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              },
+              "default": {
+                "acme.cert-manager.io/http01-solver": "true"
+              },
+              "unevaluatedProperties": false
+            },
+            "port": {
+              "type": "integer",
+              "default": 8089
+            }
+          },
+          "required": [
+            "selectorLabels",
+            "port"
+          ],
+          "unevaluatedProperties": false
         }
       },
       "required": [

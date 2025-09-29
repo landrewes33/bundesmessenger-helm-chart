@@ -15,6 +15,45 @@ tests:
         not: true
 
 ---
+suite: Network Policies ACME solver
+templates:
+  - network-policy/allow-acme-network-policy.yaml
+set:
+  externalPostgresql.existingSecret: postgresql
+  networkpolicies:
+    enabled: true
+    ingressNamespace: "default"
+    acme:
+      selectorLabels:
+        acme.cert-manager.io/http01-solver: null  # Unset by coalescing
+        acme.cert-manager.io/own: "true"
+      port: 1234
+tests:
+  - it: should create a NetworkPolicy with correct labels and ingress rules
+    asserts:
+      - containsDocument:
+          apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          name: RELEASE-NAME-acme-http01-solver-allow-ingress-controller
+      - equal:
+          path: spec.podSelector.matchLabels
+          value:
+            acme.cert-manager.io/own: "true"
+      - contains:
+          path: spec.ingress[0].from
+          any: true
+          content:
+            namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: default
+      - equal:
+          path: spec.ingress[0].ports[0].port
+          value: 1234
+      - equal:
+          path: spec.ingress[0].ports[0].protocol
+          value: TCP
+
+---
 suite: Network Policies MAS
 templates:
   - network-policy/matrix-authentication-service-network-policy.yaml
