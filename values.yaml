@@ -2806,6 +2806,7 @@ networkpolicies:
   # Aktuell wird nur eine Architektur mit einem L7 Ingress Controller unterstützt.
   # Absolut notwendig für die Network-Policies
   ingressNamespace: "default"
+
   # Wird gesetzt wenn sich die Postgres Instanz ausserhalb des Kubernetes Cluster befindet.
   # Da Network Policies keine Hostnames auflösen können, wird eine IP benötigt.
   postgres:
@@ -2819,6 +2820,13 @@ networkpolicies:
     # explizit deaktiviert werden: `app.kubernetes.io/name: null`
     selectorLabels:
       app.kubernetes.io/name: postgresql
+
+  # (map) HTTP-Resolver für ACME/Let’s Encrypt.
+  # Erlaubt die Kommunikation vom Ingress zum hier angegebenen Endpunkt (Pod + Port).
+  acme:
+    selectorLabels:
+      acme.cert-manager.io/http01-solver: "true"
+    port: 8089
 
 
 ######################################################################################

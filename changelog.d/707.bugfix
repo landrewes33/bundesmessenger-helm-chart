@@ -1,0 +1,1 @@
+Erlaubt die Benutzung von HTTP01-Resolvern z.B. mit dem [Cert-Manager](https://cert-manager.io/docs/configuration/acme/http01/) bei aktivierten Network-Policies.
