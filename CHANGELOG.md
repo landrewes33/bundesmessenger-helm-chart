@@ -7,6 +7,94 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.15.0 (2025-09-29)
+
+### ✨ Features
+
+- Erlaubt dem Matrix Authentication Service die Kommunikation via Worker
+  anstatt Main-Prozess. (!838)
+- Erlaubt eine generische Benutzung der Labels zum markieren der Datenbank in
+  den Networkpolicies. Aus `networkpolicies.postgres.labelselector` wird
+  `networkpolicies.postgres.selectorLabels`. (!863)
+- Erlaubt dem Synapse Main Prozess zusätzliche listener zu konfigurieren
+  (`extraMainListenerTypes`), wie z.B. `consent`. (!871)
+- Hinzufügen der Schalter `extraVolumes` und `extraVolumeMounts` für
+  jwt-Service. (!882)
+- Image `ghcr.io/element-hq/matrix-authentication-service` auf Version `1.3.0`
+  aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web`
+  auf Version `2.23.1` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/nginx` auf
+  Version `1.18.0-6ubuntu14.7-jammy-production` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal`
+  auf Version `0.16.0` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse`
+  auf Version `1.137.0` aktualisiert.
+
+### 🐛 Bugfixes
+
+- Erlaubt die Benutzung von HTTP01-Resolvern z.B. mit dem
+  [Cert-Manager](https://cert-manager.io/docs/configuration/acme/http01/) bei
+  aktivierten Network-Policies. (!707)
+- Anpassungen an die
+  [IGBvC-Richtlinien](https://gitlab.opencode.de/ig-bvc/policy-entwicklung/richtlinien-umsetzung-kyverno).
+  (!761)
+- Behebt einen Fehler mit einer nicht schemakonformen Variablen in den Unittest
+  zum Admin-Portal. (!868)
+- Behebt einen Fehler in den NetworkPolicies der Synapse Workern (z.B. Pusher)
+  externe Verbindungen erlaubte. (!869)
+- Korrektur der Network-Policy `allow-kubedns-network-policy`. (!884)
+- Escape von Sonderzeichen in Postgres- und Redis-Passwörtern um
+  Missinterpretation von `sed` zu verhindern. (!889)
+
+### 📚 Dokumentation
+
+- Behebt einen Tippfehler in der Dokumentation zum Schadcodescanner. (!818)
+- Angeben des Tags vom PostgreSQL-Abbild als String in der Anleitung zur
+  Testumgebung. (!843)
+- Anpassen der Web-Links von Sygnal auf offizelles Element-HQ Repository.
+  (!866)
+- Bug Report und Feature Request Templates für GitLab hinzugefügt. (!878, !885)
+
+### 📝 Weitere Änderungen
+
+- Aktualisierung der publiccode.yml. (!757)
+- Konfiguration der CI/CD-Pipelines. (!768, !776, !777, !778, !780, !781, !785,
+  !804, !820, !821, !859, !865, !870)
+- Update der CI/CD Components Version auf v1.4.0. (!834)
+- Migration der experimentellen Matrix Authentication Service Konfiguration vom
+  Synapse zur stabilen Konfiguration. (!839)
+- Ergänzung fehlender `resources` Konfigurationen. (!842)
+- PostgreSQL Image Reference auf `bitnamilegacy` aktualisiert. [Bekanntmachung
+  von Bitnami](https://github.com/bitnami/containers/issues/83267). (!856)
+- Einheitliche Angabe von `extraEnv` im Schema. (!881, !892)
+- `$CACHE_DOCKER/alpine/helm` in der CI-Pipeline auf Version `3.18.6`
+  aktualisiert.
+- `$CACHE_DOCKER/aquasec/trivy` in der CI-Pipeline auf Version `0.65.0`
+  aktualisiert.
+- `$CACHE_DOCKER/sonarsource/sonar-scanner-cli` in der CI-Pipeline auf Version
+  `11.4` aktualisiert.
+- `check-jsonschema` in der CI-Pipeline auf Version `0.33.3` aktualisiert.
+- `jsonschema` in der CI-Pipeline auf Version `4.25.1` aktualisiert.
+- `kindest/node` in der CI-Pipeline auf aktuelles Patch-Level aktualisiert.
+- `kubernetes-sigs/kind` in der CI-Pipeline auf Version `v0.30.0` aktualisiert.
+- `kubernetes-sigs/kustomize` in der CI-Pipeline auf Version `5.7.1`
+  aktualisiert.
+- `kyverno/kyverno` in der CI-Pipeline auf Version `v1.15.1` aktualisiert.
+- `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
+  `v0.85.0` aktualisiert.
+
+### 🦖 Abkündigungen und Bereinigungen
+
+- Entfernen vom Demomodus. (!827)
+- Entfernen des Schalters `config.enableRegistration`. Offene Registierung kann
+  weiterhin verwendet werden ([Doku
+  Nutzerverwaltung](./docs/nutzerverwaltung.md)). (!844)
+
 ## BundesMessenger Helm Chart 1.14.0 (2025-07-24)
 
 ### ⚠️ Versionshinweise
