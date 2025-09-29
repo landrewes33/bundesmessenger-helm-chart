@@ -155,8 +155,8 @@ postgresql:
   enabled: true
   image:
     registry: docker.io
-    repository: bitnami/postgresql
-    tag: 15
+    repository: bitnamilegacy/postgresql
+    tag: "16"
 ```
 
 ```yaml

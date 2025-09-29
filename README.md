@@ -33,7 +33,7 @@ Das Matrix Protokoll wird in der
 Weitere Komponenten, die durch das Helm Chart bereitgestellt werden:
 
 - [Synapse-Admin](https://github.com/Awesome-Technologies/synapse-admin) zur Administration
-- [Sygnal](https://github.com/matrix-org/sygnal) Push-Server für Google und Apple
+- [Sygnal](https://github.com/element-hq/sygnal) Push-Server für Google und Apple
 - [BundesMessenger WebClient](https://gitlab.opencode.de/bwi/bundesmessenger/clients/bundesmessenger-web)
 - BundesMessenger Call
 - [Redis](https://redis.io/) In-Memory Datenbank

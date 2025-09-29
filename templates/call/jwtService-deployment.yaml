@@ -33,6 +33,7 @@ spec:
         app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      automountServiceAccountToken: false
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.call.jwtService.podSecurityContext | nindent 8 }}
@@ -74,6 +75,9 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
+          {{- with .Values.call.jwtService.extraVolumeMounts }}
+            {{- . | toYaml | nindent 10 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.call.jwtService.resources | nindent 12 }}
       volumes:
@@ -81,6 +85,9 @@ spec:
           emptyDir:
             sizeLimit: 10Mi
             medium: Memory
+        {{- with .Values.call.jwtService.extraVolumes }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
     {{- with .Values.call.jwtService.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -33,6 +33,7 @@ spec:
     spec:
     {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      automountServiceAccountToken: false
       securityContext:
         {{- $config.podSecurityContext | toYaml | nindent 8 }}
       containers:

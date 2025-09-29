@@ -51,16 +51,6 @@ tests:
       - matchRegex:
           path: stringData["experimental-features.yaml"]
           pattern: "msc3266_enabled: true"
-  - it: ensures experimental_features is set for MAS
-    template: secrets.yaml
-    documentIndex: 0
-    asserts:
-      - matchRegex:
-          path: stringData["experimental-features.yaml"]
-          pattern: "experimental_features:"
-      - matchRegex:
-          path: stringData["experimental-features.yaml"]
-          pattern: "msc3861:"
   - it: ensures experimental_features is set for values.yaml
     template: secrets.yaml
     documentIndex: 0
@@ -96,21 +86,3 @@ tests:
       - matchRegex:
           path: stringData["experimental-features.yaml"]
           pattern: "msc3266_enabled: true"
-  - it: ensures experimental_features overwritten for MAS
-    template: secrets.yaml
-    documentIndex: 0
-    set:
-      mas.enabled: true
-      extraConfig:
-        experimental_features:
-          msc3861: dummy
-    asserts:
-      - matchRegex:
-          path: stringData["experimental-features.yaml"]
-          pattern: "experimental_features:"
-      - matchRegex:
-          path: stringData["experimental-features.yaml"]
-          pattern: "msc3861:"
-      - notMatchRegex:
-          path: stringData["experimental-features.yaml"]
-          pattern: "msc3861: dummy"

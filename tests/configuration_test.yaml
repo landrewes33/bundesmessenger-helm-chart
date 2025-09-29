@@ -1,0 +1,33 @@
+# SPDX-FileCopyrightText: 2025 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+suite: Configuration extraMainListenerTypes
+templates:
+  - configuration.yaml
+set:
+  serverName: happy.place.example.org
+  externalPostgresql.existingSecret: postgresql
+tests:
+  - it: renders default listener types without extras
+    set: {}
+    asserts:
+      - matchRegex:
+          path: data["homeserver.yaml"]
+          pattern: 'names:\n\s{8}\-\sclient\n\s{8}\-\sfederation'
+  - it: handles empty list explicitly
+    set:
+      config:
+        extraMainListenerTypes: []
+    asserts:
+      - matchRegex:
+          path: data["homeserver.yaml"]
+          pattern: 'names:\n\s{8}\-\sclient\n\s{8}\-\sfederation'
+  - it: adds extra listener types when configured
+    set:
+      config:
+        extraMainListenerTypes:
+          - type1
+          - type2
+    asserts:
+      - matchRegex:
+          path: data["homeserver.yaml"]
+          pattern: 'names:\n\s{8}\-\sclient\n\s{8}\-\sfederation\n\s{8}\-\stype1\n\s{8}\-\stype2'

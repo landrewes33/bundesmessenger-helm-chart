@@ -32,6 +32,7 @@ spec:
       securityContext:
         {{- toYaml .Values.mas.podSecurityContext | nindent 8 }}
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      automountServiceAccountToken: false
       initContainers:
         - name: initconfig
           command:
@@ -58,6 +59,8 @@ spec:
           imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.mas.securityContext | nindent 12 }}
+          resources:
+            {{- toYaml .Values.mas.resources | nindent 12 }}
       containers:
         - name: {{ $component }}
           command: ["mas-cli", "server", "--config=/mas/config/config.yaml"]
@@ -95,10 +98,6 @@ spec:
               mountPath: /mas/config
             - name: tmpdir
               mountPath: /tmp
-          {{- if .Values.demomode.enabled }}
-            - name: demoscript
-              mountPath: /script
-          {{- end }}
           {{- with .Values.mas.extraVolumeMounts }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}

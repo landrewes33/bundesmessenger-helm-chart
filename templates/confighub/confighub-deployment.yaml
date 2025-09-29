@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.confighub.enabled }}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "confighub-nginx") -}}
@@ -49,6 +49,7 @@ spec:
         app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      automountServiceAccountToken: false
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.confighub.podSecurityContext | nindent 8 }}

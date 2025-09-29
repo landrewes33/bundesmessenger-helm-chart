@@ -27,6 +27,7 @@ spec:
         app.kubernetes.io/component: {{ $component }}
     spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      automountServiceAccountToken: false
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.webclient.podSecurityContext | nindent 8 }}
@@ -37,9 +38,7 @@ spec:
         securityContext:
           {{- toYaml .Values.webclient.securityContext | nindent 10 }}
         resources:
-          requests:
-            memory: 45Mi
-            cpu: 50m
+          {{- toYaml .Values.webclient.resources | nindent 10 }}
         command:
           - sh
           - -c

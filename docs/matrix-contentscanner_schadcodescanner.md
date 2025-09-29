@@ -85,7 +85,7 @@ Falls der Antivirenscan vollständig deaktiviert werden soll, muss der
 und der Schadcodescanner muss deaktiviert sein:
 
 ```yaml
-content_scanner:
+contentscanner:
   scanScript: "/opt/scanner_bypass.sh"  # Umgehung des AV-Scans
 
 schadcodescanner:

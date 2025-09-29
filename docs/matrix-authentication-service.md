@@ -51,12 +51,9 @@ Wellknown-Datei übernimmt.
 Es wird empfohlen, dies vom MAS übernehmen zu lassen
 3. Bereitstellen einer PostgreSQL-Datenbank für den MAS
 4. Konfiguration des Homeservers zur Nutzung des MAS
-    1. Deaktivierung von `config.enableRegistration` (übernimmt Helm Chart)
     1. Deaktivierung von `extraConfig.password_config.enabled` (übernimmt Helm Chart)
-    1. Konfigurieren von `experimental_features.msc3861` mit
-        `enabled:true`, `issuer`, `client_id`, `client_auth_method`,
-        `clients_secret`, `admin_token`, `account_management_url`
-        (übernimmt Helm Chart)
+    1. Konfigurieren von `matrix_authentication_service` mit
+        `enabled: true`, `endpoint` und `secret` (übernimmt Helm Chart)
     1. Konfiguration eines optionalen OIDC-Providers (OpenID-Connect-Provider)
 5. Migration der bestehenden Konfiguration auf neue Authentifizierungsmethode
 

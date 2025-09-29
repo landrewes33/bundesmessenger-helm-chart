@@ -1,6 +1,7 @@
 {{/* SPDX-FileCopyrightText: 2023–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.networkpolicies.enabled }}
+  {{- $worker_not_outbound := list "background_worker" "pusher" -}}
   {{- range $worker, $config := .Values.workers }}
     {{- if $config.enabled }}
 {{- $name := $worker | replace "_" "-" }}
@@ -33,21 +34,29 @@ spec:
       - protocol: TCP
         port: 9093
     {{- if $.Values.postgresql.enabled }}
+    {{- /* internal postgresql from this chart */}}
     - to:
       - podSelector:
           matchLabels:
-            {{ $.Values.networkpolicies.postgres.labelselector | default "app.kubernetes.io/name: postgresql" }}
+            {{- $.Values.networkpolicies.postgres.selectorLabels | default (dict "app.kubernetes.io/name" "postgresql") | toYaml | nindent 12 }}
       ports:
       - protocol: TCP
         port: {{ $.Values.postgresql.containerPorts.postgresql | default 5432 }}
-    {{- else if $.Values.networkpolicies.postgres.labelselector }}
-      - podSelector:
-          matchLabels:
-            {{ $.Values.networkpolicies.postgres.labelselector }}
-    {{- else }}
+    {{- else if $.Values.networkpolicies.postgres.externalPostgresIP }}
+    {{- /* external postgresql outside cluster selected by IP
+          set an IP has higher priority than a label */}}
     - to:
       - ipBlock:
           cidr: "{{ $.Values.networkpolicies.postgres.externalPostgresIP }}/32"
+      ports:
+      - protocol: TCP
+        port: {{ $.Values.externalPostgresql.port | default 5432 }}
+    {{- else }}
+    {{- /* external postgresql inside cluster selected by label */}}
+    - to:
+      - podSelector:
+          matchLabels:
+           {{- $.Values.networkpolicies.postgres.selectorLabels | toYaml | nindent 12 }}
       ports:
       - protocol: TCP
         port: {{ $.Values.externalPostgresql.port | default 5432 }}
@@ -86,20 +95,22 @@ spec:
       - protocol: TCP
         port: 8080
     {{- end }}
-    {{- if $.Values.networkpolicies.fwProxyList }}
-      {{- range $.Values.networkpolicies.fwProxyList }}
+    {{- if not (has $worker $worker_not_outbound) }}
+      {{- if $.Values.networkpolicies.fwProxyList }}
+        {{- range $.Values.networkpolicies.fwProxyList }}
     - to:
       - ipBlock:
           cidr: {{ (split ":" . )._0 | quote }}
         ports:
         - protcoll: TCP
           port: {{ (split ":" . )._1 | quote }}
-      {{- end }}
-    {{- else }}
+        {{- end }}
+      {{- else }}
     {{- /* Federation traffic to internet if no proxy is given */}}
     - to:
       - ipBlock:
           cidr: 0.0.0.0/0
+      {{- end }}
     {{- end }}
 ---
 apiVersion: networking.k8s.io/v1

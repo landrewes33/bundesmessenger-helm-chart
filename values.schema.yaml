@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://schema.bundesmessenger.dev/bum/v1.14.0/values.schema.json
+$id: https://schema.bundesmessenger.dev/bum/v1.15.0/values.schema.json
 type: object
 title: BundesMessenger Helm-Konfiguration
 properties:
@@ -426,14 +426,6 @@ properties:
         type: boolean
         description: Metriken erfassen
         default: true
-      enableRegistration:
-        type: boolean
-        title: Registrierungskonfiguration
-        description: >-
-          Beachten Sie, dass die Registrierung mit dem containerinternen
-          Werkzeug register_new_matrix_user immer möglich ist.
-          Synapse-Admin/Admin-Portal kann dafür genutzt werden
-        default: false
       registrationSharedSecret:
         type: ["null", "object", "string"]
         title: Geheimnis zum Registrieren neuer Nutzer
@@ -521,6 +513,12 @@ properties:
         items:
           properties: {}
         default: []
+      extraMainListenerTypes:
+        type: array
+        description: Extra listener, die zum Listener des Hauptprozesses hinzugefügt werden können
+        items:
+          type: string
+        default: []
       trustedKeyServers:
         type: array
         title: Vertrauenswürdige Schlüssel-Server
@@ -541,9 +539,9 @@ properties:
       - extraLoggers
       - reportStats
       - enable_metrics
-      - enableRegistration
       - formSecret
       - extraListeners
+      - extraMainListenerTypes
       - trustedKeyServers
     unevaluatedProperties: false
   extraConfig:
@@ -1041,6 +1039,8 @@ properties:
         default: {}
         unevaluatedProperties: false
       extraEnv:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
         type: array
         description: >-
           Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-Pod
@@ -1057,9 +1057,6 @@ properties:
           Sygnal muss in der "no_proxy" Ausnahme enthalten sein, da Synapse ihn
           sonst versucht via Proxy zu erreichen. Für die BuM Apps ist dies
           "push-local".
-        items:
-          type: object
-          unevaluatedProperties: false
         default: []
         examples:
           - - name: LD_PRELOAD
@@ -1929,15 +1926,17 @@ properties:
         $ref: >-
           https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
         type: object
-        title: Ressourcen des Init-Containers zur Rechtekorrektur
-        description: >-
-          Hier keine gesetzt, da kurzlebig und von Hause aus klein.
-        default: {}
-        examples:
-          - resources:
-              requests:
-                memory: 128Mi
-                cpu: 100m
+        title: Ressourcengrenzen des Init-Containers zur Rechtekorrektur
+        default:
+          limits:
+            memory: 128Mi
+            cpu: 500m
+          requests:
+            memory: 64Mi
+            cpu: 100m
+        required:
+          - limits
+          - requests
         unevaluatedProperties: false
     required:
       - enabled
@@ -1979,7 +1978,7 @@ properties:
     type: object
     title: Konfiguration für Sygnal
     description: >-
-      Reference: https://github.com/matrix-org/sygnal
+      Reference: https://github.com/element-hq/sygnal
     properties:
       enabled:
         type: boolean
@@ -3921,6 +3920,8 @@ properties:
           - size
         unevaluatedProperties: false
       extraEnv:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
         type: array
       service:
         type: object
@@ -4725,6 +4726,8 @@ properties:
             title: Replica-Count
             default: 1
           extraEnv:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
             type: array
             title: Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
             default: []
@@ -4735,6 +4738,18 @@ properties:
                   value: https://proxyuser@proxyserver:proxyport
                 - name: HTTP_PROXY
                   value: http://proxyuser@proxyserver:proxyport
+          extraVolumes:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes
+            type: array
+            title: Weitere Speicherbereiche für den LiveKit JWT Service-Pod
+            default: []
+          extraVolumeMounts:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts
+            type: array
+            title: Weitere Speicher-Einhängepunkte für den LiveKit JWT Service-Container
+            default: []
           podSecurityContext:
             $ref: "#/$defs/podSecurityContext"
             type: object
@@ -4757,7 +4772,7 @@ properties:
             $ref: >-
               https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
             type: object
-            title: Ressourcen für den Client vom BundesMessenger-Call
+            title: Ressourcen für den den LiveKit-JWT-Server
             properties:
               limits:
                 properties:
@@ -4973,12 +4988,36 @@ properties:
           externalPostgresIP:
             type: ["null", "string"]
             default: null
-          labelselector:
-            type: string
-            minLength: 1
-            default: "app.kubernetes.io/name: postgresql"
+          selectorLabels:
+            type: object
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/labels
+            default:
+              app.kubernetes.io/name: postgresql
+            unevaluatedProperties: false
         required:
-          - labelselector
+          - selectorLabels
+        unevaluatedProperties: false
+      acme:
+        type: object
+        title: HTTP-Resolver für ACME/Let’s Encrypt
+        description: >-
+          Erlaubt die Kommunikation vom Ingress zum hier angegebenen Endpunkt
+          (Pod + Port).
+        properties:
+          selectorLabels:
+            type: object
+            additionalProperties:
+              type: string
+            default:
+              acme.cert-manager.io/http01-solver: "true"
+            unevaluatedProperties: false
+          port:
+            type: integer
+            default: 8089
+        required:
+          - selectorLabels
+          - port
         unevaluatedProperties: false
     required:
       - enabled
@@ -5063,56 +5102,6 @@ properties:
       - podSecurityContext
       - securityContext
       - resources
-    unevaluatedProperties: false
-  demomode:
-    type: object
-    properties:
-      enabled:
-        type: boolean
-        default: false
-      serviceAccount:
-        type: object
-        properties:
-          create:
-            type: boolean
-          name:
-            type: ["null", "boolean"]
-            title: Name des ServiceAccounts für den demomode-job.
-            default: null
-            examples:
-              - non-default-demomode-name
-        required:
-          - create
-        unevaluatedProperties: false
-      mode:
-        type: string
-        enum:
-          - complete
-          - defined
-          - federation
-      interval:
-        type: string
-      existingClaim:
-        type: string
-      postgresqldump:
-        type: string
-      sqldump:
-        type: string
-    if:
-      properties:
-        enabled:
-          const: true
-    then:
-      required:
-        - mode
-    required:
-      - enabled
-      - serviceAccount
-      - mode
-      - interval
-      - existingClaim
-      - postgresqldump
-      - sqldump
     unevaluatedProperties: false
 patternProperties:
   ^x-: true
@@ -5208,7 +5197,6 @@ required:
   - additionalConfig
   - networkpolicies
   - tests
-  - demomode
 unevaluatedProperties: false
 $defs:
   bitnamiImage:
@@ -5703,20 +5691,11 @@ $defs:
         default: {}
         unevaluatedProperties: true
       extraEnv:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
         type: array
         title: Zusätzliche Umgebungsvariablen
         description: DEFAULT sind auf alle Synapse-Worker-Container anzuwenden.
-        items:
-          type: object
-          properties:
-            name:
-              type: string
-            value:
-              type: string
-          required:
-            - name
-            - value
-          unevaluatedProperties: false
         default: []
         examples:
           - name: LD_PRELOAD

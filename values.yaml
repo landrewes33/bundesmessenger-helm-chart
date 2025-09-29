@@ -11,7 +11,7 @@ image:
   repository: bwi/bundesmessenger/backend/container-images/synapse
 
   # (string) Verwendete Version des Synapse-Abbilds.
-  tag: 1.133.0-jammy-production
+  tag: 1.137.0-jammy-production
 
   # (list) Optional kann ein Array von imagePullSecrets angegeben werden.
   # Secrets müssen manuell im Namensraum angelegt werden.
@@ -164,7 +164,7 @@ signingkey:
       # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen (empfohlen)
       repository: bwi/bundesmessenger/backend/container-images/synapse
       # (string) Verwendete Version des Synapse-Abbilds.
-      tag: 1.133.0-jammy-production
+      tag: 1.137.0-jammy-production
       pullSecrets: []
       # (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
@@ -268,11 +268,6 @@ config:
   # (bool) Metriken erfassen, eingeschaltet
   enable_metrics: true
 
-  # (bool) Registrierungskonfiguration, beachten Sie, dass die Registrierung mit dem
-  # containerinternen Werkzeug register_new_matrix_user immer möglich ist. Synapse-Admin kann dafür genutzt werden.
-  # @default -- false
-  enableRegistration: false
-
   # -- (map|string|null) Geheimnis zum Registrieren neuer Nutzer.
   # Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge gesetzt, wenn
   # er nicht angegeben ist.
@@ -311,6 +306,12 @@ config:
   #  - port: 9000
   #    bind_addresses: ['::']
   #    type: manhole
+
+  ## Extra listener, die zum Listener des Hauptprozesses hinzugefügt werden können
+  ##
+  extraMainListenerTypes: []
+  #  - consent
+
 ########################################
 ## Konfigurationen für Föderation
 ########################################
@@ -412,6 +413,7 @@ extraConfig:
   # (map) Konfiguration für Login mit Passwort
   password_config:
     # (bool) Login mit Passwort erlauben, eingeschaltet
+    # Wird automatisch ausgeschaltet, falls `mas.enabled`.
     enabled: true
     # (bool) lokale Nutzerdatenbank, eingeschaltet
     # Wenn dies deaktiviert wird, müssen andere `password_providers` definiert werden.
@@ -1192,14 +1194,14 @@ volumePermissions:
     #   - name: myRegistryKeySecretName
     pullSecrets: []
 
-  # (map) Ressourcen des Init-Containers zur Rechtekorrektur
-  # Hier keine gesetzt, da kurzlebig und von Hause aus klein
-  # Beispiel:
-  # resources:
-  #   requests:
-  #     memory: 128Mi
-  #     cpu: 100m
-  resources: {}
+  # (map) Ressourcengrenzen des Init-Containers zur Rechtekorrektur.
+  resources:
+    limits:
+      memory: 128Mi
+      cpu: 500m
+    requests:
+      memory: 64Mi
+      cpu: 100m
 
 ## Konfiguration für den Hauptdienst von Synapse.
 ## Um TLS in Synapse selbst zu verwenden, fügen Sie einen TLS-Listener hinzu und ändern Sie die Ports
@@ -1217,7 +1219,7 @@ service:
 ######################################################################################
 ##          Konfiguration für Sygnal
 ######################################################################################
-## Reference: https://github.com/matrix-org/sygnal
+## Reference: https://github.com/element-hq/sygnal
 
 sygnal:
   # (bool) Aktivieren des Sygnal-Container
@@ -1226,7 +1228,7 @@ sygnal:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/sygnal
-    tag: 0.15.1-jammy-production
+    tag: 0.16.0-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 
@@ -1237,15 +1239,10 @@ sygnal:
   proxy: null
 
   # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
-  # weitere Beispiele:
-  #  fsGroup: 27
-  #  runAsGroup: 2000
-  #  runAsUser: 2000
-  #  sysctls:
-  #    - name: net.ipv4.ip_unprivileged_port_start
-  #      value: "80"
   podSecurityContext:
     <<: *defaultPodSecurityContext
+    runAsGroup: 1222
+    runAsUser: 1222
 
   # (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
   # weitere Beispiele:
@@ -1397,7 +1394,7 @@ wellknown:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/nginx
-    tag: 1.18.0-6ubuntu14.6-jammy-production
+    tag: 1.18.0-6ubuntu14.7-jammy-production
     pullPolicy: IfNotPresent
     # (list) Liste von Kubernetes Pull-Secrets.
     # Beispiel:
@@ -1467,7 +1464,7 @@ confighub:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/nginx
-    tag: 1.18.0-6ubuntu14.6-jammy-production
+    tag: 1.18.0-6ubuntu14.7-jammy-production
     pullPolicy: IfNotPresent
     # (list) Liste von Kubernetes Pull-Secrets.
     # Beispiel:
@@ -1531,7 +1528,7 @@ postgresql:
   # (map) Das zu verwendende PostgreSQL-Container-Abbild.
   image:
     registry: docker.io
-    repository: bitnami/postgresql
+    repository: bitnamilegacy/postgresql
     tag: "16"
     # (list) Liste von Kubernetes Pull-Secrets.
     # Beispiel:
@@ -1861,7 +1858,7 @@ mas:
     registry: ghcr.io
     repository: element-hq/matrix-authentication-service
     # Tag mit "-debug" um shell zu haben
-    tag: 0.18.0-debug
+    tag: 1.3.0-debug
     pullSecrets: []
     pullPolicy: IfNotPresent
 
@@ -2511,7 +2508,7 @@ webclient:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.23.0-jammy-production
+    tag: 2.23.1-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 
@@ -2646,6 +2643,11 @@ call:
     # - name: HTTP_PROXY
     #   value: "http://proxyuser@proxyserver:proxyport"
     extraEnv: []
+
+    # (list) Weitere Speicherbereiche für den LiveKit JWT Service-Pod.
+    extraVolumes: []
+    # (list) Weitere Speicher-Einhängepunkte für den LiveKit JWT Service-Container.
+    extraVolumeMounts: []
 
     # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
     podSecurityContext:
@@ -2809,16 +2811,27 @@ networkpolicies:
   # Aktuell wird nur eine Architektur mit einem L7 Ingress Controller unterstützt.
   # Absolut notwendig für die Network-Policies
   ingressNamespace: "default"
+
   # Wird gesetzt wenn sich die Postgres Instanz ausserhalb des Kubernetes Cluster befindet.
   # Da Network Policies keine Hostnames auflösen können, wird eine IP benötigt.
   postgres:
-    # bei dem Einsatz einer Postgres Instanz welche sich außerhalb des Kubernetes Clusters
-    # befindet muss hier eine einzelne IP Adresse angegeben werden.
+    # bei dem Einsatz einer Postgres Instanz, welche sich außerhalb des Kubernetes Clusters
+    # befindet, muss hier eine einzelne IP Adresse angegeben werden.
     externalPostgresIP: ""
-    # (string) Der labelselector wird dafür genutzt eine Postgres Instanz innerhalb des Clusters
-    # zu adressieren. Sollte das Label bei einer eigens betriebenen Instanz abweichen,
-    # kann dies hier angepasst werden.
-    labelselector: "app.kubernetes.io/name: postgresql"
+    # (map) Labels zum Adressieren der PostgreSQL-Instanz.
+    # Sollten die Labels bei einer eigens betriebenen Instanz abweichen, kann
+    # dies hier angepasst werden.
+    # Achtung: Auf Grund des Verhaltens von Helm, muss der Stansardwert, wenn er nicht benötigt wird
+    # explizit deaktiviert werden: `app.kubernetes.io/name: null`
+    selectorLabels:
+      app.kubernetes.io/name: postgresql
+
+  # (map) HTTP-Resolver für ACME/Let’s Encrypt.
+  # Erlaubt die Kommunikation vom Ingress zum hier angegebenen Endpunkt (Pod + Port).
+  acme:
+    selectorLabels:
+      acme.cert-manager.io/http01-solver: "true"
+    port: 8089
 
 
 ######################################################################################
@@ -2862,59 +2875,3 @@ tests:
       cpu: 50m
       # (string) Anforderungen an RAM Ressourcen, die für Tests anzuwenden sind.
       memory: 16Mi
-
-
-######################################################################################
-##          Konfiguration für Demo-Modes
-######################################################################################
-
-demomode:
-  # (bool) Aktivieren des Demoworkflows für Kubernetes ab v1.21.0
-  # Achtung: Der Demomodus setzt per CronJob die Datenbank regelmäßig zurück.
-  enabled: false
-
-  serviceAccount:
-    create: true
-    # (string|null) Name des ServiceAccounts für den demomode-job.
-    # name: non-default-demomode-name
-
-  # (string) Auswahl des Demomodus
-  # Folgende Möglichkeiten:
-  #   "complete": Es wird die gesamte Datenbank gelöscht und neu erstellt.
-  #   "defined": Es wird ein Datenbank-Dump zurück gespielt.
-  #              Dieser muss als DB-Dump bereitgestellt werden. (TBD)
-  #   "federation": Wie "defined", jedoch mit der Option als Förderationspartner zu fungieren. (TBD)
-  mode: complete
-
-  # (string) Angabe der Laufzeit des Demomodus
-  # Nutzung der Crontab-Zeitnotation
-  # Die Crontab-Zeitnotation besteht aus fünf oder sechs Stichpunkten, die die Zeitintervalle angeben:
-  # Minute (0-59): Die Minute, zu der die Aufgabe ausgeführt werden soll.
-  # Stunde (0-23): Die Stunde, zu der die Aufgabe ausgeführt werden soll.
-  # Tag des Monats (1-31): Der Tag des Monats, an dem die Aufgabe ausgeführt werden soll.
-  # Monat (1-12): Der Monat, in dem die Aufgabe ausgeführt werden soll.
-  # Tag der Woche (0-6): Der Tag der Woche, an dem die Aufgabe ausgeführt werden soll (0 steht für Sonntag).
-  # (optional) Jahr (z. B. 2023): Das Jahr, in dem die Aufgabe ausgeführt werden soll.
-  # Die Stichpunkte können folgende Werte enthalten:
-  # Eine konkrete Zahl (z. B. 5): Die Aufgabe wird zu diesem spezifischen Wert ausgeführt.
-  # Eine Liste von Zahlen (z. B. 1,3,5): Die Aufgabe wird zu jedem der angegebenen Werte ausgeführt.
-  # Ein Bereich von Zahlen (z. B. 1-5): Die Aufgabe wird zu allen Werten im angegebenen Bereich ausgeführt.
-  # Eine Schrittgröße (z. B. */10): Die Aufgabe wird in Intervallen entsprechend der angegebenen Schrittgröße ausgeführt.
-  # Zusätzlich können spezielle Zeichen verwendet werden:
-  # Asterisk (*): Steht für "jeder Wert" und wird verwendet, um anzuzeigen, dass die Aufgabe zu jeder möglichen Zeit ausgeführt werden soll.
-  # Komma (,): Trennt mehrere Werte oder Wertebereiche voneinander.
-  # Schrägstrich (/): Wird verwendet, um eine Schrittgröße anzugeben.
-  # @default 0 0 * * 0, Dies bedeutet, dass die Aufgabe um 0:00 Uhr (Mitternacht) an jedem Sonntag (Tag der Woche = 0) ausgeführt wird
-  interval: "0 0 * * 0"
-
-  # (string) existingClaim für Volume/Storage PostgreSQL-Dump und Media-Files
-  existingClaim: ""
-
-  # (string) Image für den Dump-Container, muss mit dem genutzten PostgreSQL kompatibel sein.
-  # anzugeben in der Form: Registry/Repository/Image:Tag
-  # Beispiel: registry.opencode.de/ig-bvc/demo-apps/postgresql/postgres:14
-  # Wenn nicht gesetzt, wird das Image vom weiter oben konfigurierten internen PostgreSQL-Server genutzt.
-  postgresqldump: ""
-
-  # (string) Postgresql-Dump, welcher auf dem PVC vom PostgreSQL-Server liegt
-  sqldump: dump.sql

@@ -89,7 +89,12 @@ data:
         x_forwarded: true
 
         resources:
-          - names: [client, federation]
+          - names:
+            - client
+            - federation
+    {{- with .Values.config.extraMainListenerTypes -}}
+      {{ . | toYaml | nindent 12 }}
+    {{- end }}
             compress: false
 
       - port: 9090
@@ -141,12 +146,6 @@ data:
     uploads_path: "/synapse/data/uploads"
 
     ## Registration ##
-
-    {{ if .Values.mas.enabled -}}
-    enable_registration: false
-    {{- else -}}
-    enable_registration: {{ .Values.config.enableRegistration | default false }}
-    {{- end }}
 
     {{- if include "matrix-synapse.registrationSharedSecret.secretName" . }}
     registration_shared_secret_path: /synapse/secrets/registration
@@ -215,7 +214,7 @@ data:
     {{ $extraConfig := .Values.extraConfig }}
     {{- if .Values.mas.enabled -}}
       {{ $passwordDict := dict "password_config" (dict "enabled" false) }}
-      {{ $extraConfig := mergeOverwrite $extraConfig $passwordDict }}
+      {{ $extraConfig = mergeOverwrite $extraConfig $passwordDict }}
     {{- end -}}
 
     {{- /* Entfernen von per default leeren Variable aus ExtraConfig Dictionary
@@ -234,10 +233,10 @@ data:
       {{ $caDict := dict "federation_custom_ca_list" ($caList) }}
       {{ $extraConfig := mustMergeOverwrite $extraConfig $caDict }}
     {{- end }}
-    
+
     {{/* Handled in built-in experimental_features.yaml. */}}
     {{ $extraConfig := omit $extraConfig "experimental_features" }}
-    
+
     {{- with $extraConfig }}
 
     ## Extra config ##
