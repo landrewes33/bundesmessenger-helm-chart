@@ -306,3 +306,113 @@ tests:
       - equal:
           path: spec.egress[0].to[0].ipBlock.cidr
           value: "10.1.2.3/32"
+---
+suite: Test egress rules allow KubeDNS and external IPBlocks
+templates:
+  - templates/network-policy/allow-kubedns-network-policy.yaml
+set:
+  postgresql:
+    enabled: false
+  externalPostgresql:
+    port: 15432
+    existingSecret: postgresql
+  networkpolicies.enabled: true
+tests:
+  - it: should render egress rule without ports for CIDR-only
+    set:
+      networkpolicies:
+        egressIpBlock:
+          - "10.0.0.0/24"
+    asserts:
+      - isKind:
+          of: NetworkPolicy
+      - contains:
+          path: spec.egress
+          content:
+            to:
+              - ipBlock:
+                  cidr: "10.0.0.0/24"
+
+  - it: should group multiple CIDRs with same port 443
+    set:
+      networkpolicies:
+        egressIpBlock:
+          - "192.168.1.0/24:443"
+          - "172.16.0.0/16:443"
+    asserts:
+      - contains:
+          path: spec.egress[0].to
+          content:
+            ipBlock:
+              cidr: "192.168.1.0/24"
+      - contains:
+          path: spec.egress[0].to
+          content:
+            ipBlock:
+              cidr: "172.16.0.0/16"
+      - equal:
+          path: spec.egress[0].ports[0].port
+          value: 443
+
+  - it: should separate different ports into different egress rules
+    set:
+      networkpolicies:
+        egressIpBlock:
+          - "172.20.0.0/16:80"
+          - "192.168.1.0/24:443"
+    asserts:
+      - contains:
+          path: spec.egress
+          content:
+            ports:
+              - port: 80
+                protocol: TCP
+            to:
+              - ipBlock:
+                  cidr: 172.20.0.0/16
+      - contains:
+          path: spec.egress
+          content:
+            ports:
+              - port: 443
+                protocol: TCP
+            to:
+              - ipBlock:
+                  cidr: 192.168.1.0/24
+
+  - it: should render default DNS egress when egressCIDRs is not set
+    set:
+      networkpolicies:
+        dnsLabel: kube-dns
+    asserts:
+      - contains:
+          path: spec.egress[0].to
+          content:
+            namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: kube-system
+            podSelector:
+              matchExpressions:
+                - key: k8s-app
+                  operator: In
+                  values:
+                    - kube-dns
+
+  - it: should render default DNS egress when egressCIDRs is empty list
+    set:
+      networkpolicies:
+        dnsLabel: coredns
+        egressIpBlock: []
+    asserts:
+      - contains:
+          path: spec.egress[0].to
+          content:
+            namespaceSelector:
+              matchLabels:
+                kubernetes.io/metadata.name: kube-system
+            podSelector:
+              matchExpressions:
+                - key: k8s-app
+                  operator: In
+                  values:
+                    - coredns

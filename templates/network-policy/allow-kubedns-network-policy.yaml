@@ -12,20 +12,39 @@ spec:
   policyTypes:
     - Egress
   egress:
-    - to:
     {{- if .Values.networkpolicies.egressIpBlock }}
-      {{- with .Values.networkpolicies.egressIpBlock }}
-      - ipBlock:
-        {{ if contains ":" . }}
-        cidr: {{ (split ":" .) | first }}
-      ports:
-      - protocol: TCP
-        port: {{ (split ":" .) | last }}
-        {{- else }}
-        cidr: .
+    {{- $groups := dict -}}
+    {{- range $i, $entry := .Values.networkpolicies.egressIpBlock }}
+      {{- $parts := splitList ":" $entry -}}
+      {{- if eq (len $parts) 1 }}
+        {{- $cidr := index $parts 0 -}}
+        {{- if not (hasKey $groups "none") }}
+          {{- $_ := set $groups "none" (list) }}
         {{- end }}
+        {{- $_ := set $groups "none" (append (get $groups "none") $cidr) }}
+      {{- else }}
+        {{- $cidr := index $parts 0 -}}
+        {{- $port := index $parts 1 -}}
+        {{- if not (hasKey $groups $port) }}
+          {{- $_ := set $groups $port (list) }}
+        {{- end }}
+        {{- $_ := set $groups $port (append (get $groups $port) $cidr) }}
       {{- end }}
+    {{- end }}
+    {{- range $port, $cidrs := $groups }}
+    - to:
+      {{- range $cidrs }}
+      - ipBlock:
+          cidr: {{ . | quote }}
+      {{- end }}
+      {{- if ne $port "none" }}
+      ports:
+        - protocol: TCP
+          port: {{ $port }}
+      {{- end }}
+    {{- end }}
     {{- else }}
+    - to:
       - namespaceSelector:
           matchLabels:
             kubernetes.io/metadata.name: kube-system
