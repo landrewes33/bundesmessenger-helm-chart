@@ -1357,10 +1357,9 @@
           "unevaluatedProperties": false
         },
         "extraEnv": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
           "type": "array",
           "description": "Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-Pod anzuwenden sind.\n\nDies ist unter anderem für die Nutzung eines ausgehenden Proxies (https://element-hq.github.io/synapse/latest/setup/forward_proxy.html) notwendig.\n\nAchtung: U.U. sind die gleichen Einstellungen zusätzlich unter \"workers.default\" bzw. für den Sygnal selbst zu konfigurieren. Der Sygnal muss in der \"no_proxy\" Ausnahme enthalten sein, da Synapse ihn sonst versucht via Proxy zu erreichen. Für die BuM Apps ist dies \"push-local\".",
-          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
-          "unevaluatedProperties": false,
           "default": [],
           "examples": [
             [
@@ -4639,8 +4638,8 @@
           "unevaluatedProperties": false
         },
         "extraEnv": {
-          "type": "array",
-          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env"
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
+          "type": "array"
         },
         "service": {
           "type": "object",
@@ -6746,11 +6745,10 @@
           "unevaluatedProperties": true
         },
         "extraEnv": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
           "type": "array",
           "title": "Zusätzliche Umgebungsvariablen",
           "description": "DEFAULT sind auf alle Synapse-Worker-Container anzuwenden.",
-          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
-          "unevaluatedProperties": false,
           "default": [],
           "examples": [
             {
