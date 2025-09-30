@@ -1,0 +1,1 @@
+Image `ghcr.io/element-hq/lk-jwt-service` auf Version `0.3.0` aktualisiert.
