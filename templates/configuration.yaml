@@ -157,6 +157,14 @@ data:
 
     form_secret_path: /synapse/secrets/form-secret
 
+    ## Redis configuration ##
+
+    redis:
+      enabled: true
+      host: {{ include "matrix-synapse.redis.host" . | quote }}
+      port: {{ include "matrix-synapse.redis.port" . }}
+      password_path: /synapse/secrets/redis
+
     ## Metrics ###
 
     enable_metrics: {{ .Values.config.enable_metrics | default true }}

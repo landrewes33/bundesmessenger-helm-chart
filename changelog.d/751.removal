@@ -1,0 +1,1 @@
+Erfordern der Angabe eines Secret-Namens für Redis per existingSecret; der Standardname ist nun `redis`.
