@@ -2979,35 +2979,42 @@ properties:
     unevaluatedProperties: true
   externalRedis:
     type: object
-    title: Authentifizierung für externen Redis Server
+    title: Extern konfigurierter Redis-Server
+    description: "Wird nur verwendet, wenn `redis.enabled: false` ist."
     properties:
       host:
         type: string
         minLength: 1
-        title: Hostname für externen Redis Server
+        title: Hostname vom externen Redis-Server
         default: redis
       port:
         $ref: >-
           https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort
         type: integer
-        title: Port für externe PostgreSQL-DB
+        title: Port vom externen Redis-Server
         default: 6379
       password:
+        deprecated: true
         type: ["null", "string"]
         title: Password für Redis
-        default: synapse
-      existingSecret:
-        type: ["null", "string"]
-        title: Bestehendes Secret
-        description: Wird anstelle eines statischen Passwortes verwendet.
+        description: >-
+          **ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.
         default: null
+        examples:
+          - 53C237R3D!5P455W02D
+      existingSecret:
+        type: string
+        title: Name des Secrets mit dem Redis-Passwort
+        default: redis
       existingSecretPasswordKey:
-        type: ["null", "string"]
-        title: Schlüsselinformationen für ein genanntes Secret
+        type: string
+        title: Verweis im `existingSecret` auf das Redis-Passwort
         default: redis-password
     required:
       - host
       - port
+      - existingSecret
+      - existingSecretPasswordKey
     unevaluatedProperties: false
   ingress:
     type: object
@@ -5106,33 +5113,6 @@ properties:
 patternProperties:
   ^x-: true
 allOf:
-  - oneOf:
-      - properties:
-          redis:
-            properties:
-              enabled:
-                const: true
-      - properties:
-          redis:
-            properties:
-              enabled:
-                const: false
-          externalRedis:
-            oneOf:
-              - properties:
-                  existingSecret:
-                    type: string
-                  password:
-                    type: "null"
-                requires:
-                  - existingSecret
-              - properties:
-                  existingSecret:
-                    type: "null"
-                  password:
-                    type: string
-                requires:
-                  - password
   - oneOf:
       - properties:
           postgresql:

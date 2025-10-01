@@ -1702,19 +1702,20 @@ redis:
         # (string) Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind.
         memory: 256Mi
 
-# (map) Ein extern konfigurierter Redis-Server, der für Worker/Sharding verwendet wird
-# Wird erst ausgewertet, wenn `redis.enabled=false` ist.
-# Alternativ zum statischen Passwort:
-# Der Name eines bestehenden Secret mit Redis-Anmeldeinformationen
-# existingSecret: redis-secrets
-# Passwortschlüssel, der aus dem bestehenden Secret abgerufen wird
-# existingSecretPasswordKey: redis-password
+# (map) Extern konfigurierter Redis-Server.
+# Wird nur verwendet, wenn `redis.enabled: false` ist.
 externalRedis:
+  # (string) Hostname vom externen Redis-Server.
   host: redis
+  # (integer) Port vom externen Redis-Server.
   port: 6379
-  password: null
+  # (string|null) Password für Redis.
+  # **ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.
+  # password: 53C237R3D!5P455W02D
 
-  existingSecret: null
+  # (string) Name des Secrets mit dem Redis-Passwort.
+  existingSecret: redis
+  # (string) Verweis im `existingSecret` auf das Redis-Passwort.
   existingSecretPasswordKey: redis-password
 
 

@@ -105,10 +105,8 @@ spec:
             - -c
             - |
               export POSTGRES_PASSWORD=$(echo "${POSTGRES_PASSWORD:-}" | sed 's/\//\\\//g' | sed 's/\&/\\\&/g') && \
-              export REDIS_PASSWORD=$(echo "${REDIS_PASSWORD:-}" | sed 's/\//\\\//g' | sed 's/\&/\\\&/g') && \
               cat /synapse/secrets/*.yaml | \
                 sed -e "s/@@POSTGRES_PASSWORD@@/${POSTGRES_PASSWORD:-}/" \
-                    -e "s/@@REDIS_PASSWORD@@/${REDIS_PASSWORD:-}/" \
                        > /synapse/config/conf.d/secrets.yaml
 
               {{- range $config.extraCommands }}
@@ -133,16 +131,6 @@ spec:
                 secretKeyRef:
                   name: {{ $postgresSecretName }}
                   key: {{ $postgresSecretKey }}
-          {{- end }}
-          {{- if and
-              ($redisSecretName := include "matrix-synapse.redis.secret-name" $)
-              ($redisSecretKey := include "matrix-synapse.redis.secret-key" $)
-          }}
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $redisSecretName }}
-                  key: {{ $redisSecretKey }}
           {{- end }}
           {{- with $config.extraEnv }}
             {{- . | toYaml | nindent 12 }}
@@ -242,6 +230,11 @@ spec:
             sources:
               - secret:
                   name: {{ include "matrix-synapse.fullname" $ }}
+              - secret:
+                  name: {{ include "matrix-synapse.redis.secret-name" $ }}
+                  items:
+                    - key: {{ include "matrix-synapse.redis.secret-key" $ }}
+                      path: redis
               {{ if and
                   ($secretName := include "matrix-synapse.registrationSharedSecret.secretName" $)
                   ($secretKey := include "matrix-synapse.registrationSharedSecret.secretKey" $)

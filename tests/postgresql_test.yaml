@@ -91,6 +91,10 @@ tests:
       postgresql.enabled: false
       externalPostgresql.existingSecret: null
       externalPostgresql.password: P455W02D
+      # Make sure `env` is an array.
+      synapse.extraEnv:
+        - name: DUMMY
+          value: ENV
     asserts:
       - template: deployment.yaml
         notContains:
