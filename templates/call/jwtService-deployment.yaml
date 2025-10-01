@@ -42,16 +42,10 @@ spec:
           env:
             - name: LIVEKIT_URL
               value: {{ .Values.call.livekit.url | quote }}
-            - name: LIVEKIT_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.call.existingSecret }}
-                  key: {{ .Values.call.secretKeys.livekitKey }}
-            - name: LIVEKIT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.call.existingSecret }}
-                  key: {{ .Values.call.secretKeys.livekitSecret }}
+            - name: LIVEKIT_KEY_FROM_FILE
+              value: /secret/livekit-key
+            - name: LIVEKIT_SECRET_FROM_FILE
+              value: /secret/livekit-secret
           {{- with .Values.call.jwtService.extraEnv }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -73,6 +67,8 @@ spec:
               port: http
             periodSeconds: 30
           volumeMounts:
+            - mountPath: /secret
+              name: secret
             - mountPath: /tmp
               name: tmp
           {{- with .Values.call.jwtService.extraVolumeMounts }}
@@ -85,6 +81,19 @@ spec:
           emptyDir:
             sizeLimit: 10Mi
             medium: Memory
+        - name: secret
+          projected:
+            sources:
+              - secret:
+                  name: {{ .Values.call.existingSecret }}
+                  items:
+                    - key: {{ .Values.call.secretKeys.livekitKey }}
+                      path: livekit-key
+              - secret:
+                  name: {{ .Values.call.existingSecret }}
+                  items:
+                    - key: {{ .Values.call.secretKeys.livekitSecret }}
+                      path: livekit-secret
         {{- with .Values.call.jwtService.extraVolumes }}
           {{- . | toYaml | nindent 8 }}
         {{- end }}
