@@ -107,8 +107,8 @@ Der LiveKit JWT Service ist ein eigenes Container Image bzw. Kubernetes Service
 und wird via Umgebungsvariablen konfiguriert.
 
 - `LIVEKIT_URL`
-- `LIVEKIT_KEY`
-- `LIVEKIT_SECRET`
+- `LIVEKIT_KEY_FROM_FILE`
+- `LIVEKIT_SECRET_FROM_FILE`
 
 Der LiveKit JWT Service stellt den API Endpunkt `POST /sfu/get` für die Clients
 bereit. Über die API bekommt er einen OpenID-Token des Benutzers und den Synapse-Homeserver
