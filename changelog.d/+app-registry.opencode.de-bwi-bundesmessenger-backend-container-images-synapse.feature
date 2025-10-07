@@ -1,0 +1,1 @@
+Image `registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse` auf Version `1.139.1` aktualisiert.
