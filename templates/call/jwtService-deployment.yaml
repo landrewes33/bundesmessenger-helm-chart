@@ -72,7 +72,7 @@ spec:
             - mountPath: /tmp
               name: tmp
           {{- with .Values.call.jwtService.extraVolumeMounts }}
-            {{- . | toYaml | nindent 10 }}
+            {{- . | toYaml | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.call.jwtService.resources | nindent 12 }}
