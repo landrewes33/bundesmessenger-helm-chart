@@ -2595,6 +2595,40 @@
             }
           ],
           "unevaluatedProperties": true
+        },
+        "extraEnv": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
+          "type": "array",
+          "title": "Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind",
+          "default": [],
+          "examples": [
+            [
+              {
+                "name": "NO_PROXY",
+                "value": "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"
+              },
+              {
+                "name": "HTTPS_PROXY",
+                "value": "https://proxyuser@proxyserver:proxyport"
+              },
+              {
+                "name": "HTTP_PROXY",
+                "value": "http://proxyuser@proxyserver:proxyport"
+              }
+            ]
+          ]
+        },
+        "extraVolumes": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes",
+          "type": "array",
+          "title": "Weitere Speicherbereiche für das Sygnal Deployment",
+          "default": []
+        },
+        "extraVolumeMounts": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts",
+          "type": "array",
+          "title": "Weitere Speicher-Einhängepunkte für das Sygnal Deployment",
+          "default": []
         }
       },
       "allOf": [
@@ -4384,6 +4418,10 @@
           "title": "Die maximale Zeit, die ein Eintrag im Cache verbleibt, bevor er entfernt wird",
           "default": "1d"
         },
+        "extraEnv": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
+          "type": "array"
+        },
         "extraVolumes": {
           "type": "array",
           "title": "Zusätzliche in den Matrix-Content-Scanner zu mountende Datenträger (Volumes)",
@@ -4552,6 +4590,7 @@
       ],
       "required": [
         "enabled",
+        "extraEnv",
         "extraVolumes",
         "extraVolumeMounts",
         "scanScript",
@@ -5245,10 +5284,31 @@
             "readOnlyRootFilesystem": true
           },
           "unevaluatedProperties": false
+        },
+        "extraEnv": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
+          "type": "array",
+          "title": "Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind",
+          "default": []
+        },
+        "extraVolumes": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes",
+          "type": "array",
+          "title": "Weitere Speicherbereiche für das Admin-Portal Deployment",
+          "default": []
+        },
+        "extraVolumeMounts": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts",
+          "type": "array",
+          "title": "Weitere Speicher-Einhängepunkte für das Admin-Portal Deployment",
+          "default": []
         }
       },
       "required": [
         "enabled",
+        "extraEnv",
+        "extraVolumes",
+        "extraVolumeMounts",
         "uri",
         "TLSverify",
         "logLevel",
