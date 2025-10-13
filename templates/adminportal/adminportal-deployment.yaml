@@ -51,7 +51,7 @@ spec:
           - containerPort: 8000
             name: admin-core
             protocol: TCP
-        {{- with .Values.contentscanner.extraEnv }}
+        {{- with .Values.adminPortal.extraEnv }}
         env:
           {{- . | toYaml | nindent 10 }}
         {{- end }}
@@ -71,7 +71,7 @@ spec:
             subPath: audit_log_db.db
             readOnly: false
         {{- end }}
-        {{- with .Values.sygnal.extraVolumeMounts }}
+        {{- with .Values.adminPortal.extraVolumeMounts }}
           {{- . | toYaml | nindent 12 }}
         {{- end }}
         envFrom:
@@ -92,7 +92,7 @@ spec:
           emptyDir:
             sizeLimit: 2Gi
         {{- end }}
-        {{- with .Values.sygnal.extraVolumes }}
+        {{- with .Values.adminPortal.extraVolumes }}
          {{- . | toYaml | nindent 8 }}
         {{- end }}
       {{- end }}
