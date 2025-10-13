@@ -41,6 +41,11 @@ livekit:
   turn:
     enabled: false
 
+  # By default, the LiveKit SFU auto-creates rooms for all users.
+  # To ensure proper access control disable automatic room creation.
+  room:
+    auto_create: false
+
 loadBalancer:
   type: do
   # TLS certificate generated automatically with certmanager / letsencrypt
