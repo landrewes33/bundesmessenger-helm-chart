@@ -37,6 +37,10 @@ spec:
       - name: {{ $name }}
         image: "{{ printf "%s/%s:%s" $config.image.registry $config.image.repository $config.image.tag }}"
         imagePullPolicy: "{{ $config.image.pullPolicy }}"
+        {{- with .Values.contentscanner.extraEnv }}
+        env:
+          {{- . | toYaml | nindent 10 }}
+        {{- end }}
         securityContext:
           {{- $config.securityContext | toYaml | nindent 10 }}
         resources:

@@ -51,6 +51,10 @@ spec:
           - containerPort: 8000
             name: admin-core
             protocol: TCP
+        {{- with .Values.adminPortal.extraEnv }}
+        env:
+          {{- . | toYaml | nindent 10 }}
+        {{- end }}
         readinessProbe:
           tcpSocket:
             port: admin-core
@@ -60,12 +64,15 @@ spec:
             path: {{ $apiPath }}/health
             port: admin-core
           periodSeconds: 10
-        {{- if eq .Values.adminPortal.auditLog.database "sqlite" }}
         volumeMounts:
+        {{- if eq .Values.adminPortal.auditLog.database "sqlite" }}
           - name: audit-log
             mountPath: /app/log/
             subPath: audit_log_db.db
             readOnly: false
+        {{- end }}
+        {{- with .Values.adminPortal.extraVolumeMounts }}
+          {{- . | toYaml | nindent 12 }}
         {{- end }}
         envFrom:
           - configMapRef:
@@ -84,6 +91,9 @@ spec:
         {{- else }}
           emptyDir:
             sizeLimit: 2Gi
+        {{- end }}
+        {{- with .Values.adminPortal.extraVolumes }}
+         {{- . | toYaml | nindent 8 }}
         {{- end }}
       {{- end }}
 

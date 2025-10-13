@@ -11,7 +11,7 @@ image:
   repository: bwi/bundesmessenger/backend/container-images/synapse
 
   # (string) Verwendete Version des Synapse-Abbilds.
-  tag: 1.137.0-jammy-production
+  tag: 1.139.2-jammy-production
 
   # (list) Optional kann ein Array von imagePullSecrets angegeben werden.
   # Secrets müssen manuell im Namensraum angelegt werden.
@@ -100,7 +100,7 @@ argoCD: false
 kubectlImage:
   registry: registry.opencode.de
   repository: bwi/bundesmessenger/backend/container-images/kubectl
-  tag: 1.33.2-jammy-production
+  tag: 1.34.1-jammy-production
   pullSecrets: []
   pullPolicy: IfNotPresent
 
@@ -164,7 +164,7 @@ signingkey:
       # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen (empfohlen)
       repository: bwi/bundesmessenger/backend/container-images/synapse
       # (string) Verwendete Version des Synapse-Abbilds.
-      tag: 1.137.0-jammy-production
+      tag: 1.139.2-jammy-production
       pullSecrets: []
       # (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
@@ -356,10 +356,6 @@ extraConfig:
     # Bei Bedarf werden diese vom remote Server erneut heruntergeladen.
     remote_media_lifetime: 90d
 
-  # (bool) Alle Dateien werden als Authentifiziert markiert, wenn aktiviert.
-  # siehe https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#enable_authenticated_media
-  # Authentifizierte Medien werden aktuell nicht vom Matrix Content Scanner unterstützt.
-  enable_authenticated_media: false
   # (bool) Authentifizierung notwendig für User-Suche
   require_auth_for_profile_requests: true
   # (bool) Limitiere Requests für Nutzer mit shared rooms, abgeschaltet
@@ -1306,6 +1302,21 @@ sygnal:
 
   existingSecret: "sygnal"
 
+  # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+  # Beispiel:
+  # - name: NO_PROXY
+  #   value: "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"
+  # - name: HTTPS_PROXY
+  #   value: "https://proxyuser@proxyserver:proxyport"
+  # - name: HTTP_PROXY
+  #   value: "http://proxyuser@proxyserver:proxyport"
+  extraEnv: []
+
+  # (list) Weitere Speicherbereiche für das Admin-Portal Deployment.
+  extraVolumes: []
+  # (list) Weitere Speicher-Einhängepunkte für das Admin-Portal Deployment.
+  extraVolumeMounts: []
+
   # (string|null) iOS-Key Dateiname
   # Wenn iOS Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
   # Bei Nutzung von iOS-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
@@ -1702,19 +1713,20 @@ redis:
         # (string) Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind.
         memory: 256Mi
 
-# (map) Ein extern konfigurierter Redis-Server, der für Worker/Sharding verwendet wird
-# Wird erst ausgewertet, wenn `redis.enabled=false` ist.
-# Alternativ zum statischen Passwort:
-# Der Name eines bestehenden Secret mit Redis-Anmeldeinformationen
-# existingSecret: redis-secrets
-# Passwortschlüssel, der aus dem bestehenden Secret abgerufen wird
-# existingSecretPasswordKey: redis-password
+# (map) Extern konfigurierter Redis-Server.
+# Wird nur verwendet, wenn `redis.enabled: false` ist.
 externalRedis:
+  # (string) Hostname vom externen Redis-Server.
   host: redis
+  # (integer) Port vom externen Redis-Server.
   port: 6379
-  password: null
+  # (string|null) Password für Redis.
+  # **ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.
+  # password: 53C237R3D!5P455W02D
 
-  existingSecret: null
+  # (string) Name des Secrets mit dem Redis-Passwort.
+  existingSecret: redis
+  # (string) Verweis im `existingSecret` auf das Redis-Passwort.
   existingSecretPasswordKey: redis-password
 
 
@@ -2154,6 +2166,9 @@ contentscanner:
   # (string) Die maximale Zeit, die ein Eintrag im Cache verbleibt, bevor er entfernt wird.
   ttl: 1d
 
+  # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+  extraEnv: []
+
   # (list) Zusätzliche in den Matrix-Content-Scanner zu mountende Datenträger (Volumes)
   # Beispiel:
   #  - name: custom-scanscript
@@ -2494,6 +2509,14 @@ adminPortal:
   securityContext:
     <<: *defaultSecurityContext
 
+  # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+  extraEnv: []
+
+  # (list) Weitere Speicherbereiche für das Admin-Portal Deployment.
+  extraVolumes: []
+  # (list) Weitere Speicher-Einhängepunkte für das Admin-Portal Deployment.
+  extraVolumeMounts: []
+
 
 ######################################################################################
 ##          Konfiguration für Element-WebClient
@@ -2627,7 +2650,7 @@ call:
     image:
       registry: ghcr.io
       repository: element-hq/lk-jwt-service
-      tag: 0.2.3
+      tag: 0.3.0
       pullSecrets: []
       pullPolicy: IfNotPresent
 
@@ -2636,6 +2659,12 @@ call:
 
     # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
     # Beispiel:
+    # https://github.com/element-hq/lk-jwt-service/tree/main?tab=readme-ov-file#%EF%B8%8F-configuration
+    # - name: LIVEKIT_FULL_ACCESS_HOMESERVERS
+    #   value: *
+    # https://github.com/element-hq/lk-jwt-service/tree/main?tab=readme-ov-file#-development--testing
+    # - name: LIVEKIT_INSECURE_SKIP_VERIFY_TLS
+    #   value: YES_I_KNOW_WHAT_I_AM_DOING
     # - name: NO_PROXY
     #   value: "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"
     # - name: HTTPS_PROXY

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.bundesmessenger.dev/bum/v1.15.0/values.schema.json",
+  "$id": "https://schema.bundesmessenger.dev/bum/v1.16.0/values.schema.json",
   "$comment": "Do not modify by hand. This file is auto-generated from values.schema.yaml",
   "type": "object",
   "title": "BundesMessenger Helm-Konfiguration",
@@ -2595,6 +2595,40 @@
             }
           ],
           "unevaluatedProperties": true
+        },
+        "extraEnv": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
+          "type": "array",
+          "title": "Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind",
+          "default": [],
+          "examples": [
+            [
+              {
+                "name": "NO_PROXY",
+                "value": "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"
+              },
+              {
+                "name": "HTTPS_PROXY",
+                "value": "https://proxyuser@proxyserver:proxyport"
+              },
+              {
+                "name": "HTTP_PROXY",
+                "value": "http://proxyuser@proxyserver:proxyport"
+              }
+            ]
+          ]
+        },
+        "extraVolumes": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes",
+          "type": "array",
+          "title": "Weitere Speicherbereiche für das Sygnal Deployment",
+          "default": []
+        },
+        "extraVolumeMounts": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts",
+          "type": "array",
+          "title": "Weitere Speicher-Einhängepunkte für das Sygnal Deployment",
+          "default": []
         }
       },
       "allOf": [
@@ -3582,49 +3616,50 @@
     },
     "externalRedis": {
       "type": "object",
-      "title": "Authentifizierung für externen Redis Server",
+      "title": "Extern konfigurierter Redis-Server",
+      "description": "Wird nur verwendet, wenn `redis.enabled: false` ist.",
       "properties": {
         "host": {
           "type": "string",
           "minLength": 1,
-          "title": "Hostname für externen Redis Server",
+          "title": "Hostname vom externen Redis-Server",
           "default": "redis"
         },
         "port": {
           "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort",
           "type": "integer",
-          "title": "Port für externe PostgreSQL-DB",
+          "title": "Port vom externen Redis-Server",
           "default": 6379
         },
         "password": {
+          "deprecated": true,
           "type": [
             "null",
             "string"
           ],
           "title": "Password für Redis",
-          "default": "synapse"
+          "description": "**ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.",
+          "default": null,
+          "examples": [
+            "53C237R3D!5P455W02D"
+          ]
         },
         "existingSecret": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "title": "Bestehendes Secret",
-          "description": "Wird anstelle eines statischen Passwortes verwendet.",
-          "default": null
+          "type": "string",
+          "title": "Name des Secrets mit dem Redis-Passwort",
+          "default": "redis"
         },
         "existingSecretPasswordKey": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "title": "Schlüsselinformationen für ein genanntes Secret",
+          "type": "string",
+          "title": "Verweis im `existingSecret` auf das Redis-Passwort",
           "default": "redis-password"
         }
       },
       "required": [
         "host",
-        "port"
+        "port",
+        "existingSecret",
+        "existingSecretPasswordKey"
       ],
       "unevaluatedProperties": false
     },
@@ -4383,6 +4418,10 @@
           "title": "Die maximale Zeit, die ein Eintrag im Cache verbleibt, bevor er entfernt wird",
           "default": "1d"
         },
+        "extraEnv": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
+          "type": "array"
+        },
         "extraVolumes": {
           "type": "array",
           "title": "Zusätzliche in den Matrix-Content-Scanner zu mountende Datenträger (Volumes)",
@@ -4551,6 +4590,7 @@
       ],
       "required": [
         "enabled",
+        "extraEnv",
         "extraVolumes",
         "extraVolumeMounts",
         "scanScript",
@@ -5244,10 +5284,31 @@
             "readOnlyRootFilesystem": true
           },
           "unevaluatedProperties": false
+        },
+        "extraEnv": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
+          "type": "array",
+          "title": "Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind",
+          "default": []
+        },
+        "extraVolumes": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes",
+          "type": "array",
+          "title": "Weitere Speicherbereiche für das Admin-Portal Deployment",
+          "default": []
+        },
+        "extraVolumeMounts": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts",
+          "type": "array",
+          "title": "Weitere Speicher-Einhängepunkte für das Admin-Portal Deployment",
+          "default": []
         }
       },
       "required": [
         "enabled",
+        "extraEnv",
+        "extraVolumes",
+        "extraVolumeMounts",
         "uri",
         "TLSverify",
         "logLevel",
@@ -6180,62 +6241,6 @@
     "^x-": true
   },
   "allOf": [
-    {
-      "oneOf": [
-        {
-          "properties": {
-            "redis": {
-              "properties": {
-                "enabled": {
-                  "const": true
-                }
-              }
-            }
-          }
-        },
-        {
-          "properties": {
-            "redis": {
-              "properties": {
-                "enabled": {
-                  "const": false
-                }
-              }
-            },
-            "externalRedis": {
-              "oneOf": [
-                {
-                  "properties": {
-                    "existingSecret": {
-                      "type": "string"
-                    },
-                    "password": {
-                      "type": "null"
-                    }
-                  },
-                  "requires": [
-                    "existingSecret"
-                  ]
-                },
-                {
-                  "properties": {
-                    "existingSecret": {
-                      "type": "null"
-                    },
-                    "password": {
-                      "type": "string"
-                    }
-                  },
-                  "requires": [
-                    "password"
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
     {
       "oneOf": [
         {

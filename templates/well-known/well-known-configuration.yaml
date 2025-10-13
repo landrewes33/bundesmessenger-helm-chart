@@ -24,18 +24,6 @@ data:
       server_name _;
 
       root {{ .Values.wellknown.htdocsPath }};
-      {{- /* Noch kein LUA-Support */ -}}
-      {{- if .Values.monitoring.enabled }}
-      #listen 9090;
-      #location /metrics {
-      #  content_by_lua_block {
-      #    metric_connections:set(ngx.var.connections_reading, {"reading"})
-      #    metric_connections:set(ngx.var.connections_waiting, {"waiting"})
-      #    metric_connections:set(ngx.var.connections_writing, {"writing"})
-      #    prometheus:collect()
-      #  }
-      #}
-      {{- end }}
       # livenessProbe auf /status, logging deaktiviert
       location /status {
         return 200;
