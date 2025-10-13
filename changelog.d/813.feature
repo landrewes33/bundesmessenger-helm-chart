@@ -1,1 +1,0 @@
-Aktiviert [`authenticated media`](https://matrix.org/docs/spec-guides/authed-media-servers/) im Synapse.

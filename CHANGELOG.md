@@ -7,6 +7,48 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.16.0 (2025-10-13)
+
+### ✨ Features
+
+- Aktiviert [`authenticated
+  media`](https://matrix.org/docs/spec-guides/authed-media-servers/) im
+  Synapse. (!813)
+- Image `ghcr.io/element-hq/lk-jwt-service` auf Version `0.3.0` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/kubectl`
+  auf Version `1.34.1` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse`
+  auf Version `1.139.2` aktualisiert.
+
+### 🐛 Bugfixes
+
+- Korrektur von `nindent` für den jwt-Service. (!903)
+
+### 📚 Dokumentation
+
+- Aktualisierung der Livekit Beispielkonfiguration mit `room.auto_create:
+  false`. (!895)
+
+### 📝 Weitere Änderungen
+
+- Konfiguration der CI/CD-Pipelines. (!886, !888, !890)
+- Einbinden vom Livekit-Schlüssel und -Geheimnis als Dateien. (!896)
+- Entfernt nicht verwendete Nginx Metriken in der wellknown Konfiguration.
+  (!898)
+- Hinzufügen der Schalter `extraVolumes`, `extraVolumeMounts` und `extraEnv` zu
+  Admin-Portal, Matrix-Content-Scanner und Sygnal. (!905, !910)
+- `bwmessenger/bundesmessenger-backend/common-pipelines` in der CI-Pipeline auf
+  Version `1.4.4` aktualisiert.
+- `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
+  `v0.86.0` aktualisiert.
+
+### 🦖 Abkündigungen und Bereinigungen
+
+- Erfordern der Angabe eines Secret-Namens für Redis per existingSecret; der
+  Standardname ist nun `redis`. (!751)
+
 ## BundesMessenger Helm Chart 1.15.0 (2025-09-29)
 
 ### ✨ Features

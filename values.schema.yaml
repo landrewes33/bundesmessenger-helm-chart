@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://schema.bundesmessenger.dev/bum/develop/values.schema.json
+$id: https://schema.bundesmessenger.dev/bum/v1.16.0/values.schema.json
 type: object
 title: BundesMessenger Helm-Konfiguration
 properties:
