@@ -2519,15 +2519,15 @@ adminPortal:
 
 
 ######################################################################################
-##          Konfiguration für Element-WebClient
+##          Konfiguration für BundesMessenger-WebClient
 ######################################################################################
 
 webclient:
-  # (bool) Element-Webclient im Deployment aktivieren
+  # (bool) BundesMessenger-WebClient im Deployment aktivieren
   enabled: false
   # (string|null) URL für den Webclient, zwingend notwendig
   uri: null
-  # (map) Konfiguration für das Image vom Element-Webclient
+  # (map) Konfiguration für das Image vom BundesMessenger-WebClient
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
