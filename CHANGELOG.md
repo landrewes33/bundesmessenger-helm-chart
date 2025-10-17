@@ -7,6 +7,13 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.16.1 (2025-10-17)
+
+### ✨ Features
+
+- Image `ghcr.io/element-hq/matrix-authentication-service` auf Version `1.4.1`
+  aktualisiert.
+
 ## BundesMessenger Helm Chart 1.16.0 (2025-10-13)
 
 ### ✨ Features
