@@ -5339,7 +5339,7 @@
         "image": {
           "$ref": "#/$defs/image",
           "type": "object",
-          "title": "Konfiguration für das Image vom Element-Webclient",
+          "title": "Konfiguration für das Image vom BundesMessenger-WebClient",
           "default": {
             "registry": "registry.opencode.de",
             "repository": "bwi/bundesmessenger/backend/container-images/bundesmessenger-web",
