@@ -42,7 +42,7 @@ tests:
           path: metadata.name
           value: RELEASE-NAME-bundesmessenger
         matchRegex:
-          path: stringData['config.yaml']
+          path: stringData["config.yaml"]
           pattern: 'password: "@@POSTGRES_PASSWORD@@"'
   - it: ensures internal PostgreSQL password is treated as Secret
     set:
@@ -63,7 +63,7 @@ tests:
       - template: secrets.yaml
         documentIndex: 0
         matchRegex:
-          path: stringData['config.yaml']
+          path: stringData["config.yaml"]
           pattern: 'password: "@@POSTGRES_PASSWORD@@"'
   - it: ensures external PostgreSQL works with existingSecret
     set:
@@ -84,7 +84,7 @@ tests:
       - template: secrets.yaml
         documentIndex: 0
         matchRegex:
-          path: stringData['config.yaml']
+          path: stringData["config.yaml"]
           pattern: 'password: "@@POSTGRES_PASSWORD@@"'
   - it: ensures external PostgreSQL works with password
     set:
@@ -105,7 +105,7 @@ tests:
       - template: secrets.yaml
         documentIndex: 0
         matchRegex:
-          path: stringData['config.yaml']
+          path: stringData["config.yaml"]
           pattern: 'password: "P455W02D"'
   - it: ensures external PostgreSQL errors on password and externalSecret
     set:

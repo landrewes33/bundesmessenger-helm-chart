@@ -55,7 +55,7 @@ tests:
           token_endpoint_auth_method: client_secret_basic
     asserts:
       - matchRegex:
-          path: stringData['mas-secret.yaml']
+          path: stringData["mas-secret.yaml"]
           pattern: "(?ms:\
             ^\\s*upstream_oauth2:.*?\
             ^\\s*  providers:.*?\
@@ -111,7 +111,7 @@ tests:
             sslkey: /path/to/key.pem
     asserts:
       - matchRegex:
-          path: stringData['mas-secret.yaml']
+          path: stringData["mas-secret.yaml"]
           pattern: "(?ms:\
             ^\\s*database:.*?\
             ^\\s*  # host: \"different.mas.example.org\".*?\
@@ -130,7 +130,7 @@ tests:
             ^\\s*  max_lifetime: 1818.*?\
             )"
       - matchRegex:
-          path: stringData['mas-secret.yaml']
+          path: stringData["mas-secret.yaml"]
           pattern: "(?ms:\
             ^\\s*database:.*?\
             ^\\s*  uri: \"\
@@ -151,7 +151,7 @@ tests:
           enabled: false
     asserts:
       - matchRegex:
-          path: stringData['mas-secret.yaml']
+          path: stringData["mas-secret.yaml"]
           pattern: "(?ms:\
             ^\\s*matrix:.*?\
             ^\\s*  endpoint: \"http://RELEASE-NAME-bundesmessenger:8008\".*?\
@@ -167,7 +167,7 @@ tests:
           enabled: true
     asserts:
       - matchRegex:
-          path: stringData['mas-secret.yaml']
+          path: stringData["mas-secret.yaml"]
           pattern: "(?ms:\
             ^\\s*matrix:.*?\
             ^\\s*  endpoint: \"http://RELEASE-NAME-generic-worker:8083\".*?\
