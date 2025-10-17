@@ -2538,6 +2538,10 @@ webclient:
   # (string) Anzeigename des Servers in Webclients.
   displayName: Messenger deiner Organisation
 
+  # Zusätzliche Konfigurationen für den Webclient (config.json)
+  # Ref: https://gitlab.opencode.de/bwi/bundesmessenger/clients/bundesmessenger-web/-/blob/master/config.sample.json
+  extraConfig: {}
+
   # (list) Weitere Umgebungsvariablen für den Webclient-Container.
   extraEnv: []
 

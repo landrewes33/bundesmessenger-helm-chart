@@ -5360,6 +5360,12 @@
           "title": "Anzeigename des Servers in Webclients",
           "default": "Messenger deiner Organisation"
         },
+        "extraConfig": {
+          "type": "object",
+          "description": "Zusätzliche Konfigurationen für den Webclient (config.json)",
+          "default": {},
+          "unevaluatedProperties": true
+        },
         "extraEnv": {
           "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env",
           "type": "array",

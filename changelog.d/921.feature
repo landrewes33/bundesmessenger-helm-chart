@@ -1,0 +1,1 @@
+Ermöglicht die Erweiterung der Konfiguration des Webclients in der `config.json`.

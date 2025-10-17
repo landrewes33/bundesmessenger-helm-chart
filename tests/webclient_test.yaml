@@ -79,3 +79,73 @@ tests:
       - containsDocument:
           kind: Ingress
         not: true
+
+---
+suite: Web Client ConfigMap
+templates:
+  - webclient/webclient-configuration.yaml
+set:
+  webclient:
+    enabled: true
+    uri: webclient.example.org
+    displayName: "MatrixClient"
+  externalPostgresql.existingSecret: postgresql
+  serverName: example.org
+tests:
+  - it: renders default config without optional blocks
+    template: webclient/webclient-configuration.yaml
+    documentIndex: 0
+    set:
+      call.enabled: false
+      additionalConfig.locationSharing.enabled: false
+    asserts:
+      - matchRegex:
+          path: data["override_default_config.json"]
+          pattern: '"base_url":\s"https://example\.org"'
+      - matchRegex:
+          path: data["override_default_config.json"]
+          pattern: '"server_name":\s"MatrixClient"'
+      - matchRegex:
+          path: data["override_default_config.json"]
+          pattern: '"content_scanner":\s{[^}]*"enabled":\strue[^}]*}'
+      - notMatchRegex:
+          path: data["override_default_config.json"]
+          pattern: '"element_call"'
+      - notMatchRegex:
+          path: data["override_default_config.json"]
+          pattern: '"bwi_setting_defaults"'
+
+  - it: includes bwi_setting_defaults when locationSharing enabled
+    template: webclient/webclient-configuration.yaml
+    documentIndex: 0
+    set:
+      additionalConfig.locationSharing.enabled: true
+    asserts:
+      - matchRegex:
+          path: data["override_default_config.json"]
+          pattern: '"bwi_setting_defaults":\s{'
+      - matchRegex:
+          path: data["override_default_config.json"]
+          pattern: '"BwiFeature.locationShareTypesEnabled":\s\[\s*"Pin"\s*\]'
+
+  - it: add custom config
+    template: webclient/webclient-configuration.yaml
+    documentIndex: 0
+    set:
+      webclient.extraConfig:
+        custom_key: "custom_value"
+    asserts:
+      - matchRegex:
+          path: data["override_default_config.json"]
+          pattern: '"custom_key":\s*"custom_value"'
+
+  - it: override custom config
+    template: webclient/webclient-configuration.yaml
+    documentIndex: 0
+    set:
+      webclient.extraConfig:
+        server_name: "NewMatrixClient"
+    asserts:
+      - matchRegex:
+          path: data["override_default_config.json"]
+          pattern: '"server_name":\s"NewMatrixClient"'
