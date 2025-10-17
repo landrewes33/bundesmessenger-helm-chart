@@ -71,7 +71,7 @@ tests:
       value: sygnal
     asserts:
       - equal:
-          path: stringData['bundesmessenger.json']
+          path: stringData["bundesmessenger.json"]
           value: |
             {
               "fake": "values"
@@ -88,7 +88,7 @@ tests:
       value: sygnal
     asserts:
       - equal:
-          path: data['AuthKey.p8']
+          path: data["AuthKey.p8"]
           value: 53C237
   - it: ensures no Secret without legacy options
     template: sygnal/sygnal-configuration.yaml

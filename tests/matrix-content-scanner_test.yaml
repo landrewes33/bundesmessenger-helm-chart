@@ -51,13 +51,13 @@ tests:
     documentIndex: 0
     asserts:
       - matchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*max_file_size:)'
       - matchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*max_size:)'
       - matchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*ttl:)'
   - it: ensures all config options are passed trough
     template: matrix-content-scanner/contentscanner-configuration.yaml
@@ -68,13 +68,13 @@ tests:
       contentscanner.ttl: 3d
     asserts:
       - matchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*max_file_size: 42MB)'
       - matchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*max_size: 4096)'
       - matchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*ttl: 3d)'
 ---
 suite: Matrix Content Scanner MIME types
@@ -93,10 +93,10 @@ tests:
       contentscanner.blocked_mimetypes: null
     asserts:
       - notMatchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*allowed_mimetypes:)'
       - notMatchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*blocked_mimetypes:)'
   - it: ensures the MIME types allowlist
     template: matrix-content-scanner/contentscanner-configuration.yaml
@@ -108,10 +108,10 @@ tests:
       contentscanner.blocked_mimetypes: null
     asserts:
       - matchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*allowed_mimetypes:\n\s*- text/plain\n\s*- image/svg)'
       - notMatchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*blocked_mimetypes:)'
   - it: ensures the MIME types blocklist
     template: matrix-content-scanner/contentscanner-configuration.yaml
@@ -123,10 +123,10 @@ tests:
         - application/wasm
     asserts:
       - notMatchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*allowed_mimetypes:)'
       - matchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*blocked_mimetypes:\n\s*- application/yaml\n\s*- application/wasm)'
   - it: ensures all MIME types are blocked on an empty allowlist
     template: matrix-content-scanner/contentscanner-configuration.yaml
@@ -136,10 +136,10 @@ tests:
       contentscanner.blocked_mimetypes: null
     asserts:
       - matchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*allowed_mimetypes:\s*\[\])'
       - notMatchRegex:
-          path: data['config.yaml']
+          path: data["config.yaml"]
           pattern: '(?m:^\s*blocked_mimetypes:)'
   - it: ensures an error on an empty MIME types blocklist
     set:
