@@ -1663,7 +1663,7 @@ redis:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/redis
-    tag: 5_6.0.16-1ubuntu1-jammy-production
+    tag: 5_6.0.16-1ubuntu1.1-jammy-production
     # (list) Liste von Kubernetes Pull-Secrets.
     # Beispiel:
     # pullSecrets: ["myRegistryKeySecretName"]
