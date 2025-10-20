@@ -1614,26 +1614,31 @@ postgresql:
     # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
     sslmode: prefer
 
-# (map) Ein extern konfigurierter Postgres-Server, der für die Datenbank von Synapse verwendet wird.
-# Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf "C" eingestellt sein.
-# Die "interne" Datenbank muss deaktiviert sein `postgresql.enabled: false`.
-# Beispiel für K8s internen Postgres im Namespace "postgres":
+# (map) Extern konfigurierter PostgreSQL-Server.
+# Wird für die Datenbank von Synapse verwendet.
+# Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf "C"
+# eingestellt sein.
+# Die „interne“ Datenbank muss deaktiviert sein: `postgresql.enabled: false`.
 externalPostgresql:
+  # (string) Hostname vom externen PostgreSQL-Server.
+  # Beispieladresse für einen K8s-internen PostgreSQL im Namespace `postgres`:
   host: postgres-4-matrix-postgresql.postgres.svc.cluster.local
+  # (integer) Port vom externen PostgreSQL-Server.
   port: 5432
-  # (string) Name für PostgreSQL-DB auf die sich verbunden wird
+  # (string) Name der zu verwendenden PostgreSQL-Datenbank.
   database: synapse_db
 
-  # (string) Name für PostgreSQL Nutzer
+  # (string) Name des PostgreSQL-Nutzers.
   username: synapse
 
-  # (string|null) Passwort für PostgreSQL Nutzer
-  password: null
+  # (string|null) Passwort vom PostgreSQL-Nutzer.
+  # **ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.
+  # password: 53C237P0576235Q1P455W02D
 
-  # (string|null) Der Name eines bestehenden Secrets mit Postgresql-Anmeldedaten
-  existingSecret: null
+  # (string) Name vom Secret mit dem PostgreSQL-Passwort.
+  existingSecret: postgresql
 
-  # (string) Passwortschlüssel, der aus dem bestehenden Secret abgerufen wird
+  # (string) Verweis im `existingSecret` auf das PostgreSQL-Passwort.
   existingSecretPasswordKey: password
 
   # (map) Zusätzliche Argumente für die Datenbankverbindung.

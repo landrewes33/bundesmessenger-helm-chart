@@ -285,51 +285,31 @@ Set postgresql username
 {{- end -}}
 
 {{/*
-PostgreSQL password.
-
-Empty if an existingSecret is used.
+Name of the Secret containing the PostgreSQL password.
 */}}
-{{- define "matrix-synapse.postgresql.password" -}}
-{{- if and .Values.postgresql.enabled (not .Values.postgresql.auth.existingSecret) }}
-  {{- required "PostgreSQL requires a Secret or password" .Values.postgresql.auth.password }}
-{{- else if and (not .Values.postgresql.enabled) (not .Values.externalPostgresql.existingSecret) }}
-  {{- required
-    "External PostgreSQL requires a Secret or password"
-    .Values.externalPostgresql.password
-  }}
+{{- define "matrix-synapse.postgresql.secret-name" -}}
+{{- if .Values.postgresql.enabled }}
+  {{- .Values.postgresql.auth.existingSecret }}
+{{- else }}
+  {{- .Values.externalPostgresql.existingSecret }}
 {{- end }}
 {{- end -}}
 
 {{/*
-Name of the Secret containing the PostgreSQL password.
-
-Empty if no existingSecret is used.
-*/}}
-{{- define "matrix-synapse.postgresql.secret-name" -}}
-{{- if .Values.postgresql.enabled -}}
-  {{ .Values.postgresql.auth.existingSecret | default "" }}
-{{- else -}}
-  {{ .Values.externalPostgresql.existingSecret | default "" }}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Key to the password contained in the PostgreSQL Secret.
-
-Empty if no existingSecret is used.
 */}}
 {{- define "matrix-synapse.postgresql.secret-key" -}}
-{{- if and .Values.postgresql.enabled .Values.postgresql.auth.existingSecret -}}
+{{- if .Values.postgresql.enabled }}
   {{- required
     "To use a Secret for PostgreSQL, postgresql.auth.secretKeys.userPasswordKey is required"
     .Values.postgresql.auth.secretKeys.userPasswordKey
   }}
-{{- else if and (not .Values.postgresql.enabled) .Values.externalPostgresql.existingSecret -}}
+{{- else }}
   {{- required
     "To use a Secret for PostgreSQL, externalPostgresql.existingSecretPasswordKey is required"
     .Values.externalPostgresql.existingSecretPasswordKey
   }}
-{{- end -}}
+{{- end }}
 {{- end -}}
 
 {{/*
