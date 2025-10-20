@@ -3339,56 +3339,59 @@
     },
     "externalPostgresql": {
       "type": "object",
-      "title": "Authentifizierung für externen PostgreSQL",
+      "title": "Extern konfigurierter PostgreSQL-Server",
+      "description": "Wird für die Datenbank von Synapse verwendet. Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf \"C\" eingestellt sein. Die „interne“ Datenbank muss deaktiviert sein: `postgresql.enabled: false`.",
       "properties": {
         "host": {
           "type": "string",
           "minLength": 1,
-          "title": "Hostname für externen PostgreSQL Server",
+          "title": "Hostname vom externen PostgreSQL-Server",
+          "description": "Beispieladresse für einen K8s-internen PostgreSQL im Namespace `postgres`:",
           "default": "postgres-4-matrix-postgresql.postgres.svc.cluster.local"
         },
         "port": {
           "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort",
           "type": "integer",
-          "title": "Port für externe PostgreSQL-DB",
+          "title": "Port vom externen PostgreSQL-Server",
           "default": 5342
         },
         "database": {
           "type": "string",
           "minLength": 1,
-          "title": "DB-Name für PostgreSQL-DB",
+          "title": "Name der zu verwendenden PostgreSQL-Datenbank",
           "default": "synapse_db"
         },
         "username": {
           "type": "string",
           "minLength": 1,
-          "title": "Nutzername für PostgreSQL-DB",
+          "title": "Name des PostgreSQL-Nutzers",
           "default": "synapse"
         },
         "password": {
+          "deprecated": true,
           "type": [
             "null",
             "string"
           ],
           "minLength": 1,
-          "title": "Password für PostgreSQL Nutzer",
-          "default": "synapse"
+          "title": "Passwort vom PostgreSQL-Nutzer",
+          "description": "**ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.",
+          "default": null,
+          "examples": [
+            "53C237P0576235Q1P455W02D"
+          ]
         },
         "existingSecret": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "title": "Bestehendes Secret",
-          "description": "Wird anstelle eines statischen Passwortes verwendet."
+          "type": "string",
+          "minLength": 1,
+          "title": "Name vom Secret mit dem PostgreSQL-Passwort",
+          "default": "postgresql"
         },
         "existingSecretPasswordKey": {
-          "type": [
-            "null",
-            "string"
-          ],
-          "title": "Passwortschlüssel",
-          "description": "Wird aus dem bestehenden Secret abgerufen."
+          "type": "string",
+          "minLength": 1,
+          "title": "Verweis im `existingSecret` auf das PostgreSQL-Passwort",
+          "default": "password"
         },
         "extraArgs": {
           "type": "object",
@@ -3430,6 +3433,8 @@
         "port",
         "database",
         "username",
+        "existingSecret",
+        "existingSecretPasswordKey",
         "extraArgs"
       ],
       "unevaluatedProperties": false
@@ -6246,64 +6251,6 @@
   "patternProperties": {
     "^x-": true
   },
-  "allOf": [
-    {
-      "oneOf": [
-        {
-          "properties": {
-            "postgresql": {
-              "properties": {
-                "enabled": {
-                  "const": true
-                }
-              }
-            }
-          }
-        },
-        {
-          "properties": {
-            "postgresql": {
-              "properties": {
-                "enabled": {
-                  "const": false
-                }
-              }
-            },
-            "externalPostgresql": {
-              "oneOf": [
-                {
-                  "properties": {
-                    "existingSecret": {
-                      "type": "string"
-                    },
-                    "password": {
-                      "type": "null"
-                    }
-                  },
-                  "required": [
-                    "existingSecret"
-                  ]
-                },
-                {
-                  "properties": {
-                    "existingSecret": {
-                      "type": "null"
-                    },
-                    "password": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "password"
-                  ]
-                }
-              ]
-            }
-          }
-        }
-      ]
-    }
-  ],
   "required": [
     "image",
     "serverName",

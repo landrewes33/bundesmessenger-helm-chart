@@ -89,7 +89,8 @@ tests:
   - it: ensures external PostgreSQL works with password
     set:
       postgresql.enabled: false
-      externalPostgresql.existingSecret: null
+      externalPostgresql.existingSecret: postgresql-secret
+      externalPostgresql.existingSecretPasswordKey: lepass
       externalPostgresql.password: P455W02D
       # Make sure `env` is an array.
       synapse.extraEnv:
@@ -97,23 +98,26 @@ tests:
           value: ENV
     asserts:
       - template: deployment.yaml
-        notContains:
-          any: true
+        contains:
           path: spec.template.spec.containers[?(@.name=="synapse")].env
           content:
             name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgresql-secret
+                key: lepass
       - template: secrets.yaml
         documentIndex: 0
         matchRegex:
           path: stringData["config.yaml"]
-          pattern: 'password: "P455W02D"'
-  - it: ensures external PostgreSQL errors on password and externalSecret
-    set:
-      postgresql.enabled: false
-      externalPostgresql.existingSecret: postgresql-secret
-      externalPostgresql.password: P455W02D
-    asserts:
-      - failedTemplate: {}
+          pattern: 'password: "@@POSTGRES_PASSWORD@@"'
+      - template: secrets.yaml
+        documentSelector:
+          path: metadata.name
+          value: postgresql-secret
+        equal:
+          path: stringData.lepass
+          value: P455W02D
   - it: ensures external PostgreSQL errors without credentials
     set:
       postgresql.enabled: false

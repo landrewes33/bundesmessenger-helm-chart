@@ -122,16 +122,11 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-          {{- if and
-              ($postgresSecretName := include "matrix-synapse.postgresql.secret-name" $)
-              ($postgresSecretKey := include "matrix-synapse.postgresql.secret-key" $)
-          }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ $postgresSecretName }}
-                  key: {{ $postgresSecretKey }}
-          {{- end }}
+                  name: {{ include "matrix-synapse.postgresql.secret-name" $ | quote }}
+                  key: {{ include "matrix-synapse.postgresql.secret-key" $ | quote }}
           {{- with $config.extraEnv }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
