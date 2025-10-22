@@ -105,6 +105,14 @@ if [ $ret -ne 0 ]; then
 fi
 
 printf "\n================================================================================\n"
+printf "Cherry-pick or add other commits now.\n"
+printf "This is particularly important for a new patch/hotfix release.\n"
+printf "Updates to container images should be made here.\n"
+printf "In the next step, documentation of the images used will be created.\n"
+printf "Done? "
+read -r yn
+
+printf "\n================================================================================\n"
 printf "Create config YAML (ci/versions/v%s.yaml)\n" "$nextVersion"
 
 # new_config_file=$scriptDir/versions/v${nextVersion}.yaml
@@ -153,10 +161,6 @@ git add --no-all \
     "$scriptDir/../values.schema.yaml"
 git commit -a -m "Setting version for the release ${nextVersion}"
 
-
-printf "\n================================================================================\n"
-printf "Cherry-pick or add other commits now. Done? "
-read -r yn
 
 printf "\n================================================================================\n"
 printf "Done, push the branch \"%s/v%s\"? (YES/no) " "$branchprefix" "$nextVersion"
