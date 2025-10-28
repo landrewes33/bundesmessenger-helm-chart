@@ -30,10 +30,10 @@ data:
       {{- fail (printf "Replica count must be 1 for worker %s." $worker) }}
     {{- end }}
 
-  {{ $name }}.worker: |
+  {{ $name }}.worker.yaml: |
     worker_app: synapse.app.generic_worker
 
-    worker_name: "@@HOSTNAME@@"
+    # worker_name: assigned at runtime for each replica via a separate config.
 
     worker_listeners:
       - port: 9090
