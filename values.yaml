@@ -1297,8 +1297,8 @@ sygnal:
   apps: {}
 
   # (string) Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält.
-  # Nähere Infos unter ./docs/sygnal_push.md#einbindung-von-secrets
-
+  # Nähere Infos unter
+  # ./docs/sygnal_push.md#nutzung-eines-secrets-für-sygnal-push-konfiguration
   existingSecret: "sygnal"
 
   # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
