@@ -1,0 +1,5 @@
+Das Redis Subchart wurde migriert; statt von Bitnami wird nun das Chart der
+[CloudPirates](https://www.cloudpirates.io/knowledge/blog/unsere-open-source-helm-charts-als-bitnami-alternative)
+verwendet. Falls eigene Änderungen an der Redis-Konfiguration bestehen, sind möglicherweise
+Konfigurationsänderungen unter `redis` notwendig. Die Dokumentation der neuen Schalter findet sich unter
+https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis.

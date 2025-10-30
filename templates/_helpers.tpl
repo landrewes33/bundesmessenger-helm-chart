@@ -356,7 +356,7 @@ Set redis host
 */}}
 {{- define "matrix-synapse.redis.host" -}}
 {{- if .Values.redis.enabled -}}
-  {{- printf "%s-%s" (include "matrix-synapse.redis.fullname" .) "master" | trunc 63 | trimSuffix "-" -}}
+  {{- include "matrix-synapse.redis.fullname" . | trunc 63 | trimSuffix "-" }}
 {{- else -}}
   {{- required "A valid externalRedis.host is required" .Values.externalRedis.host }}
 {{- end -}}
@@ -367,7 +367,7 @@ Set redis port
 */}}
 {{- define "matrix-synapse.redis.port" -}}
 {{- if .Values.redis.enabled -}}
-  {{- .Values.redis.master.service.ports.redis | default 6379 }}
+  {{- required "A valid redis.service.port is required" .Values.redis.service.port }}
 {{- else -}}
   {{- required "A valid externalRedis.port is required" .Values.externalRedis.port }}
 {{- end -}}

@@ -79,8 +79,7 @@ monitoring:
 # (map) Erstellen eines ServiceAccounts, samt gewünschter Annotations.
 # Beinhaltet gewünschte Annotations oder Nutzung eines vorhandenen
 # ServiceAccounts. Es werden darüber hinaus noch weitere ServiceAccounts
-# angelegt, z.B. für den Signing-Key Job oder Redis. Der ServiceAccount für
-# Redis kann via `redis.serviceAccount.name` konfiguriert werden.
+# angelegt, z.B. für den Signing-Key Job.
 serviceAccount:
   # (bool) Aktivierung der Erstellung eines ServiceAccounts.
   create: true
@@ -1694,29 +1693,34 @@ redis:
 
   # (string) Form der Architektur des Deployments
   architecture: standalone
-  master:
-    kind: StatefulSet
-    # (map) Persistenzkonfiguration des Redis.
-    # Beachten Sie, dass Synapse Redis nur als Synchronisierungsdienstprogramm
-    # verwendet, so dass keine Daten jemals persistiert werden müssen.
-    persistence:
-      enabled: false
-    service:
-      ports:
-        # (integer) Serviceport
-        redis: 6379
 
-    resources:
-      limits:
-        # (string) Rechenressourcengrenzen, die auf den Redis-Container anzuwenden sind.
-        cpu: 500m
-        # (string) RAM Ressourcengrenzen, die auf den Redis-Container anzuwenden sind.
-        memory: 768Mi
-      requests:
-        # (string) Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind.
-        cpu: 300m
-        # (string) Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind.
-        memory: 256Mi
+  config:
+    # (string) Redis Konfiguration.
+    content: |
+      # Don’t enforce IPv6 binding and make compatible for ubuntu redis 5.6
+      # bind * -::*
+      port 6379
+
+  # (map) Persistenzkonfiguration des Redis.
+  # Beachten Sie, dass Synapse Redis nur als Synchronisierungsdienstprogramm
+  # verwendet, so dass keine Daten jemals persistiert werden müssen.
+  persistence:
+    enabled: false
+  service:
+    type: ClusterIP
+    port: 6379
+
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den Redis-Container anzuwenden sind.
+      cpu: 500m
+      # (string) RAM Ressourcengrenzen, die auf den Redis-Container anzuwenden sind.
+      memory: 768Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind.
+      cpu: 300m
+      # (string) Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind.
+      memory: 256Mi
 
 # (map) Extern konfigurierter Redis-Server.
 # Wird nur verwendet, wenn `redis.enabled: false` ist.
