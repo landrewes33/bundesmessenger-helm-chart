@@ -27,8 +27,8 @@ keywords:
 
 dependencies:
   - name: redis
-    version: ^17.14.6
-    repository: oci://registry-1.docker.io/bitnamicharts
+    version: ^0.8.2
+    repository: oci://ghcr.io/cloudpirates-io/helm-charts
     condition: redis.enabled
   - name: postgresql
     version: ^15.5.38

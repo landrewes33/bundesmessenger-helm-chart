@@ -1,9 +1,9 @@
 dependencies:
 - name: redis
-  repository: oci://registry-1.docker.io/bitnamicharts
-  version: 17.17.1
+  repository: oci://ghcr.io/cloudpirates-io/helm-charts
+  version: 0.8.5
 - name: postgresql
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 15.5.38
-digest: sha256:e8541c02b7e8c1c185549a060650b81d23a245cf53051ffeaabe0a6b768ec742
-generated: "2025-10-15T06:37:10.726472448Z"
+digest: sha256:543e970461698cf1a49035456eb921f777fbd84e5814c7bd3fd8b6ddb71f21c4
+generated: "2025-10-20T14:30:10.873003619+02:00"

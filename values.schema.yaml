@@ -97,8 +97,7 @@ properties:
     description: >-
       Beinhaltet gewünschte Annotations oder Nutzung eines vorhandenen
       ServiceAccounts. Es werden darüber hinaus noch weitere ServiceAccounts
-      angelegt, z.B. für den Signing-Key Job oder Redis. Der ServiceAccount für
-      Redis kann via `redis.serviceAccount.name` konfiguriert werden.
+      angelegt, z.B. für den Signing-Key Job.
     properties:
       create:
         type: boolean
@@ -2945,78 +2944,71 @@ properties:
           - replication
         title: Form der Architektur des Deployments
         default: standalone
-      master:
+      config:
         type: object
         properties:
-          kind:
+          content:
             type: string
-            enum:
-              - Deployment
-              - StatefulSet
-              - DaemonSet
-            default: StatefulSet
-          persistence:
-            type: object
-            title: Persistenzkonfiguration des Redis
-            description: >-
-              Beachten Sie, dass Synapse Redis nur als
-              Synchronisierungsdienstprogramm verwendet, so dass keine Daten
-              jemals persistiert werden müssen.
-            properties:
-              enabled:
-                type: boolean
-                default: false
-            unevaluatedProperties: true
-          service:
-            type: object
-            properties:
-              ports:
-                type: object
-                properties:
-                  redis:
-                    $ref: >-
-                      https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort
-                    type: integer
-                    default: 6379
-                unevaluatedProperties: true
-            unevaluatedProperties: true
-          resources:
+            title: Redis Konfiguration
+            default: |
+              port 6379
+        unevaluatedProperties: true
+      persistence:
+        type: object
+        title: Persistenzkonfiguration des Redis
+        description: >-
+          Beachten Sie, dass Synapse Redis nur als
+          Synchronisierungsdienstprogramm verwendet, so dass keine Daten
+          jemals persistiert werden müssen.
+        properties:
+          enabled:
+            type: boolean
+            default: false
+        unevaluatedProperties: true
+      service:
+        type: object
+        properties:
+          port:
             $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
-            type: object
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort
+            type: integer
+            default: 6379
+        unevaluatedProperties: true
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        properties:
+          limits:
             properties:
-              limits:
-                properties:
-                  cpu:
-                    title: >-
-                      Rechenressourcengrenzen, die auf den Redis-Container
-                      anzuwenden sind
-                    default: 500m
-                  memory:
-                    title: >-
-                      RAM Ressourcengrenzen, die auf den Redis-Container
-                      anzuwenden sind
-                    default: 768Mi
-              requests:
-                properties:
-                  cpu:
-                    title: >-
-                      Anforderungen an Rechenressourcen, die auf den
-                      Redis-Container anzuwenden sind
-                    default: 300m
-                  memory:
-                    title: >-
-                      Anforderungen an RAM Ressourcen, die auf den
-                      Redis-Container anzuwenden sind
-                    default: 256Mi
-            unevaluatedProperties: false
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf den Redis-Container anzuwenden sind
+                default: 500m
+              memory:
+                title: >-
+                  RAM Ressourcengrenzen, die auf den Redis-Container anzuwenden sind
+                default: 768Mi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind
+                default: 300m
+              memory:
+                title: >-
+                  Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind
+                default: 256Mi
         unevaluatedProperties: true
     required:
       - enabled
       - image
       - auth
       - architecture
-      - master
+      - config
+      - persistence
+      - service
+      - resources
     unevaluatedProperties: true
   externalRedis:
     type: object
