@@ -2591,15 +2591,12 @@ webclient:
 ## Der BundesMessenger-Call Client ist derzeit im Beta-Status. Er ermöglicht Video-Chats.
 ## Die Video-Chats funktionieren via WebRTC und LiveKit SFU.
 ## Die SFU muss sperat bereit gestellt werden.
-## Der Client wird nicht mit der konfigurierten URL direkt aufgerufen, sondern
-## integriert sich in den WebClient. Die URL wird für die Integration
-## jedoch benötigt.
+## Der Client für Call ist Bestandteil vom Webclient. Es wird jedoch der
+## JWT Service benötigt.
 
 call:
   # (bool) BundesMessenger-Call im Deployment aktivieren
   enabled: false
-  # (string) URL für den Call, zwingend notwendig
-  uri: ""
 
   # (map) Konfiguration mit denen der LiveKit Server erreicht werden kann.
   # Key und Secret müssen mit den Angabe im LiveKit Server überein stimmen.
@@ -2617,46 +2614,6 @@ call:
     livekitKey: livekit-key
     # (string) Verweis im `existingSecret` auf das Livekit-Geheimnis.
     livekitSecret: livekit-secret
-
-  # (map) Konfiguration für Client vom BundesMessenger-Call
-  client:
-    image:
-      registry: registry.opencode.de
-      repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-call
-      tag: 0.4.0-jammy-production
-      pullSecrets: []
-      pullPolicy: IfNotPresent
-
-    # (list) Weitere Umgebungsvariablen für den Call-Container.
-    extraEnv: []
-
-    # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
-    podSecurityContext:
-      <<: *defaultPodSecurityContext
-      runAsUser: 1001
-      runAsGroup: 1001
-
-    # (map) Konfiguration für die Container-Sicherheitsrichtlinie
-    securityContext:
-      <<: *defaultSecurityContext
-
-    # (list) Weitere Speicherbereiche für den Call-Pod.
-    extraVolumes: []
-    # (list) Weitere Speicher-Einhängepunkte für den Call-Container.
-    extraVolumeMounts: []
-
-    ## Ressource Konfiguration für BundesMessenger-Call.
-    resources:
-      limits:
-        # (string) Rechenressourcengrenzen, die auf den BundesMessenger-Call anzuwenden sind.
-        cpu: 100m
-        # (string) RAM Ressourcengrenzen, die auf den BundesMessenger-Call anzuwenden sind.
-        memory: 90Mi
-      requests:
-        # (string) Anforderungen an Rechenressourcen, die auf den BundesMessenger-Call anzuwenden sind.
-        cpu: 50m
-        # (string) Anforderungen an RAM Ressourcen, die auf den BundesMessenger-Call anzuwenden sind.
-        memory: 45Mi
 
   # (map) Konfiguration für das Image vom LiveKit JWT Service
   jwtService:

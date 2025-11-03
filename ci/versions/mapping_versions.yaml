@@ -2,8 +2,6 @@
   app: Basis
 - path: webclient.image
   app: Webclient
-- path: call.client.image
-  app: Call
 - path: call.jwtService.image
   app: LiveKit-JWT-Service
 - path: schadcodescanner.clamavImage

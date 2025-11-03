@@ -52,32 +52,28 @@ stellt mit dem angefragten Huddle Meeting via WebSocket eine Verbindung her.
 
 ## Aufbau
 
-### BundesMessenger Call Client
+### Integrierter BundesMessenger Call Client
 
-Der folgende Parameter ist im Bereich `call` der Konfiguration anzugeben:
-
-```yaml
-uri: call.example.com
-```
-
-In Zukunft:
-~~Die URL wird intern für die Bereitstellung des Clients genutzt. Der Benutzer
-muss diese Adresse nicht manuell aufrufen.~~
+Call ist Bestandteil vom Webclient. Es wird kein zusätzlicher Client
+oder URL benötigt.
 
 :pushpin: Die weiteren Konfigurationen werden durch das Helm Chart automatisch
 bereitgestellt.
 
-Die Call Client [Konfiguration](https://github.com/element-hq/element-call?tab=readme-ov-file#backend)
-wird um die LiveKit JWT Service URL in der `config.json` erweitert.
+Die Wellknown [Konfiguration](https://github.com/element-hq/element-call?tab=readme-ov-file#backend-discovery)
+wird um die LiveKit JWT Service URL in der `.well-known/matrix/client` erweitert.
 
 ```json
-"livekit": {
-  "livekit_service_url": "https://call.example.com"
-}
+"org.matrix.msc4143.rtc_foci": [
+    {
+        "type": "livekit",
+        "livekit_service_url": "https://example.com"
+    },
+]
 ```
 
 Der Call Client ruft die notwendigen Informationen während der Nutzung von der
-API `POST https://call.example.com/sfu/get` ab.
+API `POST https://example.com/sfu/get` ab.
 
 ### LiveKit JWT Service
 
@@ -86,8 +82,16 @@ Es sind folgende Parameter im Bereich `call` der Konfiguration anzugeben:
 ```yaml
 livekit:
   url: "wss://livekit.example.com"
-  key: "devkey"
-  secret: "secret"
+
+  # LiveKit Geheimnisse in values.yaml (nicht empfohlen)
+  # key: "devkey"
+  # secret: "secret"
+
+# LiveKit Geheimnisse via Secret
+existingSecret: call
+secretKeys:
+  livekitKey: livekit-key
+  livekitSecret: livekit-secret
 ```
 
 Key und Secret sind frei generierbar. Damit werden LiveKit Access Token berechnet.

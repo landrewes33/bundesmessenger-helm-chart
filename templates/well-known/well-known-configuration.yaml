@@ -82,7 +82,7 @@ data:
     {{- if .Values.call.enabled }}
     {{- $_call := dict
       "org.matrix.msc4143.rtc_foci" (list (dict
-        "livekit_service_url" (printf "https://%s" .Values.call.uri)
+        "livekit_service_url" (include "matrix-synapse.publicServerURL" .)
         "type" "livekit"
       ))
     }}
