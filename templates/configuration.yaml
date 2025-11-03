@@ -219,11 +219,27 @@ data:
         {{- end }}
       {{- end }}
     {{- end }}
-    {{ $extraConfig := .Values.extraConfig }}
+
+    {{- $extraConfig := deepCopy .Values.extraConfig -}}
     {{- if .Values.mas.enabled -}}
       {{ $passwordDict := dict "password_config" (dict "enabled" false) }}
       {{ $extraConfig = mergeOverwrite $extraConfig $passwordDict }}
     {{- end -}}
+
+    {{- /* https://github.com/element-hq/element-call/blob/livekit/docs/self-hosting.md#a-matrix-homeserver */}}
+    {{- if .Values.call.enabled }}
+      {{- $extraConfig = merge $extraConfig (dict
+        "max_event_delay_duration" "24h"
+        "rc_message" (dict
+            "per_second" 0.5
+            "burst_count" 30
+        )
+        "rc_delayed_event_mgmt" (dict
+            "per_second" 1
+            "burst_count" 20
+        )
+      )}}
+    {{- end }}
 
     {{- /* Entfernen von per default leeren Variable aus ExtraConfig Dictionary
     Synapse does not starts when federation_custom_ca_list is empty.

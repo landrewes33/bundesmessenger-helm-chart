@@ -32,19 +32,11 @@ data:
   )
 }}
 
-{{- if .Values.call.enabled }}
-  {{- $defaultConfig = merge $defaultConfig (dict
-    "element_call" (dict
-      "url" (printf "https://%s" .Values.call.uri)
-      "use_exclusively" true
-      "participant_limit" 5
-      "brand" "BundesMessenger Call"
-    )
-    "features" (dict
-      "feature_group_calls" true
-    )
-  )}}
-{{- end -}}
+{{- $defaultConfig = mergeOverwrite $defaultConfig (dict
+  "setting_defaults" (dict
+    "UIFeature.voip" .Values.call.enabled
+  )
+)}}
 
 {{- if .Values.additionalConfig.locationSharing.enabled }}
   {{- $defaultConfig = merge $defaultConfig (dict

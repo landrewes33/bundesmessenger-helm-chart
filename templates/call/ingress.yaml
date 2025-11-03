@@ -1,15 +1,14 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if and .Values.ingress.enabled .Values.call.enabled }}
-{{- $callUri := .Values.call.uri | required "call.uri is required." -}}
-{{- $callName := include "matrix-synapse.externalname" (dict "global" . "external" "call") -}}
-{{- $jwtServiceame := include "matrix-synapse.externalname" (dict "global" . "external" "call-jwt-service") -}}
+{{- $jwtServiceName := include "matrix-synapse.externalname" (dict "global" . "external" "call-jwt-service") -}}
 {{- $component := "call" -}}
+{{- $matrixHostName := include "matrix-synapse.publicServerName" . }}
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ $callName }}
+  name: {{ $jwtServiceName }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
@@ -25,7 +24,7 @@ spec:
 {{- if .Values.ingress.tls }}
   tls:
   {{- range .Values.ingress.tls }}
-    {{- if has $callUri .hosts }}
+    {{- if has $matrixHostName .hosts }}
     - hosts:
       {{- range .hosts }}
         - {{ . | quote }}
@@ -37,21 +36,21 @@ spec:
   {{- end }}
 {{- end }}
   rules:
-    - host: {{ $callUri | quote }}
+  {{- $csHosts := .Values.ingress.csHosts }}
+  {{- if $.Values.ingress.includeServerName }}
+    {{- $csHosts = concat (list $matrixHostName) $csHosts }}
+  {{- end }}
+  {{- range $csHosts }}
+    {{- $host := . }}
+    - host: {{ . | quote }}
       http:
         paths:
-          - path: /
-            backend:
-              service:
-                name: {{ $callName }}
-                port:
-                  number: 8080
-            pathType: Prefix
           - path: "/sfu/get"
             backend:
               service:
-                name: {{ $jwtServiceame }}
+                name: {{ $jwtServiceName }}
                 port:
                   number: 8080
             pathType: Prefix
+  {{- end }}
 {{- end }}
