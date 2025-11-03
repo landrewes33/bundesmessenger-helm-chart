@@ -377,6 +377,8 @@ extraConfig:
     enabled: true
     # (bool) Suche alle Nutzer, eingeschaltet
     search_all_users: true
+    # (bool) Lokale Benutzer in Suchergebnissen bevorzugen
+    prefer_local_users: true
   # (bool) Nutzer können Anzeigenamen ändern, abgeschaltet
   enable_set_displayname: false
   # (bool) Nur Raummitglieder können einen Alias für einen Raum konfigurieren.
@@ -2696,6 +2698,15 @@ additionalConfig:
   # (list) Liste an JWT, die dem Client bereit gestellt werden, um die Infrastruktur
   # als legitim auszuweisen. Diese werden via `<public_baseurl>/_bum/client/v1/verify`
   verifyJWT: []
+
+  federation:
+    # (bool) Um die Darstellung der Föderation in den Clients zu aktivieren oder deaktivieren.
+    enabled: true
+    # (bool) Um die Einführungsdialoge anzeigen zu können.
+    showIntroduction: false
+    # (bool) Um die Vorankündigung zur Einführung der Föderation anzeigen zu können.
+    # Hinweis: Der Einführungsdialog wird nur einmalig angezeigt.
+    showAnnouncement: false
 
   dsgvoExport:
     # (bool) Fügt Volume und suspended Cronjob hinzu um Benutzer zu exportieren.

@@ -118,6 +118,17 @@ data:
       {{- end }}
     {{- end }}
 
+    {{- if .Values.additionalConfig.federation.enabled }}
+      {{- $defaultClient = merge $defaultClient (dict
+        "de.bwi" (dict
+          "federation" (dict
+            "enable" true
+            "show_introduction" .Values.additionalConfig.federation.showIntroduction
+            "show_announcement" .Values.additionalConfig.federation.showAnnouncement
+          )
+      ))}}
+    {{- end }}
+
     {{- $defaultClient = merge $defaultClient (dict
       "de.bwi" (dict
         "data_privacy_url" (printf "https://%s"
