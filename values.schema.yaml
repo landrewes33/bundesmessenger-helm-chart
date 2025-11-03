@@ -4832,6 +4832,30 @@ properties:
         items:
           type: string
         default: []
+      federation:
+        type: object
+        properties:
+          enabled:
+            type: boolean
+            description: >-
+              Um die Darstellung der Föderation in den Clients zu aktivieren
+              oder deaktivieren.
+            default: true
+          showIntroduction:
+            type: boolean
+            description: "Um die Einführungsdialoge anzeigen zu können."
+            default: false
+          showAnnouncement:
+            type: boolean
+            description: >-
+              Um die Vorankündigung zur Einführung der Föderation anzuzeigen.
+              Der Einführungsdialog wird nur einmalig angezeigt.
+            default: false
+        required:
+          - enabled
+          - showIntroduction
+          - showAnnouncement
+        unevaluatedProperties: false
       dsgvoExport:
         type: object
         properties:
@@ -4926,6 +4950,7 @@ properties:
         unevaluatedProperties: true
     required:
       - verifyJWT
+      - federation
       - dsgvoExport
       - locationSharing
       - maintenance
