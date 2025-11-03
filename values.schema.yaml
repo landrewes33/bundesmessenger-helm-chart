@@ -2121,10 +2121,11 @@ properties:
         type: string
         title: Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält
         description: >-
-          Die Schlüssel des Secrets sind die Dateinamen, welche unter
-          `sygnal.apps` mit dem Präfix `/secrets` referenziert werden.
+          Nähere Infos unter
+          ./docs/sygnal_push.md#nutzung-eines-secrets-für-sygnal-push-konfiguration
         default: sygnal
       ioskey_filename:
+        deprecated: true
         type: ["null", "string"]
         minLength: 1
         title: iOS-Key Dateiname
@@ -2142,6 +2143,7 @@ properties:
           Apps-Konfiguration übereinstimmen!
         default: null
       ioskey_keyvalue:
+        deprecated: true
         type: ["null", "string"]
         minLength: 1
         title: iOS-Key Datei-Inhalt
@@ -2149,6 +2151,7 @@ properties:
         examples:
           - ioskey_keyvalue: HIER KÖNNTE IHR KEY STEHEN
       fcmkey_filename:
+        deprecated: true
         type: ["null", "string"]
         minLength: 1
         title: FCM-Key Dateiname
@@ -2167,6 +2170,7 @@ properties:
           gcm-Sektion der vorhergehenden Apps-Konfiguration übereinstimmen!
         default: null
       fcmkey_keyvalue:
+        deprecated: true
         type: ["null", "object"]
         title: FCM-Key Service Account File Inhalt
         default: null

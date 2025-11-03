@@ -47,10 +47,11 @@ Für beide Typen wird zusätzlich optional akzeptiert:
   `apns-push-type`-Header an APNs gesendet wird. Wenn er nicht angegeben wird,
   wird der Header nicht gesendet.
 
-Das `keyfile` wird durch die Parameter `ioskey_filename` und `ioskey_keyvalue` in
-die Infrastruktur eingebunden. `ioskey_filename` definiert den Dateinamen, der
-mit der Angabe unter `keyfile` korrelieren muss und `ioskey_keyvalue`
-entspricht dem Inhalt der Datei und ist Base64 kodiert.
+Das `keyfile` muss als Schlüssel-Werte-Paar innerhalb eines Kubernetes Secrets
+angegeben werden. Dabei entspricht der Schlüssel dem Dateinamen und der Wert dem
+Inhalt der Datei (siehe Definition [Sygnal Secret]). Mit der Einstellung
+`sygnal.existingSecret` wird das von Sygnal zu verwendende Secret über seinen
+Namen referenziert.
 
 ### Google Android (`gcm`)
 
@@ -66,10 +67,13 @@ Android-Anwendungen zu übermitteln.
   die in der Firebase-Konsole unter folgender Adresse abgerufen werden kann:
   `https://console.firebase.google.com/project/<PROJECT NAME>/settings/serviceaccounts/adminsdk`
 
-Das `service_account_file` wird durch die Parameter `fcmkey_filename` und
-`fcmkey_keyvalue` in die Infrastruktur eingebunden. `fcmkey_filename` definiert
-den Dateinamen, der mit der Angabe unter `service_account_file` korrelieren muss
-und `fcmkey_keyvalue` entspricht dem Inhalt der Datei (YAML-Dictionary).
+Das `service_account_file` muss als Schlüssel-Werte-Paar innerhalb eines
+Kubernetes Secrets angegeben werden. Dabei entspricht der Schlüssel dem
+Dateinamen und der Wert dem Inhalt der Datei (siehe Definition [Sygnal Secret]).
+Mit der Einstellung `sygnal.existingSecret` wird das von Sygnal zu verwendende
+Secret über seinen Namen referenziert.
+
+[Sygnal Secret]: <../templates/secrets.yaml#:~:text=name:%20sygnal>
 
 ## Verwendung eines HTTP-Proxys für ausgehenden Datenverkehr
 
@@ -93,12 +97,20 @@ zu mounten und nicht als unverschlüsselten Text im Helm-Chart anzugeben.
 Dafür kann der Konfigurationsschalter `sygnal.existingSecret` mit dem Namen
 eines vorhandenen Secrets besetzt werden.
 
-Die Schlüssel des Secrets sind die Dateinamen der Zugangsschlüssel für FCM und APN.
-Diese werden auch unter `sygnal.apps` referenziert und mit in den Container eingebunden.
-In der Referenzierung wird der Dateiname samt Pfad angegeben, in diesem Fall
-mit dem Präfix `/secrets`.
+Die Schlüssel des Secrets sind die Dateinamen der Zugangsschlüssel für FCM und
+APN. Um beispielsweise ein Secret mit Namen `sygnal-pusher-secret` zu erstellen,
+das die beiden Schlüsseldateien `MyKey.p007` und `fcm-example.json` enthält,
+kann der folgende Befehl verwendet werden:
 
-Als Beispiel:
+```sh
+kubectl --namespace=bum create secret generic "sygnal-pusher-secret" \
+  --from-file="MyKey.p007" \
+  --from-file="fcm-example.json"
+```
+
+Die so hinterlegten Dateien werden auch unter `sygnal.apps` referenziert und mit
+in den Container eingebunden. In der Referenzierung wird der Dateiname samt Pfad
+angegeben, in diesem Fall mit dem Präfix `/secrets`. Als Beispiel:
 
 Secret:
 
@@ -106,8 +118,8 @@ Secret:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: "sygnal"
-  namespace: bundesm
+  name: sygnal-pusher-secret
+  namespace: bum
 stringData:
   fcm-example.json: |
     [...]
@@ -119,6 +131,8 @@ Konfiguration:
 
 ```yaml
 sygnal:
+  enabled: true
+  existingSecret: sygnal-pusher-secret
   apps:
     de.bwi.messenger.x.ios.example:
       type: apns
@@ -134,5 +148,6 @@ Die Konfigurationen, welche wir registrierten Nutzerhäusern zur Verfügung
 stellen, enthalten bereits die richtigen Angaben. Diese können zur nachhaltigen
 Nutzung auch manuell in ein Secret und in ein Vault überführt werden.
 
-Im Zuge eines Deployment wird ein Secret mit den Schlüsseln angelegt, wenn nicht
-bereits vorhanden.
+Werden noch die abgekündigten Optionen `ioskey_filename`, `ioskey_keyvalue`,
+`fcmkey_filename` oder `fcmkey_keyvalue` verwendet, so wird im Zuge eines
+Deployment ein Secret mit den Schlüsseln angelegt, wenn nicht bereits vorhanden.
