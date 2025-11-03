@@ -2545,10 +2545,11 @@
         "existingSecret": {
           "type": "string",
           "title": "Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält",
-          "description": "Die Schlüssel des Secrets sind die Dateinamen, welche unter `sygnal.apps` mit dem Präfix `/secrets` referenziert werden.",
+          "description": "Nähere Infos unter ./docs/sygnal_push.md#nutzung-eines-secrets-für-sygnal-push-konfiguration",
           "default": "sygnal"
         },
         "ioskey_filename": {
+          "deprecated": true,
           "type": [
             "null",
             "string"
@@ -2559,6 +2560,7 @@
           "default": null
         },
         "ioskey_keyvalue": {
+          "deprecated": true,
           "type": [
             "null",
             "string"
@@ -2573,6 +2575,7 @@
           ]
         },
         "fcmkey_filename": {
+          "deprecated": true,
           "type": [
             "null",
             "string"
@@ -2583,6 +2586,7 @@
           "default": null
         },
         "fcmkey_keyvalue": {
+          "deprecated": true,
           "type": [
             "null",
             "object"

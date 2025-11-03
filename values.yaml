@@ -1291,9 +1291,9 @@ sygnal:
   # (map) Konfiguration für Push-Dienste (APNS und FCM)
   # Beispiel:
   # apps:
-  #    de.opencode.dvs.ios:
-  #      type: apns
-  #      keyfile: /de.opencode.dvs.ios.p8
+  #   de.opencode.dvs.ios:
+  #     type: apns
+  #     keyfile: /secrets/de.opencode.dvs.ios.p8
   apps: {}
 
   # (string) Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält.
@@ -1320,18 +1320,26 @@ sygnal:
   # Wenn iOS Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
   # Bei Nutzung von iOS-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
   # Durch Filename-Vergabe wird der unten angegebene ioskey geladen.
+  # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
+  # (siehe docs/sygnal_push.md).
   # ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus der APNS-Sektion
   # der vorhergehenden Apps-Konfiguration übereinstimmen!
   # (string|null) iOS-Key Datei-Inhalt. Die Zeichenkette muss in Base64 kodiert sein.
+  # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
+  # (siehe docs/sygnal_push.md).
   # ioskey_keyvalue: 'HIER KÖNNTE IHR KEY STEHEN'
 
   # (string|null) FCM-Key Dateiname
   # bei Nutzung von FCM-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
   # Wenn FCM Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
   # Durch Filename-Vergabe wird der unten angegebene FCM-Service-Account-File geladen.
+  # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
+  # (siehe docs/sygnal_push.md).
   # fcmkey_filename: de.opencode.dvs.bundesmessenger.json <<-- muss zwingend mit dem service_account_file-Dateinamen
   # aus der gcm-Sektion der vorhergehenden Apps-Konfiguration übereinstimmen!
   # (map|null) FCM-Key Service Account File Inhalt
+  # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
+  # (siehe docs/sygnal_push.md).
   # fcmkey_keyvalue:
   #   type: "service_account"
   #   project_id: "bundesmessenger"

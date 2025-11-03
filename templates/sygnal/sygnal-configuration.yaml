@@ -1,10 +1,11 @@
-{{/* SPDX-FileCopyrightText: 2022–2024 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.sygnal.enabled }}
 
 {{- $fcmKeyFilename := .Values.sygnal.fcmkey_filename }}
 {{- $iosKeyFilename := .Values.sygnal.ioskey_filename }}
 {{- if or $fcmKeyFilename $iosKeyFilename }}
+{{- /* Abgekündigt */}}
 ---
 apiVersion: v1
 kind: Secret
@@ -29,6 +30,7 @@ data:
     .Values.sygnal.ioskey_keyvalue | toYaml | quote
   }}
 {{- end }}
+...
 {{- end }}
 
 ---

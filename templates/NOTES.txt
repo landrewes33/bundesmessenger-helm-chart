@@ -43,6 +43,10 @@ Gehen Sie sicher, dass {{  include "matrix-synapse.signingkeyServiceAccountName"
 Gehen Sie sicher, dass {{  include "matrix-synapse.dsgvoExportServiceAccountName" . }} als ServiceAccount vorhanden ist.
 {{- end }}
 
+{{- if or .Values.sygnal.fcmkey_filename .Values.sygnal.ioskey_filename }}
+Die Sygnal-Konfigurationsoptionen `sygnal.fcmkey_filename` und `sygnal.ioskey_filename` sind abgekündigt. Legen Sie stattdessen direkt das Kubernetes Secret `{{ .Values.sygnal.existingSecret }}` an, wie in docs/sygnal_push.md beschrieben.
+{{- end }}
+
 
 Sie können einen initialen administrativen und weitere Accounts für den installierten BundesMessenger mit den folgenden Kommandos anlegen:
 {{ if and .Values.mas.enabled .Values.mas.passwords.enabled }}
