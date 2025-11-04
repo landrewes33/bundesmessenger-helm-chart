@@ -27,7 +27,7 @@ keywords:
 
 dependencies:
   - name: redis
-    version: ^0.13.0
+    version: ^0.13.1
     repository: oci://ghcr.io/cloudpirates-io/helm-charts
     condition: redis.enabled
   - name: postgresql
