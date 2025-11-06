@@ -1,1 +1,1 @@
-Image `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web` auf Version `2.24.0` aktualisiert.
+Image `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web` auf Version `2.24.1` aktualisiert.
