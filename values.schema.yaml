@@ -4856,6 +4856,19 @@ properties:
           - showIntroduction
           - showAnnouncement
         unevaluatedProperties: false
+      migrationBuMX:
+        type: integer
+        title: "Migrationshinweis für BundesMessengerX"
+        description: >-
+          Ermöglicht dem Benutzer in den BuM Legacy-Apps in verschiedenen Stufen
+          auf die Migration zu BuMX hinzuweisen.
+
+            0: Keine Information
+            1: Freundlicher Hinweis
+            2: Aufforderung zum Wechsel
+            3: Zwangsdialog, Anmeldung an der BuM Legacy App nicht mehr möglich
+        enum: [0, 1, 2, 3]
+        default: 0
       dsgvoExport:
         type: object
         properties:
@@ -4951,6 +4964,7 @@ properties:
     required:
       - verifyJWT
       - federation
+      - migrationBuMX
       - dsgvoExport
       - locationSharing
       - maintenance

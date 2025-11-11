@@ -142,6 +142,9 @@ data:
             "a valid URL for imprint (imprintUrl) is required."
           )
         )
+        "migration_bumx" (dict
+          "level" .Values.additionalConfig.migrationBuMX
+        )
       )
     )}}
 

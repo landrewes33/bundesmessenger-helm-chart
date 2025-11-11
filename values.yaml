@@ -2716,6 +2716,15 @@ additionalConfig:
     # Hinweis: Der Einführungsdialog wird nur einmalig angezeigt.
     showAnnouncement: false
 
+  # (integer) Migrationshinweis für BundesMessengerX.
+  # Ermöglicht dem Benutzer in den BuM Legacy-Apps in verschiedenen Stufen auf
+  # die Migration zu BuMX hinzuweisen.
+  #  0: Keine Information
+  #  1: Freundlicher Hinweis
+  #  2: Aufforderung zum Wechsel
+  #  3: Zwangsdialog, Anmeldung an der BuM Legacy App nicht mehr möglich
+  migrationBuMX: 0
+
   dsgvoExport:
     # (bool) Fügt Volume und suspended Cronjob hinzu um Benutzer zu exportieren.
     # Weiteres siehe ./docs/DSGVO-Exporter.md

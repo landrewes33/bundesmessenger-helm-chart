@@ -5771,6 +5771,18 @@
           ],
           "unevaluatedProperties": false
         },
+        "migrationBuMX": {
+          "type": "integer",
+          "title": "Migrationshinweis für BundesMessengerX",
+          "description": "Ermöglicht dem Benutzer in den BuM Legacy-Apps in verschiedenen Stufen auf die Migration zu BuMX hinzuweisen.\n\n  0: Keine Information\n  1: Freundlicher Hinweis\n  2: Aufforderung zum Wechsel\n  3: Zwangsdialog, Anmeldung an der BuM Legacy App nicht mehr möglich",
+          "enum": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "default": 0
+        },
         "dsgvoExport": {
           "type": "object",
           "properties": {
@@ -5956,6 +5968,7 @@
       "required": [
         "verifyJWT",
         "federation",
+        "migrationBuMX",
         "dsgvoExport",
         "locationSharing",
         "maintenance"
