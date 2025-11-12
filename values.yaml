@@ -1225,7 +1225,7 @@ sygnal:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/sygnal
-    tag: 0.16.0-jammy-production
+    tag: 0.17.0-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 
