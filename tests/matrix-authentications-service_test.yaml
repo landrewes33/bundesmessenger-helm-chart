@@ -221,3 +221,45 @@ tests:
       - containsDocument:
           kind: Ingress
         not: true
+---
+suite: MAS Secrets
+templates:
+  - secrets.yaml
+tests:
+  - it: tests creation of the MAS signingkey Secret
+    set:
+      mas.enabled: true
+      mas.signingkeys.existingSecret: mas-sig-key-sec
+    documentSelector:
+      path: metadata.name
+      value: mas-sig-key-sec
+    asserts:
+      - containsDocument:
+          kind: Secret
+          apiVersion: v1
+          name: mas-sig-key-sec
+          any: true
+      - matchRegex:
+          path: stringData["0000-mas-signingkey-rsa.pem"]
+          pattern: "^-----BEGIN RSA PRIVATE KEY-----"
+      - matchRegex:
+          path: stringData["0001-mas-signingkey-ec.pem"]
+          pattern: "^-----BEGIN EC PRIVATE KEY-----"
+  - it: tests creation of the MAS encryption Secret
+    set:
+      mas.enabled: true
+      mas.encryption:
+        existingSecret: mas-enc-sec
+        existingSecretKey: enc
+    documentSelector:
+      path: metadata.name
+      value: mas-enc-sec
+    asserts:
+      - containsDocument:
+          kind: Secret
+          apiVersion: v1
+          name: mas-enc-sec
+          any: true
+      - matchRegex:
+          path: stringData.enc
+          pattern: "^[a-zA-z0-9]{64}$"

@@ -1927,6 +1927,30 @@ mas:
       # sslcert: /path/to/cert.pem
       # sslkey: /path/to/key.pem
 
+  # (map) MAS Cookie- und Datenbankschlüssel.
+  # Der Schlüssel wird als hexadezimale Zeichenkette eingelesen und besteht aus
+  # genau 32 Bytes. Beispiel:
+  #
+  #   c7e42fb8baba8f228b2e169fdf4c8216dffd5d33ad18bafd8b928c09ca46c718
+  #
+  # Warnung: Verwenden Sie ausschließlich den initialen Schlüssel vom ersten
+  # Start des MAS! Ändern des Schlüssels führt zu Datenverlust.
+  encryption:
+    # (string) Name des Secrets, in dem der MAS Datenbankschlüssel stehen.
+    existingSecret: mas
+    # (string) Verweis im `existingSecret` auf den MAS Datenbankschlüssel.
+    existingSecretKey: encryption
+
+  # (map) MAS Signaturschlüssel.
+  # Im Secret liegt eine beliebige Anzahl an Signaturschlüsseln im PEM-Format.
+  # Unter den Schlüsseln muss mindestens ein RSA-Schlüssel vorhanden sein.
+  #
+  # Referenz:
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#secretskeys
+  signingkeys:
+    # (string) Name des Secrets, in dem die MAS Signaturschlüssel stehen.
+    existingSecret: mas-signingkeys
+
   # (list) Diese URLs ersetzen bzw. überlagern die URLs vom Synapse.
   # D.h., dass diese URLs vom MAS anstatt von Synapse beantwortet werden müssen.
   # Die hier definierten URLs werden von dem Ingress des Synapse entfernt und
