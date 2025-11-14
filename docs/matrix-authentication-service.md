@@ -74,14 +74,21 @@ am MAS mit Benutzername und Passwort erfolgt.
 
 Ohne Benutzerinteraktion
 
-```console
-mas-cli manage -c /mas/config/config.yaml register-user nutzer --password SuperSicheresPasswort --admin --yes -e nutzer@example.com
+```sh
+mas-cli manage -c /mas/config/mas-secret.yaml \
+    register-user 'nutzer' --admin --yes \
+        --password='SuperSicheresPasswort' \
+        --email='nutzer@example.com'
 ```
 
 Interaktiv
 
-```console
-mas-cli manage -c /mas/config/config.yaml register-user nutzer
+```sh
+mas-cli manage \
+        -c /mas/config/config.yaml \
+        -c /mas/config/mas-secret.yaml \
+        -c /mas/config/signingkeys/signingkeys.yaml \
+    register-user 'nutzer'
 ```
 
 ## Anmeldung via Single Sign On (SSO)

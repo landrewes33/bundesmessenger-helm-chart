@@ -86,6 +86,24 @@ spec:
       remoteRef:
         key: secret/redis
         property: redis-password
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: mas-signingkeys
+spec:
+  secretStoreRef:
+    kind: SecretStore
+    name: bum-secret-store
+  data:
+    - secretKey: 0000-mas-signingkey.pem
+      remoteRef:
+        key: secret/mas-signingkeys
+        property: 0000-mas-signingkey.pem
+    - secretKey: 0001-mas-signingkey.pem
+      remoteRef:
+        key: secret/mas-signingkeys
+        property: 0001-mas-signingkey.pem
 ```
 
 Für eine Einführung zum Einsatz von Secrets im BundesMessenger siehe

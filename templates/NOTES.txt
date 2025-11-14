@@ -55,7 +55,7 @@ Der Benutzer muss in Kleinbuchstaben geschrieben sein und das Passwort die notwe
 eine E-Mailadresse wird zum aktuellen Zeitpunkt auch empfohlen direkt mit anzugeben)
 
     export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=matrix-authentication-service" -o jsonpath="{.items[0].metadata.name}")
-    kubectl exec --namespace {{ .Release.Namespace }} $POD_NAME -- mas-cli manage -c /mas/config/config.yaml register-user NUTZER --password PASSWORT --admin --yes -e nutzer@example.com
+    kubectl exec --namespace {{ .Release.Namespace }} $POD_NAME -- mas-cli manage -c /mas/config/mas-secret.yaml register-user NUTZER --password PASSWORT --admin --yes -e nutzer@example.com
 
 Ein Nutzer ohne administrative Rechte kann mit dem Zusatz "--no-admin" angelegt werden.
 {{- else if and .Values.mas.enabled (not .Values.mas.passwords.enabled) }}

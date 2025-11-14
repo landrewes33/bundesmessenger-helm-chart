@@ -34,36 +34,43 @@ spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       automountServiceAccountToken: false
       initContainers:
-        - name: initconfig
-          command:
-            - sh
-            - -c
-            - |
-                mas-cli config generate -o /tmp/tmpconf.yaml && sed -i '1,/transport/d;/passwords/,$d' /tmp/tmpconf.yaml
-                mas-cli config dump --config=/tmp/tmpconf.yaml --config=/mas/config/conf.d/config.yaml --config=/mas/config/conf.d/mas-secret.yaml -o /mas/config/config.yaml
-          volumeMounts:
-            - name: config
-              mountPath: /mas/config/conf.d/config.yaml
-              subPath: config.yaml
-            - name: secrets
-              mountPath: /mas/config/conf.d/mas-secret.yaml
-              subPath: mas-secret.yaml
-            - name: tmpconf
-              mountPath: /mas/config
-            - name: tmpdir
-              mountPath: /tmp
-          {{- with .Values.mas.extraVolumeMounts }}
-            {{- . | toYaml | nindent 12 }}
-          {{- end }}
-          image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
+        # Workaround for listing signingkeys until the `keys_dir` setting lands:
+        # https://github.com/element-hq/matrix-authentication-service/pull/4877
+        - name: generate-signingkeys-config
+          image: {{ quote (printf "%s/%s:%s"
+            .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag
+          )}}
           imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.mas.securityContext | nindent 12 }}
           resources:
             {{- toYaml .Values.mas.resources | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - |
+              set -euo pipefail
+              INDIR=/mas/secret/signingkey
+              OUTFILE=/mas/config/signingkeys/signingkeys.yaml
+              {
+                echo "secrets:"
+                echo "  keys:"
+                find -L "$INDIR" -maxdepth 1 -type f -print0 | xargs -0 \
+                  printf "    - key_file: \"%s\"\n"
+              } | tee "$OUTFILE"
+          volumeMounts:
+            - name: secret-signingkeys
+              mountPath: /mas/secret/signingkey
+            - name: config-signingkeys
+              mountPath: /mas/config/signingkeys
       containers:
         - name: {{ $component }}
-          command: ["mas-cli", "server", "--config=/mas/config/config.yaml"]
+          command:
+            - mas-cli
+            - server
+            - --config=/mas/config/config.yaml
+            - --config=/mas/config/mas-secret.yaml
+            - --config=/mas/config/signingkeys/signingkeys.yaml
           image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
           imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
           securityContext:
@@ -94,10 +101,14 @@ spec:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
           volumeMounts:
-            - name: tmpconf
+            - name: config
               mountPath: /mas/config
-            - name: tmpdir
-              mountPath: /tmp
+            - name: config-signingkeys
+              mountPath: /mas/config/signingkeys
+            - name: secrets
+              mountPath: /mas/secret
+            - name: secret-signingkeys
+              mountPath: /mas/secret/signingkey
           {{- with .Values.mas.extraVolumeMounts }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -105,25 +116,31 @@ spec:
             {{- toYaml .Values.mas.resources | nindent 12 }}
       volumes:
         - name: config
-          configMap:
-            name: {{ $name }}
-            items:
-              - key: config.yaml
-                path: config.yaml
+          projected:
+            sources:
+            - configMap:
+                name: {{ $name }}
+                items:
+                  - key: config.yaml
+                    path: config.yaml
+            - secret:
+                name: {{ $name }}
+                items:
+                  - key: mas-secret.yaml
+                    path: mas-secret.yaml
+        - name: config-signingkeys
+          emptyDir:
+            sizeLimit: 10Mi
+            medium: Memory
         - name: secrets
           secret:
-            secretName: {{ $name }}
+            secretName: {{ .Values.mas.encryption.existingSecret | quote }}
             items:
-              - key: mas-secret.yaml
-                path: mas-secret.yaml
-        - name: tmpconf
-          emptyDir:
-            sizeLimit: 10Mi
-            medium: Memory
-        - name: tmpdir
-          emptyDir:
-            sizeLimit: 10Mi
-            medium: Memory
+              - key: {{ .Values.mas.encryption.existingSecretKey | quote }}
+                path: encryption
+        - name: secret-signingkeys
+          secret:
+            secretName: {{ .Values.mas.signingkeys.existingSecret | quote }}
       {{- with .Values.mas.extraVolumes }}
         {{- . | toYaml | nindent 8 }}
       {{- end }}

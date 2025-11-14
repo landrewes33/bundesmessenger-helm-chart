@@ -3375,6 +3375,49 @@ properties:
           - max_lifetime
           - extraArgs
         unevaluatedProperties: false
+      encryption:
+        type: object
+        title: MAS Cookie- und Datenbankschlüssel
+        description: >-
+          Der Schlüssel wird als hexadezimale Zeichenkette eingelesen und
+          besteht aus genau 32 Bytes. Beispiel:
+
+            c7e42fb8baba8f228b2e169fdf4c8216dffd5d33ad18bafd8b928c09ca46c718
+
+          Warnung: Verwenden Sie ausschließlich den initialen Schlüssel vom
+          ersten Start des MAS! Ändern des Schlüssels führt zu Datenverlust.
+        properties:
+          existingSecret:
+            type: string
+            title: Name des Secrets, in dem der MAS Datenbankschlüssel stehen
+            default: mas
+          existingSecretKey:
+            type: string
+            title: Verweis im `existingSecret` auf den MAS Datenbankschlüssel
+            default: encryption
+        required:
+          - existingSecret
+          - existingSecretKey
+        unevaluatedProperties: false
+      signingkeys:
+        type: object
+        title: MAS Signaturschlüssel
+        description: >-
+          Im Secret liegt eine beliebige Anzahl an Signaturschlüsseln im
+          PEM-Format. Unter den Schlüsseln muss mindestens ein RSA-Schlüssel
+          vorhanden sein.
+
+
+          Referenz:
+          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#secretskeys
+        properties:
+          existingSecret:
+            type: string
+            title: Name des Secrets, in dem die MAS Signaturschlüssel stehen
+            default: mas-signingkeys
+        required:
+          - existingSecret
+        unevaluatedProperties: false
       paths:
         type: array
         title: URLs überlagern die URLs vom Synapse
@@ -3684,6 +3727,8 @@ properties:
       - image
       - uri
       - postgresql
+      - encryption
+      - signingkeys
       - paths
       - masPaths
       - upstream_oauth2_provider
