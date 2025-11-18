@@ -90,6 +90,20 @@ spec:
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
+  name: mas
+spec:
+  secretStoreRef:
+    kind: SecretStore
+    name: bum-secret-store
+  data:
+    - secretKey: encryption
+      remoteRef:
+        key: secret/mas
+        property: encryption-key
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
   name: mas-signingkeys
 spec:
   secretStoreRef:

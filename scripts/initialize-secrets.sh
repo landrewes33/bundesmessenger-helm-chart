@@ -33,6 +33,9 @@ SIGNINGKEY="ed25519 a_$KID $KEY"
 MAS_SIGNINGKEY_RSA="$(openssl genpkey -algorithm rsa)"
 MAS_SIGNINGKEY_EC="$(openssl genpkey -algorithm ed25519)"
 
+# Erstellen der MAS Datenbankschlüssel.
+MAS_DB_KEY="$(openssl rand -hex 32)"
+
 
 # Secret mit dem Synapse Signierschlüssel.
 kubectl create -n "$NAMESPACE" secret generic "signingkey" \
@@ -70,3 +73,7 @@ kubectl create -n "$NAMESPACE" secret generic "call" \
 kubectl create -n "$NAMESPACE" secret generic "mas-signingkeys" \
     --from-literal="0000-mas-signingkey-rsa.pem=$MAS_SIGNINGKEY_RSA" \
     --from-literal="0001-mas-signingkey-ec.pem=$MAS_SIGNINGKEY_EC"
+
+# Secret mit dem MAS Datenbankschlüssel.
+kubectl create -n "$NAMESPACE" secret generic "mas" \
+    --from-literal="encryption=$MAS_DB_KEY"
