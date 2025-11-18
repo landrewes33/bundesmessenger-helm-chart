@@ -55,12 +55,11 @@ dataPrivacyUrl: ""
 imprintUrl: ""
 
 # (string) Der Server-Name für Admin-APIs.
-# Unter diesem Namen werden die Admin-APIs von Synapse (`/_synapse/admin`), MAS
-# und weiteren Komponenten zur Verfügung gestellt.
+# Unter diesem Namen werden die Admin-APIs von Synapse (`/_synapse/admin`),
+# MAS (`/api/admin`) und weiteren Komponenten zur Verfügung gestellt.
 #
-# Ist `synapse_admin.enabled` und `synapse_admin.uri` von `adminAPIServerName`
-# verschieden, dann ist dort nur der Synapse-Admin erreichbar. Schnittstellen
-# zum Konfigurieren werden nur über `adminAPIServerName` zur Verfügung gestellt.
+# Schnittstellen zum Konfigurieren werden nur über `adminAPIServerName`
+# zur Verfügung gestellt.
 # @default -- Nicht gesetzt, aber Voraussetzung!
 adminAPIServerName: ""
 
@@ -1876,10 +1875,7 @@ ingress:
 ######################################################################################
 ##          Konfiguration für Matrix-Authentication-Service
 ######################################################################################
-## Achtung: Der MAS ist "work in progress" bzw. experimentell, siehe: docs/matrix-authentication-service.md
-## Wenn der matrix-authentication-service Pod nicht startet, befinden sich
-## die relevanten Fehlermeldungen meist im initContainer "initconfig".
-## Reference: https://github.com/element-hq/matrix-authentication-service
+## Dokumentation zum MAS, siehe: docs/matrix-authentication-service.md
 
 mas:
   # (bool) Aktivieren des Matrix-Authentication-Service
