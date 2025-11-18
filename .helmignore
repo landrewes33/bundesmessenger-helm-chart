@@ -47,3 +47,7 @@ pusher-values.yaml
 /docs/images/*.jpg
 /docs/images/*.png
 schemacache/
+# Scripts
+scripts/rewrite-license-header.sh
+scripts/check-synapse-versions-align.sh
+scripts/hooks/

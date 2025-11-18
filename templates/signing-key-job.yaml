@@ -23,7 +23,11 @@ metadata:
     helm.sh/hook-delete-policy: hook-succeeded
   {{- end }}
 data:
-{{ (.Files.Glob "scripts/*.sh").AsConfig | indent 2 }}
+{{- $scripts := list "signing-key.sh" "signing-key-check.sh" }}
+{{- range $scripts }}
+  {{ . }}: |-
+{{ (printf "scripts/%s" .) | $.Files.Get | indent 4 }}
+{{- end }}
 
 {{ if .Values.signingkey.serviceAccount.create }}
 
