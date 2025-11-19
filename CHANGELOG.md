@@ -59,7 +59,7 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 - Unterbinden der Generierung von Secrets unter ArgoCD. Mehr Infos dazu in
   unserer [ArgoCD-Doku](./docs/ArgoCD.md). (!928)
 - Bedingte Einbindung von Umgebungsvariablen für AdminPortal korrigiert
-  (partly contributed by Siegfried.schoefer@lsi.bayern.de). (!938)
+  (partly contributed by Siegfried Schöfer (Siegfried.schoefer@lsi.bayern.de). (!938)
 - Importiert nur die benötigten Scripte für den Signing-Key-Job in die
   ConfigMap. (!957)
 
@@ -144,7 +144,7 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 - Entfernt nicht verwendete Nginx Metriken in der wellknown Konfiguration.
   (!898)
 - Hinzufügen der Schalter `extraVolumes`, `extraVolumeMounts` und `extraEnv` zu
-  Admin-Portal, Matrix-Content-Scanner und Sygnal. (!905, !910)
+  Admin-Portal, Matrix-Content-Scanner und Sygnal. Contributed by Siegfried Schöfer (Siegfried.schoefer@lsi.bayern.de) (!905, !910)
 - `bwmessenger/bundesmessenger-backend/common-pipelines` in der CI-Pipeline auf
   Version `1.4.4` aktualisiert.
 - `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
