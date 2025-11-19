@@ -1,1 +1,0 @@
-Erfordern der Angabe eines Secret-Namens für PostgreSQL per existingSecret; der Standardname ist nun `postgresql`.

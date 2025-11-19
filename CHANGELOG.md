@@ -7,6 +7,105 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.17.0 (2025-11-19)
+
+### ⚠️ Versionshinweise
+
+- Das Redis Subchart wurde migriert; statt von Bitnami wird nun das Chart der
+[CloudPirates](https://www.cloudpirates.io/knowledge/blog/unsere-open-source-helm-charts-als-bitnami-alternative)
+  verwendet. Falls eigene Änderungen an der Redis-Konfiguration bestehen, sind
+  möglicherweise
+  Konfigurationsänderungen unter `redis` notwendig. Die Dokumentation der neuen
+  Schalter findet sich unter
+  https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis. (!916)
+- Bei der Verwendung von [ArgoCD](https://argo-cd.readthedocs.io/en/stable/)
+  werden ab dieser Version keine Secrets mehr automatisch von Helm erstellt.
+  Diese
+  müssen über alternative Mittel, z.B.
+  [`kubectl`](./scripts/initialize-secrets.sh) oder den [External Secrets
+  Operator](https://external-secrets.io/latest/api/externalsecret/) angelegt
+  werden. Details in unserer [ArgoCD-Doku](./docs/ArgoCD.md).
+
+  Für PostgreSQL und Redis bleiben die aktuellen Secrets bestehen. Beim Upgrade
+  ist insbesondere das Secret `synapse` zu berücksichtigen. (!928)
+
+### ✨ Features
+
+- Hinzufügen von Schaltern zur Föderation zwischen BundesMessenger-Instanzen.
+  (!899)
+- Ermöglicht die Erweiterung der Konfiguration des Webclients in der
+  `config.json`. (!921)
+- Konfiguration mit Hinweisstufen zur BundesMessengerX-Migration in den
+  abgelösten Apps. (!940)
+- Image `ghcr.io/element-hq/matrix-authentication-service` auf Version `1.6.0`
+  aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web`
+  auf Version `2.24.1` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/redis` auf
+  Version `5_6.0.16-1ubuntu1.1-jammy-production` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/sygnal`
+  auf Version `0.17.0` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse`
+  auf Version `1.142.1` aktualisiert.
+- Sub-Chart `postgresql` auf Version `15.5.38` aktualisiert.
+- Sub-Chart `redis` auf Version `0.13.1` aktualisiert.
+
+### 🐛 Bugfixes
+
+- Unterbinden der Generierung von Secrets unter ArgoCD. Mehr Infos dazu in
+  unserer [ArgoCD-Doku](./docs/ArgoCD.md). (!928)
+- Bedingte Einbindung von Umgebungsvariablen für AdminPortal korrigiert
+  (partly contributed by Siegfried.schoefer@lsi.bayern.de). (!938)
+- Importiert nur die benötigten Scripte für den Signing-Key-Job in die
+  ConfigMap. (!957)
+
+### 📚 Dokumentation
+
+- Korrigieren des Links zur Nutzung von Sygnal mit Secrets in der values.yaml.
+  (!934)
+- Klarstellung, dass `adminAPIServerName` auch die Admin-Endpunkte für den MAS
+  bereit stellt. (!959)
+
+### 📝 Weitere Änderungen
+
+- Generieren der Signierschlüssel vom MAS im Chart. (!693, !958)
+- Migration des Redis Subcharts von Bitnami zu [CloudPirates open-source
+  Helm-Charts](https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis).
+  (!916)
+- Anpassen der Konfiguration von Renovate. (!917)
+- Konfiguration der CI/CD-Pipelines. (!918, !919, !943, !946, !966)
+- Korrektur der Bezeichnung des Webclients im Schema. (!922)
+- Einheitliche Benutzung von Anführungszeichen in den Unittests. (!923)
+- Unterstützung von Cherry-Picks im Release-Skript beim Erstellen von
+  Patch-Releases. (!925)
+- Updaten von fetch-files für die newsfile component um deren Änderung in
+  common-pipelines zu reflektieren. (!927)
+- Sicherstellen eines sauberen Ausgangspunkts beim CI Merge-Back-Job. (!929)
+- Umbau der Konfiguration von Worker-Deployments. (!931)
+- `$CACHE_DOCKER/library/docker` in der CI-Pipeline auf Version `29`
+  aktualisiert.
+- `$CACHE_DOCKER/library/python` in der CI-Pipeline auf Version `3.14`
+  aktualisiert.
+- `$CACHE_GHCR/renovatebot/renovate` in der CI-Pipeline auf Version `42`
+  aktualisiert.
+- `bwmessenger/bundesmessenger-backend/common-pipelines` in der CI-Pipeline auf
+  Version `1.4.5` aktualisiert.
+- `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
+  `v0.86.2` aktualisiert.
+
+### 🦖 Abkündigungen und Bereinigungen
+
+- Abkündigung der direkten Angabe von Schlüsselmaterial in der
+  Sygnal-Konfiguration. (!511)
+- Erfordern der Angabe eines Secret-Namens für PostgreSQL per existingSecret;
+  der Standardname ist nun `postgresql`. (!828)
+- Entfernen vom eigenständigen BundesMessenger Call, da dieser direkt in den
+  Webclient integriert wurde. (!862)
+
 ## BundesMessenger Helm Chart 1.16.1 (2025-10-17)
 
 ### ✨ Features

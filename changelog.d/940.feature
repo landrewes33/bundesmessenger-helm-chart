@@ -1,1 +1,0 @@
-Konfiguration mit Hinweisstufen zur BundesMessengerX-Migration in den abgelösten Apps.
