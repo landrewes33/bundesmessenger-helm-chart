@@ -50,6 +50,7 @@ data:
       - name: adminapi
         resources:
           - name: adminapi
+          - name: discovery
         binds:
           # First option: listen to the given address
         {{- if not .Values.ipv4Only }}
