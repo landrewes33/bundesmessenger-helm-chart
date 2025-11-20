@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: 2024–2025 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
-suite: MAS
+suite: Matrix Authentication Service
 templates:
   - matrix-authentication-service/matrix-authentication-service-deployment.yaml
   - matrix-authentication-service/matrix-authentication-service-configuration.yaml
@@ -48,7 +48,7 @@ tests:
       value: RELEASE-NAME-matrix-authentication-service
     set:
       mas.enabled: true
-      mas.upstream_oauth2_provider:
+      mas.extraConfig.upstream_oauth2.providers:
         - client_id: fake-cafebabecafebabe
           id: 00000000000VA11D111V11D222
           scope: openid email profile
@@ -59,13 +59,13 @@ tests:
           pattern: "(?ms:\
             ^\\s*upstream_oauth2:.*?\
             ^\\s*  providers:.*?\
-            ^\\s*    - client_id: fake-cafebabecafebabe\n.*?\
-            ^\\s*      id: 00000000000VA11D111V11D222\n.*?\
-            ^\\s*      scope: openid email profile\n.*?\
-            ^\\s*      token_endpoint_auth_method: client_secret_basic\n.*?\
+            ^\\s*  - client_id: fake-cafebabecafebabe\n.*?\
+            ^\\s*    id: 00000000000VA11D111V11D222\n.*?\
+            ^\\s*    scope: openid email profile\n.*?\
+            ^\\s*    token_endpoint_auth_method: client_secret_basic\n.*?\
             )"
 ---
-suite: MAS config
+suite: Matrix Authentication Service config
 templates:
   - matrix-authentication-service/matrix-authentication-service-deployment.yaml
   - matrix-authentication-service/matrix-authentication-service-configuration.yaml
@@ -173,7 +173,7 @@ tests:
             ^\\s*  endpoint: \"http://RELEASE-NAME-generic-worker:8083\".*?\
             )"
 ---
-suite: MAS ingress
+suite: Matrix Authentication Service ingress
 templates:
   - matrix-authentication-service/matrix-authentication-service-deployment.yaml
   - matrix-authentication-service/matrix-authentication-service-configuration.yaml

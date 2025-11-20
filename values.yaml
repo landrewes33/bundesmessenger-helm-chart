@@ -1975,124 +1975,50 @@ mas:
     - "/.well-known/openid-configuration"
     - "/"
 
-  # (list) Konfiguration eines Upstream Authentification Providers zur Delegierung
-  # der Authentifizierung. Die Angaben werden automatisch in die Konfiguration unter
-  # `upstream_oauth2.providers` bereit gestellt.
-  # https://element-hq.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
-  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#upstream_oauth2
-  upstream_oauth2_provider: []
-
-  # (list) OIDC Clients, die zusätzlich zum Synypase Client konfiguriert werden.
-  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#clients
-  clients: []
-
-  # (map)
-  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords
-  passwords:
-    # Whether to enable the password database.
-    # If disabled, users will only be able to log in using upstream OIDC providers
-    enabled: true
-
-    # List of password hashing schemes being used
-    # /!\ Only change this if you know what you're doing
-    # TODO: document this section better
-    schemes:
-      - version: 1
-        algorithm: argon2id
-
-  # (map)
-  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#account
-  account:
-    # (bool) Whether users are allowed to change their email addresses. default: true
-    email_change_allowed: false
-
-    # (bool) Whether users are allowed to change their display names. default: true
-    # This should be in sync with the policy in the homeserver configuration.
-    displayname_change_allowed: false
-
-    # (bool) Whether to enable self-service password registration. default: false
-    # This has no effect if password login is disabled.
-    password_registration_enabled: false
-
-    # (bool) Whether users are allowed to change their passwords. default: true
-    # This has no effect if password login is disabled.
-    password_change_allowed: true
-
-    # (bool) Whether email-based password recovery is enabled. default: false
-    # This has no effect if password login is disabled.
-    password_recovery_enabled: false
-
-
-  # (map) Zusätzliche Policy Konfiguration für MAS.
-  # Die Angaben werden automatisch in die Konfiguration unter `policy.data` bereit gestellt.
-  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#policy
-  policy:
-    admin_users: []
-
-    # (map) Registration using passwords
+  # Zusätzliche Konfigurationen für den MAS
+  # Ref: https://element-hq.github.io/matrix-authentication-service/reference/configuration.html
+  extraConfig:
+    # (map) Konfiguration der Passwortdatenbank.
+    # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords
     passwords:
-      # (integer) minimum length of a password. default: ?
-      min_length: 8
-      # (bool) require at least one lowercase character in a password. default: false
-      require_lowercase: true
-      # (bool) require at least one uppercase character in a password. default: false
-      require_uppercase: true
-      # (bool) require at least one number in a password. default: false
-      require_number: true
+      # Whether to enable the password database.
+      # If disabled, users will only be able to log in using upstream OIDC providers
+      enabled: true
 
-   # (map)
-   # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting
-  rate_limiting:
-    # Limits how many account recovery attempts are allowed.
-    # These limits can protect against e-mail spam.
-    #
-    # Note: these limit also apply to recovery e-mail re-sends.
-    account_recovery:
-      # Controls how many account recovery attempts are permitted
-      # based on source IP address.
-      per_ip:
-        burst: 3
-        per_second: 0.0008
+      # List of password hashing schemes being used
+      # /!\ Only change this if you know what you're doing
+      schemes:
+        - version: 1
+          algorithm: argon2id
 
-      # Controls how many account recovery attempts are permitted
-      # based on the e-mail address that is being used for recovery.
-      per_address:
-        burst: 3
-        per_second: 0.0002
+      # Minimum complexity required for passwords, estimated by the zxcvbn algorithm
+      # Must be between 0 and 4, default is 3
+      # See https://github.com/dropbox/zxcvbn#usage for more information
+      minimum_complexity: 3
 
-    # Limits how many login attempts are allowed.
-    #
-    # Note: these limit also applies to password checks when a user attempts to
-    # change their own password.
-    login:
-      # Controls how many login attempts are permitted
-      # based on source IP address.
-      # This can protect against brute force login attempts.
-      per_ip:
-        burst: 3
-        per_second: 0.05
+    # (map) Einstellungen zu MAS Nutzerkonten.
+    # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#account
+    account:
+      # (bool) Whether users are allowed to change their email addresses. default: true
+      email_change_allowed: false
 
-      # Controls how many login attempts are permitted
-      # based on the account that is being attempted to be logged into.
-      # This can protect against a distributed brute force attack
-      # but should be set high enough to prevent someone's account being
-      # casually locked out.
-      per_account:
-        burst: 1800
-        per_second: 0.5
+      # (bool) Whether users are allowed to change their display names. default: true
+      # This should be in sync with the policy in the homeserver configuration.
+      displayname_change_allowed: false
 
-    # Limits how many registrations attempts are allowed,
-    # based on source IP address.
-    # This limit can protect against e-mail spam and against people registering too many accounts.
-    registration:
-      burst: 3
-      per_second: 0.0008
+      # (bool) Whether to enable self-service password registration. default: false
+      # This has no effect if password login is disabled.
+      password_registration_enabled: false
 
-  # (map) Zusätzliche E-Mail Konfiguration für MAS.
-  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#email
-  email:
-    # Default transport: don't send any emails
-    transport: blackhole
+      # (bool) Whether email-based password recovery is enabled. default: false
+      # This has no effect if password login is disabled.
+      password_recovery_enabled: false
+
+    # (map) Zusätzliche E-Mail Konfiguration für MAS.
+    # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#email
+    email:
+      # Default transport: don't send any emails
+      transport: blackhole
 
   # (list) Zusätzliche in den MAS zu mountende Datenträger (Volumes)
   # Beispiel:

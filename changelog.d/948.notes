@@ -1,0 +1,4 @@
+Die MAS Konfiguration hat eine neue Struktur erhalten um mehr Flexibilität zu erhalten
+und wurde an die Art der Synapse Konfiguration angelehnt. Folgende Werte
+verschieben sich von `mas` zu `mas.extraConfig`: `clients`, `passwords`,
+`email`, `upstream_oauth2_provider`, `account`, `policy`.

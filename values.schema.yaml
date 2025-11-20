@@ -824,7 +824,6 @@ properties:
             alias: '*'
             room_id: '*'
             user_id: '*'
-
       opentracing:
         type: ["null", "object"]
         description: >-
@@ -3463,171 +3462,103 @@ properties:
           - /graphql
           - /.well-known/openid-configuration
           - /
-      upstream_oauth2_provider:
-        type: array
-        title: >-
-          Konfiguration eines Upstream Authentification Providers zur
-          Delegierung der Authentifizierung
-        description: >-
-          Die Angaben werden automatisch in die Konfiguration unter
-          `upstream_oauth2.providers` bereit gestellt.
-
-
-          https://element-hq.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
-
-          https://element-hq.github.io/matrix-authentication-service/usage/configuration.html#upstream_oauth2
-        items:
-          type: object
-          properties:
-            id:
-              type: string
-              pattern: ^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26}$
-            client_id:
-              type: string
-            token_endpoint_auth_method:
-              type: string
-              enum:
-                - none
-                - client_secret_basic
-                - client_secret_post
-                - client_secret_jwt
-                - private_key_jwt
-            scope:
-              type: string
-          required:
-            - id
-            - client_id
-            - token_endpoint_auth_method
-            - scope
-          unevaluatedProperties: true
-        default: []
-      clients:
-        type: array
-        title: OIDC Clients
-        description: >-
-          Werden zusätzlich zum Synypase Client konfiguriert.
-
-
-          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#clients
-        items:
-          type: object
-          unevaluatedProperties: true
-      passwords:
+      extraConfig:
         type: object
-        title: Passwords.
-        description: >-
-          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords
+        title: Zusätzliche Konfigurationen für den MAS
+        description: "Ref: https://element-hq.github.io/matrix-authentication-service/reference/configuration.html"
         properties:
-          enabled:
-            type: boolean
-            title: Whether to enable the password database
-            description: >-
-              If disabled, users will only be able to log in using upstream OIDC
-              providers.
-          schemes:
-            type: array
-            title: List of password hashing schemes being used.
-            description: ⚠ Only change this if you know what you're doing.
-            items:
-              type: object
-              properties:
-                version:
-                  type: integer
-                algorithm:
-                  type: string
-              required:
-                - version
-                - algorithm
-              unevaluatedProperties: false
-            default:
-              - version: 1
-                algorithm: argon2id
-        unevaluatedProperties: true
-      account:
-        type: object
-        title: Account.
-        description: >-
-          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#account
-        properties:
-          email_change_allowed:
-            type: boolean
-            title: Whether users are allowed to change their email addresses
-            default: true
-          displayname_change_allowed:
-            type: boolean
-            title: Whether users are allowed to change their display names
-            description: >-
-              This should be in sync with the policy in the homeserver configuration.
-            default: true
-          password_registration_enabled:
-            type: boolean
-            title: Whether to enable self-service password registration
-            description: This has no effect if password login is disabled.
-            default: true
-          password_change_allowed:
-            type: boolean
-            title: Whether users are allowed to change their passwords
-            description: This has no effect if password login is disabled.
-            default: true
-          password_recovery_enabled:
-            type: boolean
-            title: Whether email-based password recovery is enabled
-            description: This has no effect if password login is disabled.
-            default: true
-        unevaluatedProperties: true
-      policy:
-        type: object
-        title: Zusätzliche Policy Konfiguration für MAS
-        description: >-
-          Die Angaben werden automatisch in die Konfiguration unter
-          `policy.data` bereit gestellt.
-
-
-          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#policy
-        properties:
-          admin_users:
-            type: array
-            items:
-              properties: {}
-            default: []
           passwords:
             type: object
-            title: Registration using passwords
+            title: Konfiguration der Passwortdatenbank.
+            description: >-
+              https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords
             properties:
-              min_length:
+              enabled:
+                type: boolean
+                title: Whether to enable the password database
+                description: >-
+                  If disabled, users will only be able to log in using upstream OIDC
+                  providers.
+              schemes:
+                type: array
+                title: List of password hashing schemes being used.
+                description: ⚠ Only change this if you know what you're doing.
+                items:
+                  type: object
+                  properties:
+                    version:
+                      type: integer
+                    algorithm:
+                      type: string
+                  required:
+                    - version
+                    - algorithm
+                  unevaluatedProperties: false
+                default:
+                  - version: 1
+                    algorithm: argon2id
+              minimum_complexity:
                 type: integer
-                title: Minimum length of a password.
-                default: 8
-              require_lowercase:
-                type: boolean
-                title: Require at least one lowercase character in a password
-                default: false
-              require_uppercase:
-                type: boolean
-                title: Require at least one uppercase character in a password
-                default: false
-              require_number:
-                type: boolean
-                title: Require at least one number in a password
-                default: false
+                title: Minimum complexity required for passwords
+                description: >-
+                  Minimum complexity required for passwords, estimated by the zxcvbn algorithm
+                  Must be between 0 and 4, default is 3
+                  See https://github.com/dropbox/zxcvbn#usage for more information
+                enum: [0, 1, 2, 3]
+            required:
+              - enabled
+              - schemes
+              - minimum_complexity
             unevaluatedProperties: true
-        unevaluatedProperties: true
-      rate_limiting:
-        type: object
-        title: Rate-limiting.
-        description: >-
-          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting
-        unevaluatedProperties: true
-      email:
-        type: object
-        title: Zusätzliche E-Mail Konfiguration für MAS
-        description: >-
-          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#email
-        properties:
-          transport:
-            type: string
-            minLength: 1
-            default: blackhole
+          account:
+            type: object
+            title: Einstellungen zu MAS Nutzerkonten.
+            description: >-
+              https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#account
+            properties:
+              email_change_allowed:
+                type: boolean
+                title: Whether users are allowed to change their email addresses
+                default: true
+              displayname_change_allowed:
+                type: boolean
+                title: Whether users are allowed to change their display names
+                description: >-
+                  This should be in sync with the policy in the homeserver configuration.
+                default: true
+              password_registration_enabled:
+                type: boolean
+                title: Whether to enable self-service password registration
+                description: This has no effect if password login is disabled.
+                default: true
+              password_recovery_enabled:
+                type: boolean
+                title: Whether email-based password recovery is enabled
+                description: This has no effect if password login is disabled.
+                default: true
+            required:
+              - email_change_allowed
+              - displayname_change_allowed
+              - password_registration_enabled
+              - password_recovery_enabled
+            unevaluatedProperties: true
+          email:
+            type: object
+            title: Zusätzliche E-Mail Konfiguration für MAS
+            description: >-
+              https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#email
+            properties:
+              transport:
+                type: string
+                minLength: 1
+                default: blackhole
+            required:
+              - transport
+            unevaluatedProperties: true
+        required:
+          - passwords
+          - account
+          - email
         unevaluatedProperties: true
       extraVolumes:
         type: array
@@ -3749,13 +3680,7 @@ properties:
       - signingkeys
       - paths
       - masPaths
-      - upstream_oauth2_provider
-      - clients
-      - passwords
-      - account
-      - policy
-      - rate_limiting
-      - email
+      - extraConfig
       - extraVolumes
       - extraVolumeMounts
       - podSecurityContext

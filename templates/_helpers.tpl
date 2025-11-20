@@ -506,6 +506,33 @@ Set MAS default uri
 {{- end }}
 {{- end -}}
 
+{{/*
+Divides the MAS configuration into normal config sections and
+those that should be provided via Secret.
+
+Args:
+  global: (dict) Global dict.
+  secrets: (bool) Toggle which sections to render.
+    If `true`: only sections containing secrets are rendered.
+    If `false`, only sections without secrets are rendered.
+*/}}
+{{- define "matrix-synapse.filteredMasConfig" -}}
+{{- $masConfig := .global.Values.mas.extraConfig -}}
+{{- $wantSecrets := .secrets -}}
+{{- $secretSections := list
+      "clients" "email" "secrets" "captcha" "upstream_oauth2"
+-}}
+{{- $output := dict -}}
+
+{{- range $section, $content := $masConfig -}}
+  {{- $isSecret := has $section $secretSections -}}
+  {{- if eq $wantSecrets $isSecret -}}
+    {{- $_ := set $output $section $content -}}
+  {{- end -}}
+{{- end -}}
+
+{{- toYaml $output -}}
+{{- end -}}
 
 {{/* Legacy in-config registration shared secret.
 

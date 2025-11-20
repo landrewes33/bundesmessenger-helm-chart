@@ -119,29 +119,8 @@ data:
     secrets:
       encryption_file: /mas/secret/encryption
       # keys: are collected at startup and written to a separate config.
-    {{- with .Values.mas.passwords }}
 
-    passwords:
-      {{- . | toYaml | nindent 6 }}
-    {{- end }}
-
-    {{- with .Values.mas.account }}
-
-    account:
-      {{- . | toYaml | nindent 6 }}
-    {{- end }}
-
-    {{- with .Values.mas.policy }}
-
-    policy:
-      data:
-        {{- . | toYaml | nindent 8 }}
-    {{- end }}
-
-    {{- with .Values.mas.rate_limiting }}
-
-    rate_limiting:
-      {{- . | toYaml | nindent 6 }}
-    {{- end }}
+    # extraConfig
+    {{- include "matrix-synapse.filteredMasConfig" (dict "global" . "secrets" false) | nindent 4 }}
 
 {{- end }}
