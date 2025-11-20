@@ -1563,8 +1563,17 @@ postgresql:
     # (string) Name des PostgreSQL-Nutzers.
     username: synapse
 
-    # (string|null) Passwort für PostgreSQL Nutzer
-    password: synapse
+    # (string|null) Passwort für den PostgreSQL-Nutzer.
+    # Muss leer sein. Das Passwort wird im `existingSecret` angegeben.
+    # Wenn das `existingSecret` vor der Installation nicht bereit steht,
+    # wird es automatisch mit einem zufälligen Passwort erzeugt.
+    # password: ""
+
+    # (string|null) Passwort für den PostgreSQL-Adminnutzer.
+    # Muss leer sein. Das Passwort wird im `existingSecret` angegeben.
+    # Wenn das `existingSecret` vor der Installation nicht bereit steht,
+    # wird es automatisch mit einem zufälligen Passwort erzeugt.
+    # postgresPassword: ""
 
     # (string) Name des Secrets, in dem das PostgreSQL-Passwort steht.
     # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen

@@ -3136,8 +3136,26 @@
                 "null",
                 "string"
               ],
-              "title": "Password für PostgreSQL Nutzer",
-              "default": "synapse"
+              "enum": [
+                null,
+                ""
+              ],
+              "title": "Passwort für den PostgreSQL-Nutzer",
+              "description": "Muss leer sein. Das Passwort wird im `existingSecret` angegeben. Wenn das `existingSecret` vor der Installation nicht bereit steht, wird es automatisch mit einem zufälligen Passwort erzeugt.",
+              "default": null
+            },
+            "postgresPassword": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "enum": [
+                null,
+                ""
+              ],
+              "title": "Passwort für den PostgreSQL-Adminnutzer",
+              "description": "Muss leer sein. Das Passwort wird im `existingSecret` angegeben. Wenn das `existingSecret` vor der Installation nicht bereit steht, wird es automatisch mit einem zufälligen Passwort erzeugt.",
+              "default": null
             },
             "existingSecret": {
               "type": "string",
