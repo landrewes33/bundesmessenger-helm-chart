@@ -1,1 +1,0 @@
-Sub-Chart `postgresql` auf Version `15.5.38` aktualisiert.

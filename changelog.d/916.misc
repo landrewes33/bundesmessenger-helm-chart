@@ -1,1 +1,0 @@
-Migration des Redis Subcharts von Bitnami zu [CloudPirates open-source Helm-Charts](https://github.com/CloudPirates-io/helm-charts/tree/main/charts/redis).

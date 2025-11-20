@@ -1,1 +1,0 @@
-Image `registry.opencode.de/bwi/bundesmessenger/backend/container-images/redis` auf Version `5_6.0.16-1ubuntu1.1-jammy-production` aktualisiert.

@@ -1,9 +1,0 @@
-Bei der Verwendung von [ArgoCD](https://argo-cd.readthedocs.io/en/stable/)
-werden ab dieser Version keine Secrets mehr automatisch von Helm erstellt. Diese
-müssen über alternative Mittel, z.B.
-[`kubectl`](./scripts/initialize-secrets.sh) oder den [External Secrets
-Operator](https://external-secrets.io/latest/api/externalsecret/) angelegt
-werden. Details in unserer [ArgoCD-Doku](./docs/ArgoCD.md).
-
-Für PostgreSQL und Redis bleiben die aktuellen Secrets bestehen. Beim Upgrade
-ist insbesondere das Secret `synapse` zu berücksichtigen.
