@@ -75,7 +75,6 @@ damit ein Deployment möglich und erfolgreich ist.
 | `synapse_admin.uri` | `synapse_admin.enabled: true` | Wenn der Synapse-Admin genutzt werden soll, kann eine sich von `adminAPIServerName` unterscheidende URL konfiguriert werden (empfohlen). |
 | `adminPortal.uri` | `adminPortal.enabled: true` | Wenn das BundesMessenger Admin-Portal genutzt werden soll, kann eine sich von `adminAPIServerName` unterscheidende URL konfiguriert werden (empfohlen). |
 | `webclient.uri` | `webclient.enabled: true` | Wenn der Webclient genutzt werden will, muss eine entsprechende URL für die WebGUI konfiguriert werden. |
-| `call.uri` | `call.enabled: true` | Wenn der Call Client genutzt werden will, muss eine entsprechende URL für die WebGUI konfiguriert werden. |
 | `displayName` | `webclient.enabled: true` | Der Anzeigename des Messengers im Webclient. Default: `Messenger deiner Organisation`. |
 
 ## Hostnamen/DNS
@@ -87,7 +86,6 @@ Sie benötigen Hostnamen inkl. DNS-Auflösung für die folgenden Infrastrukturko
 | Synapse | erforderlich | `serverName` bzw. `publicServerName` | |
 | Synapse | erforderlich | `adminAPIServerName` | Für die Trennung der Admin-API von Synapse und dem öffentlich zugänglichen Endpunkt des Synapse. |
 | [WebClient](webclient.md) | optional, aber empfohlen | `webclient.uri` | Kann aktiviert werden mit `webclient.enabled=true`. <br /> Der inkludierte gehärtete WebClient des BundesMessenger wird hauptsächlich für den "internen" Gebrauch ausgelegt und per Browser aufgerufen. <br /> Für die externe Nutzung von Clients über mobile Endgeräte stehen die Apps des BundesMessengers zur Verfügung. |
-| Call | optional bei Nutzung von Call | `call.uri` | Kann aktiviert werden mit `call.enabled=true`. <br /> Der inkludierte Call Client des BundesMessenger wird in den WebClient integriert und über diese URL nicht direkt aufgerufen. |
 | [Synapse-Admin](synapse_admin.md) | optional, aber empfohlen | `synapse_admin.uri` | Empfohlen für eine Erreichbarkeit nur von intern, `.local`-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :smiley:<br />Kann aktiviert werden mit `synapse_admin.enabled=true`. |
 | Monitoring | empfohlen | tbd | ToDo |
 

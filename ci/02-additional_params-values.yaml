@@ -48,7 +48,6 @@ webclient:
 
 call:
   enabled: true
-  uri: call.example.org
 
 contentscanner:
   enabled: true
@@ -129,5 +128,7 @@ additionalConfig:
   verifyJWT:
     - Token1
     - Token2
+  federation:
+    enabled: true
   dsgvoExport:
     enabled: true

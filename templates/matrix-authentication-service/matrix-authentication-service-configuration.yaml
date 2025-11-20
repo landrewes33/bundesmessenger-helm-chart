@@ -115,6 +115,9 @@ data:
         # This requires mounting the `prometheus` resource to an HTTP listener
         exporter: prometheus
 
+    secrets:
+      encryption_file: /mas/secret/encryption
+      # keys: are collected at startup and written to a separate config.
     {{- with .Values.mas.passwords }}
 
     passwords:

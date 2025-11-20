@@ -1,15 +1,6 @@
 {{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- $needsVolumePermissions := and .Values.volumePermissions.enabled (or .Values.persistence.enabled .Values.persistence.existingClaim) (not .Values.workers.media_repository.enabled ) }}
-{{- $postgresqlSecretName := include "matrix-synapse.postgresql.secret-name" . -}}
-{{- $postgresqlPassword := include "matrix-synapse.postgresql.password" . -}}
-{{- if eq (empty $postgresqlSecretName) (empty $postgresqlPassword) -}}
-  {{- fail (print
-    "INVARIANT VIOLATION! Of PostgreSQL secret-name and PostgreSQL password "
-    "there must be exactly one. ($postgresqlSecretName: " $postgresqlSecretName
-    ", $postgresqlPassword: " $postgresqlPassword ")"
-  )}}
-{{- end -}}
 {{- if not .Values.redis.auth.enabled -}}
   {{- fail "Redis without authentication is not supported by this chart" -}}
 {{- end -}}
@@ -99,16 +90,11 @@ spec:
                           -c /synapse/config/homeserver.yaml \
                           -c /synapse/config/conf.d/
           env:
-          {{- if and
-              ($postgresSecretName := include "matrix-synapse.postgresql.secret-name" .)
-              ($postgresSecretKey := include "matrix-synapse.postgresql.secret-key" .)
-          }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ $postgresSecretName }}
-                  key: {{ $postgresSecretKey }}
-          {{- end }}
+                  name: {{ include "matrix-synapse.postgresql.secret-name" . | quote }}
+                  key: {{ include "matrix-synapse.postgresql.secret-key" . | quote }}
           {{- with .Values.synapse.extraEnv }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -169,6 +155,11 @@ spec:
         - name: config
           configMap:
             name: {{ include "matrix-synapse.fullname" . }}
+            items:
+              - key: log.yaml
+                path: log.yaml
+              - key: homeserver.yaml
+                path: homeserver.yaml
         - name: secrets
           projected:
             sources:

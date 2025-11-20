@@ -219,11 +219,59 @@ data:
         {{- end }}
       {{- end }}
     {{- end }}
-    {{ $extraConfig := .Values.extraConfig }}
+
+    {{- $extraConfig := deepCopy .Values.extraConfig -}}
     {{- if .Values.mas.enabled -}}
       {{ $passwordDict := dict "password_config" (dict "enabled" false) }}
       {{ $extraConfig = mergeOverwrite $extraConfig $passwordDict }}
     {{- end -}}
+
+    {{- if .Values.additionalConfig.federation.enabled -}}
+      {{- $aclModule := (dict
+        "module" "synapse_acl_extensions_module.AclExtensionModule"
+        "config" (dict
+          "leave_reason" (print
+            "Die Föderation für diesen Raum wurde aufgehoben. "
+            "Alle föderierten Mitglieder werden automatisch entfernt."
+          )
+          "block_acl_change_when_kick_fails" true
+        )
+      )}}
+
+      {{- /* ensure `modules` key exists */}}
+      {{- $extraConfig = merge $extraConfig (dict "modules" (list)) }}
+
+      {{- /* check if the ACL module is already present */}}
+      {{- $existing := false }}
+      {{- range $extraConfig.modules }}
+        {{- if eq .module $aclModule.module }}
+          {{- $existing = true }}
+        {{- end }}
+      {{- end }}
+
+      {{- if not $existing }}
+        {{- /* add module to existing modules list
+        if the ACL module exists already, do not modify it */}}
+        {{- $extraConfig = mergeOverwrite $extraConfig (dict
+          "modules" (append $extraConfig.modules $aclModule)
+        )}}
+      {{- end }}
+    {{- end }}
+
+    {{- /* https://github.com/element-hq/element-call/blob/livekit/docs/self-hosting.md#a-matrix-homeserver */}}
+    {{- if .Values.call.enabled }}
+      {{- $extraConfig = merge $extraConfig (dict
+        "max_event_delay_duration" "24h"
+        "rc_message" (dict
+            "per_second" 0.5
+            "burst_count" 30
+        )
+        "rc_delayed_event_mgmt" (dict
+            "per_second" 1
+            "burst_count" 20
+        )
+      )}}
+    {{- end }}
 
     {{- /* Entfernen von per default leeren Variable aus ExtraConfig Dictionary
     Synapse does not starts when federation_custom_ca_list is empty.
@@ -238,12 +286,12 @@ data:
       {{- range .Values.extraConfig.federation_custom_ca_list }}
         {{- $caList = printf "/%s" ( trimPrefix "/" . ) | append $caList }}
       {{- end }}
-      {{ $caDict := dict "federation_custom_ca_list" ($caList) }}
-      {{ $extraConfig := mustMergeOverwrite $extraConfig $caDict }}
+      {{- $caDict := dict "federation_custom_ca_list" ($caList) }}
+      {{- $extraConfig := mustMergeOverwrite $extraConfig $caDict }}
     {{- end }}
 
-    {{/* Handled in built-in experimental_features.yaml. */}}
-    {{ $extraConfig := omit $extraConfig "experimental_features" }}
+    {{- /* Handled in built-in experimental_features.yaml. */}}
+    {{- $extraConfig := omit $extraConfig "experimental_features" }}
 
     {{- with $extraConfig }}
 

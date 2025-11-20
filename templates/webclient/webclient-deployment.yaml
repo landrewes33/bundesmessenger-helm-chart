@@ -43,13 +43,13 @@ spec:
           - sh
           - -c
           - |
-            jq -s '.[0] * .[1]' /app/config.sample.json /tmp/temp.json > /opt/config.json
+            jq -s '.[0] * .[1]' /app/config.sample.json /tmp/override_default_config.json > /opt/config.json
         volumeMounts:
           - name: config
             mountPath: /opt/
           - name: temp
-            mountPath: /tmp/temp.json
-            subPath: temp.json
+            mountPath: /tmp/override_default_config.json
+            subPath: override_default_config.json
       containers:
       - name: element
           {{- with .Values.webclient.extraEnv }}
@@ -100,8 +100,8 @@ spec:
           configMap:
             name: {{ $webclientName }}-tempconf
             items:
-            - key: temp.json
-              path: temp.json
+            - key: override_default_config.json
+              path: override_default_config.json
         - name: config
           emptyDir:
             sizeLimit: 100Ki

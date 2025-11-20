@@ -82,7 +82,7 @@ data:
     {{- if .Values.call.enabled }}
     {{- $_call := dict
       "org.matrix.msc4143.rtc_foci" (list (dict
-        "livekit_service_url" (printf "https://%s" .Values.call.uri)
+        "livekit_service_url" (include "matrix-synapse.publicServerURL" .)
         "type" "livekit"
       ))
     }}
@@ -118,6 +118,17 @@ data:
       {{- end }}
     {{- end }}
 
+    {{- if .Values.additionalConfig.federation.enabled }}
+      {{- $defaultClient = merge $defaultClient (dict
+        "de.bwi" (dict
+          "federation" (dict
+            "enable" true
+            "show_introduction" .Values.additionalConfig.federation.showIntroduction
+            "show_announcement" .Values.additionalConfig.federation.showAnnouncement
+          )
+      ))}}
+    {{- end }}
+
     {{- $defaultClient = merge $defaultClient (dict
       "de.bwi" (dict
         "data_privacy_url" (printf "https://%s"
@@ -130,6 +141,9 @@ data:
           (.Values.imprintUrl | required
             "a valid URL for imprint (imprintUrl) is required."
           )
+        )
+        "migration_bumx" (dict
+          "level" .Values.additionalConfig.migrationBuMX
         )
       )
     )}}

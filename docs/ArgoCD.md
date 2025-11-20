@@ -21,10 +21,109 @@ Werte.
 
 Die für den BundesMessenger empfohlene Art Secrets anzulegen ist über das
 Anbinden eine Vault-Lösung, beispielsweise mithilfe des [External Secrets
-Operators](https://external-secrets.io).
+Operators](https://external-secrets.io). Als Startpunkt dafür können die
+folgenden [`ExternalSecret`]-Manifeste dienen.
+
+Diese Manifeste sind am Beispiel von [OpenBao](https://openbao.org/) erstellt worden.
+
+```yaml
+# external-secrets.yaml
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: synapse
+spec:
+  secretStoreRef:
+    kind: SecretStore
+    name: bum-secret-store
+  data:
+    - secretKey: registration-shared-secret
+      remoteRef:
+        key: secret/synapse
+        property: registration-shared-secret
+    - secretKey: macaroon-secret-key
+      remoteRef:
+        key: secret/synapse
+        property: macaroon-secret-key
+    - secretKey: form-secret
+      remoteRef:
+        key: secret/synapse
+        property: form-secret
+    - secretKey: worker-replication-secret
+      remoteRef:
+        key: secret/synapse
+        property: worker-replication-secret
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: postgresql
+spec:
+  secretStoreRef:
+    kind: SecretStore
+    name: bum-secret-store
+  data:
+    - secretKey: password
+      remoteRef:
+        key: secret/postgresql
+        property: password
+    - secretKey: postgres-password
+      remoteRef:
+        key: secret/postgresql
+        property: postgres-password
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: redis
+spec:
+  secretStoreRef:
+    kind: SecretStore
+    name: bum-secret-store
+  data:
+    - secretKey: redis-password
+      remoteRef:
+        key: secret/redis
+        property: redis-password
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: mas
+spec:
+  secretStoreRef:
+    kind: SecretStore
+    name: bum-secret-store
+  data:
+    - secretKey: encryption
+      remoteRef:
+        key: secret/mas
+        property: encryption-key
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: mas-signingkeys
+spec:
+  secretStoreRef:
+    kind: SecretStore
+    name: bum-secret-store
+  data:
+    - secretKey: 0000-mas-signingkey.pem
+      remoteRef:
+        key: secret/mas-signingkeys
+        property: 0000-mas-signingkey.pem
+    - secretKey: 0001-mas-signingkey.pem
+      remoteRef:
+        key: secret/mas-signingkeys
+        property: 0001-mas-signingkey.pem
+```
 
 Für eine Einführung zum Einsatz von Secrets im BundesMessenger siehe
 [Secrets.md](./Secrets.md).
+
+[`ExternalSecret`]: <https://external-secrets.io/latest/api/externalsecret/>
 
 ## Erzwingen der Anpassungen für ArgoCD
 

@@ -87,17 +87,17 @@ spec:
             - sh
             - -c
             - |
-              cat /tmp/{{ $name }}.worker | sed "s/@@HOSTNAME@@/${HOSTNAME}/" > /synapse/config/{{ $name }}.worker
+              # Assign a unique worker name.
+              # HOSTNAME contains the pod index and is thus unique per replica.
+              echo "worker_name: $HOSTNAME" > /synapse/config/replica/worker-name.yaml
           image: {{ quote (printf "%s/%s:%s"
             $.Values.image.registry $.Values.image.repository $.Values.image.tag
           )}}
           resources:
             {{- $config.resources | toYaml | nindent 12 }}
           volumeMounts:
-          - mountPath: "/tmp/"
-            name: temp-worker-config
-          - mountPath: "/synapse/config/"
-            name: worker-config
+          - name: replica-worker-config
+            mountPath: /synapse/config/replica
       containers:
         - name: {{ $name }}
           command:
@@ -116,22 +116,14 @@ spec:
               exec python3 -B -m synapse.app.generic_worker \
                           -c /synapse/config/homeserver.yaml \
                           -c /synapse/config/conf.d/ \
-                          -c /synapse/config/{{ $name }}.worker
+                          -c /synapse/config/worker/{{ $name }}.yaml \
+                          -c /synapse/config/replica/worker-name.yaml
           env:
-            - name: PODNAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-          {{- if and
-              ($postgresSecretName := include "matrix-synapse.postgresql.secret-name" $)
-              ($postgresSecretKey := include "matrix-synapse.postgresql.secret-key" $)
-          }}
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ $postgresSecretName }}
-                  key: {{ $postgresSecretKey }}
-          {{- end }}
+                  name: {{ include "matrix-synapse.postgresql.secret-name" $ | quote }}
+                  key: {{ include "matrix-synapse.postgresql.secret-key" $ | quote }}
           {{- with $config.extraEnv }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
@@ -176,14 +168,9 @@ spec:
             {{- $config.resources | toYaml | nindent 12 }}
           volumeMounts:
             - name: config
-              mountPath: /synapse/config/homeserver.yaml
-              subPath: homeserver.yaml
-            - name: config
-              mountPath: /synapse/config/log.yaml
-              subPath: log.yaml
-            - name: worker-config
-              mountPath: /synapse/config/{{ $name }}.worker
-              subPath: {{ $name }}.worker
+              mountPath: /synapse/config
+            - name: replica-worker-config
+              mountPath: /synapse/config/replica
             - name: tmpconf
               mountPath: /synapse/config/conf.d
             - name: secrets
@@ -217,14 +204,24 @@ spec:
     {{- end }}
       volumes:
         - name: config
-          configMap:
-            name: {{ include "matrix-synapse.fullname" $ }}
-        - name: worker-config
+          projected:
+            sources:
+              - configMap:
+                  name: {{ include "matrix-synapse.fullname" $ }}
+                  items:
+                    - key: log.yaml
+                      path: log.yaml
+                    - key: homeserver.yaml
+                      path: homeserver.yaml
+              - configMap:
+                  name: {{ include 
+                    "matrix-synapse.workername" (dict "global" $ "worker" "workers") }}
+                  items:
+                    - key: {{ $name }}.worker.yaml
+                      path: worker/{{ $name }}.yaml
+        - name: replica-worker-config
           emptyDir:
             sizeLimit: 10Mi
-        - name: temp-worker-config
-          configMap:
-            name: {{ include "matrix-synapse.workername" (dict "global" $ "worker" "workers") }}
         - name: secrets
           projected:
             sources:

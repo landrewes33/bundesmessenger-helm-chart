@@ -231,7 +231,6 @@ Pull secrets
     .Values.adminPortal.coreImage.pullSecrets
     .Values.adminPortal.uiImage.pullSecrets
     .Values.webclient.image.pullSecrets
-    .Values.call.client.image.pullSecrets
     .Values.call.jwtService.image.pullSecrets
     .Values.tests.image.pullSecrets
 -}}
@@ -285,51 +284,31 @@ Set postgresql username
 {{- end -}}
 
 {{/*
-PostgreSQL password.
-
-Empty if an existingSecret is used.
+Name of the Secret containing the PostgreSQL password.
 */}}
-{{- define "matrix-synapse.postgresql.password" -}}
-{{- if and .Values.postgresql.enabled (not .Values.postgresql.auth.existingSecret) }}
-  {{- required "PostgreSQL requires a Secret or password" .Values.postgresql.auth.password }}
-{{- else if and (not .Values.postgresql.enabled) (not .Values.externalPostgresql.existingSecret) }}
-  {{- required
-    "External PostgreSQL requires a Secret or password"
-    .Values.externalPostgresql.password
-  }}
+{{- define "matrix-synapse.postgresql.secret-name" -}}
+{{- if .Values.postgresql.enabled }}
+  {{- .Values.postgresql.auth.existingSecret }}
+{{- else }}
+  {{- .Values.externalPostgresql.existingSecret }}
 {{- end }}
 {{- end -}}
 
 {{/*
-Name of the Secret containing the PostgreSQL password.
-
-Empty if no existingSecret is used.
-*/}}
-{{- define "matrix-synapse.postgresql.secret-name" -}}
-{{- if .Values.postgresql.enabled -}}
-  {{ .Values.postgresql.auth.existingSecret | default "" }}
-{{- else -}}
-  {{ .Values.externalPostgresql.existingSecret | default "" }}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Key to the password contained in the PostgreSQL Secret.
-
-Empty if no existingSecret is used.
 */}}
 {{- define "matrix-synapse.postgresql.secret-key" -}}
-{{- if and .Values.postgresql.enabled .Values.postgresql.auth.existingSecret -}}
+{{- if .Values.postgresql.enabled }}
   {{- required
     "To use a Secret for PostgreSQL, postgresql.auth.secretKeys.userPasswordKey is required"
     .Values.postgresql.auth.secretKeys.userPasswordKey
   }}
-{{- else if and (not .Values.postgresql.enabled) .Values.externalPostgresql.existingSecret -}}
+{{- else }}
   {{- required
     "To use a Secret for PostgreSQL, externalPostgresql.existingSecretPasswordKey is required"
     .Values.externalPostgresql.existingSecretPasswordKey
   }}
-{{- end -}}
+{{- end }}
 {{- end -}}
 
 {{/*
@@ -376,7 +355,7 @@ Set redis host
 */}}
 {{- define "matrix-synapse.redis.host" -}}
 {{- if .Values.redis.enabled -}}
-  {{- printf "%s-%s" (include "matrix-synapse.redis.fullname" .) "master" | trunc 63 | trimSuffix "-" -}}
+  {{- include "matrix-synapse.redis.fullname" . | trunc 63 | trimSuffix "-" }}
 {{- else -}}
   {{- required "A valid externalRedis.host is required" .Values.externalRedis.host }}
 {{- end -}}
@@ -387,7 +366,7 @@ Set redis port
 */}}
 {{- define "matrix-synapse.redis.port" -}}
 {{- if .Values.redis.enabled -}}
-  {{- .Values.redis.master.service.ports.redis | default 6379 }}
+  {{- required "A valid redis.service.port is required" .Values.redis.service.port }}
 {{- else -}}
   {{- required "A valid externalRedis.port is required" .Values.externalRedis.port }}
 {{- end -}}

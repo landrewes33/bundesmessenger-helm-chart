@@ -15,42 +15,42 @@ metadata:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ $webclientName }}
 data:
-  temp.json: |
-    {
-      "default_server_config": {
-        "m.homeserver": {
-          "base_url": {{ include "matrix-synapse.publicServerURL" . | quote }},
-          "server_name": {{ .Values.webclient.displayName | quote }}
-        }
-      },
-      "enable_presence_by_hs_url": {
-        {{ include "matrix-synapse.publicServerURL" . | quote }}: {{
-            .Values.extraConfig.presence.enabled | default false
-          }}
-      },
-      {{- if .Values.call.enabled }}
-      "element_call": {
-        "url": "{{- printf "https://%s" .Values.call.uri }}",
-        "use_exclusively": true,
-        "participant_limit": 5,
-        "brand": "BundesMessenger Call"
-      },
-      "features": {
-        "feature_group_calls": true
-      },
-      {{- end -}}
-      {{- if .Values.additionalConfig.locationSharing.enabled }}
-      "bwi_setting_defaults": {
-        "BwiFeature.locationShareTypesEnabled": ["Pin"],
-        "BwiFeature.disableGeolocation": false,
-        "BwiFeature.hideOSMLink": true
-      },
-      {{- end }}
-      "permalink_prefix": "{{- printf "https://%s" .Values.webclient.uri }}",
-      "content_scanner": {
-        "enabled": true
-      }
-    }
+  override_default_config.json: |
+{{- $defaultConfig := dict
+  "default_server_config" (dict
+    "m.homeserver" (dict
+      "base_url" (include "matrix-synapse.publicServerURL" .)
+      "server_name" .Values.webclient.displayName
+    )
+  )
+  "enable_presence_by_hs_url" (dict
+    (include "matrix-synapse.publicServerURL" .) (.Values.extraConfig.presence.enabled | default false)
+  )
+  "permalink_prefix" (printf "https://%s" .Values.webclient.uri)
+  "content_scanner" (dict
+    "enabled" true
+  )
+}}
+
+{{- $defaultConfig = mergeOverwrite $defaultConfig (dict
+  "setting_defaults" (dict
+    "UIFeature.voip" .Values.call.enabled
+  )
+)}}
+
+{{- if .Values.additionalConfig.locationSharing.enabled }}
+  {{- $defaultConfig = merge $defaultConfig (dict
+    "bwi_setting_defaults" (dict
+      "BwiFeature.locationShareTypesEnabled" (list "Pin")
+      "BwiFeature.disableGeolocation" false
+      "BwiFeature.hideOSMLink" true
+    )
+  )}}
+{{- end }}
+
+{{- $customConfig := .Values.webclient.extraConfig | default dict }}
+{{- $mergedConfig := mergeOverwrite $defaultConfig $customConfig }}
+{{- $mergedConfig | toPrettyJson | nindent 4 }}
 
 ---
 apiVersion: v1

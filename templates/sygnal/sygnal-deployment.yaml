@@ -74,12 +74,14 @@ spec:
               subPath: sygnal.yaml
               readOnly: true
             {{- if .Values.sygnal.fcmkey_filename }}
+            {{- /* Abgekündigt */}}
             - name: secrets
               mountPath: /{{ .Values.sygnal.fcmkey_filename }}
               subPath: {{ .Values.sygnal.fcmkey_filename }}
               readOnly: true
             {{- end }}
             {{- if .Values.sygnal.ioskey_filename }}
+            {{- /* Abgekündigt */}}
             - name: secrets
               mountPath: /{{ .Values.sygnal.ioskey_filename }}
               subPath: {{ .Values.sygnal.ioskey_filename }}

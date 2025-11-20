@@ -16,10 +16,25 @@ fi
 
 NAMESPACE=$1
 
+if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1 && \
+   kubectl auth can-i create secrets -n "$NAMESPACE" >/dev/null 2>&1; then
+  echo "✅ Voraussetzungen erfüllt, Secret kann erstellt werden."
+else
+  echo "❌ Namespace existiert nicht oder keine Berechtigung."
+  exit 1
+fi
+
 # Erstellen des Synapse Signierschlüssels.
 KID=$(tr -cd "0-9" < /dev/urandom | head -c 4)
 KEY=$(openssl genpkey -algorithm ed25519  | cut -c 49-92 | sed '2p;d')
 SIGNINGKEY="ed25519 a_$KID $KEY"
+
+# Erstellen der MAS Signierschlüssel.
+MAS_SIGNINGKEY_RSA="$(openssl genpkey -algorithm rsa)"
+MAS_SIGNINGKEY_EC="$(openssl genpkey -algorithm ed25519)"
+
+# Erstellen der MAS Datenbankschlüssel.
+MAS_DB_KEY="$(openssl rand -hex 32)"
 
 
 # Secret mit dem Synapse Signierschlüssel.
@@ -51,3 +66,14 @@ kubectl create -n "$NAMESPACE" secret generic "call" \
 # kubectl create -n "$NAMESPACE" secret generic "sygnal" \
 #     --from-file="AuthKey.p8" \
 #     --from-file="bundesmessenger.json"
+
+# Secret mit den MAS Signierschlüsseln.
+# Die Dateinamen der Signierschlüssel sind frei wählbar. Es muss mindestens ein
+# RSA-Schlüssel angegeben werden.
+kubectl create -n "$NAMESPACE" secret generic "mas-signingkeys" \
+    --from-literal="0000-mas-signingkey-rsa.pem=$MAS_SIGNINGKEY_RSA" \
+    --from-literal="0001-mas-signingkey-ec.pem=$MAS_SIGNINGKEY_EC"
+
+# Secret mit dem MAS Datenbankschlüssel.
+kubectl create -n "$NAMESPACE" secret generic "mas" \
+    --from-literal="encryption=$MAS_DB_KEY"

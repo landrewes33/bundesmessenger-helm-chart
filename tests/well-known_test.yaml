@@ -88,11 +88,10 @@ tests:
     template: well-known/well-known-configuration.yaml
     set:
       call.enabled: true
-      call.uri: calluri.example.org
     asserts:
       - matchRegex:
           path: data["client.json"]
-          pattern: '"org\.matrix\.msc4143\.rtc_foci"\s*:\s*\[\s*{\s*"livekit_service_url"\s*:\s*"https://calluri\.example\.org",\s*"type"\s*:\s*"livekit"\s*}\s*\]'
+          pattern: '"org\.matrix\.msc4143\.rtc_foci"\s*:\s*\[\s*{\s*"livekit_service_url"\s*:\s*"https://example\.org",\s*"type"\s*:\s*"livekit"\s*}\s*\]'
 
 ---
 suite: Well-Known overrides

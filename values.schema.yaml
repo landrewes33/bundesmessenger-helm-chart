@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://schema.bundesmessenger.dev/bum/v1.16.1/values.schema.json
+$id: https://schema.bundesmessenger.dev/bum/v1.17.0/values.schema.json
 type: object
 title: BundesMessenger Helm-Konfiguration
 properties:
@@ -97,8 +97,7 @@ properties:
     description: >-
       Beinhaltet gewünschte Annotations oder Nutzung eines vorhandenen
       ServiceAccounts. Es werden darüber hinaus noch weitere ServiceAccounts
-      angelegt, z.B. für den Signing-Key Job oder Redis. Der ServiceAccount für
-      Redis kann via `redis.serviceAccount.name` konfiguriert werden.
+      angelegt, z.B. für den Signing-Key Job.
     properties:
       create:
         type: boolean
@@ -2121,10 +2120,11 @@ properties:
         type: string
         title: Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält
         description: >-
-          Die Schlüssel des Secrets sind die Dateinamen, welche unter
-          `sygnal.apps` mit dem Präfix `/secrets` referenziert werden.
+          Nähere Infos unter
+          ./docs/sygnal_push.md#nutzung-eines-secrets-für-sygnal-push-konfiguration
         default: sygnal
       ioskey_filename:
+        deprecated: true
         type: ["null", "string"]
         minLength: 1
         title: iOS-Key Dateiname
@@ -2142,6 +2142,7 @@ properties:
           Apps-Konfiguration übereinstimmen!
         default: null
       ioskey_keyvalue:
+        deprecated: true
         type: ["null", "string"]
         minLength: 1
         title: iOS-Key Datei-Inhalt
@@ -2149,6 +2150,7 @@ properties:
         examples:
           - ioskey_keyvalue: HIER KÖNNTE IHR KEY STEHEN
       fcmkey_filename:
+        deprecated: true
         type: ["null", "string"]
         minLength: 1
         title: FCM-Key Dateiname
@@ -2167,6 +2169,7 @@ properties:
           gcm-Sektion der vorhergehenden Apps-Konfiguration übereinstimmen!
         default: null
       fcmkey_keyvalue:
+        deprecated: true
         type: ["null", "object"]
         title: FCM-Key Service Account File Inhalt
         default: null
@@ -2781,42 +2784,56 @@ properties:
     unevaluatedProperties: true
   externalPostgresql:
     type: object
-    title: Authentifizierung für externen PostgreSQL
+    title: Extern konfigurierter PostgreSQL-Server
+    description: >-
+      Wird für die Datenbank von Synapse verwendet. Die Datenbank muss vorhanden
+      sein und sowohl COLLATE als auch CTYPE auf "C" eingestellt sein. Die
+      „interne“ Datenbank muss deaktiviert sein: `postgresql.enabled: false`.
     properties:
       host:
         type: string
         minLength: 1
-        title: Hostname für externen PostgreSQL Server
+        title: Hostname vom externen PostgreSQL-Server
+        description: >-
+          Beispieladresse für einen K8s-internen PostgreSQL im Namespace
+          `postgres`:
         default: postgres-4-matrix-postgresql.postgres.svc.cluster.local
       port:
         $ref: >-
           https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort
         type: integer
-        title: Port für externe PostgreSQL-DB
+        title: Port vom externen PostgreSQL-Server
         default: 5342
       database:
         type: string
         minLength: 1
-        title: DB-Name für PostgreSQL-DB
+        title: Name der zu verwendenden PostgreSQL-Datenbank
         default: synapse_db
       username:
         type: string
         minLength: 1
-        title: Nutzername für PostgreSQL-DB
+        title: Name des PostgreSQL-Nutzers
         default: synapse
       password:
+        deprecated: true
         type: ["null", "string"]
         minLength: 1
-        title: Password für PostgreSQL Nutzer
-        default: synapse
+        title: Passwort vom PostgreSQL-Nutzer
+        description: >-
+          **ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.
+        default: null
+        examples:
+          - 53C237P0576235Q1P455W02D
       existingSecret:
-        type: ["null", "string"]
-        title: Bestehendes Secret
-        description: Wird anstelle eines statischen Passwortes verwendet.
+        type: string
+        minLength: 1
+        title: Name vom Secret mit dem PostgreSQL-Passwort
+        default: postgresql
       existingSecretPasswordKey:
-        type: ["null", "string"]
-        title: Passwortschlüssel
-        description: Wird aus dem bestehenden Secret abgerufen.
+        type: string
+        minLength: 1
+        title: Verweis im `existingSecret` auf das PostgreSQL-Passwort
+        default: password
       extraArgs:
         type: object
         title: Zusätzliche Argumente für die Datenbankverbindung
@@ -2846,6 +2863,8 @@ properties:
       - port
       - database
       - username
+      - existingSecret
+      - existingSecretPasswordKey
       - extraArgs
     unevaluatedProperties: false
   redis:
@@ -2929,78 +2948,71 @@ properties:
           - replication
         title: Form der Architektur des Deployments
         default: standalone
-      master:
+      config:
         type: object
         properties:
-          kind:
+          content:
             type: string
-            enum:
-              - Deployment
-              - StatefulSet
-              - DaemonSet
-            default: StatefulSet
-          persistence:
-            type: object
-            title: Persistenzkonfiguration des Redis
-            description: >-
-              Beachten Sie, dass Synapse Redis nur als
-              Synchronisierungsdienstprogramm verwendet, so dass keine Daten
-              jemals persistiert werden müssen.
-            properties:
-              enabled:
-                type: boolean
-                default: false
-            unevaluatedProperties: true
-          service:
-            type: object
-            properties:
-              ports:
-                type: object
-                properties:
-                  redis:
-                    $ref: >-
-                      https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort
-                    type: integer
-                    default: 6379
-                unevaluatedProperties: true
-            unevaluatedProperties: true
-          resources:
+            title: Redis Konfiguration
+            default: |
+              port 6379
+        unevaluatedProperties: true
+      persistence:
+        type: object
+        title: Persistenzkonfiguration des Redis
+        description: >-
+          Beachten Sie, dass Synapse Redis nur als
+          Synchronisierungsdienstprogramm verwendet, so dass keine Daten
+          jemals persistiert werden müssen.
+        properties:
+          enabled:
+            type: boolean
+            default: false
+        unevaluatedProperties: true
+      service:
+        type: object
+        properties:
+          port:
             $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
-            type: object
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort
+            type: integer
+            default: 6379
+        unevaluatedProperties: true
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        properties:
+          limits:
             properties:
-              limits:
-                properties:
-                  cpu:
-                    title: >-
-                      Rechenressourcengrenzen, die auf den Redis-Container
-                      anzuwenden sind
-                    default: 500m
-                  memory:
-                    title: >-
-                      RAM Ressourcengrenzen, die auf den Redis-Container
-                      anzuwenden sind
-                    default: 768Mi
-              requests:
-                properties:
-                  cpu:
-                    title: >-
-                      Anforderungen an Rechenressourcen, die auf den
-                      Redis-Container anzuwenden sind
-                    default: 300m
-                  memory:
-                    title: >-
-                      Anforderungen an RAM Ressourcen, die auf den
-                      Redis-Container anzuwenden sind
-                    default: 256Mi
-            unevaluatedProperties: false
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf den Redis-Container anzuwenden sind
+                default: 500m
+              memory:
+                title: >-
+                  RAM Ressourcengrenzen, die auf den Redis-Container anzuwenden sind
+                default: 768Mi
+          requests:
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind
+                default: 300m
+              memory:
+                title: >-
+                  Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind
+                default: 256Mi
         unevaluatedProperties: true
     required:
       - enabled
       - image
       - auth
       - architecture
-      - master
+      - config
+      - persistence
+      - service
+      - resources
     unevaluatedProperties: true
   externalRedis:
     type: object
@@ -3363,6 +3375,49 @@ properties:
           - max_lifetime
           - extraArgs
         unevaluatedProperties: false
+      encryption:
+        type: object
+        title: MAS Cookie- und Datenbankschlüssel
+        description: >-
+          Der Schlüssel wird als hexadezimale Zeichenkette eingelesen und
+          besteht aus genau 32 Bytes. Beispiel:
+
+            c7e42fb8baba8f228b2e169fdf4c8216dffd5d33ad18bafd8b928c09ca46c718
+
+          Warnung: Verwenden Sie ausschließlich den initialen Schlüssel vom
+          ersten Start des MAS! Ändern des Schlüssels führt zu Datenverlust.
+        properties:
+          existingSecret:
+            type: string
+            title: Name des Secrets, in dem der MAS Datenbankschlüssel stehen
+            default: mas
+          existingSecretKey:
+            type: string
+            title: Verweis im `existingSecret` auf den MAS Datenbankschlüssel
+            default: encryption
+        required:
+          - existingSecret
+          - existingSecretKey
+        unevaluatedProperties: false
+      signingkeys:
+        type: object
+        title: MAS Signaturschlüssel
+        description: >-
+          Im Secret liegt eine beliebige Anzahl an Signaturschlüsseln im
+          PEM-Format. Unter den Schlüsseln muss mindestens ein RSA-Schlüssel
+          vorhanden sein.
+
+
+          Referenz:
+          https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#secretskeys
+        properties:
+          existingSecret:
+            type: string
+            title: Name des Secrets, in dem die MAS Signaturschlüssel stehen
+            default: mas-signingkeys
+        required:
+          - existingSecret
+        unevaluatedProperties: false
       paths:
         type: array
         title: URLs überlagern die URLs vom Synapse
@@ -3672,6 +3727,8 @@ properties:
       - image
       - uri
       - postgresql
+      - encryption
+      - signingkeys
       - paths
       - masPaths
       - upstream_oauth2_provider
@@ -4481,7 +4538,7 @@ properties:
       image:
         $ref: "#/$defs/image"
         type: object
-        title: Konfiguration für das Image vom Element-Webclient
+        title: Konfiguration für das Image vom BundesMessenger-WebClient
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
@@ -4498,6 +4555,11 @@ properties:
         type: string
         title: Anzeigename des Servers in Webclients
         default: Messenger deiner Organisation
+      extraConfig:
+        type: object
+        description: Zusätzliche Konfigurationen für den Webclient (config.json)
+        default: {}
+        unevaluatedProperties: true
       extraEnv:
         $ref: >-
           https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
@@ -4593,10 +4655,6 @@ properties:
         type: boolean
         title: BundesMessenger-Call im Deployment aktivieren
         default: false
-      uri:
-        type: ["null", "string"]
-        title: URL für den Call, zwingend notwendig
-        default: null
       livekit:
         type: object
         title: Konfiguration mit denen der LiveKit Server erreicht werden kann
@@ -4660,104 +4718,6 @@ properties:
         required:
           - livekitKey
           - livekitSecret
-        unevaluatedProperties: false
-      client:
-        type: object
-        title: Konfiguration für Client vom BundesMessenger-Call
-        properties:
-          image:
-            $ref: "#/$defs/image"
-            type: object
-            title: >-
-              Repository/Image-Konfiguration für den Client vom BundesMessenger-Call
-            default:
-              registry: registry.opencode.de
-              repository: >-
-                bwi/bundesmessenger/backend/container-images/bundesmessenger-call
-              pullSecrets: []
-              pullPolicy: IfNotPresent
-            required:
-              - registry
-              - repository
-              - tag
-              - pullSecrets
-              - pullPolicy
-            unevaluatedProperties: false
-          extraEnv:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
-            type: array
-            title: Weitere Umgebungsvariablen für den Call-Container
-            default: []
-          podSecurityContext:
-            $ref: "#/$defs/podSecurityContext"
-            type: object
-            default:
-              runAsUser: 1021
-              fsGroup: 2666
-              runAsGroup: 1021
-            unevaluatedProperties: false
-          securityContext:
-            $ref: "#/$defs/securityContext"
-            type: object
-            default:
-              capabilities:
-                drop:
-                  - ALL
-              allowPrivilegeEscalation: false
-              readOnlyRootFilesystem: true
-            unevaluatedProperties: false
-          extraVolumes:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes
-            type: array
-            title: Weitere Speicherbereiche für den Call-Pod
-            default: []
-          extraVolumeMounts:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts
-            type: array
-            title: Weitere Speicher-Einhängepunkte für den Call-Container
-            default: []
-          resources:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
-            type: object
-            title: Ressourcen für den Client vom BundesMessenger-Call
-            properties:
-              limits:
-                properties:
-                  cpu:
-                    title: >-
-                      Rechenressourcengrenzen, die auf den BundesMessenger-Call
-                      anzuwenden sind
-                    default: 100m
-                  memory:
-                    title: >-
-                      RAM Ressourcengrenzen, die auf den BundesMessenger-Call
-                      anzuwenden sind
-                    default: 90Mi
-              requests:
-                properties:
-                  cpu:
-                    title: >-
-                      Anforderungen an Rechenressourcen, die auf den
-                      BundesMessenger-Call anzuwenden sind
-                    default: 50m
-                  memory:
-                    title: >-
-                      Anforderungen an RAM Ressourcen, die auf den
-                      BundesMessenger-Call anzuwenden sind
-                    default: 45Mi
-            unevaluatedProperties: false
-        required:
-          - image
-          - extraEnv
-          - podSecurityContext
-          - securityContext
-          - extraVolumes
-          - extraVolumeMounts
-          - resources
         unevaluatedProperties: false
       jwtService:
         type: object
@@ -4894,7 +4854,6 @@ properties:
       - livekit
       - existingSecret
       - secretKeys
-      - client
       - jwtService
     unevaluatedProperties: false
   additionalConfig:
@@ -4918,6 +4877,43 @@ properties:
         items:
           type: string
         default: []
+      federation:
+        type: object
+        properties:
+          enabled:
+            type: boolean
+            description: >-
+              Um die Darstellung der Föderation in den Clients zu aktivieren
+              oder deaktivieren.
+            default: true
+          showIntroduction:
+            type: boolean
+            description: "Um die Einführungsdialoge anzeigen zu können."
+            default: false
+          showAnnouncement:
+            type: boolean
+            description: >-
+              Um die Vorankündigung zur Einführung der Föderation anzuzeigen.
+              Der Einführungsdialog wird nur einmalig angezeigt.
+            default: false
+        required:
+          - enabled
+          - showIntroduction
+          - showAnnouncement
+        unevaluatedProperties: false
+      migrationBuMX:
+        type: integer
+        title: "Migrationshinweis für BundesMessengerX"
+        description: >-
+          Ermöglicht dem Benutzer in den BuM Legacy-Apps in verschiedenen Stufen
+          auf die Migration zu BuMX hinzuweisen.
+
+            0: Keine Information
+            1: Freundlicher Hinweis
+            2: Aufforderung zum Wechsel
+            3: Zwangsdialog, Anmeldung an der BuM Legacy App nicht mehr möglich
+        enum: [0, 1, 2, 3]
+        default: 0
       dsgvoExport:
         type: object
         properties:
@@ -5012,6 +5008,8 @@ properties:
         unevaluatedProperties: true
     required:
       - verifyJWT
+      - federation
+      - migrationBuMX
       - dsgvoExport
       - locationSharing
       - maintenance
@@ -5163,34 +5161,6 @@ properties:
     unevaluatedProperties: false
 patternProperties:
   ^x-: true
-allOf:
-  - oneOf:
-      - properties:
-          postgresql:
-            properties:
-              enabled:
-                const: true
-      - properties:
-          postgresql:
-            properties:
-              enabled:
-                const: false
-          externalPostgresql:
-            oneOf:
-              - properties:
-                  existingSecret:
-                    type: string
-                  password:
-                    type: "null"
-                required:
-                  - existingSecret
-              - properties:
-                  existingSecret:
-                    type: "null"
-                  password:
-                    type: string
-                required:
-                  - password
 required:
   - image
   - serverName

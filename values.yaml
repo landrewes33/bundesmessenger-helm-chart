@@ -11,7 +11,7 @@ image:
   repository: bwi/bundesmessenger/backend/container-images/synapse
 
   # (string) Verwendete Version des Synapse-Abbilds.
-  tag: 1.139.2-jammy-production
+  tag: 1.142.1-jammy-production
 
   # (list) Optional kann ein Array von imagePullSecrets angegeben werden.
   # Secrets müssen manuell im Namensraum angelegt werden.
@@ -55,12 +55,11 @@ dataPrivacyUrl: ""
 imprintUrl: ""
 
 # (string) Der Server-Name für Admin-APIs.
-# Unter diesem Namen werden die Admin-APIs von Synapse (`/_synapse/admin`), MAS
-# und weiteren Komponenten zur Verfügung gestellt.
+# Unter diesem Namen werden die Admin-APIs von Synapse (`/_synapse/admin`),
+# MAS (`/api/admin`) und weiteren Komponenten zur Verfügung gestellt.
 #
-# Ist `synapse_admin.enabled` und `synapse_admin.uri` von `adminAPIServerName`
-# verschieden, dann ist dort nur der Synapse-Admin erreichbar. Schnittstellen
-# zum Konfigurieren werden nur über `adminAPIServerName` zur Verfügung gestellt.
+# Schnittstellen zum Konfigurieren werden nur über `adminAPIServerName`
+# zur Verfügung gestellt.
 # @default -- Nicht gesetzt, aber Voraussetzung!
 adminAPIServerName: ""
 
@@ -79,8 +78,7 @@ monitoring:
 # (map) Erstellen eines ServiceAccounts, samt gewünschter Annotations.
 # Beinhaltet gewünschte Annotations oder Nutzung eines vorhandenen
 # ServiceAccounts. Es werden darüber hinaus noch weitere ServiceAccounts
-# angelegt, z.B. für den Signing-Key Job oder Redis. Der ServiceAccount für
-# Redis kann via `redis.serviceAccount.name` konfiguriert werden.
+# angelegt, z.B. für den Signing-Key Job.
 serviceAccount:
   # (bool) Aktivierung der Erstellung eines ServiceAccounts.
   create: true
@@ -164,7 +162,7 @@ signingkey:
       # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen (empfohlen)
       repository: bwi/bundesmessenger/backend/container-images/synapse
       # (string) Verwendete Version des Synapse-Abbilds.
-      tag: 1.139.2-jammy-production
+      tag: 1.142.1-jammy-production
       pullSecrets: []
       # (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
@@ -378,6 +376,8 @@ extraConfig:
     enabled: true
     # (bool) Suche alle Nutzer, eingeschaltet
     search_all_users: true
+    # (bool) Lokale Benutzer in Suchergebnissen bevorzugen
+    prefer_local_users: true
   # (bool) Nutzer können Anzeigenamen ändern, abgeschaltet
   enable_set_displayname: false
   # (bool) Nur Raummitglieder können einen Alias für einen Raum konfigurieren.
@@ -1224,7 +1224,7 @@ sygnal:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/sygnal
-    tag: 0.16.0-jammy-production
+    tag: 0.17.0-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 
@@ -1292,14 +1292,14 @@ sygnal:
   # (map) Konfiguration für Push-Dienste (APNS und FCM)
   # Beispiel:
   # apps:
-  #    de.opencode.dvs.ios:
-  #      type: apns
-  #      keyfile: /de.opencode.dvs.ios.p8
+  #   de.opencode.dvs.ios:
+  #     type: apns
+  #     keyfile: /secrets/de.opencode.dvs.ios.p8
   apps: {}
 
   # (string) Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält.
-  # Nähere Infos unter ./docs/sygnal_push.md#einbindung-von-secrets
-
+  # Nähere Infos unter
+  # ./docs/sygnal_push.md#nutzung-eines-secrets-für-sygnal-push-konfiguration
   existingSecret: "sygnal"
 
   # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
@@ -1321,18 +1321,26 @@ sygnal:
   # Wenn iOS Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
   # Bei Nutzung von iOS-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
   # Durch Filename-Vergabe wird der unten angegebene ioskey geladen.
+  # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
+  # (siehe docs/sygnal_push.md).
   # ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus der APNS-Sektion
   # der vorhergehenden Apps-Konfiguration übereinstimmen!
   # (string|null) iOS-Key Datei-Inhalt. Die Zeichenkette muss in Base64 kodiert sein.
+  # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
+  # (siehe docs/sygnal_push.md).
   # ioskey_keyvalue: 'HIER KÖNNTE IHR KEY STEHEN'
 
   # (string|null) FCM-Key Dateiname
   # bei Nutzung von FCM-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
   # Wenn FCM Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
   # Durch Filename-Vergabe wird der unten angegebene FCM-Service-Account-File geladen.
+  # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
+  # (siehe docs/sygnal_push.md).
   # fcmkey_filename: de.opencode.dvs.bundesmessenger.json <<-- muss zwingend mit dem service_account_file-Dateinamen
   # aus der gcm-Sektion der vorhergehenden Apps-Konfiguration übereinstimmen!
   # (map|null) FCM-Key Service Account File Inhalt
+  # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
+  # (siehe docs/sygnal_push.md).
   # fcmkey_keyvalue:
   #   type: "service_account"
   #   project_id: "bundesmessenger"
@@ -1614,26 +1622,31 @@ postgresql:
     # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
     sslmode: prefer
 
-# (map) Ein extern konfigurierter Postgres-Server, der für die Datenbank von Synapse verwendet wird.
-# Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf "C" eingestellt sein.
-# Die "interne" Datenbank muss deaktiviert sein `postgresql.enabled: false`.
-# Beispiel für K8s internen Postgres im Namespace "postgres":
+# (map) Extern konfigurierter PostgreSQL-Server.
+# Wird für die Datenbank von Synapse verwendet.
+# Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf "C"
+# eingestellt sein.
+# Die „interne“ Datenbank muss deaktiviert sein: `postgresql.enabled: false`.
 externalPostgresql:
+  # (string) Hostname vom externen PostgreSQL-Server.
+  # Beispieladresse für einen K8s-internen PostgreSQL im Namespace `postgres`:
   host: postgres-4-matrix-postgresql.postgres.svc.cluster.local
+  # (integer) Port vom externen PostgreSQL-Server.
   port: 5432
-  # (string) Name für PostgreSQL-DB auf die sich verbunden wird
+  # (string) Name der zu verwendenden PostgreSQL-Datenbank.
   database: synapse_db
 
-  # (string) Name für PostgreSQL Nutzer
+  # (string) Name des PostgreSQL-Nutzers.
   username: synapse
 
-  # (string|null) Passwort für PostgreSQL Nutzer
-  password: null
+  # (string|null) Passwort vom PostgreSQL-Nutzer.
+  # **ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.
+  # password: 53C237P0576235Q1P455W02D
 
-  # (string|null) Der Name eines bestehenden Secrets mit Postgresql-Anmeldedaten
-  existingSecret: null
+  # (string) Name vom Secret mit dem PostgreSQL-Passwort.
+  existingSecret: postgresql
 
-  # (string) Passwortschlüssel, der aus dem bestehenden Secret abgerufen wird
+  # (string) Verweis im `existingSecret` auf das PostgreSQL-Passwort.
   existingSecretPasswordKey: password
 
   # (map) Zusätzliche Argumente für die Datenbankverbindung.
@@ -1663,7 +1676,7 @@ redis:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/redis
-    tag: 5_6.0.16-1ubuntu1-jammy-production
+    tag: 5_6.0.16-1ubuntu1.1-jammy-production
     # (list) Liste von Kubernetes Pull-Secrets.
     # Beispiel:
     # pullSecrets: ["myRegistryKeySecretName"]
@@ -1689,29 +1702,34 @@ redis:
 
   # (string) Form der Architektur des Deployments
   architecture: standalone
-  master:
-    kind: StatefulSet
-    # (map) Persistenzkonfiguration des Redis.
-    # Beachten Sie, dass Synapse Redis nur als Synchronisierungsdienstprogramm
-    # verwendet, so dass keine Daten jemals persistiert werden müssen.
-    persistence:
-      enabled: false
-    service:
-      ports:
-        # (integer) Serviceport
-        redis: 6379
 
-    resources:
-      limits:
-        # (string) Rechenressourcengrenzen, die auf den Redis-Container anzuwenden sind.
-        cpu: 500m
-        # (string) RAM Ressourcengrenzen, die auf den Redis-Container anzuwenden sind.
-        memory: 768Mi
-      requests:
-        # (string) Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind.
-        cpu: 300m
-        # (string) Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind.
-        memory: 256Mi
+  config:
+    # (string) Redis Konfiguration.
+    content: |
+      # Don’t enforce IPv6 binding and make compatible for ubuntu redis 5.6
+      # bind * -::*
+      port 6379
+
+  # (map) Persistenzkonfiguration des Redis.
+  # Beachten Sie, dass Synapse Redis nur als Synchronisierungsdienstprogramm
+  # verwendet, so dass keine Daten jemals persistiert werden müssen.
+  persistence:
+    enabled: false
+  service:
+    type: ClusterIP
+    port: 6379
+
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den Redis-Container anzuwenden sind.
+      cpu: 500m
+      # (string) RAM Ressourcengrenzen, die auf den Redis-Container anzuwenden sind.
+      memory: 768Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind.
+      cpu: 300m
+      # (string) Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind.
+      memory: 256Mi
 
 # (map) Extern konfigurierter Redis-Server.
 # Wird nur verwendet, wenn `redis.enabled: false` ist.
@@ -1857,10 +1875,7 @@ ingress:
 ######################################################################################
 ##          Konfiguration für Matrix-Authentication-Service
 ######################################################################################
-## Achtung: Der MAS ist "work in progress" bzw. experimentell, siehe: docs/matrix-authentication-service.md
-## Wenn der matrix-authentication-service Pod nicht startet, befinden sich
-## die relevanten Fehlermeldungen meist im initContainer "initconfig".
-## Reference: https://github.com/element-hq/matrix-authentication-service
+## Dokumentation zum MAS, siehe: docs/matrix-authentication-service.md
 
 mas:
   # (bool) Aktivieren des Matrix-Authentication-Service
@@ -1870,7 +1885,7 @@ mas:
     registry: ghcr.io
     repository: element-hq/matrix-authentication-service
     # Tag mit "-debug" um shell zu haben
-    tag: 1.4.1-debug
+    tag: 1.6.0-debug
     pullSecrets: []
     pullPolicy: IfNotPresent
 
@@ -1907,6 +1922,30 @@ mas:
       # sslrootcert: /path/to/ca.pem
       # sslcert: /path/to/cert.pem
       # sslkey: /path/to/key.pem
+
+  # (map) MAS Cookie- und Datenbankschlüssel.
+  # Der Schlüssel wird als hexadezimale Zeichenkette eingelesen und besteht aus
+  # genau 32 Bytes. Beispiel:
+  #
+  #   c7e42fb8baba8f228b2e169fdf4c8216dffd5d33ad18bafd8b928c09ca46c718
+  #
+  # Warnung: Verwenden Sie ausschließlich den initialen Schlüssel vom ersten
+  # Start des MAS! Ändern des Schlüssels führt zu Datenverlust.
+  encryption:
+    # (string) Name des Secrets, in dem der MAS Datenbankschlüssel stehen.
+    existingSecret: mas
+    # (string) Verweis im `existingSecret` auf den MAS Datenbankschlüssel.
+    existingSecretKey: encryption
+
+  # (map) MAS Signaturschlüssel.
+  # Im Secret liegt eine beliebige Anzahl an Signaturschlüsseln im PEM-Format.
+  # Unter den Schlüsseln muss mindestens ein RSA-Schlüssel vorhanden sein.
+  #
+  # Referenz:
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#secretskeys
+  signingkeys:
+    # (string) Name des Secrets, in dem die MAS Signaturschlüssel stehen.
+    existingSecret: mas-signingkeys
 
   # (list) Diese URLs ersetzen bzw. überlagern die URLs vom Synapse.
   # D.h., dass diese URLs vom MAS anstatt von Synapse beantwortet werden müssen.
@@ -2519,24 +2558,28 @@ adminPortal:
 
 
 ######################################################################################
-##          Konfiguration für Element-WebClient
+##          Konfiguration für BundesMessenger-WebClient
 ######################################################################################
 
 webclient:
-  # (bool) Element-Webclient im Deployment aktivieren
+  # (bool) BundesMessenger-WebClient im Deployment aktivieren
   enabled: false
   # (string|null) URL für den Webclient, zwingend notwendig
   uri: null
-  # (map) Konfiguration für das Image vom Element-Webclient
+  # (map) Konfiguration für das Image vom BundesMessenger-WebClient
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.23.1-jammy-production
+    tag: 2.24.1-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 
   # (string) Anzeigename des Servers in Webclients.
   displayName: Messenger deiner Organisation
+
+  # Zusätzliche Konfigurationen für den Webclient (config.json)
+  # Ref: https://gitlab.opencode.de/bwi/bundesmessenger/clients/bundesmessenger-web/-/blob/master/config.sample.json
+  extraConfig: {}
 
   # (list) Weitere Umgebungsvariablen für den Webclient-Container.
   extraEnv: []
@@ -2578,15 +2621,12 @@ webclient:
 ## Der BundesMessenger-Call Client ist derzeit im Beta-Status. Er ermöglicht Video-Chats.
 ## Die Video-Chats funktionieren via WebRTC und LiveKit SFU.
 ## Die SFU muss sperat bereit gestellt werden.
-## Der Client wird nicht mit der konfigurierten URL direkt aufgerufen, sondern
-## integriert sich in den WebClient. Die URL wird für die Integration
-## jedoch benötigt.
+## Der Client für Call ist Bestandteil vom Webclient. Es wird jedoch der
+## JWT Service benötigt.
 
 call:
   # (bool) BundesMessenger-Call im Deployment aktivieren
   enabled: false
-  # (string) URL für den Call, zwingend notwendig
-  uri: ""
 
   # (map) Konfiguration mit denen der LiveKit Server erreicht werden kann.
   # Key und Secret müssen mit den Angabe im LiveKit Server überein stimmen.
@@ -2604,46 +2644,6 @@ call:
     livekitKey: livekit-key
     # (string) Verweis im `existingSecret` auf das Livekit-Geheimnis.
     livekitSecret: livekit-secret
-
-  # (map) Konfiguration für Client vom BundesMessenger-Call
-  client:
-    image:
-      registry: registry.opencode.de
-      repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-call
-      tag: 0.4.0-jammy-production
-      pullSecrets: []
-      pullPolicy: IfNotPresent
-
-    # (list) Weitere Umgebungsvariablen für den Call-Container.
-    extraEnv: []
-
-    # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
-    podSecurityContext:
-      <<: *defaultPodSecurityContext
-      runAsUser: 1001
-      runAsGroup: 1001
-
-    # (map) Konfiguration für die Container-Sicherheitsrichtlinie
-    securityContext:
-      <<: *defaultSecurityContext
-
-    # (list) Weitere Speicherbereiche für den Call-Pod.
-    extraVolumes: []
-    # (list) Weitere Speicher-Einhängepunkte für den Call-Container.
-    extraVolumeMounts: []
-
-    ## Ressource Konfiguration für BundesMessenger-Call.
-    resources:
-      limits:
-        # (string) Rechenressourcengrenzen, die auf den BundesMessenger-Call anzuwenden sind.
-        cpu: 100m
-        # (string) RAM Ressourcengrenzen, die auf den BundesMessenger-Call anzuwenden sind.
-        memory: 90Mi
-      requests:
-        # (string) Anforderungen an Rechenressourcen, die auf den BundesMessenger-Call anzuwenden sind.
-        cpu: 50m
-        # (string) Anforderungen an RAM Ressourcen, die auf den BundesMessenger-Call anzuwenden sind.
-        memory: 45Mi
 
   # (map) Konfiguration für das Image vom LiveKit JWT Service
   jwtService:
@@ -2726,6 +2726,24 @@ additionalConfig:
   # (list) Liste an JWT, die dem Client bereit gestellt werden, um die Infrastruktur
   # als legitim auszuweisen. Diese werden via `<public_baseurl>/_bum/client/v1/verify`
   verifyJWT: []
+
+  federation:
+    # (bool) Um die Darstellung der Föderation in den Clients zu aktivieren oder deaktivieren.
+    enabled: true
+    # (bool) Um die Einführungsdialoge anzeigen zu können.
+    showIntroduction: false
+    # (bool) Um die Vorankündigung zur Einführung der Föderation anzeigen zu können.
+    # Hinweis: Der Einführungsdialog wird nur einmalig angezeigt.
+    showAnnouncement: false
+
+  # (integer) Migrationshinweis für BundesMessengerX.
+  # Ermöglicht dem Benutzer in den BuM Legacy-Apps in verschiedenen Stufen auf
+  # die Migration zu BuMX hinzuweisen.
+  #  0: Keine Information
+  #  1: Freundlicher Hinweis
+  #  2: Aufforderung zum Wechsel
+  #  3: Zwangsdialog, Anmeldung an der BuM Legacy App nicht mehr möglich
+  migrationBuMX: 0
 
   dsgvoExport:
     # (bool) Fügt Volume und suspended Cronjob hinzu um Benutzer zu exportieren.

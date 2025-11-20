@@ -7,7 +7,6 @@ templates:
 set:
   serverName: happy.place.example.org
   call.enabled: true
-  call.uri: call.example.org
   mas.enabled: true
   extraConfig:
     experimental_features:
@@ -33,7 +32,6 @@ templates:
   - secrets.yaml
 set:
   call.enabled: true
-  call.uri: call.example.org
   mas.enabled: true
   extraConfig:
     experimental_features:
@@ -75,7 +73,6 @@ tests:
     documentIndex: 0
     set:
       call.enabled: true
-      call.uri: call.example.org
       extraConfig:
         experimental_features:
           msc3266_enabled: false

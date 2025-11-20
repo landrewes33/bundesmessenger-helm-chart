@@ -1,9 +1,12 @@
 # Matrix-Authentication-Service
 
-| :warning:  Aktuell sind die Clients noch nicht mit dem Matrix-Authentication-Service (MAS) vollständig kompatibel. Nutzung wird unsererseits nicht empfohlen. Sollte sich der Zustand ändern, werden wir dies mitteilen. Hingegen voll von Synapse unterstützt ist die reine [Anmeldung mit SSO](#anmeldung-via-single-sign-on-sso). |
+| :warning: Aktuell sind die Clients noch nicht mit dem Matrix-Authentication-Service (MAS) vollständig kompatibel. Nutzung wird unsererseits nicht empfohlen. Sollte sich der Zustand ändern, werden wir dies mitteilen. Hingegen voll von Synapse unterstützt ist die reine [Anmeldung mit SSO](#anmeldung-via-single-sign-on-sso). |
 | --- |
 
 | :warning: Wichtig: Der Matrix-Authentication-Service (MAS) ist "work in progress" und hat den Status experimentell. Die Migration von einer bestehenden Synapse-Installation zum MAS ist noch nicht Bestandteil. Daher kann der MAS derzeit nur für neue Installationen genutzt werden. Eine Migration wird in Zukunft jedoch erforderlich sein. |
+| --- |
+
+| :pushpin: Wenn der matrix-authentication-service Pod nicht startet, befinden sich die relevanten Fehlermeldungen meist im `initContainer` `initconfig`. |
 | --- |
 
 Um den Matrix-Authentication-Service (MAS) zu verwenden,
@@ -74,14 +77,21 @@ am MAS mit Benutzername und Passwort erfolgt.
 
 Ohne Benutzerinteraktion
 
-```console
-mas-cli manage -c /mas/config/config.yaml register-user nutzer --password SuperSicheresPasswort --admin --yes -e nutzer@example.com
+```sh
+mas-cli manage -c /mas/config/mas-secret.yaml \
+    register-user 'nutzer' --admin --yes \
+        --password='SuperSicheresPasswort' \
+        --email='nutzer@example.com'
 ```
 
 Interaktiv
 
-```console
-mas-cli manage -c /mas/config/config.yaml register-user nutzer
+```sh
+mas-cli manage \
+        -c /mas/config/config.yaml \
+        -c /mas/config/mas-secret.yaml \
+        -c /mas/config/signingkeys/signingkeys.yaml \
+    register-user 'nutzer'
 ```
 
 ## Anmeldung via Single Sign On (SSO)
