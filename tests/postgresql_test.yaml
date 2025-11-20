@@ -44,27 +44,20 @@ tests:
         matchRegex:
           path: stringData["config.yaml"]
           pattern: 'password: "@@POSTGRES_PASSWORD@@"'
-  - it: ensures internal PostgreSQL password is treated as Secret
+  - it: errors if an internal PostgreSQL password is set
     set:
       postgresql.enabled: true
       postgresql.auth.existingSecret: postgresql-secret
-      postgresql.auth.secretKeys.userPasswordKey: lepass
       postgresql.auth.password: P455W02D
     asserts:
-      - template: deployment.yaml
-        contains:
-          path: spec.template.spec.containers[?(@.name=="synapse")].env
-          content:
-            name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: postgresql-secret
-                key: lepass
-      - template: secrets.yaml
-        documentIndex: 0
-        matchRegex:
-          path: stringData["config.yaml"]
-          pattern: 'password: "@@POSTGRES_PASSWORD@@"'
+      - failedTemplate: {}
+  - it: errors if an internal PostgreSQL admin password is set
+    set:
+      postgresql.enabled: true
+      postgresql.auth.existingSecret: postgresql-secret
+      postgresql.auth.postgresPassword: P455W02D
+    asserts:
+      - failedTemplate: {}
   - it: ensures external PostgreSQL works with existingSecret
     set:
       postgresql.enabled: false
@@ -169,68 +162,7 @@ tests:
           name: postgresql-secret
         not: true
 ---
-suite: PostgreSQL Secret migration
-templates:
-  - secrets.yaml
-set:
-  postgresql.enabled: true
-  postgresql.auth.secretKeys.userPasswordKey: password-key
-  postgresql.auth.secretKeys.adminPasswordKey: admin-password-key
-kubernetesProvider:
-  scheme:
-    v1/Secret:
-      gvr:
-        version: v1
-        resource: secrets
-      namespaced: true
-  objects:
-    # The old Helm-managed Secret from postgresql.
-    - apiVersion: v1
-      kind: Secret
-      metadata:
-        name: RELEASE-NAME-postgresql
-        namespace: NAMESPACE
-      data:
-        password: bGVwYXNzd29yZA==  # lepassword
-        postgres-password: aXRzbWVhZG1pbg==  # itsmeadmin
-      type: Opaque
-tests:
-  - it: ensures internal PostgreSQL Secret is migrated
-    set:
-      postgresql.auth.existingSecret: postgresql-secret
-      postgresql.auth.password: ""
-      postgresql.auth.postgresPassword: ""
-    documentSelector:
-      path: metadata.name
-      value: postgresql-secret
-    asserts:
-      - template: secrets.yaml
-        equal:
-          path: stringData.password-key
-          value: lepassword
-      - template: secrets.yaml
-        equal:
-          path: stringData.admin-password-key
-          value: itsmeadmin
-  - it: ensures internal PostgreSQL Secret legacy config has precedence
-    set:
-      postgresql.auth.existingSecret: postgresql-secret
-      postgresql.auth.password: synapse-more-important
-      postgresql.auth.postgresPassword: admin-more-important
-    documentSelector:
-      path: metadata.name
-      value: postgresql-secret
-    asserts:
-      - template: secrets.yaml
-        equal:
-          path: stringData.password-key
-          value: synapse-more-important
-      - template: secrets.yaml
-        equal:
-          path: stringData.admin-password-key
-          value: admin-more-important
----
-suite: PostgreSQL Secret consistency
+suite: PostgreSQL Secret lookup
 templates:
   - secrets.yaml
 set:
@@ -256,22 +188,19 @@ kubernetesProvider:
         admin-password-key: aXRzbWVhZG1pbg==  # itsmeadmin
       type: Opaque
 tests:
-  - it: ensures internal PostgreSQL Secret is consistent (user pass)
+  - it: ensures internal PostgreSQL Secret is not generated if already existing
     set:
       postgresql.auth.existingSecret: postgresql-secret
-      postgresql.auth.password: synapse-changed
     asserts:
-      - failedTemplate: {}
-  - it: ensures internal PostgreSQL Secret is consistent (admin pass)
+      - notEqual:
+          path: metadata.name
+          value: postgresql-secret
+  - it: ensures internal PostgreSQL Secret is generated if non existing
     set:
-      postgresql.auth.existingSecret: postgresql-secret
-      postgresql.auth.postgresPassword: admin-changed
+      postgresql.auth.existingSecret: postgresql-secret-new
     asserts:
-      - failedTemplate: {}
-  - it: ensures internal PostgreSQL Secret succeeds if consistent
-    set:
-      postgresql.auth.existingSecret: postgresql-secret
-      postgresql.auth.password: lepassword
-      postgresql.auth.postgresPassword: itsmeadmin
-    asserts:
-      - notFailedTemplate: {}
+      - containsDocument:
+          apiVersion: v1
+          kind: Secret
+          name: postgresql-secret-new
+          any: true
