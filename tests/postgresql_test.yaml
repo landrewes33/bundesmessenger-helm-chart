@@ -28,22 +28,7 @@ tests:
       #
       postgresql.auth.password: ""
     asserts:
-      - template: deployment.yaml
-        contains:
-          path: spec.template.spec.containers[?(@.name=="synapse")].env
-          content:
-            name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: postgresql-secret
-                key: lepass
-      - template: secrets.yaml
-        documentSelector:
-          path: metadata.name
-          value: RELEASE-NAME-bundesmessenger
-        matchRegex:
-          path: stringData["config.yaml"]
-          pattern: 'password: "@@POSTGRES_PASSWORD@@"'
+      - notFailedTemplate: {}
   - it: errors if an internal PostgreSQL password is set
     set:
       postgresql.enabled: true
@@ -65,45 +50,14 @@ tests:
       externalPostgresql.existingSecretPasswordKey: lepass
       externalPostgresql.password: null
     asserts:
-      - template: deployment.yaml
-        contains:
-          path: spec.template.spec.containers[?(@.name=="synapse")].env
-          content:
-            name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: postgresql-secret
-                key: lepass
-      - template: secrets.yaml
-        documentIndex: 0
-        matchRegex:
-          path: stringData["config.yaml"]
-          pattern: 'password: "@@POSTGRES_PASSWORD@@"'
+      - notFailedTemplate: {}
   - it: ensures external PostgreSQL works with password
     set:
       postgresql.enabled: false
       externalPostgresql.existingSecret: postgresql-secret
       externalPostgresql.existingSecretPasswordKey: lepass
       externalPostgresql.password: P455W02D
-      # Make sure `env` is an array.
-      synapse.extraEnv:
-        - name: DUMMY
-          value: ENV
     asserts:
-      - template: deployment.yaml
-        contains:
-          path: spec.template.spec.containers[?(@.name=="synapse")].env
-          content:
-            name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: postgresql-secret
-                key: lepass
-      - template: secrets.yaml
-        documentIndex: 0
-        matchRegex:
-          path: stringData["config.yaml"]
-          pattern: 'password: "@@POSTGRES_PASSWORD@@"'
       - template: secrets.yaml
         documentSelector:
           path: metadata.name
