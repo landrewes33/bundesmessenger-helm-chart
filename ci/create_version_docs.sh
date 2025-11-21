@@ -26,7 +26,7 @@ echo "Generate doc \"$docs_output_file\""
   echo "## Container Images"
   echo
   echo "| Name | Image | Tag |"
-  echo "|---------|---------|---------|"
+  echo "| --------- | --------- | --------- |"
   echo "$version_content" | yq '
     .images |
     map(
@@ -45,7 +45,7 @@ echo "Generate doc \"$docs_output_file\""
   echo "## Helm Charts"
   echo
   echo "| Name | Version | Repository |"
-  echo "|---------|---------|---------|"
+  echo "| --------- | --------- | --------- |"
   echo "$version_content" | yq '
     .helm |
     map(

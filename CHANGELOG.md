@@ -144,7 +144,8 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 - Entfernt nicht verwendete Nginx Metriken in der wellknown Konfiguration.
   (!898)
 - Hinzufügen der Schalter `extraVolumes`, `extraVolumeMounts` und `extraEnv` zu
-  Admin-Portal, Matrix-Content-Scanner und Sygnal. Contributed by Siegfried Schöfer (Siegfried.schoefer@lsi.bayern.de) (!905, !910)
+  Admin-Portal, Matrix-Content-Scanner und Sygnal. Contributed by Siegfried Schöfer
+  (Siegfried.schoefer@lsi.bayern.de) (!905, !910)
 - `bwmessenger/bundesmessenger-backend/common-pipelines` in der CI-Pipeline auf
   Version `1.4.4` aktualisiert.
 - `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
