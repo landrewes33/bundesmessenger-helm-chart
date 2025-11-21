@@ -25,9 +25,9 @@ Sobald diese Bereiche abgedeckt sind, können Sie eine PoC-Umgebung installieren
 | Größe | Module | Typ |
 | ------ | ------ | ------ |
 | Default | Synapse-Main, generische Worker Nodes (2), Media Repository (1), Redis Server, Ingress-Ressourcen | Default minimum |
-| Minimum PoC| Synapse-Main, Redis Server, Ingress-Ressourcen | Minimum für PoC / Demo |
+| Minimum PoC | Synapse-Main, Redis Server, Ingress-Ressourcen | Minimum für PoC / Demo |
 | Full PoC | Synapse-Main, generische Worker Nodes (2), Media Repository (1), Redis Server, Ingress-Ressourcen, Webclient, Contentscanner, ClamAV, Wellknown-Server, Synapse-Admin, Anbindung an Monitoring | vollwertiges PoC Deployment |
-| Full-Stack Deployment| Synapse-Main, generische Worker Nodes (2), Media Repository (1), Redis Server, Ingress-Ressourcen, Webclient, Contentscanner, ClamAV, Wellknown-Server, Synapse-Admin, PostgreSQL, spezifische Worker für Userdirectory (Nutzerverzeichnis) usw., Anbindung an Monitoring | Deployment aller möglichen und benötigten Module aus dem HelmChart. |
+| Full-Stack Deployment | Synapse-Main, generische Worker Nodes (2), Media Repository (1), Redis Server, Ingress-Ressourcen, Webclient, Contentscanner, ClamAV, Wellknown-Server, Synapse-Admin, PostgreSQL, spezifische Worker für Userdirectory (Nutzerverzeichnis) usw., Anbindung an Monitoring | Deployment aller möglichen und benötigten Module aus dem HelmChart. |
 
 ## Maschinengröße
 
@@ -38,16 +38,16 @@ Kubernetes-Cluster.
 
 ### Für die Ausbaustufe Minimum PoC oder Default
 
-| Ausführung | Anzahl Worker Nodes | Ressourcen Worker-Nodes | Anzahl Control-Planes (Master-Nodes) | Ressourcen Control-Plane|
+| Ausführung | Anzahl Worker Nodes | Ressourcen Worker-Nodes | Anzahl Control-Planes (Master-Nodes) | Ressourcen Control-Plane |
 | ------ | ------ | ------ | ------ | ------ |
-| Ohne Föderation | 2 | je 2 vCPUs/CPUs und 8 GB RAM | 1 |  2 vCPUs und 4GB RAM |
+| Ohne Föderation | 2 | je 2 vCPUs/CPUs und 8 GB RAM | 1 | 2 vCPUs und 4GB RAM |
 | Mit Föderation (experimentell) | 3 | je 4 vCPUs/CPUs und 16 GB RAM | 3 | 2 vCPUs und 4GB RAM |
 
 ### Für die Ausbaustufe Full PoC bzw. Full-Stack Deployment
 
-| Ausführung | Anzahl Worker Nodes | Ressourcen Worker-Nodes | Anzahl Control-Planes (Master-Nodes) | Ressourcen Control-Plane|
+| Ausführung | Anzahl Worker Nodes | Ressourcen Worker-Nodes | Anzahl Control-Planes (Master-Nodes) | Ressourcen Control-Plane |
 | ------ | ------ | ------ | ------ | ------ |
-| Ohne Föderation | 4 | je 4 vCPUs/CPUs und 8 GB RAM | 1 |  4 vCPUs und 4GB RAM |
+| Ohne Föderation | 4 | je 4 vCPUs/CPUs und 8 GB RAM | 1 | 4 vCPUs und 4GB RAM |
 | Mit Föderation (experimentell) | 5 | je 4 vCPUs/CPUs und 16 GB RAM | 3 | 2 vCPUs und 4GB RAM |
 
 :pushpin: **Hinweis:** Es wird empfohlen auf mehr als eine Master-Node zu
@@ -68,7 +68,7 @@ damit ein Deployment möglich und erfolgreich ist.
 | `serverName` bzw. `publicServerName` | Eine ist verpflichtend | Öffentlich (oder teilöffentlich bzw. Nutzerkreis bekannter) präsentierter Endpunkt bzw. MXID der Nutzer. |
 | `adminAPIServerName` | verpflichtend | Zur Trennung des Admin-API Interfaces des Synapse vom öffentlichen präsentierten Kontaktpunkt. |
 | `sygnal.apns` | `sygnal.enabled: true` | Werden von der BWI GmbH für die mobilen Clients zur Verfügung gestellt und beim Deployment zusätzlich eingebunden. |
-| `externalPostgresql.host`| `postgresql.enabled: false` | Wenn kein PostgreSQL-Server im Zuge des Deployments erstellt werden soll, muss zwingend eine URL zum erreichen eines externen PostgreSQL-Servers konfiguriert werden. (inklusive Zugangsdaten!) |
+| `externalPostgresql.host` | `postgresql.enabled: false` | Wenn kein PostgreSQL-Server im Zuge des Deployments erstellt werden soll, muss zwingend eine URL zum erreichen eines externen PostgreSQL-Servers konfiguriert werden. (inklusive Zugangsdaten!) |
 | `externalRedis.host` | `redis.enabled: false` | Wenn kein eigener Redis-Server installiert werden soll, muss zwingend die URL eines externen Redis-Server konfiguriert werden. (inklusive Zugangsdaten!) |
 | Alle Ingress-Routen und Network policies | `ingress.enabled.false` | Alle Routen und Network-Policies müssen manuell konfiguriert werden, wenn kein DVS-Standard Ingress-Controller nicht vorhanden ist und in der Konfiguration deaktiviert wurde. |
 | `schadcodescanner.freshclam.mirrors` | eigener lokaler privater Mirror, da Zugriff auf Internet nicht möglich | Hier kann und muss eine Liste von privaten Mirrors für den eingesetzten ClamAV Updater freshclam hinterlegt werden, wenn ein Zugriff auf den offiziellen Server unter database.clamav.net nicht möglich ist. |
