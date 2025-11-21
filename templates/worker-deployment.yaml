@@ -98,33 +98,58 @@ spec:
           volumeMounts:
           - name: replica-worker-config
             mountPath: /synapse/config/replica
+        - name: generate-pgpass
+          securityContext:
+            {{- $config.securityContext | toYaml | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - |
+              # Generate pgpass file.
+              # Ref: https://www.postgresql.org/docs/current/libpq-pgpass.html
+              pgpass_escape() {
+                sed 's/\\/\\\\/; s/:/\\:/'
+              }
+              printf '\
+              # hostname:port:database:username:password
+              *:*:*:%s:%s
+              ' \
+                "$(echo "$POSTGRES_USER" | pgpass_escape)" \
+                "$(pgpass_escape < /synapse/secrets/postgresql/password)" \
+              > /synapse/pgpass/pgpass
+              # PostgreSQL requires restrictive permissions on the passfile.
+              chmod 0400 /synapse/pgpass/pgpass
+          env:
+            - name: POSTGRES_USER
+              value: {{ include "matrix-synapse.postgresql.username" $ | quote }}
+          image: {{ quote (printf "%s/%s:%s"
+            $.Values.image.registry $.Values.image.repository $.Values.image.tag
+          )}}
+          resources:
+            {{- $config.resources | toYaml | nindent 12 }}
+          volumeMounts:
+            - name: pgpass
+              mountPath: /synapse/pgpass
+            - name: secrets
+              mountPath: /synapse/secrets
       containers:
         - name: {{ $name }}
           command:
             - sh
             - -c
             - |
-              export POSTGRES_PASSWORD=$(echo "${POSTGRES_PASSWORD:-}" | sed 's/\//\\\//g' | sed 's/\&/\\\&/g') && \
-              cat /synapse/secrets/*.yaml | \
-                sed -e "s/@@POSTGRES_PASSWORD@@/${POSTGRES_PASSWORD:-}/" \
-                       > /synapse/config/conf.d/secrets.yaml
-
               {{- range $config.extraCommands }}
               {{- . | nindent 14 }}
               {{- end }}
 
               exec python3 -B -m synapse.app.generic_worker \
                           -c /synapse/config/homeserver.yaml \
-                          -c /synapse/config/conf.d/ \
+                          -c /synapse/config/experimental-features.yaml \
+                          -c /synapse/config/secret-config.yaml \
                           -c /synapse/config/worker/{{ $name }}.yaml \
                           -c /synapse/config/replica/worker-name.yaml
-          env:
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "matrix-synapse.postgresql.secret-name" $ | quote }}
-                  key: {{ include "matrix-synapse.postgresql.secret-key" $ | quote }}
           {{- with $config.extraEnv }}
+          env:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
           securityContext:
@@ -171,10 +196,11 @@ spec:
               mountPath: /synapse/config
             - name: replica-worker-config
               mountPath: /synapse/config/replica
-            - name: tmpconf
-              mountPath: /synapse/config/conf.d
             - name: secrets
               mountPath: /synapse/secrets
+            - name: pgpass
+              mountPath: /synapse/pgpass/pgpass
+              subPath: pgpass
             - name: signingkey
               mountPath: /synapse/keys
             - mountPath: /tmp/
@@ -213,6 +239,13 @@ spec:
                       path: log.yaml
                     - key: homeserver.yaml
                       path: homeserver.yaml
+              - secret:
+                  name: {{ include "matrix-synapse.fullname" $ }}
+                  items:
+                    - key: config.yaml
+                      path: secret-config.yaml
+                    - key: experimental-features.yaml
+                      path: experimental-features.yaml
               - configMap:
                   name: {{ include 
                     "matrix-synapse.workername" (dict "global" $ "worker" "workers") }}
@@ -226,7 +259,10 @@ spec:
           projected:
             sources:
               - secret:
-                  name: {{ include "matrix-synapse.fullname" $ }}
+                  name: {{ include "matrix-synapse.postgresql.secret-name" $ | quote }}
+                  items:
+                    - key: {{ include "matrix-synapse.postgresql.secret-key" $ | quote }}
+                      path: postgresql/password
               - secret:
                   name: {{ include "matrix-synapse.redis.secret-name" $ }}
                   items:
@@ -268,7 +304,7 @@ spec:
             items:
               - key: {{ $.Values.signingkey.existingSecretKey | default "signing.key" | quote }}
                 path: signing.key
-        - name: tmpconf
+        - name: pgpass
           emptyDir:
             sizeLimit: 10Mi
       {{- range $uniqCaSecrets }}

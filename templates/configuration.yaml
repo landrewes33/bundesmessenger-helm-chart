@@ -140,6 +140,23 @@ data:
       {{ .Values.config.extraListeners | toYaml | nindent 6 }}
     {{- end }}
 
+    ## Database configuration ##
+
+    database:
+      name: psycopg2
+      args: {{- nindent 8 (toYaml (merge
+        (dict
+          "host" (include "matrix-synapse.postgresql.host" .)
+          "port" (include "matrix-synapse.postgresql.port" .)
+          "database" (include "matrix-synapse.postgresql.database" .)
+          "user" (include "matrix-synapse.postgresql.username" .)
+          "passfile" "/synapse/pgpass/pgpass"
+          "cp_min" 5
+          "cp_max" 10
+        )
+        (fromYaml (include "matrix-synapse.postgresql.extraArgs" .))
+      ))}}
+
     ## Files ##
 
     media_store_path: "/synapse/data/media"
