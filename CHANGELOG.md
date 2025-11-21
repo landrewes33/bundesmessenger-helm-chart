@@ -7,6 +7,20 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.17.1 (2025-11-21)
+
+### ⚠️ Versionshinweise
+
+- Das Release `1.17.1` ist funktional gleich mit Release `1.17.0` und ersetzt
+  dieses.
+  Für Release `1.17.0` wurden keine Artefakte gebaut. (!release)
+
+### 📚 Dokumentation
+
+- Anwenden der Markdownlint Regel
+  [MD60](https://github.com/DavidAnson/markdownlint/blob/v0.39.0/doc/md060.md)
+  in Tabellen. (!970)
+
 ## BundesMessenger Helm Chart 1.17.0 (2025-11-19)
 
 ### ⚠️ Versionshinweise
@@ -144,7 +158,8 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 - Entfernt nicht verwendete Nginx Metriken in der wellknown Konfiguration.
   (!898)
 - Hinzufügen der Schalter `extraVolumes`, `extraVolumeMounts` und `extraEnv` zu
-  Admin-Portal, Matrix-Content-Scanner und Sygnal. Contributed by Siegfried Schöfer (Siegfried.schoefer@lsi.bayern.de) (!905, !910)
+  Admin-Portal, Matrix-Content-Scanner und Sygnal. Contributed by Siegfried Schöfer
+  (Siegfried.schoefer@lsi.bayern.de) (!905, !910)
 - `bwmessenger/bundesmessenger-backend/common-pipelines` in der CI-Pipeline auf
   Version `1.4.4` aktualisiert.
 - `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
