@@ -7,6 +7,20 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 1.17.1 (2025-11-21)
+
+### ⚠️ Versionshinweise
+
+- Das Release `1.17.1` ist funktional gleich mit Release `1.17.0` und ersetzt
+  dieses.
+  Für Release `1.17.0` wurden keine Artefakte gebaut. (!release)
+
+### 📚 Dokumentation
+
+- Anwenden der Markdownlint Regel
+  [MD60](https://github.com/DavidAnson/markdownlint/blob/v0.39.0/doc/md060.md)
+  in Tabellen. (!970)
+
 ## BundesMessenger Helm Chart 1.17.0 (2025-11-19)
 
 ### ⚠️ Versionshinweise
