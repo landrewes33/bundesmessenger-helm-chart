@@ -43,7 +43,9 @@ Standardmäßig stimmt der Issuer mit der Root-Domain überein, auf dem
 der Service bereitgestellt ist (z. B. `https://auth.example.com/`),
 kann jedoch anders konfiguriert werden.
 
-## Vorbereitung
+## Migration
+
+### Vorbereitung
 
 Um diesen Service jetzt schon nutzen zu können, müssen die folgenden Punkte erfüllt
 werden und umgesetzt sein:
@@ -60,7 +62,7 @@ Es wird empfohlen, dies vom MAS übernehmen zu lassen
     1. Konfiguration eines optionalen OIDC-Providers (OpenID-Connect-Provider)
 5. Migration der bestehenden Konfiguration auf neue Authentifizierungsmethode
 
-## Installation
+### Installation
 
 Durch die Konfiguration des Services, kann die Installation über das
 Helm-Chart vorgenommen werden.
@@ -70,12 +72,12 @@ zu hinterlegen.
 
 ## Erstellen von Benutzern
 
-Der MAS hat seine eigene Kommandozeile zum anlegen von Benutzern.
+Der MAS hat seine eigene Kommandozeile zum Anlegen von Benutzern.
 Diese werden im MAS benötigt, wenn die Authentifizierung nicht an einen weiteren
 Authentifizierungsprovider delegiert werden soll, sondern lokal
 am MAS mit Benutzername und Passwort erfolgt.
 
-Ohne Benutzerinteraktion
+### Ohne Benutzerinteraktion
 
 ```sh
 mas-cli manage -c /mas/config/mas-secret.yaml \
@@ -84,7 +86,7 @@ mas-cli manage -c /mas/config/mas-secret.yaml \
         --email='nutzer@example.com'
 ```
 
-Interaktiv
+### Interaktiv
 
 ```sh
 mas-cli manage \
@@ -102,17 +104,77 @@ Demgegenüber steht die Nutzung von OIDC zur bloßen Nutzerauthorisierung (SSO).
 Diese ist bereits jetzt vollständig von Synapse und den Clients unterstützt.
 
 Im BundesMessenger kann SSO aktiviert werden, indem seine Helm-Konfiguration
-unter [`extraConfig`][bum-extra-config] um den Synapse-Schlüssel
+unter [`extraConfig`] um den Synapse-Schlüssel
 [`oidc_providers`][synapse-config-oidc-providers] ergänzt wird. Informationen zu
 den benötigten Werten und umfangreiche Beispiele finden sich in der
 [Synapse-Dokumentation zu OIDC][synapse-oidc].
 
 [MSC 3861]: <https://github.com/matrix-org/matrix-spec-proposals/pull/3861>
-[bum-extra-config]:
-    <https://gitlab.opencode.de/bwi/bundesmessenger/backend/helm-chart/-/blob/main/values.yaml#L290>
 [synapse-oidc]: <https://element-hq.github.io/synapse/latest/openid.html>
 [synapse-config-oidc-providers]:
     <https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html#oidc_providers>
+
+## Einbindung eines OAuth 2.0/OIDC Clients
+
+Der MAS ist ein OIDC Authentifizierungsprovider.
+Er bietet Anwendungen, wie dem [Admin Portal](./admin_portal.md),
+die Möglichkeit Benutzer zu authentifizieren.
+Hierfür werden im MAS
+[OIDC Clients](https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#clients)
+konfiguriert.
+
+Für die Konfiguration von Clients ist unter Umständen die Angabe eines
+Client-Secrets notwendig. Es wird empfohlen dieses Client-Secret sicher über ein
+Kubernetes Secret einzubinden. Hierzu kann dass Secret beispielsweise manuell
+mit `kubectl` erstellt werden oder der External Secrets Operator verwendet
+werden (siehe: [Secrets](./Secrets.md))
+
+```yaml
+# Beispiel für die Einbindung eines Client Secrets
+# mit dem External Secret Operator
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: mas-clients
+spec:
+  secretStoreRef:
+    kind: SecretStore
+    name: bum-secret-store
+  data:
+    - secretKey: client01
+      remoteRef:
+        key: secret/mas
+        property: client01
+```
+
+Im Helm Chart wird das Secret wie folgt eingebunden und referenziert.
+
+```yaml
+mas:
+  extraConfig:
+    clients:
+      # muss eine valide "ulid" sein: https://github.com/ulid/spec
+      - client_id: 01K9F08K3PCQAFC103R0GDVBSC  # Base32 ohne I,L,O und U
+        client_auth_method: client_secret_post
+        client_secret_file: "/mas/client_secrets/client01"
+        redirect_uris:
+          - https://example.org:3000/callback
+
+  extraVolumes:
+    - name: mas-clients-volume
+      secret:
+        secretName: mas-clients
+  extraVolumeMounts:
+    - name: mas-clients-volume
+      readOnly: true
+      mountPath: "/mas/client_secrets"
+```
+
+Weiterführende Dokumentation:
+
+- [Konfiguration](https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#clients)
+- [Authorization and sessions](https://element-hq.github.io/matrix-authentication-service/topics/authorization.html?highlight=clients#authorized-as-a-user-or-authorized-as-a-client)
+- [Admin API mit Benutzerinteraktion](https://element-hq.github.io/matrix-authentication-service/topics/admin-api.html#user-interactive-tools)
 
 ## Weiterführende Links
 
