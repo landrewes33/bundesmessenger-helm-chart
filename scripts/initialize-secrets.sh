@@ -31,7 +31,7 @@ SIGNINGKEY="ed25519 a_$KID $KEY"
 
 # Erstellen der MAS Signierschlüssel.
 MAS_SIGNINGKEY_RSA="$(openssl genpkey -algorithm rsa)"
-MAS_SIGNINGKEY_EC="$(openssl genpkey -algorithm ed25519)"
+MAS_SIGNINGKEY_EC="$(openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256)"
 
 # Erstellen der MAS Datenbankschlüssel.
 MAS_DB_KEY="$(openssl rand -hex 32)"
