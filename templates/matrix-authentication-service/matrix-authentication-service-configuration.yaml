@@ -128,7 +128,7 @@ data:
 
     secrets:
       encryption_file: /mas/secret/encryption
-      # keys: are collected at startup and written to a separate config.
+      keys_dir: /mas/secret/key
 
     # extraConfig
     {{- include "matrix-synapse.filteredMasConfig" (dict "global" . "secrets" false) | nindent 4 }}
