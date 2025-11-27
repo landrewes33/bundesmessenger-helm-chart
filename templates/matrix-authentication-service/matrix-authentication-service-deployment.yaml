@@ -33,36 +33,6 @@ spec:
         {{- toYaml .Values.mas.podSecurityContext | nindent 8 }}
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       automountServiceAccountToken: false
-      initContainers:
-        # Workaround for listing signingkeys until the `keys_dir` setting lands:
-        # https://github.com/element-hq/matrix-authentication-service/pull/4877
-        - name: generate-signingkeys-config
-          image: {{ quote (printf "%s/%s:%s"
-            .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag
-          )}}
-          imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
-          securityContext:
-            {{- toYaml .Values.mas.securityContext | nindent 12 }}
-          resources:
-            {{- toYaml .Values.mas.resources | nindent 12 }}
-          command:
-            - sh
-            - -c
-            - |
-              set -euo pipefail
-              INDIR=/mas/secret/signingkey
-              OUTFILE=/mas/config/signingkeys/signingkeys.yaml
-              {
-                echo "secrets:"
-                echo "  keys:"
-                find -L "$INDIR" -maxdepth 1 -type f -print0 | xargs -0 \
-                  printf "    - key_file: \"%s\"\n"
-              } | tee "$OUTFILE"
-          volumeMounts:
-            - name: secret-signingkeys
-              mountPath: /mas/secret/signingkey
-            - name: config-signingkeys
-              mountPath: /mas/config/signingkeys
       containers:
         - name: {{ $component }}
           command:
@@ -70,7 +40,6 @@ spec:
             - server
             - --config=/mas/config/config.yaml
             - --config=/mas/config/mas-secret.yaml
-            - --config=/mas/config/signingkeys/signingkeys.yaml
           image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
           imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
           securityContext:
@@ -103,8 +72,6 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /mas/config
-            - name: config-signingkeys
-              mountPath: /mas/config/signingkeys
             - name: secrets
               mountPath: /mas/secret
             - name: secret-signingkeys
@@ -128,10 +95,6 @@ spec:
                 items:
                   - key: mas-secret.yaml
                     path: mas-secret.yaml
-        - name: config-signingkeys
-          emptyDir:
-            sizeLimit: 10Mi
-            medium: Memory
         - name: secrets
           secret:
             secretName: {{ .Values.mas.encryption.existingSecret | quote }}

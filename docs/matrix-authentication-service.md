@@ -92,7 +92,6 @@ mas-cli manage -c /mas/config/mas-secret.yaml \
 mas-cli manage \
         -c /mas/config/config.yaml \
         -c /mas/config/mas-secret.yaml \
-        -c /mas/config/signingkeys/signingkeys.yaml \
     register-user 'nutzer'
 ```
 
