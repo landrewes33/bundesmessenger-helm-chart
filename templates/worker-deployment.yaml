@@ -264,40 +264,50 @@ spec:
                     - key: {{ include "matrix-synapse.postgresql.secret-key" $ | quote }}
                       path: postgresql/password
               - secret:
-                  name: {{ include "matrix-synapse.redis.secret-name" $ }}
+                  name: {{ include "matrix-synapse.redis.secret-name" $ | quote }}
                   items:
-                    - key: {{ include "matrix-synapse.redis.secret-key" $ }}
+                    - key: {{ include "matrix-synapse.redis.secret-key" $ | quote }}
                       path: redis
-              {{ if and
+              {{- if and
                   ($secretName := include "matrix-synapse.registrationSharedSecret.secretName" $)
                   ($secretKey := include "matrix-synapse.registrationSharedSecret.secretKey" $)
               }}
               - secret:
-                  name: {{ $secretName }}
+                  name: {{ quote $secretName }}
                   items:
-                    - key: {{ $secretKey }}
+                    - key: {{ quote $secretKey }}
                       path: registration
               {{- end }}
-              {{ if and
+              {{- if and
                   ($secretName := include "matrix-synapse.macaroonSecretKey.secretName" $)
                   ($secretKey := include "matrix-synapse.macaroonSecretKey.secretKey" $)
               }}
               - secret:
-                  name: {{ $secretName }}
+                  name: {{ quote $secretName }}
                   items:
-                    - key: {{ $secretKey }}
+                    - key: {{ quote $secretKey }}
                       path: macaroon
               {{- end }}
               - secret:
-                  name: {{ $.Values.config.formSecret.existingSecret }}
+                  name: {{ quote $.Values.config.formSecret.existingSecret }}
                   items:
-                    - key: {{ $.Values.config.formSecret.existingSecretKey }}
+                    - key: {{ quote $.Values.config.formSecret.existingSecretKey }}
                       path: form-secret
               - secret:
-                  name: {{ $.Values.config.workerReplicationSecret.existingSecret }}
+                  name: {{ quote $.Values.config.workerReplicationSecret.existingSecret }}
                   items:
-                    - key: {{ $.Values.config.workerReplicationSecret.existingSecretKey }}
+                    - key: {{ quote $.Values.config.workerReplicationSecret.existingSecretKey }}
                       path: worker-replication-secret
+              {{- if and
+                  ($secretName := include "matrix-synapse.mas.matrixSharedSecret.secretName" $)
+                  ($secretKey := include "matrix-synapse.mas.matrixSharedSecret.secretKey" $)
+              }}
+              - secret:
+                  name: {{ quote $secretName }}
+                  items:
+                    - key: {{ quote $secretKey }}
+                      path: mas-shared-secret
+              {{- end }}
         - name: signingkey
           secret:
             secretName: {{ $.Values.signingkey.existingSecret | default (include "matrix-synapse.workername" (dict "global" $ "worker" "signingkey")) | quote }}

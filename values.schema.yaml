@@ -3416,6 +3416,27 @@ properties:
           - existingSecret
           - existingSecretKey
         unevaluatedProperties: false
+      matrixSharedSecret:
+        type: object
+        title: Matrix–MAS Shared-Secret
+        description: >-
+          Beliebige Zeichenkette, die zur Absicherung der Kommunikation
+          zwischen Synapse und MAS verwendet wird.
+        properties:
+          existingSecret:
+            type: string
+            minLength: 1
+            title: Name des Secrets, in dem das Matrix–MAS Shared-Secret stehen
+            default: mas
+          existingSecretKey:
+            type: string
+            minLength: 1
+            title: Verweis im `existingSecret` auf das Matrix–MAS Shared-Secret
+            default: matrix-shared-secret
+        required:
+          - existingSecret
+          - existingSecretKey
+        unevaluatedProperties: false
       signingkeys:
         type: object
         title: MAS Signaturschlüssel
@@ -3677,6 +3698,7 @@ properties:
       - uri
       - postgresql
       - encryption
+      - matrixSharedSecret
       - signingkeys
       - paths
       - masPaths

@@ -99,7 +99,11 @@ spec:
     - secretKey: encryption
       remoteRef:
         key: secret/mas
-        property: encryption-key
+        property: encryption
+    - secretKey: matrix-shared-secret
+      remoteRef:
+        key: secret/mas
+        property: matrix-shared-secret
 ---
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret

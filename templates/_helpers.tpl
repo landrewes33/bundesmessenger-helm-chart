@@ -107,6 +107,18 @@ config.publicBaseURL.
 {{- end -}}
 
 {{/*
+Synapse’s internal MAS endpoint.
+*/}}
+{{- define "matrix-synapse.masEndpoint" -}}
+{{- if .Values.workers.generic_worker.enabled }}
+  {{- printf "http://%s:8083" (include
+    "matrix-synapse.workername" (dict "global" . "worker" "generic-worker")) }}
+{{- else }}
+  {{- printf "http://%s:8008" (include "matrix-synapse.fullname" .) }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "matrix-synapse.serviceAccountName" -}}
@@ -503,6 +515,36 @@ Set MAS default uri
 {{- define "matrix-synapse.masUri" -}}
 {{- if .Values.mas.enabled }}
   {{- .Values.mas.uri | default (include "matrix-synapse.publicServerName" .) }}
+{{- end }}
+{{- end -}}
+
+{{/*
+MAS internal URL.
+*/}}
+{{- define "matrix-synapse.mas.internalURL" -}}
+{{- printf "http://%s:8080/" (include "matrix-synapse.externalname" (dict
+  "global" . "external" "matrix-authentication-service")) }}
+{{- end -}}
+
+{{/*
+Name of the MAS Secret containing the Matrix–MAS shared secret.
+
+Empty if MAS is disabled.
+*/}}
+{{- define "matrix-synapse.mas.matrixSharedSecret.secretName" -}}
+{{- if .Values.mas.enabled }}
+  {{- .Values.mas.matrixSharedSecret.existingSecret }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Key to the Matrix–MAS shared secret contained in the MAS Secret.
+
+Empty if MAS is disabled.
+*/}}
+{{- define "matrix-synapse.mas.matrixSharedSecret.secretKey" -}}
+{{- if .Values.mas.enabled }}
+  {{- .Values.mas.matrixSharedSecret.existingSecretKey }}
 {{- end }}
 {{- end -}}
 

@@ -1946,6 +1946,15 @@ mas:
     # (string) Verweis im `existingSecret` auf den MAS Datenbankschlüssel.
     existingSecretKey: encryption
 
+  # (map) Matrix–MAS Shared-Secret.
+  # Beliebige Zeichenkette, die zur Absicherung der Kommunikation zwischen
+  # Synapse und MAS verwendet wird.
+  matrixSharedSecret:
+    # (string) Name des Secrets, in dem das Matrix–MAS Shared-Secret stehen.
+    existingSecret: mas
+    # (string) Verweis im `existingSecret` auf das Matrix–MAS Shared-Secret.
+    existingSecretKey: matrix-shared-secret
+
   # (map) MAS Signaturschlüssel.
   # Im Secret liegt eine beliebige Anzahl an Signaturschlüsseln im PEM-Format.
   # Unter den Schlüsseln muss mindestens ein RSA-Schlüssel vorhanden sein.
