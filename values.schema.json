@@ -3838,8 +3838,8 @@
           "type": "object",
           "title": "Konfiguration des MAS Image",
           "default": {
-            "registry": "ghcr.io",
-            "repository": "element-hq/matrix-authentication-service",
+            "registry": "registry.opencode.de",
+            "repository": "bwi/bundesmessenger/backend/container-images/matrix-authentication-service",
             "pullSecrets": [],
             "pullPolicy": "IfNotPresent"
           },

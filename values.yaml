@@ -1891,10 +1891,9 @@ mas:
   enabled: false
   # (map) Konfiguration des Image/Repository
   image:
-    registry: ghcr.io
-    repository: element-hq/matrix-authentication-service
-    # Tag mit "-debug" um shell zu haben
-    tag: 1.7.0-debug
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/matrix-authentication-service
+    tag: 1.7.0-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 
