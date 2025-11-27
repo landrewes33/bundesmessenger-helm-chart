@@ -128,7 +128,7 @@ data:
 
     secrets:
       encryption_file: /mas/secret/encryption
-      keys_dir: /mas/secret/key
+      keys_dir: /mas/secret/signingkey
 
     # extraConfig
     {{- include "matrix-synapse.filteredMasConfig" (dict "global" . "secrets" false) | nindent 4 }}
