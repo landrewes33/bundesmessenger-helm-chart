@@ -133,11 +133,23 @@ spec:
             sizeLimit: 10Mi
             medium: Memory
         - name: secrets
-          secret:
-            secretName: {{ .Values.mas.encryption.existingSecret | quote }}
-            items:
-              - key: {{ .Values.mas.encryption.existingSecretKey | quote }}
-                path: encryption
+          projected:
+            sources:
+              - secret:
+                  name: {{ .Values.mas.encryption.existingSecret | quote }}
+                  items:
+                    - key: {{ .Values.mas.encryption.existingSecretKey | quote }}
+                      path: encryption
+              {{- if and
+                  ($secretName := include "matrix-synapse.mas.matrixSharedSecret.secretName" .)
+                  ($secretKey := include "matrix-synapse.mas.matrixSharedSecret.secretKey" .)
+              }}
+              - secret:
+                  name: {{ quote $secretName }}
+                  items:
+                    - key: {{ quote $secretKey }}
+                      path: matrix-shared-secret
+              {{- end }}
         - name: secret-signingkeys
           secret:
             secretName: {{ .Values.mas.signingkeys.existingSecret | quote }}

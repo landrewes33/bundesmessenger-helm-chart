@@ -70,6 +70,7 @@ templates:
   - matrix-authentication-service/matrix-authentication-service-deployment.yaml
   - matrix-authentication-service/matrix-authentication-service-configuration.yaml
   - matrix-authentication-service/matrix-authentication-service-ingress.yaml
+  - configuration.yaml
   - secrets.yaml
 set:
   externalPostgresql.existingSecret: postgresql
@@ -77,11 +78,11 @@ set:
   serverName: example.org
 tests:
   - it: ensures configuration is set for MAS
-    template: secrets.yaml
+    template: configuration.yaml
     documentIndex: 0
     asserts:
       - matchRegex:
-          path: stringData["config.yaml"]
+          path: data["homeserver.yaml"]
           pattern: "(?ms:\
             ^\\s*matrix_authentication_service:.*?\
             ^\\s*  enabled: true.*?\
@@ -141,7 +142,8 @@ tests:
             &sslrootcert=%2Fpath%2Fto%2Fca.pem\
             \")"
   - it: use synapse main process
-    template: secrets.yaml
+    template: >-
+      matrix-authentication-service/matrix-authentication-service-configuration.yaml
     documentSelector:
       path: metadata.name
       value: RELEASE-NAME-matrix-authentication-service
@@ -151,13 +153,14 @@ tests:
           enabled: false
     asserts:
       - matchRegex:
-          path: stringData["mas-secret.yaml"]
+          path: data["config.yaml"]
           pattern: "(?ms:\
             ^\\s*matrix:.*?\
             ^\\s*  endpoint: \"http://RELEASE-NAME-bundesmessenger:8008\".*?\
             )"
   - it: use synapse worker process
-    template: secrets.yaml
+    template: >-
+      matrix-authentication-service/matrix-authentication-service-configuration.yaml
     documentSelector:
       path: metadata.name
       value: RELEASE-NAME-matrix-authentication-service
@@ -167,7 +170,7 @@ tests:
           enabled: true
     asserts:
       - matchRegex:
-          path: stringData["mas-secret.yaml"]
+          path: data["config.yaml"]
           pattern: "(?ms:\
             ^\\s*matrix:.*?\
             ^\\s*  endpoint: \"http://RELEASE-NAME-generic-worker:8083\".*?\

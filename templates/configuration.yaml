@@ -182,6 +182,19 @@ data:
       port: {{ include "matrix-synapse.redis.port" . }}
       password_path: /synapse/secrets/redis
 
+    {{- if .Values.mas.enabled }}
+
+    ## Matrix-Authentication-Service
+
+    matrix_authentication_service:
+      enabled: true
+      # The base URL where Synapse will contact MAS
+      endpoint: {{ include "matrix-synapse.mas.internalURL" . | quote }}
+      # The shared secret used to authenticate MAS requests.
+      # Must contain the same secret as `matrix.secret_file` in the MAS configuration.
+      secret_path: /synapse/secrets/mas-shared-secret
+    {{- end }}
+
     ## Metrics ###
 
     enable_metrics: {{ .Values.config.enable_metrics | default true }}

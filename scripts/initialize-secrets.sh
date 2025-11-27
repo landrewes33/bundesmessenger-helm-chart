@@ -76,4 +76,5 @@ kubectl create -n "$NAMESPACE" secret generic "mas-signingkeys" \
 
 # Secret mit dem MAS Datenbankschlüssel.
 kubectl create -n "$NAMESPACE" secret generic "mas" \
-    --from-literal="encryption=$MAS_DB_KEY"
+    --from-literal="encryption=$MAS_DB_KEY" \
+    --from-literal="matrix-shared-secret=$(pwgen 42 1)"

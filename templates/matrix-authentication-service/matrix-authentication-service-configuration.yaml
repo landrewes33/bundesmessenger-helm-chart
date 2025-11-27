@@ -91,6 +91,16 @@ data:
         # Whether to enable the PROXY protocol on the listener
         proxy_protocol: false
 
+    matrix:
+      # The homeserver name, as per the `server_name` in the Synapse configuration file.
+      homeserver: {{ .Values.serverName | quote }}
+      # Shared secret used to authenticate the service to the homeserver.
+      # This must be of high entropy, because leaking this secret would allow anyone
+      # to perform admin actions on the homeserver.
+      secret_file: /mas/secret/matrix-shared-secret
+      # URL to which the homeserver is accessible from the service.
+      endpoint: {{ include "matrix-synapse.masEndpoint" . | quote }}
+
     templates:
       # From where to load the templates
       # This is relative to the current working directory, *not* the config file
