@@ -143,7 +143,6 @@ data:
     ## Files ##
 
     media_store_path: "/synapse/data/media"
-    uploads_path: "/synapse/data/uploads"
 
     ## Registration ##
 
