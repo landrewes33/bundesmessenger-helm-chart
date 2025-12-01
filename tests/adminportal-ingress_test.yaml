@@ -5,7 +5,6 @@ templates:
   - adminportal/adminportal-ingress.yaml
 set:
   adminAPIServerName: admin-api.example.org
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures an Ingress if enabled
     set:

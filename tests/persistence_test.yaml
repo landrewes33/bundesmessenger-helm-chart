@@ -3,8 +3,6 @@
 suite: Persistent Volume Claims
 templates:
   - pvc.yaml
-set:
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a PersistentVolumeClaim if enabled
     set:

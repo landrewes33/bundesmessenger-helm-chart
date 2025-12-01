@@ -4,8 +4,6 @@ suite: Sygnal
 templates:
   - sygnal/sygnal-deployment.yaml
   - sygnal/sygnal-configuration.yaml
-set:
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment if enabled
     template: sygnal/sygnal-deployment.yaml
@@ -41,8 +39,6 @@ suite: Sygnal secrets
 templates:
   - sygnal/sygnal-deployment.yaml
   - sygnal/sygnal-configuration.yaml
-set:
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Secret on legacy options
     template: sygnal/sygnal-configuration.yaml

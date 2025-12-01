@@ -8,7 +8,6 @@ templates:
   - signing-key-job.yaml
 set:
   serverName: example.org
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures internal Redis works with existingSecret
     set:
@@ -63,7 +62,6 @@ suite: Redis internal Secret generation
 templates:
   - secrets.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   redis.auth.existingSecretPasswordKey: password-key
 tests:
   - it: ensures internal Redis Secret if required
@@ -109,7 +107,6 @@ templates:
   - signing-key-job.yaml
 set:
   serverName: example.org
-  externalPostgresql.existingSecret: postgresql
   redis.auth.existingSecretPasswordKey: password-key
 tests:
   - it: ensures external Redis generates Secret on password and externalSecret
@@ -140,7 +137,6 @@ suite: Redis Secret consistency
 templates:
   - secrets.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   redis.enabled: true
   redis.auth.existingSecretPasswordKey: password-key
 kubernetesProvider:

@@ -5,8 +5,6 @@ templates:
   - confighub/confighub-deployment.yaml
   - confighub/confighub-configuration.yaml
   - nginx-conf.yaml
-set:
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment if enabled
     template: confighub/confighub-deployment.yaml

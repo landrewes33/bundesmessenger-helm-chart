@@ -6,7 +6,6 @@ templates:
   - call/client-configuration.yaml
   - call/ingress.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   serverName: example.org
 tests:
   - it: ensures an Ingress if (call enabled, ingress enabled)
@@ -53,7 +52,6 @@ templates:
   - templates/call/jwtService-deployment.yaml
   - secrets.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   serverName: example.org
 tests:
   - it: ensures a Deployment if enabled

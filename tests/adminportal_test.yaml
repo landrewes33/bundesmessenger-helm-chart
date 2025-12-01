@@ -8,7 +8,6 @@ templates:
 set:
   adminPortal:
     uri: adminportal.example.com
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment if enabled
     template: adminportal/adminportal-deployment.yaml

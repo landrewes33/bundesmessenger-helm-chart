@@ -5,7 +5,6 @@ templates:
   - configuration.yaml
 set:
   serverName: happy.place.example.org
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: renders default listener types without extras
     set: {}
