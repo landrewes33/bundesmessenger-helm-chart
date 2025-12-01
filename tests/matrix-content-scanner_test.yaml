@@ -4,8 +4,6 @@ suite: Matrix Content Scanner
 templates:
   - matrix-content-scanner/contentscanner-deployment.yaml
   - matrix-content-scanner/contentscanner-configuration.yaml
-set:
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a StatefulSet if enabled
     template: matrix-content-scanner/contentscanner-deployment.yaml
@@ -43,7 +41,6 @@ templates:
   - matrix-content-scanner/contentscanner-deployment.yaml
   - matrix-content-scanner/contentscanner-configuration.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   contentscanner.enabled: true
 tests:
   - it: ensures all required config options are written
@@ -82,7 +79,6 @@ templates:
   - matrix-content-scanner/contentscanner-deployment.yaml
   - matrix-content-scanner/contentscanner-configuration.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   contentscanner.enabled: true
 tests:
   - it: ensures all MIME types are allowed by default

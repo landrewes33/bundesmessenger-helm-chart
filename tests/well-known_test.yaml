@@ -9,7 +9,6 @@ set:
   wellknown.enabled: true
   dataPrivacyUrl: yes-i-have-read-and-understand.example.com
   imprintUrl: acme.noreply.example.com
-  externalPostgresql.existingSecret: postgresql
   serverName: example.org
 tests:
   - it: ensures a Deployment if enabled
@@ -51,7 +50,6 @@ set:
   wellknown.port: 554
   dataPrivacyUrl: yes-i-have-read-and-understand.example.com
   imprintUrl: acme.noreply.example.com
-  externalPostgresql.existingSecret: postgresql
   serverName: example.org
 tests:
   - it: ensures correct rendering of m.server
@@ -69,7 +67,6 @@ set:
     org.matrix.msc3814: "true"
   dataPrivacyUrl: https://dsgvo.example.org
   imprintUrl: https://impressum.example.org
-  externalPostgresql.existingSecret: postgresql
   serverName: example.org
 tests:
   - it: ensures standard values are not dropped
@@ -103,7 +100,6 @@ set:
   wellknown.client:
     m.homeserver:
       base_url: https://happy.place.example.org
-  externalPostgresql.existingSecret: postgresql
   serverName: example.org
 tests:
   - it: ensures value is present and overwritten

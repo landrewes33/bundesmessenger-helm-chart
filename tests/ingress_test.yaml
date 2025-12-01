@@ -4,7 +4,6 @@ suite: Ingress
 templates:
   - ingress.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   serverName: example.org
 tests:
   - it: ensures an Ingress if enabled

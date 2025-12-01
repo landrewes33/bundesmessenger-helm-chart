@@ -8,7 +8,6 @@ templates:
   - nginx-conf.yaml
 set:
   webclient.uri: webclient.example.org
-  externalPostgresql.existingSecret: postgresql
   serverName: example.org
 tests:
   - it: ensures a Deployment if enabled
@@ -89,7 +88,6 @@ set:
     enabled: true
     uri: webclient.example.org
     displayName: "MatrixClient"
-  externalPostgresql.existingSecret: postgresql
   serverName: example.org
 tests:
   - it: renders default config without optional blocks

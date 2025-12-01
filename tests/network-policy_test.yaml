@@ -3,8 +3,6 @@
 suite: Network Policies
 templates:
   - network-policy/*.yaml
-set:
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures no NetworkPolicy if disabled
     set:
@@ -19,7 +17,6 @@ suite: Network Policies ACME solver
 templates:
   - network-policy/allow-acme-network-policy.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   networkpolicies:
     enabled: true
     ingressNamespace: "default"
@@ -58,7 +55,6 @@ suite: Network Policies MAS
 templates:
   - network-policy/matrix-authentication-service-network-policy.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   networkpolicies.enabled: true
   mas.enabled: true
 tests:
@@ -142,7 +138,6 @@ suite: Network Policies Worker
 templates:
   - network-policy/worker-network-policy.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   networkpolicies.enabled: true
 tests:
   - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels set to {}"
@@ -227,7 +222,6 @@ suite: Network Policies Main
 templates:
   - network-policy/matrix-network-policy.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   networkpolicies.enabled: true
 tests:
   - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels set to {}"

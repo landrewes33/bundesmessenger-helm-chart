@@ -7,7 +7,6 @@ templates:
   - matrix-authentication-service/matrix-authentication-service-ingress.yaml
   - secrets.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   serverName: example.org
 tests:
   - it: ensures a StatefulSet if enabled
@@ -73,7 +72,6 @@ templates:
   - configuration.yaml
   - secrets.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   mas.enabled: true
   serverName: example.org
 tests:
@@ -183,7 +181,6 @@ templates:
   - matrix-authentication-service/matrix-authentication-service-ingress.yaml
   - secrets.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   serverName: example.org
 tests:
   - it: ensures an Ingress if (mas enabled, ingress enabled)
