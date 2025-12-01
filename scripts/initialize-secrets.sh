@@ -16,21 +16,18 @@ fi
 
 NAMESPACE=$1
 
-if kubectl get namespace "$NAMESPACE" >/dev/null 2>&1 && \
-   kubectl auth can-i create secrets -n "$NAMESPACE" >/dev/null 2>&1; then
-  echo "✅ Voraussetzungen erfüllt, Secret kann erstellt werden."
-else
-  echo "❌ Namespace existiert nicht oder keine Berechtigung."
-  exit 1
-fi
+
+alphanum_password() {
+    tr -cd "0-9a-zA-Z" < /dev/urandom | head -c 42
+}
 
 # Erstellen des Synapse Signierschlüssels.
-KID=$(tr -cd "0-9" < /dev/urandom | head -c 4)
+KID=$(tr -cd "0-9" < /dev/urandom | head -c 4) || true
 KEY=$(openssl genpkey -algorithm ed25519  | cut -c 49-92 | sed '2p;d')
 SIGNINGKEY="ed25519 a_$KID $KEY"
 
 # Erstellen der MAS Signierschlüssel.
-MAS_SIGNINGKEY_RSA="$(openssl genpkey -algorithm rsa)"
+MAS_SIGNINGKEY_RSA="$(openssl genpkey -algorithm rsa 2> /dev/null)"
 MAS_SIGNINGKEY_EC="$(openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256)"
 
 # Erstellen der MAS Datenbankschlüssel.
@@ -43,24 +40,24 @@ kubectl create -n "$NAMESPACE" secret generic "signingkey" \
 
 # Secret mit verschiedenen Synapse-Geheimnissen.
 kubectl create -n "$NAMESPACE" secret generic "synapse" \
-    --from-literal="registration-shared-secret=$(pwgen 42 1)" \
-    --from-literal="macaroon-secret-key=$(pwgen 42 1)" \
-    --from-literal="form-secret=$(pwgen 42 1)" \
-    --from-literal="worker-replication-secret=$(pwgen 42 1)"
+    --from-literal="registration-shared-secret=$(alphanum_password)" \
+    --from-literal="macaroon-secret-key=$(alphanum_password)" \
+    --from-literal="form-secret=$(alphanum_password)" \
+    --from-literal="worker-replication-secret=$(alphanum_password)"
 
 # Secret mit den Synapse-PostgreSQL-Passwörtern.
 kubectl create -n "$NAMESPACE" secret generic "postgresql" \
-    --from-literal="password=$(pwgen 42 1)" \
-    --from-literal="postgres-password=$(pwgen 42 1)"
+    --from-literal="password=$(alphanum_password)" \
+    --from-literal="postgres-password=$(alphanum_password)"
 
 # Secret mit dem Redis-Passwort.
 kubectl create -n "$NAMESPACE" secret generic "redis" \
-    --from-literal="redis-password=$(pwgen 42 1)"
+    --from-literal="redis-password=$(alphanum_password)"
 
 # Secret mit dem LiveKit-Schlüssel und -Geheimnis.
 kubectl create -n "$NAMESPACE" secret generic "call" \
-    --from-literal="livekit-key=$(pwgen 42 1)" \
-    --from-literal="livekit-secret=$(pwgen 42 1)"
+    --from-literal="livekit-key=$(alphanum_password)" \
+    --from-literal="livekit-secret=$(alphanum_password)"
 
 # Secret mit den Sygnal-Schlüsseln.
 # kubectl create -n "$NAMESPACE" secret generic "sygnal" \
@@ -77,4 +74,4 @@ kubectl create -n "$NAMESPACE" secret generic "mas-signingkeys" \
 # Secret mit dem MAS Datenbankschlüssel.
 kubectl create -n "$NAMESPACE" secret generic "mas" \
     --from-literal="encryption=$MAS_DB_KEY" \
-    --from-literal="matrix-shared-secret=$(pwgen 42 1)"
+    --from-literal="matrix-shared-secret=$(alphanum_password)"
