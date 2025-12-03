@@ -1,0 +1,1 @@
+Entfernt die automatische Erkennung von ArgoCD, die nur das Vorhandensein im Cluster und nicht die Verwendung von ArgoCD prüft.
