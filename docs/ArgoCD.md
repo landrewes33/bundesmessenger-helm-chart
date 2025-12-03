@@ -5,6 +5,9 @@ von Helm zu ArgoCD zu verbessern, wird das Chart an einigen Stellen leicht
 angepasst. Die größte Anpassung für ArgoCD ist dabei das Abstellen der
 automatischen Generierung von Secrets.
 
+:pushpin: Um den Betrieb für ArgoCD zu zu konfigurieren, muss in der Konfiguration
+explizit `argoCD: true` gesetzt werden.
+
 ## Keine automatisch generierten Secrets
 
 > ⚠️ **Warnung** – Unter ArgoCD müssen alle für den BundesMessenger benötigten
@@ -136,13 +139,3 @@ Für eine Einführung zum Einsatz von Secrets im BundesMessenger siehe
 [Secrets.md](./Secrets.md).
 
 [`ExternalSecret`]: <https://external-secrets.io/latest/api/externalsecret/>
-
-## Erzwingen der Anpassungen für ArgoCD
-
-Dieses Helm-Chart erkennt über das Vorhandensein der [API-Version]
-`argoproj.io/v1alpha1`, wenn es unter ArgoCD ausgeführt wird. Um den Betrieb für
-ArgoCD zu erzwingen, kann in der Konfiguration explizit `argoCD: true` gesetzt
-werden; dies sollte normalerweise aber nicht erforderlich sein.
-
-[API-Version]:
-    <https://helm.sh/docs/chart_template_guide/builtin_objects/#:~:text=Capabilities.APIVersions.Has>

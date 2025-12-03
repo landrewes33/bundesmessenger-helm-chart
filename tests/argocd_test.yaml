@@ -33,16 +33,3 @@ tests:
       - notEqual:
           path: metadata.name
           value: postgresql-secret
-  - it: ensures no external Secret is generated inside ArgoCD (capabilities)
-    set:
-      <<: *baseTestCase
-    capabilities:
-      apiVersions:
-        - argoproj.io/v1alpha1
-    asserts:
-      - notEqual:
-          path: metadata.name
-          value: redis-secret
-      - notEqual:
-          path: metadata.name
-          value: postgresql-secret

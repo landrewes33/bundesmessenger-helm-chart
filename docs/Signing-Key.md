@@ -30,9 +30,12 @@ da der beschriebene Vorgang bei jedem Upgrade ausgeführt wird.
 
 ## ArgoCD
 
-Dieses Helm-Chart versucht zu erkennen, ob es unter ArgoCD ausgeführt wird,
-und passt automatisch notwendige Teile des Signaturschlüssel-Jobs an,
-wenn dies der Fall ist.
+Dieses Helm-Chart generiert bei Bedarf Secrets. Dies führt,
+in Zusammenhang wie ArgoCD arbeitet, zu Komplikationen.
+Deshalb ist bei der Verwendung von ArgoCD explizit
+`argoCD: true` zu setzen (siehe [Doks ArgoCD](./ArgoCD.md)).
+Somit können notwendige Teile des Charts automatisch angepasst werden,
+wie dies z.B. beim Signaturschlüssel-Job der Fall ist.
 
 Nachdem der Signaturschlüssel-Job ausgeführt wurde, wechselt der
 Anwendungsstatus nach einer Weile auf "Fehlt" (Missing). Um den Zustand "Gesund"

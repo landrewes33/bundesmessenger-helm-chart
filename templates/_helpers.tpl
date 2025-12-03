@@ -707,7 +707,7 @@ Empty if no existingSecret is specified.
 Whether Helm is running inside ArgoCD.
 */}}
 {{- define "matrix-synapse.insideArgoCD" -}}
-{{- if or .Values.argoCD (.Capabilities.APIVersions.Has "argoproj.io/v1alpha1") }}
+{{- if .Values.argoCD }}
   {{- "true" }}
 {{- end }}
 {{- end -}}
