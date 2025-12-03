@@ -64,6 +64,14 @@ spec:
     kind: SecretStore
     name: bum-secret-store
   data:
+    - secretKey: username
+      remoteRef:
+        key: secret/postgresql
+        property: username
+    - secretKey: database
+      remoteRef:
+        key: secret/postgresql
+        property: database
     - secretKey: password
       remoteRef:
         key: secret/postgresql

@@ -66,7 +66,7 @@ kind: Job
 metadata:
   name: postgresql-major-upgrade
 spec:
-  ttlSecondsAfterFinished: 300 #5 minuten bleibt der Job bestehen, wird dann abgelöscht
+  ttlSecondsAfterFinished: 300 # 5 Minuten bleibt der Job bestehen, wird dann abgelöscht
   template:
     spec:
       securityContext:
@@ -149,10 +149,10 @@ kubectl delete pvc --namespace=bum data-bundesmessenger-postgresql-0
 
 Zum Initialisieren der Datenbank und anschließendem Rückspielen der Daten kann
 nun ein BundesMessenger-Release mit der folgenden Extrakonfiguration
-(`bum-postgres-major-upgrade.yaml`) durchgeführt werden:
+(`import-postgresql-major-upgrade.yaml`) durchgeführt werden:
 
 ```yaml
-# bum-postgres-major-upgrade.yaml
+# import-postgresql-major-upgrade.yaml
 ---
 postgresql:
   primary:
@@ -180,7 +180,7 @@ helm upgrade bundesmessenger \
     --namespace bum \
     -f bum-configuration.yaml \
     -f bum-tls.yaml \
-    -f bum-postgres-major-upgrade.yaml
+    -f import-postgresql-major-upgrade.yaml
 ```
 
 ### Schritt 5: Aufräumen
@@ -197,7 +197,7 @@ helm upgrade bundesmessenger \
     --namespace bum \
     -f bum-configuration.yaml \
     -f bum-tls.yaml
-    # -f bum-postgres-major-upgrade.yaml
+    # -f import-postgresql-major-upgrade.yaml
 ```
 
 Upgrade-Job und temporären Persistent Volume Claim (PVC)

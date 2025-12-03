@@ -1547,82 +1547,121 @@ postgresql:
   # (map) Das zu verwendende PostgreSQL-Container-Abbild.
   image:
     registry: docker.io
-    repository: bitnamilegacy/postgresql
-    tag: "16"
+    repository: postgres
+    tag: "18"
     # (list) Liste von Kubernetes Pull-Secrets.
     # Beispiel:
     # pullSecrets: ["myRegistryKeySecretName"]
     pullSecrets: []
     pullPolicy: IfNotPresent
 
-  # (object) Authentifizierung gegenüber dem internen PostgreSQL-Server.
-  auth:
-    # (string) Name der PostgreSQL-Datenbank.
-    database: synapse_db
-
-    # (string) Name des PostgreSQL-Nutzers.
+  # (map) Konfiguration des Synapse Datenbanknutzers.
+  customUser:
+    # (string) Name vom Datenbanknutzer.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
     username: synapse
-
-    # (string|null) Passwort für den PostgreSQL-Nutzer.
-    # Muss leer sein. Das Passwort wird im `existingSecret` angegeben.
-    # Wenn das `existingSecret` vor der Installation nicht bereit steht,
-    # wird es automatisch mit einem zufälligen Passwort erzeugt.
-    # password: ""
-
-    # (string|null) Passwort für den PostgreSQL-Adminnutzer.
-    # Muss leer sein. Das Passwort wird im `existingSecret` angegeben.
-    # Wenn das `existingSecret` vor der Installation nicht bereit steht,
-    # wird es automatisch mit einem zufälligen Passwort erzeugt.
-    # postgresPassword: ""
-
-    # (string) Name des Secrets, in dem das PostgreSQL-Passwort steht.
+    # (string) Name der Datenbank.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
+    database: synapse_db
+    # (string) Name vom Secret mit dem Passwort des Synapse Datenbanknutzers.
     # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen
     # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
     existingSecret: postgresql
+    # (map) Schlüssel im angegebenen Secret.
     secretKeys:
-      # (string) Verweis im `existingSecret` auf das Datenbank-Passwort.
-      # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
-      userPasswordKey: password
-      # (string) Verweis im `existingSecret` auf das Passwort des postgres-Nutzers.
-      # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
+      # (string) Verweis im `existingSecret` auf den Namen des Datenbanknutzers.
+      name: username
+      # (string) Verweis im `existingSecret` auf den Namen der Datenbank.
+      database: database
+      # (string) Verweis im `existingSecret` auf das Nutzerpasswort.
+      password: password
+
+  # (map) Konfiguration des Adminnutzers.
+  auth:
+    # (string) Name des PostgreSQL Adminnutzers.
+    username: postgres
+    # (string) Name des Kubernetes Secrets mit dem Adminpasswort.
+    # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen
+    # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
+    existingSecret: postgresql
+    # (map) Schlüssel im angegebenen Secret.
+    secretKeys:
+      # (string) Verweis im `existingSecret` auf das Adminpasswort.
       adminPasswordKey: postgres-password
 
-  containerPorts:
-    # (integer) Port des PostgreSQL-Containers.
-    postgresql: 5432
+  # (map) Service-Konfiguration.
+  service:
+    # (integer) Port des PostgreSQL-Service.
+    port: 5432
+    # (integer) Interner Port des PostgreSQL-Containers.
+    targetPort: 5432
 
-  primary:
-    service:
-      ports:
-        # (integer) Port des PostgreSQL-Service.
-        postgresql: 5432
+  # (map) Initialisierung der Datenbank.
+  initdb:
+    # (string) Extra Argumente zur Initialisierung der Datenbank
+    args: "--lc-collate=C --lc-ctype=C --encoding=UTF8"
+    # (map) Zusätzliche Initialisierungsskripte.
+    scripts: {}
+      # (string) Wiederherstellen der Datenbank nach einem Upgrade.
+      # Das Skript wird genau dann ausgeführt, wenn die Datenbank noch nicht
+      # initialisiert ist und die Datei `/major-upgrade-dump/upgrade-to-18.sql`
+      # existiert.
+      # 05-reinit.sh: |
+      #   #!/bin/sh
+      #   set -e
+      #   BACKUP_FILE=/major-upgrade-dump/upgrade-to-18.sql
+      #   [ -f "$BACKUP_FILE" ] || exit 0
+      #   echo "Re-importing Synapse database…"
+      #   psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" < "$BACKUP_FILE"
+      #   echo "✅ Successfully re-imported Synapse database!"
 
-    initdb:
-      # (string) Extra Argumente zur Initialisierung der Datenbank
-      args: "--lc-collate=C --lc-ctype=C --encoding=UTF8"
+  # (list) Extra Volumes.
+  # Kann zusammen mit `extraVolumeMounts` zum Wiedereinspielen einer Sicherung
+  # verwendet werden.
+  # Beispiel:
+  #   - name: major-upgrade-dump
+  #     persistentVolumeClaim:
+  #       claimName: postgresql-major-upgrade
+  extraVolumes: []
+  # (list) Extra Volume-Mounts.
+  # Beispiel:
+  #   - name: major-upgrade-dump
+  #     mountPath: /major-upgrade-dump
+  extraVolumeMounts: []
 
-    # (string) Extra Konfiguration der Datenbank.
-    # Die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder
+  # (map) Extra Konfiguration der Datenbank.
+  config:
+    # (int) Maximale Anzahl an Datenbankverbindungen.
+    # Die maximale Anzahl an Verbindungen ist oft eine Limitierung, da jeder
     # Synapse-Prozess seine Verbindungen zur Datenbank hält.
-    extendedConfiguration: |
-      max_connections = 1024
+    postgresqlMaxConnections: 1024
 
-    # (map) Persistenzkonfiguration für Storage für PostgreSQL
-    persistence:
-      storageClass: ""
-      size: 16Gi
+  containerSecurityContext:
+    # (integer) User ID for the PostgreSQL container.
+    runAsUser: 66999
+    # (integer) Group ID for the PostgreSQL container.
+    runAsGroup: 66999
+    # (bool) Mount container root filesystem as read-only.
+    readOnlyRootFilesystem: true
 
-    resources:
-      limits:
-        # (string) Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
-        cpu: 1
-        # (string) RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
-        memory: 4096Mi
-      requests:
-        # (string) Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind.
-        cpu: 250m
-        # (string) Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind.
-        memory: 256Mi
+  # (map) Persistenzkonfiguration für Storage für PostgreSQL
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 16Gi
+
+  # (map) Ressourcenanforderungen und -grenzen.
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
+      cpu: 1
+      # (string) RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
+      memory: 4096Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind.
+      cpu: 250m
+      # (string) Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind.
+      memory: 256Mi
 
   # (map) Zusätzliche Argumente für die Datenbankverbindung.
   # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
