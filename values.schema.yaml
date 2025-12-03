@@ -2564,9 +2564,8 @@ properties:
     title: Konfiguration des internen PostgreSQL-Servers
     description: >-
       Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und
-      schnelle Möglichkeit, Demo- und Testsysteme des BundesMessengers
-      aufzusetzen. Nicht empfohlen ist die Aktivierung für Produktivsysteme.
-
+      schnelle Möglichkeit, Demo- und Testsysteme aufzusetzen. Nicht empfohlen
+      für Produktivsysteme.
 
       Empfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden,
       setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den
@@ -2582,19 +2581,12 @@ properties:
           `externalPostgresql`-Block.
         default: false
       image:
-        $ref: "#/$defs/bitnamiImage"
+        $ref: "#/$defs/cloudPiratesImage"
         type: object
         title: Das zu verwendende PostgreSQL-Container-Abbild
-        properties:
-          pullSecrets:
-            type: array
-            title: Liste von Kubernetes Pull-Secrets
-            items:
-              type: string
-            default: []
         default:
           registry: docker.io
-          repository: bitnami/postgresql
+          repository: postgres
           pullSecrets: []
           pullPolicy: IfNotPresent
         required:
@@ -2604,18 +2596,22 @@ properties:
           - pullSecrets
           - pullPolicy
         unevaluatedProperties: true
-      auth:
+      customUser:
         type: object
-        title: Authentifizierung gegenüber dem internen PostgreSQL-Server
+        title: Konfiguration des Synapse Datenbanknutzers
         properties:
-          database:
-            type: string
-            title: Name der PostgreSQL-Datenbank
-            default: synapse_db
           username:
             type: string
-            title: Name des PostgreSQL-Nutzers
+            minLength: 1
+            title: Name des Datenbanknutzers
+            description: Muss mit der Angabe im `existingSecret` übereinstimmen.
             default: synapse
+          database:
+            type: string
+            minLength: 1
+            title: Name der Datenbank
+            description: Muss mit der Angabe im `existingSecret` übereinstimmen.
+            default: synapse_db
           password:
             type: ["null", "string"]
             enum:
@@ -2627,7 +2623,51 @@ properties:
               Wenn das `existingSecret` vor der Installation nicht bereit steht,
               wird es automatisch mit einem zufälligen Passwort erzeugt.
             default: null
-          postgresPassword:
+          existingSecret:
+            type: string
+            minLength: 1
+            title: Name des Secrets mit dem Passwort des Synapse Datenbanknutzers
+            description: >-
+              Ist `postgresql.enabled` und das angegebene Secret existiert nicht,
+              so wird automatisch ein neues Secret erstellt und verwendet.
+            default: postgresql
+          secretKeys:
+            type: object
+            title: Schlüssel im angegebenen Secret
+            properties:
+              name:
+                type: string
+                title: >-
+                  Verweis im `existingSecret` auf den Namen des Datenbanknutzers
+                default: username
+              database:
+                type: string
+                title: Verweis im `existingSecret` auf den Namen der Datenbank
+                default: database
+              password:
+                type: string
+                title: Verweis im `existingSecret` auf das Nutzerpasswort
+                default: password
+            required:
+              - name
+              - database
+              - password
+            unevaluatedProperties: true
+        required:
+          - username
+          - database
+          - existingSecret
+          - secretKeys
+        unevaluatedProperties: true
+      auth:
+        type: object
+        title: Konfiguration des Adminnutzers
+        properties:
+          username:
+            type: string
+            title: Name des PostgreSQL Adminnutzers
+            default: postgres
+          password:
             type: ["null", "string"]
             enum:
               - null
@@ -2641,130 +2681,174 @@ properties:
           existingSecret:
             type: string
             minLength: 1
-            title: Name des Secrets, in dem das PostgreSQL-Passwort steht
+            title: Name des Kubernetes Secrets mit dem enhaltenen Adminpasswort
             description: >-
-              Ist `postgresql.enabled` und es existiert kein Secret mit dem
-              angegebenen Namen, so wird ein neues Secret automatisch erstellt
-              und verwendet.
+              Ist `postgresql.enabled` und das angegebene Secret existiert nicht,
+              so wird automatisch ein neues Secret erstellt und verwendet.
             default: postgresql
           secretKeys:
             type: object
-            title: Schlüsselinformationen für ein genanntes Secret
+            title: Schlüssel im angegebenen Secret
             properties:
-              userPasswordKey:
-                type: string
-                title: Verweis im `existingSecret` auf das Datenbank-Passwort
-                description: Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
-                default: password
               adminPasswordKey:
                 type: string
-                title: Verweis im `existingSecret` auf das Passwort des postgres-Nutzers
-                description: Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
+                title: Verweis im `existingSecret` auf das Adminpasswort
                 default: postgres-password
             required:
-              - userPasswordKey
               - adminPasswordKey
             unevaluatedProperties: true
         required:
-          - database
           - username
           - existingSecret
           - secretKeys
         unevaluatedProperties: true
-      containerPorts:
+      service:
         type: object
+        title: Service-Konfiguration
         properties:
-          postgresql:
+          port:
             type: integer
-            title: Port des PostgreSQL-Containers
-            default: 5342
+            minimum: 1
+            title: Port des PostgreSQL-Service
+            default: 5432
+          targetPort:
+            type: integer
+            minimum: 1
+            title: Interner Container-Port des PostgreSQL-Containers
+            default: 5432
         required:
-          - postgresql
+          - port
+          - targetPort
         unevaluatedProperties: true
-      primary:
+      initdb:
         type: object
+        title: Initialisierung der Datenbank
         properties:
-          service:
-            type: object
-            properties:
-              ports:
-                type: object
-                properties:
-                  postgresql:
-                    type: integer
-                    title: Port des PostgreSQL-Service
-                    default: 5432
-                required:
-                  - postgresql
-                unevaluatedProperties: true
-            required:
-              - ports
-            unevaluatedProperties: true
-          initdb:
-            type: object
-            properties:
-              args:
-                type: string
-                description: Extra Argumente zur Initialisierung der Datenbank
-                default: --lc-collate=C --lc-ctype=C --encoding=UTF8
-            unevaluatedProperties: true
-          extendedConfiguration:
+          args:
             type: string
-            title: Extra Konfiguration der Datenbank
-            description: >-
-              Die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder
-              Synapseprozess seine Verbindungen zur Datenbank hält
-            default: max_connections = 1024
-          persistence:
+            title: Extra Argumente zur Initialisierung der Datenbank
+            default: --lc-collate=C --lc-ctype=C --encoding=UTF8
+          scripts:
             type: object
-            title: Persistenzkonfiguration für Storage für PostgreSQL
-            properties:
-              storageClass:
-                type: string
-                default: ""
-              size:
-                type: string
-                default: 16Gi
-            required:
-              - storageClass
-              - size
-            unevaluatedProperties: true
-          resources:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
-            type: object
-            properties:
-              limits:
-                properties:
-                  cpu:
-                    title: >-
-                      Rechenressourcengrenzen, die auf den PostgreSQL-Container
-                      anzuwenden sind
-                    default: 1
-                  memory:
-                    title: >-
-                      RAM Ressourcengrenzen, die auf den PostgreSQL-Container
-                      anzuwenden sind
-                    default: 4096Mi
-              requests:
-                properties:
-                  cpu:
-                    title: >-
-                      Anforderungen an Rechenressourcen, die auf den
-                      PostgreSQL-Container anzuwenden sind
-                    default: 250m
-                  memory:
-                    title: >-
-                      Anforderungen an RAM Ressourcen, die auf den
-                      PostgreSQL-Container anzuwenden sind
-                    default: 256Mi
+            description: Zusätzliche Initialisierungsskripte
+            additionalProperties:
+              type: string
             unevaluatedProperties: false
         required:
-          - service
-          - initdb
-          - extendedConfiguration
-          - persistence
-          - resources
+          - args
+        unevaluatedProperties: true
+      extraVolumes:
+        type: array
+        title: Extra Volumes
+        description: >-
+          Kann zusammen mit `extraVolumeMounts` zum Wiedereinspielen einer
+          Sicherung verwendet werden.
+        default: []
+        examples:
+          - - name: major-upgrade-dump
+              persistentVolumeClaim:
+                claimName: postgresql-major-upgrade
+      extraVolumeMounts:
+        type: array
+        default: []
+        examples:
+          - - name: major-upgrade-dump
+              mountPath: /major-upgrade-dump
+      config:
+        type: object
+        title: Extra Konfiguration der Datenbank
+        properties:
+          postgresqlMaxConnections:
+            type: integer
+            title: Maximale Anzahl an Datenbankverbindungen
+            description: >-
+              Die maximale Anzahl an Verbindungen ist oft eine Limitierung, da
+              jeder Synapse-Prozess seine Verbindungen zur Datenbank hält.
+            default: 1024
+        required:
+          - postgresqlMaxConnections
+        unevaluatedProperties: true
+      containerSecurityContext:
+        type: object
+        properties:
+          runAsUser:
+            type: integer
+            title: User ID for the PostgreSQL container
+            default: 66999
+          runAsGroup:
+            type: integer
+            title: Group ID for the PostgreSQL container
+            default: 66999
+          readOnlyRootFilesystem:
+            type: boolean
+            title: Mount container root filesystem as read-only
+            default: true
+        unevaluatedProperties: true
+        required:
+          - runAsUser
+          - runAsGroup
+          - readOnlyRootFilesystem
+      persistence:
+        type: object
+        title: Persistenzkonfiguration für PostgreSQL
+        properties:
+          enabled:
+            type: boolean
+            default: true
+          storageClass:
+            type: string
+            default: ""
+          size:
+            type: string
+            default: 16Gi
+        required:
+          - enabled
+          - storageClass
+          - size
+        unevaluatedProperties: true
+      resources:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+        type: object
+        title: Ressourcenanforderungen und -grenzen
+        properties:
+          limits:
+            type: object
+            properties:
+              cpu:
+                title: >-
+                  Rechenressourcengrenzen, die auf den PostgreSQL-Container
+                  anzuwenden sind
+                default: 1
+              memory:
+                title: >-
+                  RAM Ressourcengrenzen, die auf den PostgreSQL-Container
+                  anzuwenden sind
+                default: 4096Mi
+            required:
+              - cpu
+              - memory
+            unevaluatedProperties: true
+          requests:
+            type: object
+            properties:
+              cpu:
+                title: >-
+                  Anforderungen an Rechenressourcen, die auf den
+                  PostgreSQL-Container anzuwenden sind
+                default: 250m
+              memory:
+                title: >-
+                  Anforderungen an RAM Ressourcen, die auf den
+                  PostgreSQL-Container anzuwenden sind
+                default: 256Mi
+            required:
+              - cpu
+              - memory
+            unevaluatedProperties: true
+        required:
+          - limits
+          - requests
         unevaluatedProperties: true
       extraArgs:
         $comment: This config option is not part of the `postgresql` chart.
@@ -2790,13 +2874,20 @@ properties:
           type: ["null", "string", "number", "integer", "boolean"]
         required:
           - sslmode
-        unevaluatedProperties: false
+        unevaluatedProperties: true
     required:
       - enabled
       - image
+      - customUser
       - auth
-      - containerPorts
-      - primary
+      - service
+      - initdb
+      - extraVolumes
+      - extraVolumeMounts
+      - config
+      - containerSecurityContext
+      - persistence
+      - resources
       - extraArgs
     unevaluatedProperties: true
   externalPostgresql:
@@ -2814,7 +2905,7 @@ properties:
         description: >-
           Beispieladresse für einen K8s-internen PostgreSQL im Namespace
           `postgres`:
-        default: postgres-4-matrix-postgresql.postgres.svc.cluster.local
+        default: postgres-4-matrix-postgresql.postgresql.svc.cluster.local
       port:
         $ref: >-
           https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort
@@ -2899,7 +2990,7 @@ properties:
           Hinweis: Durch Setzten auf `true`, wird der `externalRedis`-Block ignoriert.
         default: true
       image:
-        $ref: "#/$defs/bitnamiImage"
+        $ref: "#/$defs/cloudPiratesImage"
         type: object
         title: Das verwendete Redis-Image
         properties:
@@ -3230,23 +3321,34 @@ properties:
       tls:
         type: array
         title: >-
-          Zusätzliche Pfade, die zu den Client-zu-Server-Eingangsblöcken
-          hinzugefügt werden sollen
+          TLS-Konfiguration für Ingress Konfiguration
         description: >-
-          Werden vor den `/_matrix` und `/_synapse` Catch-all-Pfaden eingefügt.
-
-
-          Beispiele:
-            - path: /_matrix/media
-              pathType: Prefix
-              backend:
-                service:
-                  name: matrix-media-repo
-                  port: 8000
+          Enthält für alle benötigten Domains die notwendigen
+          Secrets bzw. TLS-Zertifikate.
+          Jede Eintragung beschreibt 1 Zertifikatsquelle:
+          - hosts:
+              - matrix.example.com
+              - api.example.com
+            secretName: matrix-tls
+            certManagerIssuer: letsencrypt-prod
+          - hosts:
+              - admin.example.com
+            secretName: internal-tls
+            certManagerIssuer: internal-ca
+          - hosts:
+              - dev.example.com
+            secretName: dev-selfsigned
+            # kein certManagerIssuer -> Secret wird manuell verwaltet
         items:
-          $ref: >-
-            https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.IngressTLS.schema.json
-          type: object
+          allOf:
+            - $ref: >-
+                https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.IngressTLS.schema.json
+            - type: object
+              properties:
+                certManagerIssuer:
+                  type: string
+                  description: |
+                    Optionale Cert-Manager Issuer Angabe.
           unevaluatedProperties: false
         default: []
       className:
@@ -5010,9 +5112,10 @@ properties:
             type: ["null", "string"]
             default: null
           selectorLabels:
-            type: object
             $ref: >-
               https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/labels
+            type: object
+            title: Labels zum Adressieren der PostgreSQL-Instanz
             default:
               app.kubernetes.io/name: postgresql
             unevaluatedProperties: false
@@ -5165,7 +5268,7 @@ required:
   - tests
 unevaluatedProperties: false
 $defs:
-  bitnamiImage:
+  cloudPiratesImage:
     type: object
     properties:
       registry:

@@ -67,8 +67,8 @@ tests:
           selectorLabels: {}
       postgresql:
         enabled: true
-        containerPorts:
-          postgresql: 5433
+        service:
+          targetPort: 5433
     asserts:
       - equal:
           path: spec.egress[1].ports[0].port
@@ -82,8 +82,8 @@ tests:
     set:
       postgresql:
         enabled: true
-        containerPorts:
-          postgresql: 5433
+        service:
+          targetPort: 5433
     asserts:
       - equal:
           path: spec.egress[1].ports[0].port
@@ -149,8 +149,8 @@ tests:
           selectorLabels: {}
       postgresql:
         enabled: true
-        containerPorts:
-          postgresql: 5433
+        service:
+          targetPort: 5433
     asserts:
       - isKind:
           of: NetworkPolicy
@@ -166,8 +166,8 @@ tests:
     set:
       postgresql:
         enabled: true
-        containerPorts:
-          postgresql: 5433
+        service:
+          targetPort: 5433
     asserts:
       - equal:
           path: spec.egress[1].ports[0].port
@@ -233,8 +233,8 @@ tests:
           selectorLabels: {}
       postgresql:
         enabled: true
-        containerPorts:
-          postgresql: 5433
+        service:
+          targetPort: 5433
     asserts:
       - isKind:
           of: NetworkPolicy
@@ -250,8 +250,8 @@ tests:
     set:
       postgresql:
         enabled: true
-        containerPorts:
-          postgresql: 5433
+        service:
+          targetPort: 5433
     asserts:
       - equal:
           path: spec.egress[0].ports[0].port

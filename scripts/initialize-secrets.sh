@@ -47,6 +47,8 @@ kubectl create -n "$NAMESPACE" secret generic "synapse" \
 
 # Secret mit den Synapse-PostgreSQL-Passwörtern.
 kubectl create -n "$NAMESPACE" secret generic "postgresql" \
+    --from-literal="database=synapse_db" \
+    --from-literal="username=synapse" \
     --from-literal="password=$(alphanum_password)" \
     --from-literal="postgres-password=$(alphanum_password)"
 

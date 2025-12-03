@@ -256,32 +256,38 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "matrix-synapse.postgresql.fullname" -}}
-{{- printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" -}}
+{{- printf "%s-%s" .Release.Name "postgresql" | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 
 {{/*
-Set postgres host
+PostgreSQL host.
 */}}
 {{- define "matrix-synapse.postgresql.host" -}}
-{{- if .Values.postgresql.enabled -}}
-  {{- template "matrix-synapse.postgresql.fullname" . -}}
-{{- else -}}
-  {{- required "A valid externalPostgresql.host is required" .Values.externalPostgresql.host }}
-{{- end -}}
+{{- if .Values.postgresql.enabled }}
+  {{- template "matrix-synapse.postgresql.fullname" . }}
+{{- else }}
+  {{- required
+    "A valid externalPostgresql.host is required"
+    .Values.externalPostgresql.host
+  }}
+{{- end }}
 {{- end -}}
 
 {{/*
-Set postgres port
+PostgreSQL port.
 */}}
 {{- define "matrix-synapse.postgresql.port" -}}
-{{- if .Values.postgresql.enabled -}}
+{{- if .Values.postgresql.enabled }}
   {{- required
-    "A valid PostgreSQL port at postgresql.primary.service.ports.postgresql is required"
-    .Values.postgresql.primary.service.ports.postgresql
-  -}}
-{{- else -}}
-  {{- required "A valid externalPostgresql.port is required" .Values.externalPostgresql.port -}}
-{{- end -}}
+    "A valid PostgreSQL port at postgresql.service.port is required"
+    .Values.postgresql.service.port
+  }}
+{{- else }}
+  {{- required
+    "A valid externalPostgresql.port is required"
+    .Values.externalPostgresql.port
+  }}
+{{- end }}
 {{- end -}}
 
 {{/*
@@ -289,9 +295,31 @@ Set postgresql username
 */}}
 {{- define "matrix-synapse.postgresql.username" -}}
 {{- if .Values.postgresql.enabled -}}
-  {{- .Values.postgresql.auth.username | default "postgres" }}
+  {{- /* Synapse can’t read the username from file while the subchart can’t read
+  it from configuration. As a consequence, we require both to be given and
+  matching. The check below asserts that requirement. */}}
+  {{- $inlineValue := .Values.postgresql.customUser.username }}
+  {{- $secretName := .Values.postgresql.customUser.existingSecret }}
+  {{- $secretKey := .Values.postgresql.customUser.secretKeys.name }}
+  {{- $existingSecret := lookup "v1" "Secret" .Release.Namespace $secretName }}
+  {{- $existingValue := dig "data" $secretKey "" $existingSecret | b64dec }}
+  {{- if and $existingSecret (ne $existingValue $inlineValue) }}
+    {{- fail (print
+      "The username in `postgresql.customUser.username` (" $inlineValue ") and "
+      "the username in Secret `" $secretName "` under key `" $secretKey "` ("
+      $existingValue ") must be matching."
+    )}}
+  {{- end }}
+
+  {{- required 
+      "A valid postgresql.customUser.username is required"
+      .Values.postgresql.customUser.username 
+  }}
 {{- else -}}
-  {{- required "A valid externalPostgresql.username is required" .Values.externalPostgresql.username }}
+  {{- required
+      "A valid externalPostgresql.username is required"
+      .Values.externalPostgresql.username
+  }}
 {{- end -}}
 {{- end -}}
 
@@ -300,9 +328,15 @@ Name of the Secret containing the PostgreSQL password.
 */}}
 {{- define "matrix-synapse.postgresql.secret-name" -}}
 {{- if .Values.postgresql.enabled }}
-  {{- .Values.postgresql.auth.existingSecret }}
+  {{- .Values.postgresql.customUser.existingSecret | required (print
+    "A valid postgresql.customUser.existingSecret as name of the secret "
+    "containing the PostgreSQL credentials must be set."
+  )}}
 {{- else }}
-  {{- .Values.externalPostgresql.existingSecret }}
+  {{- .Values.externalPostgresql.existingSecret | required (print
+    "A valid externalPostgresql.existingSecret as name of the secret "
+    "containing the PostgreSQL credentials must be set."
+  )}}
 {{- end }}
 {{- end -}}
 
@@ -312,8 +346,8 @@ Key to the password contained in the PostgreSQL Secret.
 {{- define "matrix-synapse.postgresql.secret-key" -}}
 {{- if .Values.postgresql.enabled }}
   {{- required
-    "To use a Secret for PostgreSQL, postgresql.auth.secretKeys.userPasswordKey is required"
-    .Values.postgresql.auth.secretKeys.userPasswordKey
+    "To use a Secret for PostgreSQL, postgresql.customUser.secretKeys.password is required"
+    .Values.postgresql.customUser.secretKeys.password
   }}
 {{- else }}
   {{- required
@@ -328,9 +362,31 @@ Set postgresql database
 */}}
 {{- define "matrix-synapse.postgresql.database" -}}
 {{- if .Values.postgresql.enabled -}}
-  {{- .Values.postgresql.auth.database | default "synapse" }}
+  {{- /* Synapse can’t read the database name from file while the subchart can’t
+  read it from configuration. As a consequence, we require both to be given and
+  matching. The check below asserts that requirement. */}}
+  {{- $inlineValue := .Values.postgresql.customUser.database }}
+  {{- $secretName := .Values.postgresql.customUser.existingSecret }}
+  {{- $secretKey := .Values.postgresql.customUser.secretKeys.database }}
+  {{- $existingSecret := lookup "v1" "Secret" .Release.Namespace $secretName }}
+  {{- $existingValue := dig "data" $secretKey "" $existingSecret | b64dec }}
+  {{- if and $existingSecret (ne $existingValue $inlineValue) }}
+    {{- fail (print
+      "The database name in `postgresql.customUser.database` (" $inlineValue
+      ") and the database name in Secret `" $secretName "` under key `"
+      $secretKey "` (" $existingValue ") must be matching."
+    )}}
+  {{- end }}
+
+  {{- required
+    "A valid postgresql.customUser.database is required"
+    .Values.postgresql.customUser.database
+  }}
 {{- else -}}
-  {{- required "A valid externalPostgresql.database is required" .Values.externalPostgresql.database }}
+  {{- required
+    "A valid externalPostgresql.database is required"
+    .Values.externalPostgresql.database
+  }}
 {{- end -}}
 {{- end -}}
 
@@ -389,11 +445,13 @@ Name of the Secret containing the Redis password.
 */}}
 {{- define "matrix-synapse.redis.secret-name" -}}
 {{- if .Values.redis.enabled }}
-  {{- required "auth.existingSecret must be the name of a Secret"
+  {{- required 
+    "auth.existingSecret must be the name of a Secret"
     .Values.redis.auth.existingSecret
   }}
 {{- else }}
-  {{- required "externalRedis.existingSecret must be the name of a Secret"
+  {{- required 
+    "externalRedis.existingSecret must be the name of a Secret"
     .Values.externalRedis.existingSecret
   }}
 {{- end }}
@@ -424,7 +482,10 @@ Set synapse_admin uri
     {{- if .Values.synapse_admin.uri -}}
 {{- .Values.synapse_admin.uri -}}
     {{- else }}
-{{- required "A valid URI for the synapse Admin webGUI (synapse_admin.uri) is required." .Values.synapse_admin.uri -}}
+{{- required 
+  "A valid URI for the synapse Admin webGUI (synapse_admin.uri) is required." 
+  .Values.synapse_admin.uri 
+-}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
@@ -434,10 +495,14 @@ Check networkpolicy requirements TBD CHECK POSTGRES
 */}}
 {{- if .Values.networkpolicies.enabled }}
   {{- if not .Values.postgresql.enabled -}}
-    {{- required "A host from the external Postgres instance (externalPostgresql.host) is required." .Values.externalPostgresql.host -}}
+    {{- required 
+      "A host from the external Postgres instance (externalPostgresql.host) is required." 
+      .Values.externalPostgresql.host -}}
   {{- end }}
   {{- if not .Values.redis.enabled -}}
-    {{- required "A host from the external redis instance (externalRedis.host) is required." .Values.externalRedis.host -}}
+    {{- required 
+      "A host from the external redis instance (externalRedis.host) is required." 
+      .Values.externalRedis.host -}}
   {{- end }}
 {{- end }}
 

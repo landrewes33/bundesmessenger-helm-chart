@@ -38,10 +38,10 @@ spec:
     - to:
       - podSelector:
           matchLabels:
-            {{- $.Values.networkpolicies.postgres.selectorLabels | default (dict "app.kubernetes.io/name" "postgresql") | toYaml | nindent 12 }}
+            {{- toYaml $.Values.networkpolicies.postgres.selectorLabels | nindent 12 }}
       ports:
       - protocol: TCP
-        port: {{ $.Values.postgresql.containerPorts.postgresql | default 5432 }}
+        port: {{ $.Values.postgresql.service.targetPort }}
     {{- else if $.Values.networkpolicies.postgres.externalPostgresIP }}
     {{- /* external postgresql outside cluster selected by IP
           set an IP has higher priority than a label */}}
@@ -50,7 +50,7 @@ spec:
           cidr: "{{ $.Values.networkpolicies.postgres.externalPostgresIP }}/32"
       ports:
       - protocol: TCP
-        port: {{ $.Values.externalPostgresql.port | default 5432 }}
+        port: {{ $.Values.externalPostgresql.port }}
     {{- else }}
     {{- /* external postgresql inside cluster selected by label */}}
     - to:
@@ -59,7 +59,7 @@ spec:
            {{- $.Values.networkpolicies.postgres.selectorLabels | toYaml | nindent 12 }}
       ports:
       - protocol: TCP
-        port: {{ $.Values.externalPostgresql.port | default 5432 }}
+        port: {{ $.Values.externalPostgresql.port }}
     {{- end }}
     {{- if $.Values.redis.enabled }}
     - to:
