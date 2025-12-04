@@ -1,0 +1,1 @@
+Sub-Chart `postgres` auf Version `0.11.7` aktualisiert.

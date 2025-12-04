@@ -4,6 +4,6 @@ dependencies:
   version: 0.13.4
 - name: postgres
   repository: oci://ghcr.io/cloudpirates-io/helm-charts
-  version: 0.11.5
-digest: sha256:b5ae64aa6d3f792ad42c3082e11934cb7f24fd43d52b556ed0689c122907d0b3
-generated: "2025-11-10T09:23:18.936278285+01:00"
+  version: 0.11.7
+digest: sha256:79545316a1d71a839f22373e758aa7aab7894463a6435268095629fcb68c0f41
+generated: "2025-12-04T06:14:28.345795076Z"
