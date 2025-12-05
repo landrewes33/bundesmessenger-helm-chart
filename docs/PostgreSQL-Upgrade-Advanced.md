@@ -220,10 +220,11 @@ kubectl -n <NAMESPACE> patch secret postgresql -p "{\"data\": {\"database\": \"$
 neues `PVC` angelegt und unter `postgresql.persistence.existingClaim`
 angegeben werden. Dann muss das bisherige PVC auch nicht gelöscht werden.
 
-### StatefulSet löschen
+### StatefulSet und Services löschen
 
 ```sh
 kubectl -n <NAMESPACE> delete statefulset <RELEASE>-postgresql
+kubectl -n <NAMESPACE> delete service -l app.kubernetes.io/name=postgresql,app.kubernetes.io/instance=<RELEASE>
 ```
 
 ### PVC löschen
