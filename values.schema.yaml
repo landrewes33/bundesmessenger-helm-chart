@@ -1210,7 +1210,7 @@ properties:
               path:
                 default: /health
               port:
-                default: metrics
+                default: health
         unevaluatedProperties: false
       nodeSelector:
         $ref: >-
@@ -3186,23 +3186,23 @@ properties:
               email_change_allowed:
                 type: boolean
                 title: Whether users are allowed to change their email addresses
-                default: true
+                default: false
               displayname_change_allowed:
                 type: boolean
                 title: Whether users are allowed to change their display names
                 description: >-
                   This should be in sync with the policy in the homeserver configuration.
-                default: true
+                default: false
               password_registration_enabled:
                 type: boolean
                 title: Whether to enable self-service password registration
                 description: This has no effect if password login is disabled.
-                default: true
+                default: false
               password_recovery_enabled:
                 type: boolean
                 title: Whether email-based password recovery is enabled
                 description: This has no effect if password login is disabled.
-                default: true
+                default: false
             required:
               - email_change_allowed
               - displayname_change_allowed
@@ -3259,9 +3259,9 @@ properties:
         type: object
         title: Informationen zum Sicherheitskontext, die der Pod übernehmen soll
         default:
-          runAsUser: 2666
-          runAsGroup: 2666
-          fsGroup: 2666
+          runAsUser: 1007
+          runAsGroup: 1007
+          fsGroup: 1007
           runAsNonRoot: true
         unevaluatedProperties: false
       securityContext:
@@ -3271,7 +3271,7 @@ properties:
         default:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
-          runAsUser: 2666
+          runAsUser: 1007
         unevaluatedProperties: false
       resources:
         $ref: >-
@@ -3336,7 +3336,7 @@ properties:
               path:
                 default: /health
               port:
-                default: metrics
+                default: health
         unevaluatedProperties: false
     required:
       - enabled
@@ -3876,8 +3876,8 @@ properties:
         type: object
         title: Informationen zum Sicherheitskontext, die der Pod übernehmen soll
         default:
-          runAsUser: 1111
-          runAsGroup: 1111
+          runAsUser: 1001
+          runAsGroup: 1001
         unevaluatedProperties: false
       securityContext:
         $ref: "#/$defs/securityContext"
@@ -3960,7 +3960,7 @@ properties:
       TLSverify:
         type: boolean
         title: Aktivieren der TLS Zertifikatsüberprüfung
-        default: false
+        default: true
       logLevel:
         type: string
         enum:
@@ -3983,7 +3983,7 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/bumap-core
-          tag: 1.0.0-jammy
+          tag: 1.1.0-jammy-production
           pullSecrets: []
           pullPolicy: IfNotPresent
         required:
@@ -4000,7 +4000,7 @@ properties:
         default:
           registry: registry.opencode.de
           repository: bwi/bundesmessenger/backend/container-images/bumap-ui
-          tag: 1.0.0-jammy
+          tag: 1.1.0-jammy-production
           pullSecrets: []
           pullPolicy: IfNotPresent
         required:
@@ -4238,8 +4238,8 @@ properties:
         type: object
         title: Informationen zum Sicherheitskontext, die der Pod übernehmen soll
         default:
-          runAsUser: 1111
-          runAsGroup: 1111
+          runAsUser: 1001
+          runAsGroup: 1001
         unevaluatedProperties: false
       securityContext:
         $ref: "#/$defs/securityContext"
@@ -4580,7 +4580,7 @@ properties:
         properties:
           enabled:
             type: boolean
-            default: false
+            default: true
           map_style_url:
             type: ["null", "string"]
           map_style_config:
