@@ -1481,7 +1481,7 @@
                 },
                 "memory": {
                   "title": "Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.",
-                  "default": "1000Mi"
+                  "default": "500Mi"
                 }
               }
             }
@@ -2446,7 +2446,7 @@
                 },
                 "memory": {
                   "title": "Anforderungen an RAM Ressourcen, die auf den Sygnal-Container anzuwenden sind",
-                  "default": "45Mi"
+                  "default": "50Mi"
                 }
               }
             }
@@ -3313,7 +3313,7 @@
                 },
                 "memory": {
                   "title": "Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind",
-                  "default": "256Mi"
+                  "default": "128Mi"
                 }
               }
             }
@@ -4139,7 +4139,7 @@
                 },
                 "memory": {
                   "title": "RAM Ressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind",
-                  "default": "1Gi"
+                  "default": "500Mi"
                 }
               }
             },
@@ -4151,7 +4151,7 @@
                 },
                 "memory": {
                   "title": "Anforderungen an RAM Ressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind",
-                  "default": "500Mi"
+                  "default": "50Mi"
                 }
               }
             }
@@ -4418,7 +4418,7 @@
                 },
                 "memory": {
                   "title": "Anforderungen an RAM Ressourcen, die auf den ClamAV-Container anzuwenden sind",
-                  "default": "2Gi"
+                  "default": "1.5Gi"
                 }
               }
             }
@@ -5015,7 +5015,7 @@
                 },
                 "memory": {
                   "title": "RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind",
-                  "default": "100Mi"
+                  "default": "50Mi"
                 }
               }
             },
@@ -5027,7 +5027,7 @@
                 },
                 "memory": {
                   "title": "Anforderungen an RAM Ressourcen, die auf den webclient-server anzuwenden sind",
-                  "default": "45Mi"
+                  "default": "15Mi"
                 }
               }
             }
