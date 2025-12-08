@@ -8,6 +8,7 @@ templates:
   - secrets.yaml
 set:
   serverName: example.org
+  maspostgresql.enabled: true
 tests:
   - it: ensures a StatefulSet if enabled
     template: matrix-authentication-service/matrix-authentication-service-deployment.yaml
@@ -73,6 +74,7 @@ templates:
   - secrets.yaml
 set:
   mas.enabled: true
+  maspostgresql.enabled: true
   serverName: example.org
 tests:
   - it: ensures configuration is set for MAS
@@ -91,23 +93,26 @@ tests:
       path: metadata.name
       value: RELEASE-NAME-matrix-authentication-service
     set:
-      mas:
-        postgresql:
-          host: different.mas.example.org
-          port: 1
-          database: mas
-          username: Frank
-          password: ididitmyway
-          min_connections: 3
-          max_connections: 20
-          connect_timeout: 60
-          idle_timeout: 1212
-          max_lifetime: 1818
-          extraArgs:
-            sslmode: require
-            sslrootcert: /path/to/ca.pem
-            sslcert: /path/to/cert.pem
-            sslkey: /path/to/key.pem
+      maspostgresql:
+        enabled: false
+      externalmasPostgresql:
+        host: different.mas.example.org
+        port: 1
+        database: mas
+        username: Frank
+        existingSecret: postgresql
+        existingSecretPasswordKey: password
+        password: ididitmyway
+        min_connections: 3
+        max_connections: 20
+        connect_timeout: 60
+        idle_timeout: 1212
+        max_lifetime: 1818
+        extraArgs:
+          sslmode: require
+          sslrootcert: /path/to/ca.pem
+          sslcert: /path/to/cert.pem
+          sslkey: /path/to/key.pem
     asserts:
       - matchRegex:
           path: stringData["mas-secret.yaml"]
@@ -117,7 +122,6 @@ tests:
             ^\\s*  # port: 1.*?\
             ^\\s*  # database: \"mas\".*?\
             ^\\s*  # username: \"Frank\".*?\
-            ^\\s*  # password: \"ididitmyway\".*?\
             ^\\s*  # ssl_mode: \"require\".*?\
             ^\\s*  # ssl_ca_file: \"/path/to/ca.pem\".*?\
             ^\\s*  # ssl_certificate_file: \"/path/to/cert.pem\".*?\
@@ -133,7 +137,7 @@ tests:
           pattern: "(?ms:\
             ^\\s*database:.*?\
             ^\\s*  uri: \"\
-            postgresql://Frank:ididitmyway@different.mas.example.org:1/mas\
+            postgresql://Frank:POSTGRES_PASS@different.mas.example.org:1/mas\
             \\?sslcert=%2Fpath%2Fto%2Fcert.pem\
             &sslkey=%2Fpath%2Fto%2Fkey.pem\
             &sslmode=require\
@@ -182,6 +186,7 @@ templates:
   - secrets.yaml
 set:
   serverName: example.org
+  maspostgresql.enabled: true
 tests:
   - it: ensures an Ingress if (mas enabled, ingress enabled)
     template: matrix-authentication-service/matrix-authentication-service-ingress.yaml
@@ -216,6 +221,7 @@ tests:
     template: matrix-authentication-service/matrix-authentication-service-ingress.yaml
     set:
       mas.enabled: false
+      maspostgresql.enabled: false
       ingress.enabled: false
     asserts:
       - containsDocument:
@@ -225,6 +231,8 @@ tests:
 suite: MAS Secrets
 templates:
   - secrets.yaml
+set:
+  maspostgresql.enabled: true
 tests:
   - it: tests creation of the MAS signingkey Secret
     set:

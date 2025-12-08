@@ -79,6 +79,18 @@ spec:
       remoteRef:
         key: secret/postgresql
         property: password
+    - secretKey: masusername
+      remoteRef:
+        key: secret/postgresql
+        property: masusername
+    - secretKey: masdatabase
+      remoteRef:
+        key: secret/postgresql
+        property: masdatabase
+    - secretKey: maspassword
+      remoteRef:
+        key: secret/postgresql
+        property: maspassword
     - secretKey: postgres-password
       remoteRef:
         key: secret/postgresql

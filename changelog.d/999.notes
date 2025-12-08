@@ -1,0 +1,7 @@
+Der Matrix-Authentication-Service kann jetzt auch als "One-Click-Deplyoment" mit einer internen Datenbank
+genutzt werden (`maspostgresql.enabled: true`).
+
+Die bisherige Datenbank Konfiguration für den MAS wurde von `mas.postgresql` nach
+`externalmasPostgresql` verschoben. Das Passwort für die bisher genutzte Datenbank
+muss in einem Secret abgelegt werden. Im Standard wird das Secret `postgresql`
+mit den Key `maspassword` verwendet.

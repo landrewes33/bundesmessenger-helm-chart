@@ -1,13 +1,13 @@
 {{/* SPDX-FileCopyrightText: 2023–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.networkpolicies.enabled }}
-{{- if .Values.postgresql.enabled -}}
-{{- $component := "postgresql" -}}
+{{- if .Values.maspostgresql.enabled -}}
+{{- $component := "maspostgresql" -}}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ .Release.Name }}-{{ $component }}-allow-ingress-synapse
+  name: {{ .Release.Name }}-{{ $component }}-allow-ingress-mas
   namespace: {{ .Release.Namespace }}
 spec:
   podSelector:
@@ -20,15 +20,7 @@ spec:
     - from:
       - podSelector:
           matchLabels:
-            app.kubernetes.io/component: synapse
-{{- range $worker, $config := .Values.workers }}
-  {{- if $config.enabled }}
-{{- $name := $worker | replace "_" "-" }}
-      - podSelector:
-          matchLabels:
-            app.kubernetes.io/component: {{ $name }}
-  {{- end }}
-{{- end }}
+            app.kubernetes.io/component: matrix-authentication-service
       ports:
       - protocol: TCP
         port: 5432

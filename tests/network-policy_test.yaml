@@ -63,9 +63,9 @@ tests:
     documentIndex: 0
     set:
       networkpolicies:
-        postgres:
+        maspostgresql:
           selectorLabels: {}
-      postgresql:
+      maspostgresql:
         enabled: true
         service:
           targetPort: 5433
@@ -75,12 +75,12 @@ tests:
           value: 5433
       - equal:
           path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
-          value: postgresql
+          value: maspostgresql
   - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels not set"
     template: network-policy/matrix-authentication-service-network-policy.yaml
     documentIndex: 0
     set:
-      postgresql:
+      maspostgresql:
         enabled: true
         service:
           targetPort: 5433
@@ -90,19 +90,19 @@ tests:
           value: 5433
       - equal:
           path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
-          value: postgresql
+          value: maspostgresql
   - it: "renders postgres egress rule when postgresql.enabled = false but selectorLabels are set"
     template: network-policy/matrix-authentication-service-network-policy.yaml
     documentIndex: 0
     set:
       networkpolicies:
-        postgres:
+        maspostgresql:
           selectorLabels:
             custom: postgres-db
             app.kubernetes.io/name: null
-      postgresql:
+      maspostgresql:
         enabled: false
-      externalPostgresql:
+      externalmasPostgresql:
         port: 15432
     asserts:
       - equal:
@@ -118,12 +118,12 @@ tests:
     documentIndex: 0
     set:
       networkpolicies:
-        postgres:
+        maspostgresql:
           selectorLabels: {}
           externalPostgresIP: 10.1.2.3
-      postgresql:
+      maspostgresql:
         enabled: false
-      externalPostgresql:
+      externalmasPostgresql:
         port: 25432
     asserts:
       - equal:

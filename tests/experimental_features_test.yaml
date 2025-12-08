@@ -8,6 +8,8 @@ set:
   serverName: happy.place.example.org
   call.enabled: true
   mas.enabled: true
+  maspostgresql:
+    enabled: false
   extraConfig:
     experimental_features:
       new_feature: true
@@ -32,6 +34,8 @@ templates:
 set:
   call.enabled: true
   mas.enabled: true
+  maspostgresql:
+    enabled: false
   extraConfig:
     experimental_features:
       new_feature: true

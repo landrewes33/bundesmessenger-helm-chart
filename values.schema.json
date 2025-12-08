@@ -3078,501 +3078,85 @@
       "unevaluatedProperties": false
     },
     "postgresql": {
-      "type": "object",
-      "title": "Konfiguration des internen PostgreSQL-Servers",
-      "description": "Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und schnelle Möglichkeit, Demo- und Testsysteme aufzusetzen. Nicht empfohlen für Produktivsysteme.\nEmpfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den `externalPostgresql`-Block.",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Aktivieren des internen PostgreSQL-Servers",
-          "description": "Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den `externalPostgresql`-Block.",
-          "default": false
+      "allOf": [
+        {
+          "$ref": "#/$defs/postgresqlDefaults",
+          "type": "object"
         },
-        "image": {
-          "$ref": "#/$defs/cloudPiratesImage",
+        {
           "type": "object",
-          "title": "Das zu verwendende PostgreSQL-Container-Abbild",
-          "default": {
-            "registry": "docker.io",
-            "repository": "postgres",
-            "pullSecrets": [],
-            "pullPolicy": "IfNotPresent"
-          },
-          "required": [
-            "registry",
-            "repository",
-            "tag",
-            "pullSecrets",
-            "pullPolicy"
-          ],
-          "unevaluatedProperties": true
-        },
-        "customUser": {
-          "type": "object",
-          "title": "Konfiguration des Synapse Datenbanknutzers",
           "properties": {
-            "username": {
-              "type": "string",
-              "minLength": 1,
-              "title": "Name des Datenbanknutzers",
-              "description": "Muss mit der Angabe im `existingSecret` übereinstimmen.",
-              "default": "synapse"
-            },
-            "database": {
-              "type": "string",
-              "minLength": 1,
-              "title": "Name der Datenbank",
-              "description": "Muss mit der Angabe im `existingSecret` übereinstimmen.",
-              "default": "synapse_db"
-            },
-            "password": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "enum": [
-                null,
-                ""
-              ],
-              "title": "Passwort für den PostgreSQL-Nutzer",
-              "description": "Muss leer sein. Das Passwort wird im `existingSecret` angegeben. Wenn das `existingSecret` vor der Installation nicht bereit steht, wird es automatisch mit einem zufälligen Passwort erzeugt.",
-              "default": null
-            },
-            "existingSecret": {
-              "type": "string",
-              "minLength": 1,
-              "title": "Name des Secrets mit dem Passwort des Synapse Datenbanknutzers",
-              "description": "Ist `postgresql.enabled` und das angegebene Secret existiert nicht, so wird automatisch ein neues Secret erstellt und verwendet.",
-              "default": "postgresql"
-            },
-            "secretKeys": {
+            "initdb": {
               "type": "object",
-              "title": "Schlüssel im angegebenen Secret",
+              "title": "Initialisierung der Datenbank",
               "properties": {
-                "name": {
+                "args": {
                   "type": "string",
-                  "title": "Verweis im `existingSecret` auf den Namen des Datenbanknutzers",
-                  "default": "username"
+                  "title": "Extra Argumente zur Initialisierung der Datenbank",
+                  "default": "--lc-collate=C --lc-ctype=C --encoding=UTF8"
                 },
-                "database": {
-                  "type": "string",
-                  "title": "Verweis im `existingSecret` auf den Namen der Datenbank",
-                  "default": "database"
-                },
-                "password": {
-                  "type": "string",
-                  "title": "Verweis im `existingSecret` auf das Nutzerpasswort",
-                  "default": "password"
+                "scripts": {
+                  "type": "object",
+                  "description": "Zusätzliche Initialisierungsskripte",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "unevaluatedProperties": false
                 }
               },
               "required": [
-                "name",
-                "database",
-                "password"
-              ],
-              "unevaluatedProperties": true
+                "args"
+              ]
             }
           },
           "required": [
-            "username",
-            "database",
-            "existingSecret",
-            "secretKeys"
-          ],
-          "unevaluatedProperties": true
-        },
-        "auth": {
-          "type": "object",
-          "title": "Konfiguration des Adminnutzers",
-          "properties": {
-            "username": {
-              "type": "string",
-              "title": "Name des PostgreSQL Adminnutzers",
-              "default": "postgres"
-            },
-            "password": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "enum": [
-                null,
-                ""
-              ],
-              "title": "Passwort für den PostgreSQL-Adminnutzer",
-              "description": "Muss leer sein. Das Passwort wird im `existingSecret` angegeben. Wenn das `existingSecret` vor der Installation nicht bereit steht, wird es automatisch mit einem zufälligen Passwort erzeugt.",
-              "default": null
-            },
-            "existingSecret": {
-              "type": "string",
-              "minLength": 1,
-              "title": "Name des Kubernetes Secrets mit dem enhaltenen Adminpasswort",
-              "description": "Ist `postgresql.enabled` und das angegebene Secret existiert nicht, so wird automatisch ein neues Secret erstellt und verwendet.",
-              "default": "postgresql"
-            },
-            "secretKeys": {
-              "type": "object",
-              "title": "Schlüssel im angegebenen Secret",
-              "properties": {
-                "adminPasswordKey": {
-                  "type": "string",
-                  "title": "Verweis im `existingSecret` auf das Adminpasswort",
-                  "default": "postgres-password"
-                }
-              },
-              "required": [
-                "adminPasswordKey"
-              ],
-              "unevaluatedProperties": true
-            }
-          },
-          "required": [
-            "username",
-            "existingSecret",
-            "secretKeys"
-          ],
-          "unevaluatedProperties": true
-        },
-        "service": {
-          "type": "object",
-          "title": "Service-Konfiguration",
-          "properties": {
-            "port": {
-              "type": "integer",
-              "minimum": 1,
-              "title": "Port des PostgreSQL-Service",
-              "default": 5432
-            },
-            "targetPort": {
-              "type": "integer",
-              "minimum": 1,
-              "title": "Interner Container-Port des PostgreSQL-Containers",
-              "default": 5432
-            }
-          },
-          "required": [
-            "port",
-            "targetPort"
-          ],
-          "unevaluatedProperties": true
-        },
-        "initdb": {
-          "type": "object",
-          "title": "Initialisierung der Datenbank",
-          "properties": {
-            "args": {
-              "type": "string",
-              "title": "Extra Argumente zur Initialisierung der Datenbank",
-              "default": "--lc-collate=C --lc-ctype=C --encoding=UTF8"
-            },
-            "scripts": {
-              "type": "object",
-              "description": "Zusätzliche Initialisierungsskripte",
-              "additionalProperties": {
-                "type": "string"
-              },
-              "unevaluatedProperties": false
-            }
-          },
-          "required": [
-            "args"
-          ],
-          "unevaluatedProperties": true
-        },
-        "extraVolumes": {
-          "type": "array",
-          "title": "Extra Volumes",
-          "description": "Kann zusammen mit `extraVolumeMounts` zum Wiedereinspielen einer Sicherung verwendet werden.",
-          "default": [],
-          "examples": [
-            [
-              {
-                "name": "major-upgrade-dump",
-                "persistentVolumeClaim": {
-                  "claimName": "postgresql-major-upgrade"
-                }
-              }
-            ]
+            "initdb"
           ]
-        },
-        "extraVolumeMounts": {
-          "type": "array",
-          "default": [],
-          "examples": [
-            [
-              {
-                "name": "major-upgrade-dump",
-                "mountPath": "/major-upgrade-dump"
-              }
-            ]
-          ]
-        },
-        "config": {
-          "type": "object",
-          "title": "Extra Konfiguration der Datenbank",
-          "properties": {
-            "postgresqlMaxConnections": {
-              "type": "integer",
-              "title": "Maximale Anzahl an Datenbankverbindungen",
-              "description": "Die maximale Anzahl an Verbindungen ist oft eine Limitierung, da jeder Synapse-Prozess seine Verbindungen zur Datenbank hält.",
-              "default": 1024
-            }
-          },
-          "required": [
-            "postgresqlMaxConnections"
-          ],
-          "unevaluatedProperties": true
-        },
-        "containerSecurityContext": {
-          "type": "object",
-          "properties": {
-            "runAsUser": {
-              "type": "integer",
-              "title": "User ID for the PostgreSQL container",
-              "default": 66999
-            },
-            "runAsGroup": {
-              "type": "integer",
-              "title": "Group ID for the PostgreSQL container",
-              "default": 66999
-            },
-            "readOnlyRootFilesystem": {
-              "type": "boolean",
-              "title": "Mount container root filesystem as read-only",
-              "default": true
-            }
-          },
-          "unevaluatedProperties": true,
-          "required": [
-            "runAsUser",
-            "runAsGroup",
-            "readOnlyRootFilesystem"
-          ]
-        },
-        "persistence": {
-          "type": "object",
-          "title": "Persistenzkonfiguration für PostgreSQL",
-          "properties": {
-            "enabled": {
-              "type": "boolean",
-              "default": true
-            },
-            "storageClass": {
-              "type": "string",
-              "default": ""
-            },
-            "size": {
-              "type": "string",
-              "default": "16Gi"
-            }
-          },
-          "required": [
-            "enabled",
-            "storageClass",
-            "size"
-          ],
-          "unevaluatedProperties": true
-        },
-        "resources": {
-          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json",
-          "type": "object",
-          "title": "Ressourcenanforderungen und -grenzen",
-          "properties": {
-            "limits": {
-              "type": "object",
-              "properties": {
-                "cpu": {
-                  "title": "Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind",
-                  "default": 1
-                },
-                "memory": {
-                  "title": "RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind",
-                  "default": "4096Mi"
-                }
-              },
-              "required": [
-                "cpu",
-                "memory"
-              ],
-              "unevaluatedProperties": true
-            },
-            "requests": {
-              "type": "object",
-              "properties": {
-                "cpu": {
-                  "title": "Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind",
-                  "default": "250m"
-                },
-                "memory": {
-                  "title": "Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind",
-                  "default": "256Mi"
-                }
-              },
-              "required": [
-                "cpu",
-                "memory"
-              ],
-              "unevaluatedProperties": true
-            }
-          },
-          "required": [
-            "limits",
-            "requests"
-          ],
-          "unevaluatedProperties": true
-        },
-        "extraArgs": {
-          "$comment": "This config option is not part of the `postgresql` chart.",
-          "type": "object",
-          "title": "Zusätzliche Argumente für die Datenbankverbindung",
-          "description": "Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config",
-          "properties": {
-            "sslmode": {
-              "type": "string",
-              "enum": [
-                "disable",
-                "allow",
-                "prefer",
-                "require",
-                "verify-ca",
-                "verify-full"
-              ],
-              "title": "Verwendeter SSL-Modus",
-              "description": "https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS",
-              "default": "prefer"
-            }
-          },
-          "additionalProperties": {
-            "type": [
-              "null",
-              "string",
-              "number",
-              "integer",
-              "boolean"
-            ]
-          },
-          "required": [
-            "sslmode"
-          ],
-          "unevaluatedProperties": true
         }
-      },
-      "required": [
-        "enabled",
-        "image",
-        "customUser",
-        "auth",
-        "service",
-        "initdb",
-        "extraVolumes",
-        "extraVolumeMounts",
-        "config",
-        "containerSecurityContext",
-        "persistence",
-        "resources",
-        "extraArgs"
-      ],
-      "unevaluatedProperties": true
+      ]
     },
     "externalPostgresql": {
-      "type": "object",
-      "title": "Extern konfigurierter PostgreSQL-Server",
-      "description": "Wird für die Datenbank von Synapse verwendet. Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf \"C\" eingestellt sein. Die „interne“ Datenbank muss deaktiviert sein: `postgresql.enabled: false`.",
-      "properties": {
-        "host": {
-          "type": "string",
-          "minLength": 1,
-          "title": "Hostname vom externen PostgreSQL-Server",
-          "description": "Beispieladresse für einen K8s-internen PostgreSQL im Namespace `postgres`:",
-          "default": "postgres-4-matrix-postgresql.postgresql.svc.cluster.local"
+      "$ref": "#/$defs/externalPostgresqlDefaults",
+      "type": "object"
+    },
+    "externalmasPostgresql": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/externalPostgresqlDefaults",
+          "type": "object"
         },
-        "port": {
-          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort",
-          "type": "integer",
-          "title": "Port vom externen PostgreSQL-Server",
-          "default": 5342
-        },
-        "database": {
-          "type": "string",
-          "minLength": 1,
-          "title": "Name der zu verwendenden PostgreSQL-Datenbank",
-          "default": "synapse_db"
-        },
-        "username": {
-          "type": "string",
-          "minLength": 1,
-          "title": "Name des PostgreSQL-Nutzers",
-          "default": "synapse"
-        },
-        "password": {
-          "deprecated": true,
-          "type": [
-            "null",
-            "string"
-          ],
-          "minLength": 1,
-          "title": "Passwort vom PostgreSQL-Nutzer",
-          "description": "**ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.",
-          "default": null,
-          "examples": [
-            "53C237P0576235Q1P455W02D"
-          ]
-        },
-        "existingSecret": {
-          "type": "string",
-          "minLength": 1,
-          "title": "Name vom Secret mit dem PostgreSQL-Passwort",
-          "default": "postgresql"
-        },
-        "existingSecretPasswordKey": {
-          "type": "string",
-          "minLength": 1,
-          "title": "Verweis im `existingSecret` auf das PostgreSQL-Passwort",
-          "default": "password"
-        },
-        "extraArgs": {
+        {
           "type": "object",
-          "title": "Zusätzliche Argumente für die Datenbankverbindung",
-          "description": "Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config",
           "properties": {
-            "sslmode": {
-              "type": "string",
-              "enum": [
-                "disable",
-                "allow",
-                "prefer",
-                "require",
-                "verify-ca",
-                "verify-full"
-              ],
-              "title": "Verwendeter SSL-Modus",
-              "description": "https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS",
-              "default": "prefer"
+            "min_connections": {
+              "type": "integer",
+              "default": 0
+            },
+            "max_connections": {
+              "type": "integer",
+              "default": 10
+            },
+            "connect_timeout": {
+              "type": "integer",
+              "default": 30
+            },
+            "idle_timeout": {
+              "type": "integer",
+              "default": 600
+            },
+            "max_lifetime": {
+              "type": "integer",
+              "default": 1800
             }
           },
-          "additionalProperties": {
-            "type": [
-              "null",
-              "string",
-              "number",
-              "integer",
-              "boolean"
-            ]
-          },
           "required": [
-            "sslmode"
-          ],
-          "unevaluatedProperties": false
+            "min_connections",
+            "max_connections",
+            "connect_timeout",
+            "idle_timeout",
+            "max_lifetime"
+          ]
         }
-      },
-      "required": [
-        "host",
-        "port",
-        "database",
-        "username",
-        "existingSecret",
-        "existingSecretPasswordKey",
-        "extraArgs"
       ],
       "unevaluatedProperties": false
     },
@@ -3583,7 +3167,7 @@
       "properties": {
         "enabled": {
           "type": "boolean",
-          "tiitle": "Aktivieren des internen Redis-Servers",
+          "title": "Aktivieren des internen Redis-Servers",
           "description": "Hinweis: Durch Setzten auf `true`, wird der `externalRedis`-Block ignoriert.",
           "default": true
         },
@@ -3984,143 +3568,6 @@
           "title": "URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider.",
           "description": "Eine URI ist dringend ratsam, damit der Dienst routing-technisch getrennt ist. Ein stabiles Deployment ohne eigene URI wurde bisher nicht erprobt."
         },
-        "postgresql": {
-          "type": "object",
-          "properties": {
-            "host": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "title": "Host für PostgreSQL-DB von MAS",
-              "description": "Falls ungesetzt, wird die Haupt-PostgreSQL-Instanz verwendet.",
-              "default": null,
-              "examples": [
-                "masdb.example.org"
-              ]
-            },
-            "port": {
-              "type": "integer",
-              "title": "Port für PostgreSQL-DB von MAS",
-              "default": 5432
-            },
-            "database": {
-              "type": "string",
-              "minLength": 1,
-              "title": "DB-Name für PostgreSQL-DB von MAS",
-              "default": "mas_synapse"
-            },
-            "username": {
-              "type": "string",
-              "minLength": 1,
-              "title": "Nutzername für PostgreSQL-DB von MAS",
-              "default": "massynapse"
-            },
-            "password": {
-              "type": "string",
-              "minLength": 1,
-              "title": "Password für PostgreSQL Nutzer von MAS",
-              "default": "mas-synapse"
-            },
-            "min_connections": {
-              "type": "integer",
-              "default": 0
-            },
-            "max_connections": {
-              "type": "integer",
-              "default": 10
-            },
-            "connect_timeout": {
-              "type": "integer",
-              "default": 30
-            },
-            "idle_timeout": {
-              "type": "integer",
-              "default": 600
-            },
-            "max_lifetime": {
-              "type": "integer",
-              "default": 1800
-            },
-            "extraArgs": {
-              "type": "object",
-              "title": "Zusätzliche Argumente für die MAS Datenbankverbindung",
-              "description": "https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS",
-              "properties": {
-                "sslmode": {
-                  "type": "string",
-                  "enum": [
-                    "disable",
-                    "allow",
-                    "prefer",
-                    "require",
-                    "verify-ca",
-                    "verify-full"
-                  ],
-                  "title": "Verwendeter SSL-Modus",
-                  "description": "https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS",
-                  "default": "prefer"
-                },
-                "sslrootcert": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
-                  "default": null,
-                  "examples": [
-                    "/path/to/ca.pem"
-                  ]
-                },
-                "sslcert": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
-                  "default": null,
-                  "examples": [
-                    "/path/to/cert.pem"
-                  ]
-                },
-                "sslkey": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
-                  "default": null,
-                  "examples": [
-                    "/path/to/key.pem"
-                  ]
-                }
-              },
-              "additionalProperties": {
-                "type": [
-                  "null",
-                  "string",
-                  "number",
-                  "integer",
-                  "boolean"
-                ]
-              },
-              "required": [
-                "sslmode"
-              ],
-              "unevaluatedProperties": false
-            }
-          },
-          "required": [
-            "port",
-            "database",
-            "username",
-            "password",
-            "min_connections",
-            "max_connections",
-            "connect_timeout",
-            "idle_timeout",
-            "max_lifetime",
-            "extraArgs"
-          ],
-          "unevaluatedProperties": false
-        },
         "encryption": {
           "type": "object",
           "title": "MAS Cookie- und Datenbankschlüssel",
@@ -4492,7 +3939,6 @@
         "enabled",
         "image",
         "uri",
-        "postgresql",
         "encryption",
         "matrixSharedSecret",
         "signingkeys",
@@ -4507,6 +3953,47 @@
         "livenessProbe",
         "readinessProbe",
         "startupProbe"
+      ],
+      "unevaluatedProperties": false
+    },
+    "maspostgresql": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/postgresqlDefaults",
+          "type": "object"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "min_connections": {
+              "type": "integer",
+              "default": 0
+            },
+            "max_connections": {
+              "type": "integer",
+              "default": 10
+            },
+            "connect_timeout": {
+              "type": "integer",
+              "default": 30
+            },
+            "idle_timeout": {
+              "type": "integer",
+              "default": 600
+            },
+            "max_lifetime": {
+              "type": "integer",
+              "default": 1800
+            }
+          },
+          "required": [
+            "min_connections",
+            "max_connections",
+            "connect_timeout",
+            "idle_timeout",
+            "max_lifetime"
+          ]
+        }
       ],
       "unevaluatedProperties": false
     },
@@ -6172,6 +5659,31 @@
           ],
           "unevaluatedProperties": false
         },
+        "maspostgresql": {
+          "type": "object",
+          "properties": {
+            "externalPostgresIP": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "default": null
+            },
+            "selectorLabels": {
+              "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/labels",
+              "type": "object",
+              "title": "Labels zum Adressieren der MAS PostgreSQL-Instanz",
+              "default": {
+                "app.kubernetes.io/name": "maspostgresql"
+              },
+              "unevaluatedProperties": false
+            }
+          },
+          "required": [
+            "selectorLabels"
+          ],
+          "unevaluatedProperties": false
+        },
         "acme": {
           "type": "object",
           "title": "HTTP-Resolver für ACME/Let’s Encrypt",
@@ -6352,6 +5864,481 @@
   ],
   "unevaluatedProperties": false,
   "$defs": {
+    "postgresqlDefaults": {
+      "type": "object",
+      "title": "Konfiguration des internen PostgreSQL-Servers",
+      "description": "Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und schnelle Möglichkeit, Demo- und Testsysteme aufzusetzen. Nicht empfohlen für Produktivsysteme.\nEmpfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den `externalPostgresql`-Block.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Aktivieren des internen PostgreSQL-Servers",
+          "description": "Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den `externalPostgresql`-Block.",
+          "default": false
+        },
+        "image": {
+          "$ref": "#/$defs/cloudPiratesImage",
+          "type": "object",
+          "title": "Das zu verwendende PostgreSQL-Container-Abbild",
+          "default": {
+            "registry": "docker.io",
+            "repository": "postgres",
+            "pullSecrets": [],
+            "pullPolicy": "IfNotPresent"
+          },
+          "required": [
+            "registry",
+            "repository",
+            "tag",
+            "pullSecrets",
+            "pullPolicy"
+          ],
+          "unevaluatedProperties": true
+        },
+        "customUser": {
+          "type": "object",
+          "title": "Konfiguration des Synapse Datenbanknutzers",
+          "properties": {
+            "username": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Name des Datenbanknutzers",
+              "description": "Muss mit der Angabe im `existingSecret` übereinstimmen.",
+              "default": "synapse"
+            },
+            "database": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Name der Datenbank",
+              "description": "Muss mit der Angabe im `existingSecret` übereinstimmen.",
+              "default": "synapse_db"
+            },
+            "password": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "enum": [
+                null,
+                ""
+              ],
+              "title": "Passwort für den PostgreSQL-Nutzer",
+              "description": "Muss leer sein. Das Passwort wird im `existingSecret` angegeben. Wenn das `existingSecret` vor der Installation nicht bereit steht, wird es automatisch mit einem zufälligen Passwort erzeugt.",
+              "default": null
+            },
+            "existingSecret": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Name des Secrets mit dem Passwort des Synapse Datenbanknutzers",
+              "description": "Ist `postgresql.enabled` und das angegebene Secret existiert nicht, so wird automatisch ein neues Secret erstellt und verwendet.",
+              "default": "postgresql"
+            },
+            "secretKeys": {
+              "type": "object",
+              "title": "Schlüssel im angegebenen Secret",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Verweis im `existingSecret` auf den Namen des Datenbanknutzers",
+                  "default": "username"
+                },
+                "database": {
+                  "type": "string",
+                  "title": "Verweis im `existingSecret` auf den Namen der Datenbank",
+                  "default": "database"
+                },
+                "password": {
+                  "type": "string",
+                  "title": "Verweis im `existingSecret` auf das Nutzerpasswort",
+                  "default": "password"
+                }
+              },
+              "required": [
+                "name",
+                "database",
+                "password"
+              ],
+              "unevaluatedProperties": true
+            }
+          },
+          "required": [
+            "username",
+            "database",
+            "existingSecret",
+            "secretKeys"
+          ],
+          "unevaluatedProperties": true
+        },
+        "auth": {
+          "type": "object",
+          "title": "Konfiguration des Adminnutzers",
+          "properties": {
+            "username": {
+              "type": "string",
+              "title": "Name des PostgreSQL Adminnutzers",
+              "default": "postgres"
+            },
+            "password": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "enum": [
+                null,
+                ""
+              ],
+              "title": "Passwort für den PostgreSQL-Adminnutzer",
+              "description": "Muss leer sein. Das Passwort wird im `existingSecret` angegeben. Wenn das `existingSecret` vor der Installation nicht bereit steht, wird es automatisch mit einem zufälligen Passwort erzeugt.",
+              "default": null
+            },
+            "existingSecret": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Name des Kubernetes Secrets mit dem enhaltenen Adminpasswort",
+              "description": "Ist `postgresql.enabled` und das angegebene Secret existiert nicht, so wird automatisch ein neues Secret erstellt und verwendet.",
+              "default": "postgresql"
+            },
+            "secretKeys": {
+              "type": "object",
+              "title": "Schlüssel im angegebenen Secret",
+              "properties": {
+                "adminPasswordKey": {
+                  "type": "string",
+                  "title": "Verweis im `existingSecret` auf das Adminpasswort",
+                  "default": "postgres-password"
+                }
+              },
+              "required": [
+                "adminPasswordKey"
+              ],
+              "unevaluatedProperties": true
+            }
+          },
+          "required": [
+            "username",
+            "existingSecret",
+            "secretKeys"
+          ],
+          "unevaluatedProperties": true
+        },
+        "service": {
+          "type": "object",
+          "title": "Service-Konfiguration",
+          "properties": {
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Port des PostgreSQL-Service",
+              "default": 5432
+            },
+            "targetPort": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Interner Container-Port des PostgreSQL-Containers",
+              "default": 5432
+            }
+          },
+          "required": [
+            "port",
+            "targetPort"
+          ],
+          "unevaluatedProperties": true
+        },
+        "extraVolumes": {
+          "type": "array",
+          "title": "Extra Volumes",
+          "description": "Kann zusammen mit `extraVolumeMounts` zum Wiedereinspielen einer Sicherung verwendet werden.",
+          "default": [],
+          "examples": [
+            [
+              {
+                "name": "major-upgrade-dump",
+                "persistentVolumeClaim": {
+                  "claimName": "postgresql-major-upgrade"
+                }
+              }
+            ]
+          ]
+        },
+        "extraVolumeMounts": {
+          "type": "array",
+          "default": [],
+          "examples": [
+            [
+              {
+                "name": "major-upgrade-dump",
+                "mountPath": "/major-upgrade-dump"
+              }
+            ]
+          ]
+        },
+        "config": {
+          "type": "object",
+          "title": "Extra Konfiguration der Datenbank",
+          "properties": {
+            "postgresqlMaxConnections": {
+              "type": "integer",
+              "title": "Maximale Anzahl an Datenbankverbindungen",
+              "description": "Die maximale Anzahl an Verbindungen ist oft eine Limitierung, da jeder Synapse-Prozess seine Verbindungen zur Datenbank hält.",
+              "default": 1024
+            }
+          },
+          "required": [
+            "postgresqlMaxConnections"
+          ],
+          "unevaluatedProperties": true
+        },
+        "containerSecurityContext": {
+          "type": "object",
+          "properties": {
+            "runAsUser": {
+              "type": "integer",
+              "title": "User ID for the PostgreSQL container",
+              "default": 66999
+            },
+            "runAsGroup": {
+              "type": "integer",
+              "title": "Group ID for the PostgreSQL container",
+              "default": 66999
+            },
+            "readOnlyRootFilesystem": {
+              "type": "boolean",
+              "title": "Mount container root filesystem as read-only",
+              "default": true
+            }
+          },
+          "unevaluatedProperties": true,
+          "required": [
+            "runAsUser",
+            "runAsGroup",
+            "readOnlyRootFilesystem"
+          ]
+        },
+        "persistence": {
+          "type": "object",
+          "title": "Persistenzkonfiguration für PostgreSQL",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "storageClass": {
+              "type": "string",
+              "default": ""
+            },
+            "size": {
+              "type": "string",
+              "default": "16Gi"
+            }
+          },
+          "required": [
+            "enabled",
+            "storageClass",
+            "size"
+          ],
+          "unevaluatedProperties": true
+        },
+        "resources": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json",
+          "type": "object",
+          "title": "Ressourcenanforderungen und -grenzen",
+          "properties": {
+            "limits": {
+              "type": "object",
+              "properties": {
+                "cpu": {
+                  "title": "Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind",
+                  "default": 1
+                },
+                "memory": {
+                  "title": "RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind",
+                  "default": "4096Mi"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "unevaluatedProperties": true
+            },
+            "requests": {
+              "type": "object",
+              "properties": {
+                "cpu": {
+                  "title": "Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind",
+                  "default": "250m"
+                },
+                "memory": {
+                  "title": "Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind",
+                  "default": "256Mi"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "unevaluatedProperties": true
+            }
+          },
+          "required": [
+            "limits",
+            "requests"
+          ],
+          "unevaluatedProperties": true
+        },
+        "extraArgs": {
+          "$comment": "This config option is not part of the `postgresql` chart.",
+          "type": "object",
+          "title": "Zusätzliche Argumente für die Datenbankverbindung",
+          "description": "Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config",
+          "properties": {
+            "sslmode": {
+              "type": "string",
+              "enum": [
+                "disable",
+                "allow",
+                "prefer",
+                "require",
+                "verify-ca",
+                "verify-full"
+              ],
+              "title": "Verwendeter SSL-Modus",
+              "description": "https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS",
+              "default": "prefer"
+            }
+          },
+          "additionalProperties": {
+            "type": [
+              "null",
+              "string",
+              "number",
+              "integer",
+              "boolean"
+            ]
+          },
+          "required": [
+            "sslmode"
+          ],
+          "unevaluatedProperties": true
+        }
+      },
+      "required": [
+        "enabled",
+        "image",
+        "customUser",
+        "auth",
+        "service",
+        "extraVolumes",
+        "extraVolumeMounts",
+        "config",
+        "containerSecurityContext",
+        "persistence",
+        "resources",
+        "extraArgs"
+      ],
+      "unevaluatedProperties": true
+    },
+    "externalPostgresqlDefaults": {
+      "type": "object",
+      "title": "Extern konfigurierter PostgreSQL-Server",
+      "description": "Wird für die Datenbank von Synapse verwendet. Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf \"C\" eingestellt sein. Die „interne“ Datenbank muss deaktiviert sein: `postgresql.enabled: false`.",
+      "properties": {
+        "host": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Hostname vom externen PostgreSQL-Server",
+          "description": "Beispieladresse für einen K8s-internen PostgreSQL im Namespace `postgres`:",
+          "default": "postgres-4-matrix-postgresql.postgresql.svc.cluster.local"
+        },
+        "port": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort",
+          "type": "integer",
+          "title": "Port vom externen PostgreSQL-Server",
+          "default": 5342
+        },
+        "database": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Name der zu verwendenden PostgreSQL-Datenbank",
+          "default": "synapse_db"
+        },
+        "username": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Name des PostgreSQL-Nutzers",
+          "default": "synapse"
+        },
+        "password": {
+          "deprecated": true,
+          "type": [
+            "null",
+            "string"
+          ],
+          "minLength": 1,
+          "title": "Passwort vom PostgreSQL-Nutzer",
+          "description": "**ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.",
+          "default": null,
+          "examples": [
+            "53C237P0576235Q1P455W02D"
+          ]
+        },
+        "existingSecret": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Name vom Secret mit dem PostgreSQL-Passwort",
+          "default": "postgresql"
+        },
+        "existingSecretPasswordKey": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Verweis im `existingSecret` auf das PostgreSQL-Passwort",
+          "default": "password"
+        },
+        "extraArgs": {
+          "type": "object",
+          "title": "Zusätzliche Argumente für die Datenbankverbindung",
+          "description": "Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config",
+          "properties": {
+            "sslmode": {
+              "type": "string",
+              "enum": [
+                "disable",
+                "allow",
+                "prefer",
+                "require",
+                "verify-ca",
+                "verify-full"
+              ],
+              "title": "Verwendeter SSL-Modus",
+              "description": "https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS",
+              "default": "prefer"
+            }
+          },
+          "additionalProperties": {
+            "type": [
+              "null",
+              "string",
+              "number",
+              "integer",
+              "boolean"
+            ]
+          },
+          "required": [
+            "sslmode"
+          ],
+          "unevaluatedProperties": false
+        }
+      },
+      "required": [
+        "host",
+        "port",
+        "database",
+        "username",
+        "existingSecret",
+        "existingSecretPasswordKey",
+        "extraArgs"
+      ],
+      "unevaluatedProperties": true
+    },
     "cloudPiratesImage": {
       "type": "object",
       "properties": {

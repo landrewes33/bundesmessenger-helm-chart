@@ -33,17 +33,50 @@ spec:
         {{- toYaml .Values.mas.podSecurityContext | nindent 8 }}
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       automountServiceAccountToken: false
+      initContainers:
+        - name: generate-dbpass
+          securityContext:
+            {{- toYaml .Values.mas.securityContext | nindent 12 }}
+          env:
+            - name: POSTGRES_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "matrix-synapse.maspostgresql.secret-name" . }}
+                  key: {{ include "matrix-synapse.maspostgresql.secret-key" . }}
+          command:
+            - sh
+            - -c
+            - |
+              awk -v pass="$POSTGRES_PASS" '
+                { gsub(/POSTGRES_PASS/, pass); print }
+              ' /mas/config/mas-secret.yaml > /mas/dbpass/mas-secret.yaml
+          image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
+          resources:
+            {{- toYaml .Values.mas.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /mas/config
+            - name: secrets
+              mountPath: /mas/secrets
+            - name: dbpass
+              mountPath: /mas/dbpass
       containers:
         - name: {{ $component }}
           command:
             - mas-cli
             - server
             - --config=/mas/config/config.yaml
-            - --config=/mas/config/mas-secret.yaml
+            - --config=/mas/dbpass/mas-secret.yaml
           image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
           imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.mas.securityContext | nindent 12 }}
+          env:
+            - name: POSTGRES_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "matrix-synapse.maspostgresql.secret-name" . }}
+                  key: {{ include "matrix-synapse.maspostgresql.secret-key" . }}
           ports:
             - name: web
               containerPort: 8080
@@ -76,12 +109,17 @@ spec:
               mountPath: /mas/secret
             - name: secret-signingkeys
               mountPath: /mas/secret/signingkey
+            - name: dbpass
+              mountPath: /mas/dbpass
           {{- with .Values.mas.extraVolumeMounts }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.mas.resources | nindent 12 }}
       volumes:
+        - name: dbpass
+          emptyDir:
+            sizeLimit: 10Mi
         - name: config
           projected:
             sources:
