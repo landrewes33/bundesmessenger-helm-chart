@@ -9,21 +9,21 @@ enthalten kann:
 <!-- markdownlint-disable -->
 <figure>
 
-  ```yaml
-  apiVersion: v1
-  kind: Secret
-  metadata:
-    name: login-secret
-  stringData:
-    user-password: P455W02D!
-    admin-password: 1014DM!N!$$$
-  ```
+ ```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: login-secret
+stringData:
+  user-password: P455W02D!
+  admin-password: 1014DM!N!$$$
+ ```
 
-  <figcaption>
-    Manifest eines Kubernetes Secrets, in dem zwei Passwörter unter den
-    Schlüsseln <code>user-password</code> und <code>admin-password</code>
-    hinterlegt sind.
-  </figcaption>
+ <figcaption>
+ Manifest eines Kubernetes Secrets, in dem zwei Passwörter unter den
+ Schlüsseln <code>user-password</code> und <code>admin-password</code>
+ hinterlegt sind.
+ </figcaption>
 </figure>
 <!-- markdownlint-enable -->
 
@@ -53,7 +53,7 @@ kubectl --namespace=bum get secret "login-secret" \
 ```
 
 [Kubernetes Secrets]:
-    <https://kubernetes.io/docs/concepts/configuration/secret/>
+ <https://kubernetes.io/docs/concepts/configuration/secret/>
 
 ## Verwalten von Secrets
 
@@ -75,7 +75,7 @@ startet] bieten.
 [Infisical]: <https://infisical.com/>
 [ESO Providers]: <https://external-secrets.io/latest/provider/infisical/>
 [ESO Getting startet]:
-    <https://external-secrets.io/latest/introduction/getting-started/>
+ <https://external-secrets.io/latest/introduction/getting-started/>
 
 ## Referenzierung von Secrets
 
@@ -87,14 +87,13 @@ angegeben werden:
 
 <!-- markdownlint-disable -->
 <figure>
-
   ```yaml
   externalRedis:
     existingSecret: redis
     existingSecretPasswordKey: password
   ```
 
-  <figcaption>  
+  <figcaption>
     BundesMessenger Konfiguration des externen Redis-Servers, die angibt, das
     Redis-Passwort im Secret <code>redis</code> unter dem Schlüssel
     <code>password</code> nachzuschlagen.
@@ -107,20 +106,24 @@ angegeben werden:
 Der BundesMessenger benötigt und verwaltet einige Secrets. Die folgende Tabelle
 gibt eine Übersicht.
 
-| Komponente        | Name des Secrets                                                  | Schlüssel                                                                                               | Automatisch erstellt                                                    |
-|-------------------|-------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|
-| Hauptkomponente   | `"RELEASE-NAME-bundesmessenger"`                                  | `"config.yaml"`, `"experimental-features.yaml"`                                                         | ✓ Ja                                                                    |
-| Hauptkomponente   | `config.*.existingSecret`                                         | `"registration-shared-secret"`, `"macaroon-secret-key"`, `"form-secret"`, `"worker-replication-secret"` | – Falls nicht vorhanden                                                 |
-| Signing-Key-Job   | `signingkey.existingSecret`                                       | `"signing.key"`                                                                                         | ✗ Nein                                                                  |
-| Signing-Key-Job   | `"RELEASE-NAME-bundesmessenger-signingkey"`                       | `"signing.key"`                                                                                         | ✓ Falls `signingkey.job.enabled`                                        |
-| PostgreSQL intern | `postgresql.auth.existingSecret`                                  | `postgresql.auth.secretKeys.userPasswordKey`, `postgresql.auth.secretKeys.adminPasswordKey`             | – Falls nicht vorhanden                                                 |
-| PostgreSQL extern | `externalPostgresql.existingSecret`                               | `externalPostgresql.existingSecretPasswordKey`                                                          | ✗ Nein                                                                  |
-| Redis intern      | `redis.auth.existingSecret`                                       | `redis.auth.existingSecretPasswordKey`                                                                  | – Falls nicht vorhanden                                                 |
-| Redis extern      | `externalRedis.existingSecret`                                    | `externalRedis.existingSecretPasswordKey`                                                               | ✗ Nein                                                                  |
-| MAS               | `"RELEASE-NAME-bundesmessenger-matrix-authentication-service"`    | `"mas-secret.yaml"`                                                                                     | ✓ Falls `mas.enabled`                                                   |
-| Call              | `call.existingSecret`                                             | `call.secretKeys.livekitKey`, `call.secretKeys.livekitSecret`                                           | ✓ Falls `call.enabled`                                                  |
-| Sygnal            | `"matrix-sygnal"`                                                 | `"sygnal.yaml"`                                                                                         | ✓ Falls `sygnal.enabled`                                                |
-| Sygnal            | `sygnal.existingSecret`                                           | `sygnal.ioskey_filename`, `sygnal.fcmkey_filename`                                                      | ✓ Falls `sygnal.enabled` und `sygnal.{ioskey,fcmkey}_filename` gesetzt  |
+| Komponente | Name des Secrets | Schlüssel | Automatisch erstellt |
+| --- | --- | --- | --- |
+| Hauptkomponente | `"RELEASE-NAME-bundesmessenger"` | `"config.yaml"`, `"experimental-features.yaml"` | ✓ Ja |
+| Hauptkomponente | `config.*.existingSecret` | `"registration-shared-secret"`, `"macaroon-secret-key"`, `"form-secret"`, `"worker-replication-secret"` | – Falls nicht vorhanden |
+| Signing-Key-Job | `signingkey.existingSecret` | `"signing.key"` | ✗ Nein |
+| Signing-Key-Job | `"RELEASE-NAME-bundesmessenger-signingkey"` | `"signing.key"` | ✓ Falls `signingkey.job.enabled` |
+| PostgreSQL intern | `postgresql.auth.existingSecret` | `postgresql.auth.secretKeys.adminPasswordKey` | – Falls nicht vorhanden |
+| PostgreSQL intern | `postgresql.customUser.existingSecret` | `postgresql.customUser.secretKeys.username`, `postgresql.customUser.secretKeys.database`, `postgresql.customUser.secretKeys.password` | – Falls nicht vorhanden |
+| PostgreSQL extern | `externalPostgresql.existingSecret` | `externalPostgresql.existingSecretPasswordKey` | ✗ Nein |
+| Redis intern | `redis.auth.existingSecret` | `redis.auth.existingSecretPasswordKey` | – Falls nicht vorhanden |
+| Redis extern | `externalRedis.existingSecret` | `externalRedis.existingSecretPasswordKey` | ✗ Nein |
+| MAS | `"RELEASE-NAME-bundesmessenger-matrix-authentication-service"` | `"mas-secret.yaml"` | ✓ Falls `mas.enabled` |
+| MAS PostgreSQL intern | `maspostgresql.auth.existingSecret` | `maspostgresql.auth.secretKeys.adminPasswordKey` | – Falls nicht vorhanden |
+| MAS PostgreSQL intern | `maspostgresql.customUser.existingSecret` | `maspostgresql.customUser.secretKeys.username`, `maspostgresql.customUser.secretKeys.database`, `maspostgresql.customUser.secretKeys.password` | – Falls nicht vorhanden |
+| MAS PostgreSQL extern | `externalmasPostgresql.existingSecret` | `externalmasPostgresql.existingSecretPasswordKey` | ✗ Nein |
+| Call | `call.existingSecret` | `call.secretKeys.livekitKey`, `call.secretKeys.livekitSecret` | ✓ Falls `call.enabled` |
+| Sygnal | `"matrix-sygnal"` | `"sygnal.yaml"` | ✓ Falls `sygnal.enabled` |
+| Sygnal | `sygnal.existingSecret` | `sygnal.ioskey_filename`, `sygnal.fcmkey_filename` | ✓ Falls `sygnal.enabled` und `sygnal.{ioskey,fcmkey}_filename` gesetzt |
 
 ### Legende
 

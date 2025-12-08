@@ -291,7 +291,7 @@ PostgreSQL port.
 {{- end -}}
 
 {{/*
-Set postgresql username
+Set PostgreSQL username
 */}}
 {{- define "matrix-synapse.postgresql.username" -}}
 {{- if .Values.postgresql.enabled -}}
@@ -311,9 +311,9 @@ Set postgresql username
     )}}
   {{- end }}
 
-  {{- required 
+  {{- required
       "A valid postgresql.customUser.username is required"
-      .Values.postgresql.customUser.username 
+      .Values.postgresql.customUser.username
   }}
 {{- else -}}
   {{- required
@@ -358,7 +358,7 @@ Key to the password contained in the PostgreSQL Secret.
 {{- end -}}
 
 {{/*
-Set postgresql database
+Set PostgreSQL database
 */}}
 {{- define "matrix-synapse.postgresql.database" -}}
 {{- if .Values.postgresql.enabled -}}
@@ -445,12 +445,12 @@ Name of the Secret containing the Redis password.
 */}}
 {{- define "matrix-synapse.redis.secret-name" -}}
 {{- if .Values.redis.enabled }}
-  {{- required 
+  {{- required
     "auth.existingSecret must be the name of a Secret"
     .Values.redis.auth.existingSecret
   }}
 {{- else }}
-  {{- required 
+  {{- required
     "externalRedis.existingSecret must be the name of a Secret"
     .Values.externalRedis.existingSecret
   }}
@@ -482,9 +482,9 @@ Set synapse_admin uri
     {{- if .Values.synapse_admin.uri -}}
 {{- .Values.synapse_admin.uri -}}
     {{- else }}
-{{- required 
-  "A valid URI for the synapse Admin webGUI (synapse_admin.uri) is required." 
-  .Values.synapse_admin.uri 
+{{- required
+  "A valid URI for the synapse Admin webGUI (synapse_admin.uri) is required."
+  .Values.synapse_admin.uri
 -}}
     {{- end -}}
   {{- end -}}
@@ -495,13 +495,13 @@ Check networkpolicy requirements TBD CHECK POSTGRES
 */}}
 {{- if .Values.networkpolicies.enabled }}
   {{- if not .Values.postgresql.enabled -}}
-    {{- required 
-      "A host from the external Postgres instance (externalPostgresql.host) is required." 
+    {{- required
+      "A host from the external Postgres instance (externalPostgresql.host) is required."
       .Values.externalPostgresql.host -}}
   {{- end }}
   {{- if not .Values.redis.enabled -}}
-    {{- required 
-      "A host from the external redis instance (externalRedis.host) is required." 
+    {{- required
+      "A host from the external redis instance (externalRedis.host) is required."
       .Values.externalRedis.host -}}
   {{- end }}
 {{- end }}
@@ -513,13 +513,19 @@ https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS
 */}}
 {{- define "matrix-synapse.maspostgresql.uri" -}}
 {{- $argsPercentEncoded := list }}
-{{- range $k, $v := .Values.mas.postgresql.extraArgs }}
-  {{- $arg := printf "%s=%s" (urlquery $k) (urlquery $v) }}
-  {{- $argsPercentEncoded = append $argsPercentEncoded $arg }}
+{{- if .Values.maspostgresql.enabled }}
+  {{- range $k, $v := .Values.maspostgresql.extraArgs }}
+    {{- $arg := printf "%s=%s" (urlquery $k) (urlquery $v) }}
+    {{- $argsPercentEncoded = append $argsPercentEncoded $arg }}
+  {{- end }}
+{{- else }}
+{{- range $k, $v := .Values.externalmasPostgresql.extraArgs }}
+    {{- $arg := printf "%s=%s" (urlquery $k) (urlquery $v) }}
+    {{- $argsPercentEncoded = append $argsPercentEncoded $arg }}
+  {{- end }}
 {{- end }}
-{{- printf "postgresql://%s:%s@%s:%s/%s?%s"
+{{- printf "postgresql://%s:POSTGRES_PASS@%s:%s/%s?%s"
   (urlquery (include "matrix-synapse.maspostgresql.username" .))
-  (urlquery (include "matrix-synapse.maspostgresql.password" .))
   (include "matrix-synapse.maspostgresql.host" .)
   (include "matrix-synapse.maspostgresql.port" .)
   (urlquery (include "matrix-synapse.maspostgresql.database" .))
@@ -528,39 +534,135 @@ https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS
 {{- end -}}
 
 {{/*
-Set MAS postgresql username
+Set MAS PostgreSQL username
 */}}
 {{- define "matrix-synapse.maspostgresql.username" -}}
-  {{- if .Values.mas.enabled -}}
-{{- .Values.mas.postgresql.username | default "mas-synapse" }}
+{{- if .Values.mas.enabled -}}
+  {{- if .Values.maspostgresql.enabled -}}
+    {{- /* MAS can’t read the username from file while the subchart can’t read
+    it from configuration. As a consequence, we require both to be given and
+    matching. The check below asserts that requirement. */}}
+    {{- $inlineValue := .Values.maspostgresql.customUser.username }}
+    {{- $secretName := .Values.maspostgresql.customUser.existingSecret }}
+    {{- $secretKey := .Values.maspostgresql.customUser.secretKeys.name }}
+    {{- $existingSecret := lookup "v1" "Secret" .Release.Namespace $secretName }}
+    {{- $existingValue := dig "data" $secretKey "" $existingSecret | b64dec }}
+    {{- if and $existingSecret (ne $existingValue $inlineValue) }}
+      {{- fail (print
+        "The username in `maspostgresql.customUser.username` (" $inlineValue ") and "
+        "the username in Secret `" $secretName "` under key `" $secretKey "` ("
+        $existingValue ") must be matching."
+      )}}
+    {{- end }}
+
+    {{- required
+        "A valid maspostgresql.customUser.username is required"
+        .Values.maspostgresql.customUser.username
+    }}
+  {{- else -}}
+    {{- required
+        "A valid externalmasPostgresql.username is required"
+        .Values.externalmasPostgresql.username
+    }}
   {{- end -}}
+{{- end -}}
 {{- end -}}
 
 {{/*
-Set MAS postgresql password
+Name of the Secret containing the MAS-PostgreSQL password.
 */}}
-{{- define "matrix-synapse.maspostgresql.password" -}}
-  {{- if .Values.mas.enabled -}}
-{{- .Values.mas.postgresql.password | default "mas-synapse" }}
-  {{- end -}}
+{{- define "matrix-synapse.maspostgresql.secret-name" -}}
+{{- if .Values.mas.enabled -}}
+  {{- if .Values.maspostgresql.enabled }}
+    {{- .Values.maspostgresql.customUser.existingSecret | required (print
+      "A valid maspostgresql.customUser.existingSecret as name of the secret "
+      "containing the PostgreSQL credentials must be set."
+    )}}
+  {{- else }}
+    {{- .Values.externalmasPostgresql.existingSecret | required (print
+      "A valid externalmasPostgresql.existingSecret as name of the secret "
+      "containing the PostgreSQL credentials must be set."
+    )}}
+  {{- end }}
+{{- end }}
 {{- end -}}
 
 {{/*
-Set MAS postgresql database
+Key to the password contained in the MAS-PostgreSQL Secret.
+*/}}
+{{- define "matrix-synapse.maspostgresql.secret-key" -}}
+{{- if .Values.mas.enabled -}}
+  {{- if .Values.maspostgresql.enabled }}
+    {{- required
+      "To use a Secret for PostgreSQL, maspostgresql.customUser.secretKeys.password is required"
+      .Values.maspostgresql.customUser.secretKeys.password
+    }}
+  {{- else }}
+    {{- required
+      "To use a Secret for PostgreSQL, externalmasPostgresql.existingSecretPasswordKey is required"
+      .Values.externalmasPostgresql.existingSecretPasswordKey
+    }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Set MAS PostgreSQL database
 */}}
 {{- define "matrix-synapse.maspostgresql.database" -}}
-  {{- if .Values.mas.enabled -}}
-{{- .Values.mas.postgresql.database | default "mas-synapse" }}
-  {{- end -}}
+{{- if .Values.mas.enabled -}}
+  {{- if .Values.maspostgresql.enabled -}}
+    {{- /* MAS can’t read the database name from file while the subchart can’t
+    read it from configuration. As a consequence, we require both to be given and
+    matching. The check below asserts that requirement. */}}
+    {{- $inlineValue := .Values.maspostgresql.customUser.database }}
+    {{- $secretName := .Values.maspostgresql.customUser.existingSecret }}
+    {{- $secretKey := .Values.maspostgresql.customUser.secretKeys.database }}
+    {{- $existingSecret := lookup "v1" "Secret" .Release.Namespace $secretName }}
+    {{- $existingValue := dig "data" $secretKey "" $existingSecret | b64dec }}
+    {{- if and $existingSecret (ne $existingValue $inlineValue) }}
+      {{- fail (print
+        "The database name in `maspostgresql.customUser.database` (" $inlineValue
+        ") and the database name in Secret `" $secretName "` under key `"
+        $secretKey "` (" $existingValue ") must be matching."
+      )}}
+    {{- end }}
+
+    {{- required
+      "A valid maspostgresql.customUser.database is required"
+      .Values.maspostgresql.customUser.database
+    }}
+  {{- else -}}
+    {{- required
+      "A valid externalmasPostgresql.database is required"
+      .Values.externalmasPostgresql.database
+    }}
+  {{- end }}
+{{- end }}
 {{- end -}}
 
 {{/*
-Set MAS postgres host
+Create a default fully qualified app name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "matrix-synapse.maspostgresql.fullname" -}}
+{{- printf "%s-%s" .Release.Name "maspostgresql" | trunc 63 | trimSuffix "-" }}
+{{- end -}}
+
+{{/*
+Set MAS PostgreSQL host.
 */}}
 {{- define "matrix-synapse.maspostgresql.host" -}}
-  {{- if .Values.mas.enabled -}}
-{{- .Values.mas.postgresql.host | default ( include "matrix-synapse.postgresql.host" . ) -}}
-  {{- end -}}
+{{- if .Values.mas.enabled -}}
+  {{- if .Values.maspostgresql.enabled }}
+    {{- template "matrix-synapse.maspostgresql.fullname" . }}
+  {{- else }}
+  {{- required
+    "A valid externalPostgresql.host is required"
+    .Values.externalmasPostgresql.host
+  }}
+  {{- end }}
+{{- end }}
 {{- end -}}
 
 {{/*
@@ -570,7 +672,109 @@ Defaults to `matrix-synapse.postgresql.port`.
 */}}
 {{- define "matrix-synapse.maspostgresql.port" -}}
 {{- if .Values.mas.enabled -}}
-  {{- .Values.mas.postgresql.port | default (include "matrix-synapse.postgresql.port" .) -}}
+  {{- if .Values.maspostgresql.enabled }}
+    {{- required
+      "A valid PostgreSQL port at maspostgresql.service.port is required"
+      .Values.maspostgresql.service.port
+    }}
+  {{- else }}
+    {{- required
+      "A valid externalmasPostgresql.port is required"
+      .Values.externalmasPostgresql.port
+    }}
+  {{- end }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set MAS PostgreSQL min_connections
+*/}}
+{{- define "matrix-synapse.maspostgresql.min_connections" -}}
+{{- if .Values.mas.enabled -}}
+  {{- if .Values.maspostgresql.enabled -}}
+    {{- .Values.maspostgresql.min_connections | default "0" }}
+  {{- else }}
+    {{- required
+        "A valid externalmasPostgresql.min_connections is required"
+        .Values.externalmasPostgresql.min_connections
+    }}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set MAS PostgreSQL max_connections
+*/}}
+{{- define "matrix-synapse.maspostgresql.max_connections" -}}
+{{- if .Values.mas.enabled -}}
+  {{- if .Values.maspostgresql.enabled -}}
+    {{- .Values.maspostgresql.max_connections | default "10" }}
+  {{- else }}
+    {{- required
+        "A valid externalmasPostgresql.max_connections is required"
+        .Values.externalmasPostgresql.max_connections
+    }}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set MAS PostgreSQL connect_timeout
+*/}}
+{{- define "matrix-synapse.maspostgresql.connect_timeout" -}}
+{{- if .Values.mas.enabled -}}
+  {{- if .Values.maspostgresql.enabled -}}
+    {{- .Values.maspostgresql.connect_timeout | default "30" }}
+  {{- else }}
+    {{- required
+        "A valid externalmasPostgresql.connect_timeout is required"
+        .Values.externalmasPostgresql.connect_timeout
+    }}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set MAS PostgreSQL idle_timeout
+*/}}
+{{- define "matrix-synapse.maspostgresql.idle_timeout" -}}
+{{- if .Values.mas.enabled -}}
+  {{- if .Values.maspostgresql.enabled -}}
+    {{- .Values.maspostgresql.idle_timeout | default "600" }}
+  {{- else }}
+    {{- required
+        "A valid externalmasPostgresql.idle_timeout is required"
+        .Values.externalmasPostgresql.idle_timeout
+    }}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Set MAS PostgreSQL max_lifetime
+*/}}
+{{- define "matrix-synapse.maspostgresql.max_lifetime" -}}
+{{- if .Values.mas.enabled -}}
+  {{- if .Values.maspostgresql.enabled -}}
+    {{- .Values.maspostgresql.max_lifetime | default "1800" }}
+  {{- else }}
+    {{- required
+        "A valid externalmasPostgresql.max_lifetime is required"
+        .Values.externalmasPostgresql.max_lifetime
+    }}
+  {{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{- /*
+Wählt automatisch die korrekten extraArgs – abhängig davon,
+ob der interne PostgreSQL genutzt wird oder der externe.
+*/ -}}
+{{- define "maspostgresql.extraArgs" -}}
+{{- if .Values.maspostgresql.enabled -}}
+{{- toYaml .Values.maspostgresql.extraArgs | nindent 0 -}}
+{{- else -}}
+{{- toYaml .Values.externalmasPostgresql.extraArgs | nindent 0 -}}
 {{- end -}}
 {{- end -}}
 

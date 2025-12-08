@@ -1525,56 +1525,24 @@ confighub:
   # (map) Affinitäts-Konfiguration für confighub.
   affinity: {}
 
-
 ######################################################################################
-##          Konfiguration des internen PostgreSQL-Servers
+##          Konfiguration des PostgreSQL-Defaults zur Wiederverwendung
 ######################################################################################
 ## Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und
 ## schnelle Möglichkeit, Demo- und Testsysteme des BundesMessengers aufzusetzen.
-## Nicht empfohlen ist die Aktivierung für Produktivsysteme.
-##
-## Empfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen
-## Sie `postgresql.enabled` auf `false` und konfigurieren Sie den
-## `externalPostgresql`-Block.
 
-postgresql:
-  # (bool) Aktivieren des internen PostgreSQL-Servers.
-  # Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern
-  # vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled`
-  # auf `false` und konfigurieren Sie den `externalPostgresql`-Block.
-  enabled: false
-
-  # (map) Das zu verwendende PostgreSQL-Container-Abbild.
+x-defaultPostgresqlCommon: &postgresDefaults
+# (map) Das zu verwendende PostgreSQL-Container-Abbild.
   image:
     registry: docker.io
     repository: postgres
     tag: "18"
+
     # (list) Liste von Kubernetes Pull-Secrets.
     # Beispiel:
     # pullSecrets: ["myRegistryKeySecretName"]
     pullSecrets: []
     pullPolicy: IfNotPresent
-
-  # (map) Konfiguration des Synapse Datenbanknutzers.
-  customUser:
-    # (string) Name vom Datenbanknutzer.
-    # Muss mit der Angabe im `existingSecret` übereinstimmen.
-    username: synapse
-    # (string) Name der Datenbank.
-    # Muss mit der Angabe im `existingSecret` übereinstimmen.
-    database: synapse_db
-    # (string) Name vom Secret mit dem Passwort des Synapse Datenbanknutzers.
-    # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen
-    # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
-    existingSecret: postgresql
-    # (map) Schlüssel im angegebenen Secret.
-    secretKeys:
-      # (string) Verweis im `existingSecret` auf den Namen des Datenbanknutzers.
-      name: username
-      # (string) Verweis im `existingSecret` auf den Namen der Datenbank.
-      database: database
-      # (string) Verweis im `existingSecret` auf das Nutzerpasswort.
-      password: password
 
   # (map) Konfiguration des Adminnutzers.
   auth:
@@ -1595,25 +1563,6 @@ postgresql:
     port: 5432
     # (integer) Interner Port des PostgreSQL-Containers.
     targetPort: 5432
-
-  # (map) Initialisierung der Datenbank.
-  initdb:
-    # (string) Extra Argumente zur Initialisierung der Datenbank
-    args: "--lc-collate=C --lc-ctype=C --encoding=UTF8"
-    # (map) Zusätzliche Initialisierungsskripte.
-    scripts: {}
-      # (string) Wiederherstellen der Datenbank nach einem Upgrade.
-      # Das Skript wird genau dann ausgeführt, wenn die Datenbank noch nicht
-      # initialisiert ist und die Datei `/major-upgrade-dump/upgrade-to-18.sql`
-      # existiert.
-      # 05-reinit.sh: |
-      #   #!/bin/sh
-      #   set -e
-      #   BACKUP_FILE=/major-upgrade-dump/upgrade-to-18.sql
-      #   [ -f "$BACKUP_FILE" ] || exit 0
-      #   echo "Re-importing Synapse database…"
-      #   psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" < "$BACKUP_FILE"
-      #   echo "✅ Successfully re-imported Synapse database!"
 
   # (list) Extra Volumes.
   # Kann zusammen mit `extraVolumeMounts` zum Wiedereinspielen einer Sicherung
@@ -1664,11 +1613,58 @@ postgresql:
       memory: 256Mi
 
   # (map) Zusätzliche Argumente für die Datenbankverbindung.
-  # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+  # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
   extraArgs:
-    # Verwendeter SSL-Modus.
+    # -- (string) Verwendeter SSL-Modus.
     # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
     sslmode: prefer
+    # sslrootcert: /path/to/ca.pem
+    # sslcert: /path/to/cert.pem
+    # sslkey: /path/to/key.pem
+
+######################################################################################
+##          Konfiguration der internen PostgreSQL-Server
+######################################################################################
+## Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und
+## schnelle Möglichkeit, Demo- und Testsysteme des BundesMessengers aufzusetzen.
+## Nicht empfohlen ist die Aktivierung für Produktivsysteme.
+##
+## Empfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen
+## Sie `postgresql.enabled` auf `false` und konfigurieren Sie den
+## `externalPostgresql`-Block.
+
+postgresql:
+  <<: *postgresDefaults
+  # (bool) Aktivieren des internen PostgreSQL-Servers.
+  # Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern
+  # vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled`
+  # auf `false` und konfigurieren Sie den `externalPostgresql`-Block.
+  enabled: false
+
+  # (map) Konfiguration des Synapse Datenbanknutzers.
+  customUser:
+    # (string) Name vom Datenbanknutzer.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
+    username: synapse
+    # (string) Name der Datenbank.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
+    database: synapse_db
+    # (string) Name vom Secret mit dem Passwort des Synapse Datenbanknutzers.
+    # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen
+    # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
+    existingSecret: postgresql
+    # (map) Schlüssel im angegebenen Secret.
+    secretKeys:
+      # (string) Verweis im `existingSecret` auf den Namen des Datenbanknutzers.
+      name: username
+      # (string) Verweis im `existingSecret` auf den Namen der Datenbank.
+      database: database
+      # (string) Verweis im `existingSecret` auf das Nutzerpasswort.
+      password: password
+
+  initdb:
+    # (string) Extra Argumente zur Initialisierung der Datenbank
+    args: "--lc-collate=C --lc-ctype=C --encoding=UTF8"
 
 # (map) Extern konfigurierter PostgreSQL-Server.
 # Wird für die Datenbank von Synapse verwendet.
@@ -1940,35 +1936,6 @@ mas:
   # Eine URI ist dringend ratsam, damit der Dienst routing-technisch getrennt ist.
   # Ein stabiles Deployment ohne eigene URI wurde bisher nicht erprobt.
   uri: ""
-  # (map) Zugangsdaten für die benötigte PostreSQL-Datenbank.
-  # Diese wird nicht automatisch angelegt und muss bereit gestellt werden.
-  # https://element-hq.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
-  postgresql:
-    # (string|null) Host für PostgreSQL-DB von MAS.
-    # Falls ungesetzt, wird die Haupt-PostgreSQL-Instanz verwendet.
-    # host: masdb.example.org
-    # (integer) Port für PostgreSQL-DB von MAS.
-    port: 5432
-    # (string) DB-Name für PostgreSQL-DB von MAS.
-    database: mas_synapse
-    # (string) Nutzername für PostgreSQL-DB von MAS.
-    username: massynapse
-    # (string) Password für PostgreSQL Nutzer von MAS.
-    password: mas-synapse
-    min_connections: 0
-    max_connections: 10
-    connect_timeout: 30
-    idle_timeout: 600
-    max_lifetime: 1800
-    # (map) Zusätzliche Argumente für die MAS Datenbankverbindung.
-    # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-    extraArgs:
-      # -- (string) Verwendeter SSL-Modus.
-      # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
-      sslmode: prefer
-      # sslrootcert: /path/to/ca.pem
-      # sslcert: /path/to/cert.pem
-      # sslkey: /path/to/key.pem
 
   # (map) MAS Cookie- und Datenbankschlüssel.
   # Der Schlüssel wird als hexadezimale Zeichenkette eingelesen und besteht aus
@@ -2139,6 +2106,78 @@ mas:
       # DEFAULT gilt für alle Synapse-Worker-Container.
       port: health
 
+######################################################################################
+##          Datenbank Konfiguration für Matrix-Authentication-Service
+######################################################################################
+## Empfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen
+## Sie `externalmasPostgresql.enabled` auf `false` und konfigurieren Sie den
+## `externalPostgresql`-Block.
+  # https://element-hq.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
+maspostgresql:
+  <<: *postgresDefaults
+  # (bool) Aktivieren des internen PostgreSQL-Servers für MAS.
+  # Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern
+  # vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `maspostgresql.enabled`
+  # auf `false` und konfigurieren Sie den `externalmasPostgresql`-Block.
+  enabled: false
+
+  # (map) Konfiguration des Synapse Datenbanknutzers.
+  customUser:
+    # (string) Name vom Datenbanknutzer.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
+    username: mas
+    # (string) Name der Datenbank.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
+    database: mas_synapse
+    # (string) Name vom Secret mit dem Passwort des Synapse Datenbanknutzers.
+    # Ist `maspostgresql.enabled` und es existiert kein Secret mit dem angegebenen
+    # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
+    existingSecret: postgresql
+    # (map) Schlüssel im angegebenen Secret.
+    secretKeys:
+      # (string) Verweis im `existingSecret` auf den Namen des Datenbanknutzers.
+      name: masusername
+      # (string) Verweis im `existingSecret` auf den Namen der Datenbank.
+      database: masdatabase
+      # (string) Verweis im `existingSecret` auf das Nutzerpasswort.
+      password: maspassword
+
+  min_connections: 0
+  max_connections: 10
+  connect_timeout: 30
+  idle_timeout: 600
+  max_lifetime: 1800
+
+externalmasPostgresql:
+  # (string) Hostname vom externen PostgreSQL-Server.
+  # Beispieladresse für einen K8s-internen PostgreSQL im Namespace `postgres`:
+  host: postgres-4-matrix-postgresql.postgres.svc.cluster.local
+  # (integer) Port vom externen PostgreSQL-Server.
+  port: 5432
+  # (string) Name der zu verwendenden PostgreSQL-Datenbank.
+  database: mas_synapse
+
+  # (string) Name des PostgreSQL-Nutzers.
+  username: mas
+
+  # (string) Name vom Secret mit dem PostgreSQL-Passwort.
+  existingSecret: postgresql
+
+  # (string) Verweis im `existingSecret` auf das PostgreSQL-Passwort.
+  existingSecretPasswordKey: maspassword
+
+  # (map) Zusätzliche Argumente für die Datenbankverbindung.
+  # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+  extraArgs:
+    # -- (string) Verwendeter SSL-Modus.
+    # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+    sslmode: prefer
+
+  min_connections: 0
+  max_connections: 10
+  connect_timeout: 30
+  idle_timeout: 600
+  max_lifetime: 1800
 
 ######################################################################################
 ##          Konfiguration für Matrix-Content-Scanner (MCS)
@@ -2850,10 +2889,24 @@ networkpolicies:
     # (map) Labels zum Adressieren der PostgreSQL-Instanz.
     # Sollten die Labels bei einer eigens betriebenen Instanz abweichen, kann
     # dies hier angepasst werden.
-    # Achtung: Auf Grund des Verhaltens von Helm, muss der Stansardwert, wenn er nicht benötigt wird
+    # Achtung: Auf Grund des Verhaltens von Helm, muss der Standardwert, wenn er nicht benötigt wird
     # explizit deaktiviert werden: `app.kubernetes.io/name: null`
     selectorLabels:
       app.kubernetes.io/name: postgresql
+
+  # Wird gesetzt wenn sich die Postgres Instanz ausserhalb des Kubernetes Cluster befindet.
+  # Da Network Policies keine Hostnames auflösen können, wird eine IP benötigt.
+  maspostgresql:
+    # bei dem Einsatz einer MAS Postgres Instanz, welche sich außerhalb des Kubernetes Clusters
+    # befindet, muss hier eine einzelne IP Adresse angegeben werden.
+    externalPostgresIP: ""
+    # (map) Labels zum Adressieren der MAS PostgreSQL-Instanz.
+    # Sollten die Labels bei einer eigens betriebenen Instanz abweichen, kann
+    # dies hier angepasst werden.
+    # Achtung: Auf Grund des Verhaltens von Helm, muss der Standardwert, wenn er nicht benötigt wird
+    # explizit deaktiviert werden: `app.kubernetes.io/name: null`
+    selectorLabels:
+      app.kubernetes.io/name: maspostgresql
 
   # (map) HTTP-Resolver für ACME/Let’s Encrypt.
   # Erlaubt die Kommunikation vom Ingress zum hier angegebenen Endpunkt (Pod + Port).
