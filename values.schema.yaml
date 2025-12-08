@@ -1168,7 +1168,7 @@ properties:
                 title: >-
                   Anforderungen an RAM Ressourcen, die auf den
                   Haupt-Synapse-Container anzuwenden sind.
-                default: 1000Mi
+                default: 500Mi
         unevaluatedProperties: false
       livenessProbe:
         $ref: >-
@@ -2047,7 +2047,7 @@ properties:
                 title: >-
                   Anforderungen an RAM Ressourcen, die auf den Sygnal-Container
                   anzuwenden sind
-                default: 45Mi
+                default: 50Mi
         unevaluatedProperties: false
       livenessProbe:
         $ref: >-
@@ -3110,7 +3110,7 @@ properties:
               memory:
                 title: >-
                   Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind
-                default: 256Mi
+                default: 128Mi
         unevaluatedProperties: true
     required:
       - enabled
@@ -3957,7 +3957,7 @@ properties:
                 title: >-
                   RAM Ressourcengrenzen, die auf den
                   Matrix-Content-Scanner-Container anzuwenden sind
-                default: 1Gi
+                default: 500Mi
           requests:
             properties:
               cpu:
@@ -3969,7 +3969,7 @@ properties:
                 title: >-
                   Anforderungen an RAM Ressourcen, die auf den
                   Matrix-Content-Scanner-Container anzuwenden sind
-                default: 500Mi
+                default: 50Mi
         unevaluatedProperties: false
       podSecurityContext:
         $ref: "#/$defs/podSecurityContext"
@@ -4168,7 +4168,7 @@ properties:
                 title: >-
                   Anforderungen an RAM Ressourcen, die auf den ClamAV-Container
                   anzuwenden sind
-                default: 2Gi
+                default: 1.5Gi
         unevaluatedProperties: false
       resourcesCicap:
         $ref: >-
@@ -4648,7 +4648,7 @@ properties:
               memory:
                 title: >-
                   RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind
-                default: 100Mi
+                default: 50Mi
           requests:
             properties:
               cpu:
@@ -4660,7 +4660,7 @@ properties:
                 title: >-
                   Anforderungen an RAM Ressourcen, die auf den webclient-server
                   anzuwenden sind
-                default: 45Mi
+                default: 15Mi
         unevaluatedProperties: false
       podSecurityContext:
         $ref: "#/$defs/podSecurityContext"

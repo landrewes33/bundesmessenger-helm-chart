@@ -635,7 +635,7 @@ synapse:
       # (string) Anforderungen an Rechenressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
       cpu: 500m
       # (string) Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
-      memory: 1000Mi
+      memory: 500Mi
 
   ## Healthcheck
   livenessProbe:
@@ -1257,7 +1257,7 @@ sygnal:
       # (string) Anforderungen an Rechenressourcen, die auf den Sygnal-Container anzuwenden sind.
       cpu: 150m
       # (string) Anforderungen an RAM Ressourcen, die auf den Sygnal-Container anzuwenden sind.
-      memory: 45Mi
+      memory: 50Mi
 
   ## Healthcheck
   livenessProbe:
@@ -1777,7 +1777,7 @@ redis:
       # (string) Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind.
       cpu: 300m
       # (string) Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind.
-      memory: 256Mi
+      memory: 128Mi
 
 # (map) Extern konfigurierter Redis-Server.
 # Wird nur verwendet, wenn `redis.enabled: false` ist.
@@ -2229,12 +2229,12 @@ contentscanner:
       # (string) Rechenressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
       cpu: 500m
       # (string) RAM Ressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
-      memory: 1Gi
+      memory: 500Mi
     requests:
       # (string) Anforderungen an Rechenressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
       cpu: 300m
       # (string) Anforderungen an RAM Ressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
-      memory: 500Mi
+      memory: 50Mi
 
 
   # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
@@ -2352,7 +2352,7 @@ schadcodescanner:
       # (string) Anforderungen an Rechenressourcen, die auf den ClamAV-Container anzuwenden sind.
       cpu: 300m
       # (string) Anforderungen an RAM Ressourcen, die auf den ClamAV-Container anzuwenden sind.
-      memory: 2Gi
+      memory: 1.5Gi
 
   resourcesCicap:
     limits:
@@ -2589,12 +2589,12 @@ webclient:
       # (string) Rechenressourcengrenzen, die auf den webclient-server anzuwenden sind.
       cpu: 150m
       # (string) RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind.
-      memory: 100Mi
+      memory: 50Mi
     requests:
       # (string) Anforderungen an Rechenressourcen, die auf den webclient-server anzuwenden sind.
       cpu: 50m
       # (string) Anforderungen an RAM Ressourcen, die auf den webclient-server anzuwenden sind.
-      memory: 45Mi
+      memory: 15Mi
 
 
 ######################################################################################
