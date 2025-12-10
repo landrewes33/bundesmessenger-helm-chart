@@ -276,7 +276,8 @@ Anschließend kann das neue Release deployed werden.
 > `postgresql.image.tag` die **neue** Version angegeben ist.
 
 ```sh
-helm upgrade --install <RELEASE> . \
+helm upgrade --install <RELEASE> \
+  oci://registry.opencode.de/bwi/bundesmessenger/backend/helm-chart/bundesmessenger \
   -n <NAMESPACE> \
   -f values.yaml \
   -f maintenance-mode.yaml \
