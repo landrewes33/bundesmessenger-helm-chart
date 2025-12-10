@@ -128,5 +128,12 @@ spec:
       ports:
       - protocol: TCP
         port: 8081
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: adminportal-synapse-core
+      ports:
+      - protocol: TCP
+        port: 8081
 {{- end }}
 {{- end }}

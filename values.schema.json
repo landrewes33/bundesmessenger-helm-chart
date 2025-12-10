@@ -4704,6 +4704,11 @@
           "title": "URI für das Admin-Portal, zwingend notwendig",
           "default": null
         },
+        "clientID": {
+          "type": "string",
+          "title": "Client ID im ulid Format",
+          "default": "01KBJDJMZJ3K1XCHQ81T4Q17QD"
+        },
         "TLSverify": {
           "type": "boolean",
           "title": "Aktivieren der TLS Zertifikatsüberprüfung",
@@ -4940,6 +4945,7 @@
         "extraVolumes",
         "extraVolumeMounts",
         "uri",
+        "clientID",
         "TLSverify",
         "logLevel",
         "coreImage",
