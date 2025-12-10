@@ -5,7 +5,9 @@ templates:
   - adminportal/adminportal-deployment.yaml
   - adminportal/adminportal-configuration.yaml
   - nginx-conf.yaml
+  - secrets.yaml
 set:
+  mas.enabled: true
   adminPortal:
     uri: adminportal.example.com
 tests:

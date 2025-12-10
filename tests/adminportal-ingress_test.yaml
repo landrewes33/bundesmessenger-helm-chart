@@ -3,10 +3,13 @@
 suite: Admin Portal Ingress
 templates:
   - adminportal/adminportal-ingress.yaml
+  - secrets.yaml
 set:
   adminAPIServerName: admin-api.example.org
+  mas.enabled: true
 tests:
   - it: ensures an Ingress if enabled
+    template: adminportal/adminportal-ingress.yaml
     set:
       ingress.enabled: true
       adminPortal:
@@ -19,6 +22,7 @@ tests:
           name: RELEASE-NAME-adminportal
           any: true
   - it: ensures no Ingress if disabled
+    template: adminportal/adminportal-ingress.yaml
     set:
       ingress.enabled: false
     asserts:

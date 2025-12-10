@@ -2504,9 +2504,15 @@ synapse_admin:
 
 adminPortal:
   # (bool) Aktivieren des Admin-Portal-Moduls
+  # Hierfür ist auch der MAS erforderlich (`mas.enabled: true`).
+  # Ref: ./docs/matrix-authentication-service.md
   enabled: false
   # (string) URI für das Admin-Portal, zwingend notwendig
   uri: ""
+  # (string) Client ID im ulid Format
+  # Die Client ID verwendet das Admin Portal zur Authentifizierung am MAS.
+  # Ref: https://github.com/ulid/spec
+  clientID: "01KBJDJMZJ3K1XCHQ81T4Q17QD"
   # (bool) Aktivieren der TLS Zertifikatsüberprüfung
   TLSverify: true
   # (string) LogLevel Core-Komponente
@@ -2515,14 +2521,14 @@ adminPortal:
   coreImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bumap-core
-    tag: 1.1.0-jammy-production
+    tag: 2.1.0-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
   # (map) Konfiguration des Image vom UI-Modul
   uiImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bumap-ui
-    tag: 1.1.0-jammy-production
+    tag: 2.1.0-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 

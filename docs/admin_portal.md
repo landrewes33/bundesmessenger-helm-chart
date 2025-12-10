@@ -7,6 +7,9 @@ mit dem Helm Chart installiert werden.
 | :pushpin: BundesMessenger Admin-Portal wird in Zukunft [Synapse-Admin](./synapse_admin.md) ablösen. |
 | --- |
 
+| :pushpin: BundesMessenger Admin-Portal erfordert den [MAS](./matrix-authentication-service.md) und die Migration der Benutzerverwaltung von Synapse zum MAS. |
+| --- |
+
 In dem folgenden Beispiel wird zusätzlich zur Synapse-Installation BundesMessenger
 
 - das BundesMessenger Admin-Portal aktiviert (`adminPortal.enabled=true`),
