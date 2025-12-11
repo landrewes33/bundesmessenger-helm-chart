@@ -327,8 +327,8 @@ helm upgrade <RELEASE> \
   -f values.yaml
 ```
 
-:pushpin: Hinweis: Das Volume mit dem SQL-Dump bleibt bis zu einem Neustart des Deployments
-am aktuell laufenden Pod des PostgreSQL-Servers eingehängt.
+:pushpin: Hinweis: Das Volume mit dem SQL-Dump bleibt bis zu einem Neustart des
+Deployments am aktuell laufenden Pod des PostgreSQL-Servers eingehängt.
 
 ---
 
