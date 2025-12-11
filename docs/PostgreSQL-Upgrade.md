@@ -31,8 +31,8 @@ angepasst werden. Zusätzlich zu dem client-seitigen Wartungsmodus, setzt
 [`extraConfig.hs_disabled`](https://element-hq.github.io/synapse/develop/usage/configuration/config_documentation.html#hs_disabled-and-hs_disabled_message)
 den Homeserver selbst in einen sicheren Zustand.
 
-> 📌 **Hinweis** – Die Befehle sind angelehnt an die Anweisung zur Installation der
-> [BundesMessenger Testumgebung](installation_testumgebung.md#bundesmessenger).
+> 📌 **Hinweis** – Die Befehle sind angelehnt an die Anweisung zur Installation
+> der [BundesMessenger Testumgebung](installation_testumgebung.md#bundesmessenger).
 > Im Beispiel heißt der Namespace `bum` und das zugrundeliegende Deployment
 > `bundesmessenger`. Um für ein Cluster die korrekten Namen der
 > Kubernetes-Ressourcen zu finden, können Befehle wie der folgende verwendet
