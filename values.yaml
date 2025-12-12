@@ -1938,6 +1938,17 @@ mas:
     pullSecrets: []
     pullPolicy: IfNotPresent
 
+  # Migrationskonfiguration für MAS
+  migration:
+    # (bool) Aktiviert die Migrationsfunktionalität
+    enabled: false  # Auf true setzen, um Migration auszuführen
+    # Backup-Konfiguration für die Migration
+    backup:
+      # (bool) Aktiviert das Backup vor der Migration
+      enabled: true  # Backup-Option aktivieren
+      # (string) Speichergröße für das Backup (z.B. "1Gi", "2Gi")
+      storage: 16Gi   # Speicherplatz für Backup
+
   # (string) URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider
   # Eine URI ist dringend ratsam, damit der Dienst routing-technisch getrennt ist.
   # Ein stabiles Deployment ohne eigene URI wurde bisher nicht erprobt.

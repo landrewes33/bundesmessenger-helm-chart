@@ -1,6 +1,6 @@
 {{/* SPDX-FileCopyrightText: 2024–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
-{{- if .Values.mas.enabled }}
+{{- if and .Values.mas.enabled ( not .Values.mas.migration.enabled ) }}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-authentication-service") -}}
 {{- $component := "matrix-authentication-service" -}}
 ---

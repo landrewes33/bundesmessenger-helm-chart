@@ -3577,6 +3577,34 @@
           ],
           "unevaluatedProperties": false
         },
+        "migration": {
+          "type": "object",
+          "description": "Migrationskonfiguration für MAS",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Aktiviert die Migrationsfunktionalität",
+              "default": false
+            },
+            "backup": {
+              "type": "object",
+              "description": "Backup-Konfiguration für die Migration",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Aktiviert das Backup vor der Migration",
+                  "default": true
+                },
+                "storage": {
+                  "type": "string",
+                  "description": "Speichergröße für das Backup (z.B. \"1Gi\", \"2Gi\")",
+                  "default": "16Gi",
+                  "pattern": "^[0-9]+(Gi|Mi)$"
+                }
+              }
+            }
+          }
+        },
         "uri": {
           "type": "string",
           "title": "URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider.",
@@ -3699,6 +3727,9 @@
                       },
                       "algorithm": {
                         "type": "string"
+                      },
+                      "unicode_normalization": {
+                        "type": "boolean"
                       }
                     },
                     "required": [
@@ -8446,7 +8477,7 @@
       "description": "ExecAction describes a \"run in container\" action.",
       "properties": {
         "command": {
-          "description": "Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.",
+          "description": "execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.",
           "items": {
             "default": "",
             "type": "string"

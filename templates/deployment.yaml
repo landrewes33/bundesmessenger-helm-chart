@@ -20,7 +20,11 @@ metadata:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: synapse
 spec:
+    {{- if and .Values.mas.enabled .Values.mas.migration.enabled }}
+  replicas: 0
+    {{- else }}
   replicas: 1
+    {{- end }}
   strategy:
     {{- toYaml .Values.synapse.strategy | nindent 4 }}
   selector:

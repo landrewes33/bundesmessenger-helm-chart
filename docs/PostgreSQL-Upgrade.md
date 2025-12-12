@@ -11,7 +11,8 @@ neue Hauptversion.
 
 ```log
 FATAL:  database files are incompatible with server
-DETAIL:  The data directory was initialized by PostgreSQL version 14, which is not compatible with this version 16.4.
+DETAIL:  The data directory was initialized by PostgreSQL version 14, which is
+not compatible with this version 16.4.
 ```
 
 Fehlermeldung von PostgreSQL im Fall, dass kein Upgrade durchgeführt wurde.

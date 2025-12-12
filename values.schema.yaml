@@ -3045,6 +3045,29 @@ properties:
           - pullSecrets
           - pullPolicy
         unevaluatedProperties: false
+      migration:
+        type: object
+        description: Migrationskonfiguration für MAS
+        properties:
+          enabled:
+            type: boolean
+            description: Aktiviert die Migrationsfunktionalität
+            default: false
+
+          backup:
+            type: object
+            description: Backup-Konfiguration für die Migration
+            properties:
+              enabled:
+                type: boolean
+                description: Aktiviert das Backup vor der Migration
+                default: true
+
+              storage:
+                type: string
+                description: Speichergröße für das Backup (z.B. "1Gi", "2Gi")
+                default: "16Gi"
+                pattern: "^[0-9]+(Gi|Mi)$"
       uri:
         type: string
         title: URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider.
@@ -3171,6 +3194,8 @@ properties:
                       type: integer
                     algorithm:
                       type: string
+                    unicode_normalization:
+                      type: boolean
                   required:
                     - version
                     - algorithm

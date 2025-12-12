@@ -29,11 +29,11 @@ Der Ablauf:
 
 ## 1. Wartungsmodus aktivieren
 
-Der BundesMessenger sollte während des Upgrades in den Wartungsmodus versetzt werden,
-damit keine Daten verloren gehen. Die Konfiguration von `additionalConfig.maintenance`
-visualisiert in den Clients die Wartungsarbeiten via Wellknown und verhindert auch,
-dass BundesMessenger Clients zugreifen. `extraConfig.hs_disabled` blockt den
-Zugriff direkt im Server ab.
+Der BundesMessenger sollte während des Upgrades in den Wartungsmodus versetzt
+werden, damit keine Daten verloren gehen. Die Konfiguration von
+`additionalConfig.maintenance` visualisiert in den Clients die Wartungsarbeiten
+via Wellknown und verhindert auch, dass BundesMessenger Clients zugreifen.
+`extraConfig.hs_disabled` blockt den Zugriff direkt im Server ab.
 
 Erklärung Maintenance-Definition:
 

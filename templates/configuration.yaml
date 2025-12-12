@@ -147,7 +147,7 @@ data:
       args: {{- nindent 8 (toYaml (merge
         (dict
           "host" (include "matrix-synapse.postgresql.host" .)
-          "port" (include "matrix-synapse.postgresql.port" .)
+          "port" (atoi (include "matrix-synapse.postgresql.port" .))
           "database" (include "matrix-synapse.postgresql.database" .)
           "user" (include "matrix-synapse.postgresql.username" .)
           "passfile" "/synapse/pgpass/pgpass"
