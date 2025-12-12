@@ -1,1 +1,1 @@
-Admin-Portal auf aktuelle Version aktualisiert.
+Admin-Portal auf Version v2 aktualisiert.
