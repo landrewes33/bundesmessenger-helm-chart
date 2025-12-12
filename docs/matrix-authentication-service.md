@@ -1,9 +1,6 @@
 # Matrix-Authentication-Service
 
-| :warning: Aktuell sind die Clients noch nicht mit dem Matrix-Authentication-Service (MAS) vollständig kompatibel. Nutzung wird unsererseits nicht empfohlen. Sollte sich der Zustand ändern, werden wir dies mitteilen. Hingegen voll von Synapse unterstützt ist die reine [Anmeldung mit SSO](#anmeldung-via-single-sign-on-sso). |
-| --- |
-
-| :warning: Wichtig: Der Matrix-Authentication-Service (MAS) ist "work in progress" und hat den Status experimentell. Die Migration von einer bestehenden Synapse-Installation zum MAS ist noch nicht Bestandteil. Daher kann der MAS derzeit nur für neue Installationen genutzt werden. Eine Migration wird in Zukunft jedoch erforderlich sein. |
+| :warning: Wichtig: Der Matrix-Authentication-Service (MAS) ist seit dem 13. August 2025 im Stauts "stable". In diesem Dokument wird nur der Matrix-authentication-Service behandelt. Eine Migration wird separat unter der [Migrations-Nutzerdokumentation](./docs/matrix-authentication-service-migration) aufgeführt. |
 | --- |
 
 | :pushpin: Wenn der matrix-authentication-service Pod nicht startet, befinden sich die relevanten Fehlermeldungen meist im `initContainer` `initconfig`. |

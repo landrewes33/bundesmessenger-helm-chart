@@ -1,0 +1,614 @@
+{{/* SPDX-FileCopyrightText: 2025 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if .Values.mas.migration.enabled }}
+{{- $name := "mas-migration" -}}
+{{- $futureName := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-authentication-service") -}}
+{{- $component := "matrix-authentication-service" -}}
+---
+# Generate Config-Job
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ printf "%s-generate-mas-config" .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: "@yearly"  # Wird nie automatisch ausgeführt
+  concurrencyPolicy: Forbid
+  suspend: true  # Standardmäßig suspendiert
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ include "matrix-synapse.migrationServiceAccountName" . }}
+          {{- include "matrix-synapse.imagePullSecrets" . | nindent 10 }}
+          automountServiceAccountToken: false
+          containers:
+            - name: generate-mas-config
+              image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
+              imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  echo "Generate MAS config from Synapse homeserver.yaml"
+                  mas-cli config generate --synapse-config /synapse/config/homeserver.yaml --output /opt/mas_config.yaml
+                  if [ $? -ne 0 ]; then
+                    echo "ERROR: mas-cli config generate failed"
+                    exit 1
+                  fi
+                  echo "Generated MAS config at /opt/mas_config.yaml"
+
+                  # optionally dump config for inspection
+                  mas-cli config dump --config /opt/mas_config.yaml
+              volumeMounts:
+                - name: synapse-config
+                  mountPath: /synapse/config
+                - name: generate-config
+                  mountPath: /opt
+          restartPolicy: Never
+          volumes:
+            - name: generate-config
+              emptyDir:
+                sizeLimit: 10Mi
+            - name: synapse-config
+              projected:
+                sources:
+                  - configMap:
+                      name: {{ include "matrix-synapse.fullname" . }}
+                      items:
+                        - key: homeserver.yaml
+                          path: homeserver.yaml
+
+---
+# Pre-Migration-Check CronJob
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ printf "%s-precheck-%s" .Release.Name $name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: "@yearly"  # Wird nie automatisch ausgeführt
+  concurrencyPolicy: Forbid
+  suspend: true  # Standardmäßig suspendiert
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          restartPolicy: Never
+          serviceAccountName: {{ include "matrix-synapse.migrationServiceAccountName" . }}
+          {{- include "matrix-synapse.imagePullSecrets" . | nindent 10 }}
+          automountServiceAccountToken: false
+          containers:
+            - name: pre-migration-check
+              image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
+              imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
+              env:
+                - name: MAS_PASS
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "matrix-synapse.maspostgresql.secret-name" . }}
+                      key: {{ include "matrix-synapse.maspostgresql.secret-key" . }}
+                - name: SYNAPSE_PASS
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "matrix-synapse.postgresql.secret-name" . }}
+                      key: {{ include "matrix-synapse.postgresql.secret-key" . }}
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  echo "Build pgpass-File for synapse DB access."
+                  awk -v pass="$SYNAPSE_PASS" '
+                    /^[[:space:]]*passfile:[[:space:]]*\/synapse\/pgpass\/pgpass/ {
+                      print "    password: " pass
+                      next
+                    }
+                    { print }
+                  ' /synapse/config/homeserver.yaml > /mas/dbpass/homeserver.yaml
+                  echo "$(cat /mas/dbpass/homeserver.yaml)"
+                  echo "Done synapse homeserver.yaml"
+                  echo
+                  echo "modify MAS config to retrieve DB access"
+                  awk -v pass="$MAS_PASS" '
+                    { gsub(/POSTGRES_PASS/, pass); print }
+                  ' /mas/config/mas-secret.yaml > /mas/dbpass/mas-secret.yaml
+                  echo "Done."
+                  echo
+                  echo "Führe Pre-Migration-Check durch..."
+                  CHECK_OUTPUT=$( mas-cli syn2mas check \
+                      --config /mas/config/config.yaml \
+                      --config /mas/dbpass/mas-secret.yaml \
+                      --synapse-config /mas/dbpass/homeserver.yaml \
+                    2>&1)
+                  if echo "$CHECK_OUTPUT" | grep -q "error" | grep -v "skipping"; then
+                    echo "FEHLER: Pre-Migration-Check meldet Fehler. Beheben Sie diese vor der Migration."
+                    echo "$CHECK_OUTPUT"
+                    exit 1
+                  fi
+                  echo "Pre-Migration-Check erfolgreich. Keine Fehler gefunden."
+              volumeMounts:
+                - name: mas-config
+                  mountPath: /mas/config
+                - name: synapse-config
+                  mountPath: /synapse/config
+                - name: dbpass
+                  mountPath: /mas/dbpass
+                - name: secrets
+                  mountPath: /mas/secret
+          volumes:
+            - name: dbpass
+              emptyDir:
+                sizeLimit: 10Mi
+            - name: pgpass
+              emptyDir:
+                sizeLimit: 600Mi
+                medium: Memory
+            - name: synapse-config
+              projected:
+                sources:
+                  - configMap:
+                      name: {{ include "matrix-synapse.fullname" . }}
+                      items:
+                        - key: homeserver.yaml
+                          path: homeserver.yaml
+            - name: mas-config
+              projected:
+                sources:
+                  # ConfigMap mit echter Config für MAS
+                  - configMap:
+                      name: {{ $futureName }}
+                      items:
+                        - key: config.yaml
+                          path: config.yaml
+                  - secret:
+                      name: {{ $futureName }}
+                      items:
+                        - key: mas-secret.yaml
+                          path: mas-secret.yaml
+            - name: secrets
+              projected:
+                sources:
+                  - secret:
+                      name: {{ include "matrix-synapse.maspostgresql.secret-name" . | quote }}
+                      items:
+                        - key: {{ include "matrix-synapse.maspostgresql.secret-key" . | quote }}
+                          path: postgresql/password
+                  - secret:
+                      name: {{ .Values.mas.encryption.existingSecret | quote }}
+                      items:
+                        - key: {{ .Values.mas.encryption.existingSecretKey | quote }}
+                          path: encryption
+                  {{- if and
+                      ($secretName := include "matrix-synapse.mas.matrixSharedSecret.secretName" .)
+                      ($secretKey := include "matrix-synapse.mas.matrixSharedSecret.secretKey" .)
+                  }}
+                  - secret:
+                      name: {{ quote $secretName }}
+                      items:
+                        - key: {{ quote $secretKey }}
+                          path: matrix-shared-secret
+                  {{- end }}
+---
+# Dry-Run CronJob
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ printf "%s-dry-run-%s" .Release.Name $name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: "@yearly"  # Wird nie automatisch ausgeführt
+  concurrencyPolicy: Forbid
+  suspend: true  # Standardmäßig suspendiert
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          restartPolicy: Never
+          serviceAccountName: {{ include "matrix-synapse.migrationServiceAccountName" . }}
+          {{- include "matrix-synapse.imagePullSecrets" . | nindent 10 }}
+          automountServiceAccountToken: false
+          containers:
+            - name: mas-migration-dry-run
+              image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
+              imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
+              env:
+                - name: MAS_PASS
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "matrix-synapse.maspostgresql.secret-name" . }}
+                      key: {{ include "matrix-synapse.maspostgresql.secret-key" . }}
+                - name: SYNAPSE_PASS
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "matrix-synapse.postgresql.secret-name" . }}
+                      key: {{ include "matrix-synapse.postgresql.secret-key" . }}
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  echo "Build homeserver.yaml with password for synapse DB access."
+                  awk -v pass="$SYNAPSE_PASS" '
+                    /^[[:space:]]*passfile:[[:space:]]*\/synapse\/pgpass\/pgpass/ {
+                      print "    password: " pass
+                      next
+                    }
+                    { print }
+                  ' /synapse/config/homeserver.yaml > /mas/dbpass/homeserver.yaml
+                  echo "✅ Done synapse homeserver.yaml"
+                  echo "modify MAS config to retrieve DB access"
+                  awk -v pass="$MAS_PASS" '
+                    { gsub(/POSTGRES_PASS/, pass); print }
+                  ' /mas/config/mas-secret.yaml > /mas/dbpass/mas-secret.yaml
+                  echo "✅ Done."
+
+                  echo "Führe Migration im Testmodus (Dry-Run) durch..."
+                  DRY_RUN_OUTPUT=$(mas-cli syn2mas migrate --config /mas/config/config.yaml --config /mas/dbpass/mas-secret.yaml --synapse-config /mas/dbpass/homeserver.yaml --dry-run 2>&1)
+                  if echo "$DRY_RUN_OUTPUT" |  grep -q -i "error"; then
+                    echo "❌ FEHLER: Dry-Run meldet Fehler. Details:"
+                    echo "$DRY_RUN_OUTPUT"
+                    exit 1
+                  fi
+                  echo "✅ Dry-Run erfolgreich abgeschlossen. Keine Fehler gefunden."
+                  echo "✅ Migration kann nun sicher ausgeführt werden."
+              volumeMounts:
+                - name: mas-config
+                  mountPath: /mas/config
+                - name: synapse-config
+                  mountPath: /synapse/config
+                - name: dbpass
+                  mountPath: /mas/dbpass
+                - name: secrets
+                  mountPath: /mas/secret
+          volumes:
+            - name: dbpass
+              emptyDir:
+                sizeLimit: 10Mi
+            - name: synapse-config
+              projected:
+                sources:
+                  - configMap:
+                      name: {{ include "matrix-synapse.fullname" . }}
+                      items:
+                        - key: homeserver.yaml
+                          path: homeserver.yaml
+            - name: mas-config
+              projected:
+                sources:
+                  # ConfigMap mit echter Config für MAS
+                  - configMap:
+                      name: {{ $futureName }}
+                      items:
+                        - key: config.yaml
+                          path: config.yaml
+                  - secret:
+                      name: {{ $futureName }}
+                      items:
+                        - key: mas-secret.yaml
+                          path: mas-secret.yaml
+            - name: secrets
+              projected:
+                sources:
+                  - secret:
+                      name: {{ include "matrix-synapse.maspostgresql.secret-name" . | quote }}
+                      items:
+                        - key: {{ include "matrix-synapse.maspostgresql.secret-key" . | quote }}
+                          path: postgresql/password
+                  - secret:
+                      name: {{ .Values.mas.encryption.existingSecret | quote }}
+                      items:
+                        - key: {{ .Values.mas.encryption.existingSecretKey | quote }}
+                          path: encryption
+                  {{- if and
+                      ($secretName := include "matrix-synapse.mas.matrixSharedSecret.secretName" .)
+                      ($secretKey := include "matrix-synapse.mas.matrixSharedSecret.secretKey" .)
+                  }}
+                  - secret:
+                      name: {{ quote $secretName }}
+                      items:
+                        - key: {{ quote $secretKey }}
+                          path: matrix-shared-secret
+                  {{- end }}
+{{ if .Values.mas.enabled }}
+---
+# Haupt-Migrations-CronJob
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ printf "%s-%s" .Release.Name $name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: "@yearly"  # Wird nie automatisch ausgeführt
+  concurrencyPolicy: Forbid
+  suspend: true  # Standardmäßig suspendiert
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ include "matrix-synapse.migrationServiceAccountName" . }}
+          {{- include "matrix-synapse.imagePullSecrets" . | nindent 10 }}
+          automountServiceAccountToken: false
+          containers:
+            - name: mas-migration-config
+              image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
+              imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
+              env:
+                  - name: MAS_PASS
+                    valueFrom:
+                      secretKeyRef:
+                        name: {{ include "matrix-synapse.maspostgresql.secret-name" . }}
+                        key: {{ include "matrix-synapse.maspostgresql.secret-key" . }}
+                  - name: SYNAPSE_PASS
+                    valueFrom:
+                      secretKeyRef:
+                        name: {{ include "matrix-synapse.postgresql.secret-name" . }}
+                        key: {{ include "matrix-synapse.postgresql.secret-key" . }}
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  echo "Bereite homeserver.yaml für Migration vor. (DB-Zugang)"
+                  awk -v pass="$SYNAPSE_PASS" '
+                    /^[[:space:]]*passfile:[[:space:]]*\/synapse\/pgpass\/pgpass/ {
+                      print "    password: " pass;
+                      next;
+                    }
+                    { print }
+                  ' /synapse/config/homeserver.yaml > /mas/dbpass/homeserver.yaml
+                  echo "✅ Erledigt: homeserver.yaml"
+
+                  echo
+
+                  echo "Bereite MAS Konfiguration für Migration vor (DB-Zugang)"
+                  printf '# hostname:port:database:username:password
+                    *:*:*:%s:%s
+                    ' \
+                      "$(printf "%s" "$POSTGRES_USER" | awk '{gsub(/\\/,"\\\\"); gsub(/:/,"\\:"); print}')" \
+                      "$(awk '{gsub(/\\/,"\\\\"); gsub(/:/,"\\:"); print}' < /mas/secret/postgresql/password)" \
+                    > /home/mas/.pgpass
+                  chmod 0400 /home/mas/.pgpass
+
+                  echo "Bereite MAS Konfiguration für Migration vor (DB-Zugang)"
+                  awk -v pass="$MAS_PASS" '
+                    { gsub(/POSTGRES_PASS/, pass); print }
+                  ' /mas/config/mas-secret.yaml > /mas/dbpass/mas-secret.yaml
+
+                  echo "✅ Erledigt: MAS DB Konfiguration"
+
+                  RUN_OUTPUT=$(mas-cli syn2mas migrate --config /mas/config/config.yaml --config /mas/dbpass/mas-secret.yaml --synapse-config /mas/dbpass/homeserver.yaml 2>&1)
+                  if echo "$RUN_OUTPUT" | grep -q -i "error"; then
+                    echo "❌ FEHLER: Migration meldet Fehler. Details:"
+                    echo "$RUN_OUTPUT"
+                    exit 1
+                  fi
+                  echo "✅ Migration abgeschlossen."
+              volumeMounts:
+                - name: mas-config
+                  mountPath: /mas/config
+                - name: synapse-config
+                  mountPath: /synapse/config
+                - name: dbpass
+                  mountPath: /mas/dbpass
+                - name: pgpass
+                  mountPath: /home/mas
+                - name: secrets
+                  mountPath: /mas/secret
+          volumes:
+            - name: dbpass
+              emptyDir:
+                sizeLimit: 10Mi
+            - name: pgpass
+              emptyDir:
+                sizeLimit: 600Mi
+                medium: Memory
+            - name: synapse-config
+              projected:
+                sources:
+                  - configMap:
+                      name: {{ include "matrix-synapse.fullname" . }}
+                      items:
+                        - key: homeserver.yaml
+                          path: homeserver.yaml
+            - name: mas-config
+              projected:
+                sources:
+                  # ConfigMap mit echter Config für MAS
+                  - configMap:
+                      name: {{ $futureName }}
+                      items:
+                        - key: config.yaml
+                          path: config.yaml
+                  - secret:
+                      name: {{ $futureName }}
+                      items:
+                        - key: mas-secret.yaml
+                          path: mas-secret.yaml
+            - name: secrets
+              projected:
+                sources:
+                  - secret:
+                      name: {{ include "matrix-synapse.maspostgresql.secret-name" . | quote }}
+                      items:
+                        - key: {{ include "matrix-synapse.maspostgresql.secret-key" . | quote }}
+                          path: postgresql/password
+                  - secret:
+                      name: {{ .Values.mas.encryption.existingSecret | quote }}
+                      items:
+                        - key: {{ .Values.mas.encryption.existingSecretKey | quote }}
+                          path: encryption
+                  {{- if and
+                      ($secretName := include "matrix-synapse.mas.matrixSharedSecret.secretName" .)
+                      ($secretKey := include "matrix-synapse.mas.matrixSharedSecret.secretKey" .)
+                  }}
+                  - secret:
+                      name: {{ quote $secretName }}
+                      items:
+                        - key: {{ quote $secretKey }}
+                          path: matrix-shared-secret
+                  {{- end }}
+          restartPolicy: Never
+{{ end }}
+
+# DB- und Media-Backup-Job
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "matrix-synapse.migrationServiceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+  {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: deployment-restarter
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "matrix-synapse.migrationServiceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["apps", ""]
+    resources: ["deployments", "deployments/scale", "statefulsets", "statefulsets/scale"]
+    verbs: ["get", "update", "patch", "scale"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+  - apiGroups: [""]
+    resources: ["configMap"]
+    verbs: ["get", "update", "patch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "matrix-synapse.migrationServiceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "matrix-synapse.migrationServiceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: Role
+  name: {{ include "matrix-synapse.migrationServiceAccountName" . }}
+  apiGroup: rbac.authorization.k8s.io
+
+{{- if .Values.mas.migration.backup.enabled }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $name }}-backup-job
+  namespace: {{ .Release.Namespace }}
+spec:
+  schedule: "@yearly"  # Wird nie automatisch ausgeführt
+  suspend: true # Schedule deaktiviert, aber Pflichtfeld
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            {{- include "matrix-synapse.labels" . | nindent 12 }}
+            app.kubernetes.io/component: backup-bundesmessenger-cronjob
+            to-apiserver: allowed
+        spec:
+          securityContext:
+            runAsUser: 66000
+            runAsGroup: 66000
+            fsGroup: 66000
+            fsGroupChangePolicy: "OnRootMismatch"
+
+          {{- include "matrix-synapse.imagePullSecrets" $ | nindent 14 }}
+
+          serviceAccountName: {{ include "matrix-synapse.migrationServiceAccountName" . }}
+
+          initContainers:
+            - name: db-dump-container
+              image: "{{ printf "%s/%s:%s" .Values.postgresql.image.registry .Values.postgresql.image.repository .Values.postgresql.image.tag }}"
+              env:
+                - name: PGHOST
+                  value: {{ include "matrix-synapse.postgresql.host" . | quote }}
+                - name: PGUSER
+                  value: {{ include "matrix-synapse.postgresql.username" . | quote }}
+                - name: PGDATABASE
+                  value: {{ include "matrix-synapse.postgresql.database" . | quote }}
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "matrix-synapse.postgresql.secret-name" . }}
+                      key: {{ include "matrix-synapse.postgresql.secret-key" . }}
+                - name: DUMPDB
+                  value: "migrations-backup-$(date +%s).sql"
+              volumeMounts:
+                - name: dump
+                  mountPath: /opt
+              command:
+                - sh
+                - -c
+                - |
+                  mkdir -p /opt/sql
+                  echo "Warte auf PostgreSQL..."
+                  until pg_isready; do sleep 1; done
+                  pg_dumpall \
+                    --no-role-passwords \
+                    --clean \
+                    --if-exists \
+                    --load-via-partition-root \
+                    --quote-all-identifiers \
+                    --no-password \
+                    > "/opt/sql/$DUMPDB"
+          containers:
+            - name: save-synapse-media
+              image: {{ printf "%s/%s:%s" .Values.kubectlImage.registry .Values.kubectlImage.repository .Values.kubectlImage.tag | quote }}
+              imagePullPolicy: {{ .Values.kubectlImage.pullPolicy }}
+              command:
+                - sh
+                - -c
+                - |
+                  kubectl -n {{ .Release.Namespace }} scale deployment/{{ include "matrix-synapse.fullname" . }} --replicas=1
+
+                  mkdir -p /opt/media
+                  INSTANZ=""
+                  {{- if .Values.workers.media_repository.enabled }}
+                  INSTANZ="media-repository"
+                  {{- else }}
+                  INSTANZ="synapse"
+                  {{- end }}
+
+                  POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} \
+                    -l "app.kubernetes.io/name={{ include "matrix-synapse.name" . }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=${INSTANZ}" \
+                    -o jsonpath="{.items[0].metadata.name}")
+
+                  # clear old Media-Backup
+                  rm -rf /opt/media/*
+                  echo "copy Media-Data"
+                  kubectl cp {{ $.Release.Namespace }}/$POD_NAME:/synapse/data/media /opt/media --no-preserve=false
+              volumeMounts:
+                - name: dump
+                  mountPath: /opt
+
+          volumes:
+            - name: dump
+              persistentVolumeClaim:
+                claimName: mas-backup-pvc-{{ .Release.Name }}
+
+          restartPolicy: Never
+
+# Backup PVC (falls aktiviert)
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mas-backup-pvc-{{ .Release.Name }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.mas.migration.backup.storage | quote }}
+  {{- end }}
+{{- end }}

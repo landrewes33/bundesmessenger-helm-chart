@@ -7,7 +7,7 @@
   {{- /* extract secret name from cert path - between first both slashes, put them in a list and make it unique */}}
   {{- $uniqCaSecrets = uniq (append $uniqCaSecrets (split "/" ( trimPrefix "/" . ))._0) }}
 {{- end }}
-
+{{- $migrationPhase := and .Values.mas.enabled .Values.mas.migration.enabled -}}
 {{- $default := .Values.workers.default }}
 {{- $workerConfigs := omit .Values.workers "default" }}
 {{- range $worker, $config := $workerConfigs }}
@@ -31,7 +31,12 @@ metadata:
     {{- include "matrix-synapse.labels" $ | nindent 4 }}
     app.kubernetes.io/component: {{ $name }}
 spec:
+    # Scale-Down bei aktiver Migration
+    {{- if $migrationPhase }}
+  replicas: 0
+    {{- else }}
   replicas: {{ $replicaSize }}
+    {{- end }}
   updateStrategy:
     type: RollingUpdate
   serviceName: {{ include "matrix-synapse.workername" (dict "global" $ "worker" $name) }}

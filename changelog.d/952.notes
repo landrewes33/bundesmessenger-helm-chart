@@ -1,0 +1,8 @@
+Die Dokumentation zur Migration zur Benutzerverwaltung mit
+Matrix-Authentication-Service enthält:
+
+1. Vorbereitungsskripte zur lokalen Prüfung der Konfiguration.
+2. Schritt-für-Schritt Anleitung zur Migration.
+3. Beispielkonfigurationen basierend auf der [MAS-Dokumentation](https://element-hq.github.io/matrix-authentication-service/setup/migration.html#map-any-upstream-sso-providers).
+4. Kubernetes Job Templates für die Migration.
+5. Klare Anweisungen zur Durchführung und Überwachung der Migration.

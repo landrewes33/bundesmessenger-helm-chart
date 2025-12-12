@@ -537,7 +537,6 @@ https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS
 Set MAS PostgreSQL username
 */}}
 {{- define "matrix-synapse.maspostgresql.username" -}}
-{{- if .Values.mas.enabled -}}
   {{- if .Values.maspostgresql.enabled -}}
     {{- /* MAS can’t read the username from file while the subchart can’t read
     it from configuration. As a consequence, we require both to be given and
@@ -566,13 +565,11 @@ Set MAS PostgreSQL username
     }}
   {{- end -}}
 {{- end -}}
-{{- end -}}
 
 {{/*
 Name of the Secret containing the MAS-PostgreSQL password.
 */}}
 {{- define "matrix-synapse.maspostgresql.secret-name" -}}
-{{- if .Values.mas.enabled -}}
   {{- if .Values.maspostgresql.enabled }}
     {{- .Values.maspostgresql.customUser.existingSecret | required (print
       "A valid maspostgresql.customUser.existingSecret as name of the secret "
@@ -584,14 +581,12 @@ Name of the Secret containing the MAS-PostgreSQL password.
       "containing the PostgreSQL credentials must be set."
     )}}
   {{- end }}
-{{- end }}
 {{- end -}}
 
 {{/*
 Key to the password contained in the MAS-PostgreSQL Secret.
 */}}
 {{- define "matrix-synapse.maspostgresql.secret-key" -}}
-{{- if .Values.mas.enabled -}}
   {{- if .Values.maspostgresql.enabled }}
     {{- required
       "To use a Secret for PostgreSQL, maspostgresql.customUser.secretKeys.password is required"
@@ -603,14 +598,12 @@ Key to the password contained in the MAS-PostgreSQL Secret.
       .Values.externalmasPostgresql.existingSecretPasswordKey
     }}
   {{- end }}
-{{- end }}
 {{- end -}}
 
 {{/*
 Set MAS PostgreSQL database
 */}}
 {{- define "matrix-synapse.maspostgresql.database" -}}
-{{- if .Values.mas.enabled -}}
   {{- if .Values.maspostgresql.enabled -}}
     {{- /* MAS can’t read the database name from file while the subchart can’t
     read it from configuration. As a consequence, we require both to be given and
@@ -638,7 +631,6 @@ Set MAS PostgreSQL database
       .Values.externalmasPostgresql.database
     }}
   {{- end }}
-{{- end }}
 {{- end -}}
 
 {{/*
@@ -653,7 +645,6 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 Set MAS PostgreSQL host.
 */}}
 {{- define "matrix-synapse.maspostgresql.host" -}}
-{{- if .Values.mas.enabled -}}
   {{- if .Values.maspostgresql.enabled }}
     {{- template "matrix-synapse.maspostgresql.fullname" . }}
   {{- else }}
@@ -662,7 +653,6 @@ Set MAS PostgreSQL host.
     .Values.externalmasPostgresql.host
   }}
   {{- end }}
-{{- end }}
 {{- end -}}
 
 {{/*
@@ -671,7 +661,6 @@ MAS PostgreSQL port.
 Defaults to `matrix-synapse.postgresql.port`.
 */}}
 {{- define "matrix-synapse.maspostgresql.port" -}}
-{{- if .Values.mas.enabled -}}
   {{- if .Values.maspostgresql.enabled }}
     {{- required
       "A valid PostgreSQL port at maspostgresql.service.port is required"
@@ -684,13 +673,11 @@ Defaults to `matrix-synapse.postgresql.port`.
     }}
   {{- end }}
 {{- end -}}
-{{- end -}}
 
 {{/*
 Set MAS PostgreSQL min_connections
 */}}
 {{- define "matrix-synapse.maspostgresql.min_connections" -}}
-{{- if .Values.mas.enabled -}}
   {{- if .Values.maspostgresql.enabled -}}
     {{- .Values.maspostgresql.min_connections | default "0" }}
   {{- else }}
@@ -700,13 +687,11 @@ Set MAS PostgreSQL min_connections
     }}
   {{- end -}}
 {{- end -}}
-{{- end -}}
 
 {{/*
 Set MAS PostgreSQL max_connections
 */}}
 {{- define "matrix-synapse.maspostgresql.max_connections" -}}
-{{- if .Values.mas.enabled -}}
   {{- if .Values.maspostgresql.enabled -}}
     {{- .Values.maspostgresql.max_connections | default "10" }}
   {{- else }}
@@ -716,13 +701,11 @@ Set MAS PostgreSQL max_connections
     }}
   {{- end -}}
 {{- end -}}
-{{- end -}}
 
 {{/*
 Set MAS PostgreSQL connect_timeout
 */}}
 {{- define "matrix-synapse.maspostgresql.connect_timeout" -}}
-{{- if .Values.mas.enabled -}}
   {{- if .Values.maspostgresql.enabled -}}
     {{- .Values.maspostgresql.connect_timeout | default "30" }}
   {{- else }}
@@ -732,13 +715,11 @@ Set MAS PostgreSQL connect_timeout
     }}
   {{- end -}}
 {{- end -}}
-{{- end -}}
 
 {{/*
 Set MAS PostgreSQL idle_timeout
 */}}
 {{- define "matrix-synapse.maspostgresql.idle_timeout" -}}
-{{- if .Values.mas.enabled -}}
   {{- if .Values.maspostgresql.enabled -}}
     {{- .Values.maspostgresql.idle_timeout | default "600" }}
   {{- else }}
@@ -748,13 +729,11 @@ Set MAS PostgreSQL idle_timeout
     }}
   {{- end -}}
 {{- end -}}
-{{- end -}}
 
 {{/*
 Set MAS PostgreSQL max_lifetime
 */}}
 {{- define "matrix-synapse.maspostgresql.max_lifetime" -}}
-{{- if .Values.mas.enabled -}}
   {{- if .Values.maspostgresql.enabled -}}
     {{- .Values.maspostgresql.max_lifetime | default "1800" }}
   {{- else }}
@@ -763,7 +742,6 @@ Set MAS PostgreSQL max_lifetime
         .Values.externalmasPostgresql.max_lifetime
     }}
   {{- end -}}
-{{- end -}}
 {{- end -}}
 
 {{- /*
@@ -914,4 +892,12 @@ Whether Helm is running inside ArgoCD.
 {{- if .Values.argoCD }}
   {{- "true" }}
 {{- end }}
+{{- end -}}
+
+{{/*
+Create the name of the service account for MAS migration jobs use
+*/}}
+{{- define "matrix-synapse.migrationServiceAccountName" -}}
+  {{/* Default name is not "default" due to DVC requirements. */}}
+  {{- include "matrix-synapse.externalname" (dict "global" . "external" "mas-migration") }}
 {{- end -}}
