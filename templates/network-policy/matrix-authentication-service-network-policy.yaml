@@ -37,8 +37,8 @@ spec:
     {{- /* internal maspostgresql from this chart */}}
     - to:
       - podSelector:
-          matchLabels:
-            {{- toYaml .Values.networkpolicies.maspostgresql.selectorLabels | nindent 12 }}
+          matchExpressions:
+            {{- toYaml .Values.networkpolicies.maspostgresql.labelSelector | nindent 12 }}
       ports:
       - protocol: TCP
         port: {{ .Values.maspostgresql.service.targetPort }}
@@ -55,8 +55,8 @@ spec:
     {{- /* external postgresql inside cluster selected by label */}}
     - to:
       - podSelector:
-          matchLabels:
-           {{- .Values.networkpolicies.maspostgresql.selectorLabels | toYaml | nindent 12 }}
+          matchExpressions:
+            {{- toYaml .Values.networkpolicies.maspostgresql.labelSelector | nindent 12 }}
       ports:
       - protocol: TCP
         port: {{ .Values.externalmasPostgresql.port }}

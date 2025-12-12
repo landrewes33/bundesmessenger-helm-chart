@@ -1,0 +1,6 @@
+Die Konfigurationen zu den Networkpolicies (`networkpolicies`) wurden
+flexibler gestaltet. Das führt zu folgenden Änderungen:
+
+- `dnsLabel` -> `dns.labelSelector`
+- `postgres` -> `postgresql`
+- `postgresql` und `maspostgresql` Option `selectorLabels` -> `labelSelector`.

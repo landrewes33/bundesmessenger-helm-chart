@@ -4687,44 +4687,98 @@ properties:
     unevaluatedProperties: false
   networkpolicies:
     type: object
+    title: Konfiguration der Network Policies
     properties:
       enabled:
         type: boolean
         default: false
       fwProxyList:
         type: array
+        title: Transport-Adressen der Proxies für den Synapse und seine Worker
+        description: >-
+          Die angegebenen Proxies werden per Egress-Regeln erlaubt. Alle
+          Einträge müssen in CIDR-Schreibweise angegeben werden:
+          Start-IP/Netzmaske:Proxyport
         items:
           type: string
         default: []
+        examples:
+          - - 192.168.10.0/24:8765
+            - 10.10.0.0/16:5000
       egressIpBlock:
         type: array
+        title: Transport-Adressen der DNS-Resolver und Admin-API
+        description: >-
+          Angaben mit Port werden als Zielport mit Protokoll TCP übernommen.
+          Alle Einträge müssen in CIDR-Schreibweise angegeben werden:
+          Start-IP/Netzmaske:Proxyport
         items:
           type: string
         default: []
-      dnsLabel:
-        type: string
-        minLength: 1
-        default: kube-dns
+        examples:
+          - - 192.168.2.0/24
+            - 10.20.2.0/24:53
+      dns:
+        type: object
+        title: Einstellungen zum DNS der Infrastruktur.
+        properties:
+          labelSelector:
+            type: array
+            minItems: 1
+            title: Label-Selector zum Adressieren der DNS-Pods
+            description: >-
+              Sollten die Labels bei einer eigens betriebenen Instanz abweichen,
+              kann dies hier angepasst werden.
+            items:
+              $ref: >-
+                https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelectorRequirement.schema.json
+              type: object
+            default:
+              - key: k8s-app
+                operator: In
+                values: ["kube-dns"]
+        required:
+          - labelSelector
       ingressNamespace:
         type: string
         minLength: 1
+        title: Namespace des Ingress-Controllers
+        description: >-
+          Aktuell wird nur eine Architektur mit einem L7 Ingress-Controller
+          unterstützt. Absolut notwendig für die Network-Policies.
         default: default
-      postgres:
+      postgresql:
         type: object
+        title: Einstellungen zum Haupt-PostgreSQL-Server
         properties:
           externalPostgresIP:
             type: ["null", "string"]
+            title: IP der externen PostgreSQL-Instanz
+            description: >-
+              Beim Einsatz einer PostgreSQL-Instanz außerhalb des Kubernetes
+              Clusters muss hier eine einzelne IP Adresse angegeben werden.
+              Falls ungesetzt wird angenommen, dass die externe
+              PostgreSQL-Instanz Teil des Kubernetes Clusters ist.
             default: null
-          selectorLabels:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/labels
-            type: object
-            title: Labels zum Adressieren der PostgreSQL-Instanz
+            examples:
+              - 10.30.3.0
+          labelSelector:
+            type: array
+            minItems: 1
+            title: Label-Selector zum Adressieren des PostgreSQL-Pods
+            description: >-
+              Sollten die Labels bei einer eigens betriebenen Instanz abweichen,
+              kann dies hier angepasst werden.
+            items:
+              $ref: >-
+                https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelectorRequirement.schema.json
+              type: object
             default:
-              app.kubernetes.io/name: postgresql
-            unevaluatedProperties: false
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["postgresql"]
         required:
-          - selectorLabels
+          - labelSelector
         unevaluatedProperties: false
       maspostgresql:
         type: object
@@ -4732,16 +4786,23 @@ properties:
           externalPostgresIP:
             type: ["null", "string"]
             default: null
-          selectorLabels:
-            $ref: >-
-              https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/labels
-            type: object
-            title: Labels zum Adressieren der MAS PostgreSQL-Instanz
+          labelSelector:
+            type: array
+            minItems: 1
+            title: Label-Selector zum Adressieren des MAS PostgreSQL-Pods
+            description: >-
+              Sollten die Labels bei einer eigens betriebenen Instanz abweichen,
+              kann dies hier angepasst werden.
+            items:
+              $ref: >-
+                https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelectorRequirement.schema.json
+              type: object
             default:
-              app.kubernetes.io/name: maspostgresql
-            unevaluatedProperties: false
+              - key: app.kubernetes.io/name
+                operator: In
+                values: ["maspostgresql"]
         required:
-          - selectorLabels
+          - labelSelector
         unevaluatedProperties: false
       acme:
         type: object
@@ -4750,27 +4811,32 @@ properties:
           Erlaubt die Kommunikation vom Ingress zum hier angegebenen Endpunkt
           (Pod + Port).
         properties:
-          selectorLabels:
-            type: object
-            additionalProperties:
-              type: string
+          labelSelector:
+            type: array
+            minItems: 1
+            items:
+              $ref: >-
+                https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelectorRequirement.schema.json
+              type: object
             default:
-              acme.cert-manager.io/http01-solver: "true"
-            unevaluatedProperties: false
+              - key: acme.cert-manager.io/http01-solver
+                operator: In
+                values: ["true"]
           port:
             type: integer
             default: 8089
         required:
-          - selectorLabels
+          - labelSelector
           - port
         unevaluatedProperties: false
     required:
       - enabled
       - fwProxyList
       - egressIpBlock
-      - dnsLabel
+      - dns
       - ingressNamespace
-      - postgres
+      - postgresql
+      - acme
     unevaluatedProperties: false
   tests:
     type: object

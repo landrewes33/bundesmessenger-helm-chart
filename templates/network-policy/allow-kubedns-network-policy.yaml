@@ -50,9 +50,6 @@ spec:
             kubernetes.io/metadata.name: kube-system
         podSelector:
           matchExpressions:
-            - key: k8s-app
-              operator: In
-              values:
-                - {{ .Values.networkpolicies.dnsLabel }}
+            {{- toYaml .Values.networkpolicies.dns.labelSelector | nindent 12 }}
       {{- end }}
 {{- end }}
