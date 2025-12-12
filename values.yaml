@@ -2860,59 +2860,74 @@ additionalConfig:
 
 networkpolicies:
   enabled: false
-  # (list) IP(s) der Proxy(s), die für den Synapse und seine Worker via Env-Variablen
-  # erreichbar sein sollen. Diese werden per Egress-Regeln erlaubt.
-  # Die Einträge müssen in CIDR-Schreibweise vorgenommen werden: Start-IP/Netzmaske:Proxyport
-  # Bsp:
-  # - "192.168.10.0/24:8765"
-  # - "10.10.0.0/16:5000"
+  # (list) Transport-Adressen der Proxies für den Synapse und seine Worker.
+  # Die angegebenen Proxies werden per Egress-Regeln erlaubt. Alle Einträge
+  # müssen in CIDR-Schreibweise angegeben werden: Start-IP/Netzmaske:Proxyport
+  # Beispiel:
+  # - 192.168.10.0/24:8765
+  # - 10.10.0.0/16:5000
   fwProxyList: []
-  # (list) IP-Range(s) der DNS-Resolver bzw. Admin-API; CIDR-Schreibweise!
-  # Angaben mit Port werden als Zielport mit Protokoll TCP übernommen.
-  # Bsp:
-  # - "192.168.2.0/24"
-  # - "10.20.2.0/24:53"
+  # (list) Transport-Adressen der DNS-Resolver und Admin-API.
+  # Angaben mit Port werden als Zielport mit Protokoll TCP übernommen. Alle
+  # Einträge müssen in CIDR-Schreibweise angegeben werden:
+  # Start-IP/Netzmaske:Proxyport
+  # Beispiel:
+  # - 192.168.2.0/24
+  # - 10.20.2.0/24:53
   egressIpBlock: []
-  # (string) Label zur Identifikation der DNS-Pods der Infrastruktur.
-  dnsLabel: "kube-dns"
-  # (string) Hierbei handelt es sich um den Namespace indem ein Ingress Controller gehostet wird.
-  # Aktuell wird nur eine Architektur mit einem L7 Ingress Controller unterstützt.
-  # Absolut notwendig für die Network-Policies
-  ingressNamespace: "default"
+  # (map) Einstellungen zum DNS der Infrastruktur.
+  dns:
+    # (list) Label-Selector zum Adressieren der DNS-Pods
+    labelSelector:
+      - key: k8s-app
+        operator: In
+        values: ["kube-dns"]
+  # (string) Namespace des Ingress-Controllers.
+  # Aktuell wird nur eine Architektur mit einem L7 Ingress-Controller
+  # unterstützt. Absolut notwendig für die Network-Policies.
+  ingressNamespace: default
 
-  # Wird gesetzt wenn sich die Postgres Instanz ausserhalb des Kubernetes Cluster befindet.
-  # Da Network Policies keine Hostnames auflösen können, wird eine IP benötigt.
-  postgres:
-    # bei dem Einsatz einer Postgres Instanz, welche sich außerhalb des Kubernetes Clusters
-    # befindet, muss hier eine einzelne IP Adresse angegeben werden.
-    externalPostgresIP: ""
-    # (map) Labels zum Adressieren der PostgreSQL-Instanz.
+  # (map) Einstellungen zum Haupt-PostgreSQL-Server.
+  postgresql:
+    # (string|null) IP der externen PostgreSQL-Instanz.
+    # Beim Einsatz einer PostgreSQL-Instanz außerhalb des Kubernetes Clusters
+    # muss hier eine einzelne IP Adresse angegeben werden. Falls ungesetzt wird
+    # angenommen, dass die externe PostgreSQL-Instanz Teil des Kubernetes
+    # Clusters ist.
+    # externalPostgresIP: 10.30.3.0
+
+    # (list) Label-Selector zum Adressieren des PostgreSQL-Pods.
     # Sollten die Labels bei einer eigens betriebenen Instanz abweichen, kann
     # dies hier angepasst werden.
-    # Achtung: Auf Grund des Verhaltens von Helm, muss der Standardwert, wenn er nicht benötigt wird
-    # explizit deaktiviert werden: `app.kubernetes.io/name: null`
-    selectorLabels:
-      app.kubernetes.io/name: postgresql
+    labelSelector:
+      - key: app.kubernetes.io/name
+        operator: In
+        values: ["postgresql"]
 
-  # Wird gesetzt wenn sich die Postgres Instanz ausserhalb des Kubernetes Cluster befindet.
-  # Da Network Policies keine Hostnames auflösen können, wird eine IP benötigt.
+  # (map) Einstellungen zum MAS-PostgreSQL-Server.
   maspostgresql:
-    # bei dem Einsatz einer MAS Postgres Instanz, welche sich außerhalb des Kubernetes Clusters
-    # befindet, muss hier eine einzelne IP Adresse angegeben werden.
-    externalPostgresIP: ""
-    # (map) Labels zum Adressieren der MAS PostgreSQL-Instanz.
+    # (string|null) IP der externen MAS-PostgreSQL-Instanz.
+    # Beim Einsatz einer PostgreSQL-Instanz außerhalb des Kubernetes Clusters
+    # muss hier eine einzelne IP Adresse angegeben werden. Falls ungesetzt wird
+    # angenommen, dass die externe PostgreSQL-Instanz Teil des Kubernetes
+    # Clusters ist.
+    # externalPostgresIP: 10.30.3.0
+
+    # (list) Label-Selector zum Adressieren des PostgreSQL-Pods.
     # Sollten die Labels bei einer eigens betriebenen Instanz abweichen, kann
     # dies hier angepasst werden.
-    # Achtung: Auf Grund des Verhaltens von Helm, muss der Standardwert, wenn er nicht benötigt wird
-    # explizit deaktiviert werden: `app.kubernetes.io/name: null`
-    selectorLabels:
-      app.kubernetes.io/name: maspostgresql
+    labelSelector:
+      - key: app.kubernetes.io/name
+        operator: In
+        values: ["maspostgresql"]
 
   # (map) HTTP-Resolver für ACME/Let’s Encrypt.
   # Erlaubt die Kommunikation vom Ingress zum hier angegebenen Endpunkt (Pod + Port).
   acme:
-    selectorLabels:
-      acme.cert-manager.io/http01-solver: "true"
+    labelSelector:
+      - key: acme.cert-manager.io/http01-solver
+        operator: In
+        values: ["true"]
     port: 8089
 
 

@@ -37,17 +37,17 @@ spec:
     {{- /* internal postgresql from this chart */}}
     - to:
       - podSelector:
-          matchLabels:
-            {{- toYaml $.Values.networkpolicies.postgres.selectorLabels | nindent 12 }}
+          matchExpressions:
+            {{- toYaml $.Values.networkpolicies.postgresql.labelSelector | nindent 12 }}
       ports:
       - protocol: TCP
         port: {{ $.Values.postgresql.service.targetPort }}
-    {{- else if $.Values.networkpolicies.postgres.externalPostgresIP }}
+    {{- else if $.Values.networkpolicies.postgresql.externalPostgresIP }}
     {{- /* external postgresql outside cluster selected by IP
           set an IP has higher priority than a label */}}
     - to:
       - ipBlock:
-          cidr: "{{ $.Values.networkpolicies.postgres.externalPostgresIP }}/32"
+          cidr: "{{ $.Values.networkpolicies.postgresql.externalPostgresIP }}/32"
       ports:
       - protocol: TCP
         port: {{ $.Values.externalPostgresql.port }}
@@ -55,8 +55,8 @@ spec:
     {{- /* external postgresql inside cluster selected by label */}}
     - to:
       - podSelector:
-          matchLabels:
-           {{- $.Values.networkpolicies.postgres.selectorLabels | toYaml | nindent 12 }}
+          matchExpressions:
+            {{- toYaml $.Values.networkpolicies.postgresql.labelSelector | nindent 12 }}
       ports:
       - protocol: TCP
         port: {{ $.Values.externalPostgresql.port }}
