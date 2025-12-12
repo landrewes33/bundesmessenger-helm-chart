@@ -1234,6 +1234,12 @@ sygnal:
   # erforderlich.
   proxy: null
 
+  # (map) Annotations, die auf den Pod anzuwenden sind.
+  annotations: {}
+
+  # (map) Labels, die auf den Pod anzuwenden sind.
+  labels: {}
+
   # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   podSecurityContext:
     <<: *defaultPodSecurityContext
@@ -2048,6 +2054,12 @@ mas:
   #    subMountPath: oauthprovider.crt
   #    readOnly: true
   extraVolumeMounts: []
+
+  # (map) Annotations, die auf den Pod anzuwenden sind.
+  annotations: {}
+
+  # (map) Labels, die auf den Pod anzuwenden sind.
+  labels: {}
 
   # (map) Konfiguration für die Container-Sicherheitsrichtlinie, Synapse wird immer als
   # sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist.

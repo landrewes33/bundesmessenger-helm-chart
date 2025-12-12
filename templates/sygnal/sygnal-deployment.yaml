@@ -26,9 +26,15 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/sygnal/sygnal-configuration.yaml") . | sha256sum }}
         checksum/fcmkey: {{ .Values.sygnal.fcmkey_keyvalue | toPrettyJson | sha256sum }}
         checksum/ioskey: {{ .Values.sygnal.ioskey_keyvalue | default "" | sha256sum }}
+        {{- with .Values.sygnal.annotations }}
+        {{- . | toYaml | nindent 8 }}
+        {{- end }}
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
+        {{- with .Values.sygnal.labels }}
+        {{- . | toYaml | nindent 8 }}
+        {{- end }}
     spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       automountServiceAccountToken: false
