@@ -2006,6 +2006,18 @@ properties:
           Zielports beim Proxy ist für die Generierung der Network-Policies
           zwingend erforderlich.
         default: null
+      annotations:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/annotations
+        type: object
+        default: {}
+        unevaluatedProperties: false
+      labels:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/labels
+        type: object
+        default: {}
+        unevaluatedProperties: false
       podSecurityContext:
         $ref: "#/$defs/podSecurityContext"
         type: object
@@ -2232,6 +2244,8 @@ properties:
     required:
       - enabled
       - image
+      - annotations
+      - labels
       - podSecurityContext
       - securityContext
       - resources
@@ -3254,6 +3268,18 @@ properties:
               mountPath: /etc/ssl/certs/
               subMountPath: oauthprovider.crt
               readOnly: true
+      annotations:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/annotations
+        type: object
+        default: {}
+        unevaluatedProperties: false
+      labels:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/labels
+        type: object
+        default: {}
+        unevaluatedProperties: false
       podSecurityContext:
         $ref: "#/$defs/podSecurityContext"
         type: object
@@ -3350,6 +3376,8 @@ properties:
       - extraConfig
       - extraVolumes
       - extraVolumeMounts
+      - annotations
+      - labels
       - podSecurityContext
       - securityContext
       - resources

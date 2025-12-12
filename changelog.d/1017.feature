@@ -1,0 +1,1 @@
+Erlaubt das Setzen von benutzerdefinierten Labels und Annotations für Sygnal und MAS.
