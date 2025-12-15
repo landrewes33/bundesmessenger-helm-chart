@@ -1,1 +1,1 @@
-Sub-Chart `postgres` auf Version `0.13.3` aktualisiert.
+Sub-Chart `postgres` auf Version `0.13.4` aktualisiert.
