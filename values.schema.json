@@ -4927,11 +4927,11 @@
               "properties": {
                 "cpu": {
                   "title": "Rechenressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind",
-                  "default": "150m"
+                  "default": "500m"
                 },
                 "memory": {
                   "title": "RAM-Ressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind",
-                  "default": "100Mi"
+                  "default": "200Mi"
                 }
               }
             },
