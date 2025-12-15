@@ -2544,7 +2544,7 @@ adminPortal:
   coreImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bumap-core
-    tag: 2.2.0-jammy-production
+    tag: 2.1.0-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
   # (map) Konfiguration des Image vom UI-Modul
