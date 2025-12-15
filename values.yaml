@@ -2579,9 +2579,9 @@ adminPortal:
   resources:
     limits:
       # (string) Rechenressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind.
-      cpu: 150m
+      cpu: 500m
       # (string) RAM Ressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind.
-      memory: 100Mi
+      memory: 200Mi
     requests:
       # (string) Anforderungen an Rechenressourcen, die auf die Admin-Portal Pods anzuwenden sind.
       cpu: 5m
