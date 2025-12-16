@@ -8,10 +8,11 @@ set:
   serverName: happy.place.example.org
   call.enabled: true
   mas.enabled: true
+  maspostgresql:
+    enabled: false
   extraConfig:
     experimental_features:
       new_feature: true
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures experimental_features is not part of normal configuration file
     template: configuration.yaml
@@ -33,10 +34,11 @@ templates:
 set:
   call.enabled: true
   mas.enabled: true
+  maspostgresql:
+    enabled: false
   extraConfig:
     experimental_features:
       new_feature: true
-  externalPostgresql.existingSecret: postgresql
   serverName: example.org
 tests:
   - it: ensures experimental_features is set for call
@@ -65,7 +67,6 @@ suite: Experimental Features overrides
 templates:
   - secrets.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   serverName: example.org
 tests:
   - it: ensures experimental_features overwritten for call

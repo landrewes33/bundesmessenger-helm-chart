@@ -3,8 +3,6 @@
 suite: Network Policies
 templates:
   - network-policy/*.yaml
-set:
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures no NetworkPolicy if disabled
     set:
@@ -19,14 +17,14 @@ suite: Network Policies ACME solver
 templates:
   - network-policy/allow-acme-network-policy.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   networkpolicies:
     enabled: true
     ingressNamespace: "default"
     acme:
-      selectorLabels:
-        acme.cert-manager.io/http01-solver: null  # Unset by coalescing
-        acme.cert-manager.io/own: "true"
+      labelSelector:
+        - key: example.org/own
+          operator: In
+          values: ["true"]
       port: 1234
 tests:
   - it: should create a NetworkPolicy with correct labels and ingress rules
@@ -36,9 +34,11 @@ tests:
           kind: NetworkPolicy
           name: RELEASE-NAME-acme-http01-solver-allow-ingress-controller
       - equal:
-          path: spec.podSelector.matchLabels
+          path: spec.podSelector.matchExpressions
           value:
-            acme.cert-manager.io/own: "true"
+            - key: example.org/own
+              operator: In
+              values: ["true"]
       - contains:
           path: spec.ingress[0].from
           any: true
@@ -58,76 +58,91 @@ suite: Network Policies MAS
 templates:
   - network-policy/matrix-authentication-service-network-policy.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   networkpolicies.enabled: true
   mas.enabled: true
 tests:
-  - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels set to {}"
+  - it: errors on empty maspostgresql.labelSelector
+    set:
+      networkpolicies:
+        maspostgresql:
+          labelSelector: []
+    asserts:
+      - failedTemplate: {}
+  - it: errors on missing maspostgresql.labelSelector
+    set:
+      networkpolicies:
+        maspostgresql:
+          labelSelector: null  # Unset by coalescing
+    asserts:
+      - failedTemplate: {}
+  - it: "renders postgres egress rule when maspostgresql.enabled = true and labelSelector is set"
     template: network-policy/matrix-authentication-service-network-policy.yaml
     documentIndex: 0
     set:
       networkpolicies:
-        postgres:
-          selectorLabels: {}
-      postgresql:
+        maspostgresql:
+          labelSelector:
+            - key: example.org/custom
+              operator: In
+              values: ["postgres-db"]
+      maspostgresql:
         enabled: true
-        containerPorts:
-          postgresql: 5433
+        service:
+          targetPort: 5433
     asserts:
       - equal:
           path: spec.egress[1].ports[0].port
           value: 5433
       - equal:
-          path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
-          value: postgresql
-  - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels not set"
-    template: network-policy/matrix-authentication-service-network-policy.yaml
-    documentIndex: 0
-    set:
-      postgresql:
-        enabled: true
-        containerPorts:
-          postgresql: 5433
-    asserts:
-      - equal:
-          path: spec.egress[1].ports[0].port
-          value: 5433
-      - equal:
-          path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
-          value: postgresql
-  - it: "renders postgres egress rule when postgresql.enabled = false but selectorLabels are set"
+          path: spec.egress[1].to[0].podSelector.matchExpressions
+          value:
+            - key: example.org/custom
+              operator: In
+              values: ["postgres-db"]
+      - notContains:
+          path: spec.egress[1].to[0].podSelector.matchExpressions
+          content:
+            key: app.kubernetes.io/name
+          any: true
+  - it: "renders postgres egress rule when maspostgresql.enabled = false and labelSelector is set"
     template: network-policy/matrix-authentication-service-network-policy.yaml
     documentIndex: 0
     set:
       networkpolicies:
-        postgres:
-          selectorLabels:
-            custom: postgres-db
-            app.kubernetes.io/name: null
-      postgresql:
+        maspostgresql:
+          labelSelector:
+            - key: example.org/custom
+              operator: In
+              values: ["postgres-db"]
+      maspostgresql:
         enabled: false
-      externalPostgresql:
-        port: 15432
+      externalmasPostgresql:
+        port: 5433
     asserts:
       - equal:
           path: spec.egress[1].ports[0].port
-          value: 15432
+          value: 5433
       - equal:
-          path: spec.egress[1].to[0].podSelector.matchLabels.custom
-          value: postgres-db
-      - notExists:
-          path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
-  - it: "renders postgres egress rule with ipBlock when no selectorLabels are set"
+          path: spec.egress[1].to[0].podSelector.matchExpressions
+          value:
+            - key: example.org/custom
+              operator: In
+              values: ["postgres-db"]
+      - notContains:
+          path: spec.egress[1].to[0].podSelector.matchExpressions
+          content:
+            key: app.kubernetes.io/name
+          any: true
+  - it: "renders postgres egress rule with ipBlock"
     template: network-policy/matrix-authentication-service-network-policy.yaml
     documentIndex: 0
     set:
       networkpolicies:
-        postgres:
-          selectorLabels: {}
+        maspostgresql:
           externalPostgresIP: 10.1.2.3
-      postgresql:
+      maspostgresql:
         enabled: false
-      externalPostgresql:
+      externalmasPostgresql:
         port: 25432
     asserts:
       - equal:
@@ -142,73 +157,86 @@ suite: Network Policies Worker
 templates:
   - network-policy/worker-network-policy.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   networkpolicies.enabled: true
 tests:
-  - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels set to {}"
+  - it: errors on empty postgresql.labelSelector
+    set:
+      networkpolicies:
+        postgresql:
+          labelSelector: []
+    asserts:
+      - failedTemplate: {}
+  - it: errors on missing postgresql.labelSelector
+    set:
+      networkpolicies:
+        postgresql:
+          labelSelector: null  # Unset by coalescing
+    asserts:
+      - failedTemplate: {}
+  - it: "renders postgres egress rule when postgresql.enabled = true and labelSelector is set"
     template: network-policy/worker-network-policy.yaml
     documentIndex: 0
     set:
       networkpolicies:
-        postgres:
-          selectorLabels: {}
+        postgresql:
+          labelSelector:
+            - key: example.org/custom
+              operator: In
+              values: ["postgres-db"]
       postgresql:
         enabled: true
-        containerPorts:
-          postgresql: 5433
-    asserts:
-      - isKind:
-          of: NetworkPolicy
-      - equal:
-          path: spec.egress[1].ports[0].port
-          value: 5433
-      - equal:
-          path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
-          value: postgresql
-  - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels not set"
-    template: network-policy/worker-network-policy.yaml
-    documentIndex: 0
-    set:
-      postgresql:
-        enabled: true
-        containerPorts:
-          postgresql: 5433
+        service:
+          targetPort: 5433
     asserts:
       - equal:
           path: spec.egress[1].ports[0].port
           value: 5433
       - equal:
-          path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
-          value: postgresql
-  - it: "renders postgres egress rule when postgresql.enabled = false but selectorLabels are set"
+          path: spec.egress[1].to[0].podSelector.matchExpressions
+          value:
+            - key: example.org/custom
+              operator: In
+              values: ["postgres-db"]
+      - notContains:
+          path: spec.egress[1].to[0].podSelector.matchExpressions
+          content:
+            key: app.kubernetes.io/name
+          any: true
+  - it: "renders postgres egress rule when postgresql.enabled = false and labelSelector is set"
     template: network-policy/worker-network-policy.yaml
     documentIndex: 0
     set:
       networkpolicies:
-        postgres:
-          selectorLabels:
-            custom: postgres-db
-            app.kubernetes.io/name: null
+        postgresql:
+          labelSelector:
+            - key: example.org/custom
+              operator: In
+              values: ["postgres-db"]
       postgresql:
         enabled: false
       externalPostgresql:
-        port: 15432
+        port: 5433
     asserts:
       - equal:
           path: spec.egress[1].ports[0].port
-          value: 15432
+          value: 5433
       - equal:
-          path: spec.egress[1].to[0].podSelector.matchLabels.custom
-          value: postgres-db
-      - notExists:
-          path: spec.egress[1].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
-  - it: "renders postgres egress rule with ipBlock when no selectorLabels are set"
+          path: spec.egress[1].to[0].podSelector.matchExpressions
+          value:
+            - key: example.org/custom
+              operator: In
+              values: ["postgres-db"]
+      - notContains:
+          path: spec.egress[1].to[0].podSelector.matchExpressions
+          content:
+            key: app.kubernetes.io/name
+          any: true
+  - it: "renders postgres egress rule with ipBlock"
     template: network-policy/worker-network-policy.yaml
     documentIndex: 0
     set:
       networkpolicies:
-        postgres:
-          selectorLabels: {}
+        postgresql:
           externalPostgresIP: 10.1.2.3
       postgresql:
         enabled: false
@@ -227,73 +255,86 @@ suite: Network Policies Main
 templates:
   - network-policy/matrix-network-policy.yaml
 set:
-  externalPostgresql.existingSecret: postgresql
   networkpolicies.enabled: true
 tests:
-  - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels set to {}"
+  - it: errors on empty postgresql.labelSelector
+    set:
+      networkpolicies:
+        postgresql:
+          labelSelector: []
+    asserts:
+      - failedTemplate: {}
+  - it: errors on missing postgresql.labelSelector
+    set:
+      networkpolicies:
+        postgresql:
+          labelSelector: null  # Unset by coalescing
+    asserts:
+      - failedTemplate: {}
+  - it: "renders postgres egress rule when postgresql.enabled = true and labelSelector is set"
     template: network-policy/matrix-network-policy.yaml
     documentIndex: 0
     set:
       networkpolicies:
-        postgres:
-          selectorLabels: {}
+        postgresql:
+          labelSelector:
+            - key: example.org/custom
+              operator: In
+              values: ["postgres-db"]
       postgresql:
         enabled: true
-        containerPorts:
-          postgresql: 5433
-    asserts:
-      - isKind:
-          of: NetworkPolicy
-      - equal:
-          path: spec.egress[0].ports[0].port
-          value: 5433
-      - equal:
-          path: spec.egress[0].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
-          value: postgresql
-  - it: "renders postgres egress rule when postgresql.enabled = true selectorLabels not set"
-    template: network-policy/matrix-network-policy.yaml
-    documentIndex: 0
-    set:
-      postgresql:
-        enabled: true
-        containerPorts:
-          postgresql: 5433
+        service:
+          targetPort: 5433
     asserts:
       - equal:
           path: spec.egress[0].ports[0].port
           value: 5433
       - equal:
-          path: spec.egress[0].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
-          value: postgresql
-  - it: "renders postgres egress rule when postgresql.enabled = false but selectorLabels are set"
+          path: spec.egress[0].to[0].podSelector.matchExpressions
+          value:
+            - key: example.org/custom
+              operator: In
+              values: ["postgres-db"]
+      - notContains:
+          path: spec.egress[0].to[0].podSelector.matchExpressions
+          content:
+            key: app.kubernetes.io/name
+          any: true
+  - it: "renders postgres egress rule when postgresql.enabled = false and labelSelector is set"
     template: network-policy/matrix-network-policy.yaml
     documentIndex: 0
     set:
       networkpolicies:
-        postgres:
-          selectorLabels:
-            custom: postgres-db
-            app.kubernetes.io/name: null
+        postgresql:
+          labelSelector:
+            - key: example.org/custom
+              operator: In
+              values: ["postgres-db"]
       postgresql:
         enabled: false
       externalPostgresql:
-        port: 15432
+        port: 5433
     asserts:
       - equal:
           path: spec.egress[0].ports[0].port
-          value: 15432
+          value: 5433
       - equal:
-          path: spec.egress[0].to[0].podSelector.matchLabels.custom
-          value: postgres-db
-      - notExists:
-          path: spec.egress[0].to[0].podSelector.matchLabels["app.kubernetes.io/name"]
-  - it: "renders postgres egress rule with ipBlock when no selectorLabels are set"
+          path: spec.egress[0].to[0].podSelector.matchExpressions
+          value:
+            - key: example.org/custom
+              operator: In
+              values: ["postgres-db"]
+      - notContains:
+          path: spec.egress[0].to[0].podSelector.matchExpressions
+          content:
+            key: app.kubernetes.io/name
+          any: true
+  - it: "renders postgres egress rule with ipBlock"
     template: network-policy/matrix-network-policy.yaml
     documentIndex: 0
     set:
       networkpolicies:
-        postgres:
-          selectorLabels: {}
+        postgresql:
           externalPostgresIP: 10.1.2.3
       postgresql:
         enabled: false
@@ -306,6 +347,7 @@ tests:
       - equal:
           path: spec.egress[0].to[0].ipBlock.cidr
           value: "10.1.2.3/32"
+
 ---
 suite: Test egress rules allow KubeDNS and external IPBlocks
 templates:
@@ -324,8 +366,6 @@ tests:
         egressIpBlock:
           - "10.0.0.0/24"
     asserts:
-      - isKind:
-          of: NetworkPolicy
       - contains:
           path: spec.egress
           content:
@@ -382,8 +422,10 @@ tests:
 
   - it: should render default DNS egress when egressCIDRs is not set
     set:
-      networkpolicies:
-        dnsLabel: kube-dns
+      networkpolicies.dns.labelSelector:
+        - key: k8s-app
+          operator: In
+          values: ["kube-dns"]
     asserts:
       - contains:
           path: spec.egress[0].to
@@ -400,9 +442,11 @@ tests:
 
   - it: should render default DNS egress when egressCIDRs is empty list
     set:
-      networkpolicies:
-        dnsLabel: coredns
-        egressIpBlock: []
+      networkpolicies.dns.labelSelector:
+        - key: k8s-app
+          operator: In
+          values: ["coredns"]
+      networkpolicies.egressIpBlock: []
     asserts:
       - contains:
           path: spec.egress[0].to

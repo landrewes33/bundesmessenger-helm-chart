@@ -1,7 +1,7 @@
 {{/* SPDX-FileCopyrightText: 2024–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.networkpolicies.enabled }}
-{{- if .Values.adminPortal.enabled }}
+{{- if and .Values.adminPortal.enabled .Values.mas.enabled }}
 {{- $componentBase := "adminportal" -}}
 {{- $coreName := "synapse-core" -}}
 {{- $uiName := "synapse-ui" -}}

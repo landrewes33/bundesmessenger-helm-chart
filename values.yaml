@@ -11,7 +11,7 @@ image:
   repository: bwi/bundesmessenger/backend/container-images/synapse
 
   # (string) Verwendete Version des Synapse-Abbilds.
-  tag: 1.142.1-jammy-production
+  tag: 1.143.0-jammy-production
 
   # (list) Optional kann ein Array von imagePullSecrets angegeben werden.
   # Secrets müssen manuell im Namensraum angelegt werden.
@@ -162,7 +162,7 @@ signingkey:
       # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen (empfohlen)
       repository: bwi/bundesmessenger/backend/container-images/synapse
       # (string) Verwendete Version des Synapse-Abbilds.
-      tag: 1.142.1-jammy-production
+      tag: 1.143.0-jammy-production
       pullSecrets: []
       # (string) PullPolicy für das Image vom Signing-Key-Job
       pullPolicy: IfNotPresent
@@ -635,7 +635,7 @@ synapse:
       # (string) Anforderungen an Rechenressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
       cpu: 500m
       # (string) Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
-      memory: 1000Mi
+      memory: 500Mi
 
   ## Healthcheck
   livenessProbe:
@@ -1234,6 +1234,12 @@ sygnal:
   # erforderlich.
   proxy: null
 
+  # (map) Annotations, die auf den Pod anzuwenden sind.
+  annotations: {}
+
+  # (map) Labels, die auf den Pod anzuwenden sind.
+  labels: {}
+
   # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
   podSecurityContext:
     <<: *defaultPodSecurityContext
@@ -1257,7 +1263,7 @@ sygnal:
       # (string) Anforderungen an Rechenressourcen, die auf den Sygnal-Container anzuwenden sind.
       cpu: 150m
       # (string) Anforderungen an RAM Ressourcen, die auf den Sygnal-Container anzuwenden sind.
-      memory: 45Mi
+      memory: 50Mi
 
   ## Healthcheck
   livenessProbe:
@@ -1525,9 +1531,105 @@ confighub:
   # (map) Affinitäts-Konfiguration für confighub.
   affinity: {}
 
+######################################################################################
+##          Konfiguration des PostgreSQL-Defaults zur Wiederverwendung
+######################################################################################
+## Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und
+## schnelle Möglichkeit, Demo- und Testsysteme des BundesMessengers aufzusetzen.
+
+x-defaultPostgresqlCommon: &postgresDefaults
+# (map) Das zu verwendende PostgreSQL-Container-Abbild.
+  image:
+    registry: docker.io
+    repository: postgres
+    tag: "18"
+
+    # (list) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
+    # pullSecrets: ["myRegistryKeySecretName"]
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+
+  # (map) Konfiguration des Adminnutzers.
+  auth:
+    # (string) Name des PostgreSQL Adminnutzers.
+    username: postgres
+    # (string) Name des Kubernetes Secrets mit dem Adminpasswort.
+    # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen
+    # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
+    existingSecret: postgresql
+    # (map) Schlüssel im angegebenen Secret.
+    secretKeys:
+      # (string) Verweis im `existingSecret` auf das Adminpasswort.
+      adminPasswordKey: postgres-password
+
+  # (map) Service-Konfiguration.
+  service:
+    # (integer) Port des PostgreSQL-Service.
+    port: 5432
+    # (integer) Interner Port des PostgreSQL-Containers.
+    targetPort: 5432
+
+  # (list) Extra Volumes.
+  # Kann zusammen mit `extraVolumeMounts` zum Wiedereinspielen einer Sicherung
+  # verwendet werden.
+  # Beispiel:
+  #   - name: major-upgrade-dump
+  #     persistentVolumeClaim:
+  #       claimName: postgresql-major-upgrade
+  extraVolumes: []
+  # (list) Extra Volume-Mounts.
+  # Beispiel:
+  #   - name: major-upgrade-dump
+  #     mountPath: /major-upgrade-dump
+  extraVolumeMounts: []
+
+  # (map) Extra Konfiguration der Datenbank.
+  config:
+    # (int) Maximale Anzahl an Datenbankverbindungen.
+    # Die maximale Anzahl an Verbindungen ist oft eine Limitierung, da jeder
+    # Synapse-Prozess seine Verbindungen zur Datenbank hält.
+    postgresqlMaxConnections: 1024
+
+  containerSecurityContext:
+    # (integer) User ID for the PostgreSQL container.
+    runAsUser: 66999
+    # (integer) Group ID for the PostgreSQL container.
+    runAsGroup: 66999
+    # (bool) Mount container root filesystem as read-only.
+    readOnlyRootFilesystem: true
+
+  # (map) Persistenzkonfiguration für Storage für PostgreSQL
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 16Gi
+
+  # (map) Ressourcenanforderungen und -grenzen.
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
+      cpu: 1
+      # (string) RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
+      memory: 4096Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind.
+      cpu: 250m
+      # (string) Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind.
+      memory: 256Mi
+
+  # (map) Zusätzliche Argumente für die Datenbankverbindung.
+  # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+  extraArgs:
+    # -- (string) Verwendeter SSL-Modus.
+    # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+    sslmode: prefer
+    # sslrootcert: /path/to/ca.pem
+    # sslcert: /path/to/cert.pem
+    # sslkey: /path/to/key.pem
 
 ######################################################################################
-##          Konfiguration des internen PostgreSQL-Servers
+##          Konfiguration der internen PostgreSQL-Server
 ######################################################################################
 ## Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und
 ## schnelle Möglichkeit, Demo- und Testsysteme des BundesMessengers aufzusetzen.
@@ -1538,89 +1640,37 @@ confighub:
 ## `externalPostgresql`-Block.
 
 postgresql:
+  <<: *postgresDefaults
   # (bool) Aktivieren des internen PostgreSQL-Servers.
   # Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern
   # vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled`
   # auf `false` und konfigurieren Sie den `externalPostgresql`-Block.
   enabled: false
 
-  # (map) Das zu verwendende PostgreSQL-Container-Abbild.
-  image:
-    registry: docker.io
-    repository: bitnamilegacy/postgresql
-    tag: "16"
-    # (list) Liste von Kubernetes Pull-Secrets.
-    # Beispiel:
-    # pullSecrets: ["myRegistryKeySecretName"]
-    pullSecrets: []
-    pullPolicy: IfNotPresent
-
-  # (object) Authentifizierung gegenüber dem internen PostgreSQL-Server.
-  auth:
-    # (string) Name der PostgreSQL-Datenbank.
-    database: synapse_db
-
-    # (string) Name des PostgreSQL-Nutzers.
+  # (map) Konfiguration des Synapse Datenbanknutzers.
+  customUser:
+    # (string) Name vom Datenbanknutzer.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
     username: synapse
-
-    # (string|null) Passwort für PostgreSQL Nutzer
-    password: synapse
-
-    # (string) Name des Secrets, in dem das PostgreSQL-Passwort steht.
+    # (string) Name der Datenbank.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
+    database: synapse_db
+    # (string) Name vom Secret mit dem Passwort des Synapse Datenbanknutzers.
     # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen
     # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
     existingSecret: postgresql
+    # (map) Schlüssel im angegebenen Secret.
     secretKeys:
-      # (string) Verweis im `existingSecret` auf das Datenbank-Passwort.
-      # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
-      userPasswordKey: password
-      # (string) Verweis im `existingSecret` auf das Passwort des postgres-Nutzers.
-      # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
-      adminPasswordKey: postgres-password
+      # (string) Verweis im `existingSecret` auf den Namen des Datenbanknutzers.
+      name: username
+      # (string) Verweis im `existingSecret` auf den Namen der Datenbank.
+      database: database
+      # (string) Verweis im `existingSecret` auf das Nutzerpasswort.
+      password: password
 
-  containerPorts:
-    # (integer) Port des PostgreSQL-Containers.
-    postgresql: 5432
-
-  primary:
-    service:
-      ports:
-        # (integer) Port des PostgreSQL-Service.
-        postgresql: 5432
-
-    initdb:
-      # (string) Extra Argumente zur Initialisierung der Datenbank
-      args: "--lc-collate=C --lc-ctype=C --encoding=UTF8"
-
-    # (string) Extra Konfiguration der Datenbank.
-    # Die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder
-    # Synapse-Prozess seine Verbindungen zur Datenbank hält.
-    extendedConfiguration: |
-      max_connections = 1024
-
-    # (map) Persistenzkonfiguration für Storage für PostgreSQL
-    persistence:
-      storageClass: ""
-      size: 16Gi
-
-    resources:
-      limits:
-        # (string) Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
-        cpu: 1
-        # (string) RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
-        memory: 4096Mi
-      requests:
-        # (string) Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind.
-        cpu: 250m
-        # (string) Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind.
-        memory: 256Mi
-
-  # (map) Zusätzliche Argumente für die Datenbankverbindung.
-  # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
-  extraArgs:
-    # Verwendeter SSL-Modus.
-    # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
-    sslmode: prefer
+  initdb:
+    # (string) Extra Argumente zur Initialisierung der Datenbank
+    args: "--lc-collate=C --lc-ctype=C --encoding=UTF8"
 
 # (map) Extern konfigurierter PostgreSQL-Server.
 # Wird für die Datenbank von Synapse verwendet.
@@ -1729,7 +1779,7 @@ redis:
       # (string) Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind.
       cpu: 300m
       # (string) Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind.
-      memory: 256Mi
+      memory: 128Mi
 
 # (map) Extern konfigurierter Redis-Server.
 # Wird nur verwendet, wenn `redis.enabled: false` ist.
@@ -1882,46 +1932,27 @@ mas:
   enabled: false
   # (map) Konfiguration des Image/Repository
   image:
-    registry: ghcr.io
-    repository: element-hq/matrix-authentication-service
-    # Tag mit "-debug" um shell zu haben
-    tag: 1.6.0-debug
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/matrix-authentication-service
+    tag: 1.7.0-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
+
+  # Migrationskonfiguration für MAS
+  migration:
+    # (bool) Aktiviert die Migrationsfunktionalität
+    enabled: false  # Auf true setzen, um Migration auszuführen
+    # Backup-Konfiguration für die Migration
+    backup:
+      # (bool) Aktiviert das Backup vor der Migration
+      enabled: true  # Backup-Option aktivieren
+      # (string) Speichergröße für das Backup (z.B. "1Gi", "2Gi")
+      storage: 16Gi   # Speicherplatz für Backup
 
   # (string) URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider
   # Eine URI ist dringend ratsam, damit der Dienst routing-technisch getrennt ist.
   # Ein stabiles Deployment ohne eigene URI wurde bisher nicht erprobt.
   uri: ""
-  # (map) Zugangsdaten für die benötigte PostreSQL-Datenbank.
-  # Diese wird nicht automatisch angelegt und muss bereit gestellt werden.
-  # https://element-hq.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
-  postgresql:
-    # (string|null) Host für PostgreSQL-DB von MAS.
-    # Falls ungesetzt, wird die Haupt-PostgreSQL-Instanz verwendet.
-    # host: masdb.example.org
-    # (integer) Port für PostgreSQL-DB von MAS.
-    port: 5432
-    # (string) DB-Name für PostgreSQL-DB von MAS.
-    database: mas_synapse
-    # (string) Nutzername für PostgreSQL-DB von MAS.
-    username: massynapse
-    # (string) Password für PostgreSQL Nutzer von MAS.
-    password: mas-synapse
-    min_connections: 0
-    max_connections: 10
-    connect_timeout: 30
-    idle_timeout: 600
-    max_lifetime: 1800
-    # (map) Zusätzliche Argumente für die MAS Datenbankverbindung.
-    # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
-    extraArgs:
-      # -- (string) Verwendeter SSL-Modus.
-      # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
-      sslmode: prefer
-      # sslrootcert: /path/to/ca.pem
-      # sslcert: /path/to/cert.pem
-      # sslkey: /path/to/key.pem
 
   # (map) MAS Cookie- und Datenbankschlüssel.
   # Der Schlüssel wird als hexadezimale Zeichenkette eingelesen und besteht aus
@@ -1936,6 +1967,15 @@ mas:
     existingSecret: mas
     # (string) Verweis im `existingSecret` auf den MAS Datenbankschlüssel.
     existingSecretKey: encryption
+
+  # (map) Matrix–MAS Shared-Secret.
+  # Beliebige Zeichenkette, die zur Absicherung der Kommunikation zwischen
+  # Synapse und MAS verwendet wird.
+  matrixSharedSecret:
+    # (string) Name des Secrets, in dem das Matrix–MAS Shared-Secret stehen.
+    existingSecret: mas
+    # (string) Verweis im `existingSecret` auf das Matrix–MAS Shared-Secret.
+    existingSecretKey: matrix-shared-secret
 
   # (map) MAS Signaturschlüssel.
   # Im Secret liegt eine beliebige Anzahl an Signaturschlüsseln im PEM-Format.
@@ -1966,124 +2006,50 @@ mas:
     - "/.well-known/openid-configuration"
     - "/"
 
-  # (list) Konfiguration eines Upstream Authentification Providers zur Delegierung
-  # der Authentifizierung. Die Angaben werden automatisch in die Konfiguration unter
-  # `upstream_oauth2.providers` bereit gestellt.
-  # https://element-hq.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider
-  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#upstream_oauth2
-  upstream_oauth2_provider: []
-
-  # (list) OIDC Clients, die zusätzlich zum Synypase Client konfiguriert werden.
-  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#clients
-  clients: []
-
-  # (map)
-  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords
-  passwords:
-    # Whether to enable the password database.
-    # If disabled, users will only be able to log in using upstream OIDC providers
-    enabled: true
-
-    # List of password hashing schemes being used
-    # /!\ Only change this if you know what you're doing
-    # TODO: document this section better
-    schemes:
-      - version: 1
-        algorithm: argon2id
-
-  # (map)
-  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#account
-  account:
-    # (bool) Whether users are allowed to change their email addresses. default: true
-    email_change_allowed: false
-
-    # (bool) Whether users are allowed to change their display names. default: true
-    # This should be in sync with the policy in the homeserver configuration.
-    displayname_change_allowed: false
-
-    # (bool) Whether to enable self-service password registration. default: false
-    # This has no effect if password login is disabled.
-    password_registration_enabled: false
-
-    # (bool) Whether users are allowed to change their passwords. default: true
-    # This has no effect if password login is disabled.
-    password_change_allowed: true
-
-    # (bool) Whether email-based password recovery is enabled. default: false
-    # This has no effect if password login is disabled.
-    password_recovery_enabled: false
-
-
-  # (map) Zusätzliche Policy Konfiguration für MAS.
-  # Die Angaben werden automatisch in die Konfiguration unter `policy.data` bereit gestellt.
-  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#policy
-  policy:
-    admin_users: []
-
-    # (map) Registration using passwords
+  # Zusätzliche Konfigurationen für den MAS
+  # Ref: https://element-hq.github.io/matrix-authentication-service/reference/configuration.html
+  extraConfig:
+    # (map) Konfiguration der Passwortdatenbank.
+    # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords
     passwords:
-      # (integer) minimum length of a password. default: ?
-      min_length: 8
-      # (bool) require at least one lowercase character in a password. default: false
-      require_lowercase: true
-      # (bool) require at least one uppercase character in a password. default: false
-      require_uppercase: true
-      # (bool) require at least one number in a password. default: false
-      require_number: true
+      # Whether to enable the password database.
+      # If disabled, users will only be able to log in using upstream OIDC providers
+      enabled: true
 
-   # (map)
-   # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting
-  rate_limiting:
-    # Limits how many account recovery attempts are allowed.
-    # These limits can protect against e-mail spam.
-    #
-    # Note: these limit also apply to recovery e-mail re-sends.
-    account_recovery:
-      # Controls how many account recovery attempts are permitted
-      # based on source IP address.
-      per_ip:
-        burst: 3
-        per_second: 0.0008
+      # List of password hashing schemes being used
+      # /!\ Only change this if you know what you're doing
+      schemes:
+        - version: 1
+          algorithm: argon2id
 
-      # Controls how many account recovery attempts are permitted
-      # based on the e-mail address that is being used for recovery.
-      per_address:
-        burst: 3
-        per_second: 0.0002
+      # Minimum complexity required for passwords, estimated by the zxcvbn algorithm
+      # Must be between 0 and 4, default is 3
+      # See https://github.com/dropbox/zxcvbn#usage for more information
+      minimum_complexity: 3
 
-    # Limits how many login attempts are allowed.
-    #
-    # Note: these limit also applies to password checks when a user attempts to
-    # change their own password.
-    login:
-      # Controls how many login attempts are permitted
-      # based on source IP address.
-      # This can protect against brute force login attempts.
-      per_ip:
-        burst: 3
-        per_second: 0.05
+    # (map) Einstellungen zu MAS Nutzerkonten.
+    # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#account
+    account:
+      # (bool) Whether users are allowed to change their email addresses. default: true
+      email_change_allowed: false
 
-      # Controls how many login attempts are permitted
-      # based on the account that is being attempted to be logged into.
-      # This can protect against a distributed brute force attack
-      # but should be set high enough to prevent someone's account being
-      # casually locked out.
-      per_account:
-        burst: 1800
-        per_second: 0.5
+      # (bool) Whether users are allowed to change their display names. default: true
+      # This should be in sync with the policy in the homeserver configuration.
+      displayname_change_allowed: false
 
-    # Limits how many registrations attempts are allowed,
-    # based on source IP address.
-    # This limit can protect against e-mail spam and against people registering too many accounts.
-    registration:
-      burst: 3
-      per_second: 0.0008
+      # (bool) Whether to enable self-service password registration. default: false
+      # This has no effect if password login is disabled.
+      password_registration_enabled: false
 
-  # (map) Zusätzliche E-Mail Konfiguration für MAS.
-  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#email
-  email:
-    # Default transport: don't send any emails
-    transport: blackhole
+      # (bool) Whether email-based password recovery is enabled. default: false
+      # This has no effect if password login is disabled.
+      password_recovery_enabled: false
+
+    # (map) Zusätzliche E-Mail Konfiguration für MAS.
+    # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#email
+    email:
+      # Default transport: don't send any emails
+      transport: blackhole
 
   # (list) Zusätzliche in den MAS zu mountende Datenträger (Volumes)
   # Beispiel:
@@ -2099,6 +2065,12 @@ mas:
   #    subMountPath: oauthprovider.crt
   #    readOnly: true
   extraVolumeMounts: []
+
+  # (map) Annotations, die auf den Pod anzuwenden sind.
+  annotations: {}
+
+  # (map) Labels, die auf den Pod anzuwenden sind.
+  labels: {}
 
   # (map) Konfiguration für die Container-Sicherheitsrichtlinie, Synapse wird immer als
   # sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist.
@@ -2157,6 +2129,78 @@ mas:
       # DEFAULT gilt für alle Synapse-Worker-Container.
       port: health
 
+######################################################################################
+##          Datenbank Konfiguration für Matrix-Authentication-Service
+######################################################################################
+## Empfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen
+## Sie `externalmasPostgresql.enabled` auf `false` und konfigurieren Sie den
+## `externalPostgresql`-Block.
+  # https://element-hq.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
+maspostgresql:
+  <<: *postgresDefaults
+  # (bool) Aktivieren des internen PostgreSQL-Servers für MAS.
+  # Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern
+  # vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `maspostgresql.enabled`
+  # auf `false` und konfigurieren Sie den `externalmasPostgresql`-Block.
+  enabled: false
+
+  # (map) Konfiguration des Synapse Datenbanknutzers.
+  customUser:
+    # (string) Name vom Datenbanknutzer.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
+    username: mas
+    # (string) Name der Datenbank.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
+    database: mas_synapse
+    # (string) Name vom Secret mit dem Passwort des Synapse Datenbanknutzers.
+    # Ist `maspostgresql.enabled` und es existiert kein Secret mit dem angegebenen
+    # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
+    existingSecret: postgresql
+    # (map) Schlüssel im angegebenen Secret.
+    secretKeys:
+      # (string) Verweis im `existingSecret` auf den Namen des Datenbanknutzers.
+      name: masusername
+      # (string) Verweis im `existingSecret` auf den Namen der Datenbank.
+      database: masdatabase
+      # (string) Verweis im `existingSecret` auf das Nutzerpasswort.
+      password: maspassword
+
+  min_connections: 0
+  max_connections: 10
+  connect_timeout: 30
+  idle_timeout: 600
+  max_lifetime: 1800
+
+externalmasPostgresql:
+  # (string) Hostname vom externen PostgreSQL-Server.
+  # Beispieladresse für einen K8s-internen PostgreSQL im Namespace `postgres`:
+  host: postgres-4-matrix-postgresql.postgres.svc.cluster.local
+  # (integer) Port vom externen PostgreSQL-Server.
+  port: 5432
+  # (string) Name der zu verwendenden PostgreSQL-Datenbank.
+  database: mas_synapse
+
+  # (string) Name des PostgreSQL-Nutzers.
+  username: mas
+
+  # (string) Name vom Secret mit dem PostgreSQL-Passwort.
+  existingSecret: postgresql
+
+  # (string) Verweis im `existingSecret` auf das PostgreSQL-Passwort.
+  existingSecretPasswordKey: maspassword
+
+  # (map) Zusätzliche Argumente für die Datenbankverbindung.
+  # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+  extraArgs:
+    # -- (string) Verwendeter SSL-Modus.
+    # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+    sslmode: prefer
+
+  min_connections: 0
+  max_connections: 10
+  connect_timeout: 30
+  idle_timeout: 600
+  max_lifetime: 1800
 
 ######################################################################################
 ##          Konfiguration für Matrix-Content-Scanner (MCS)
@@ -2247,12 +2291,12 @@ contentscanner:
       # (string) Rechenressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
       cpu: 500m
       # (string) RAM Ressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
-      memory: 1Gi
+      memory: 500Mi
     requests:
       # (string) Anforderungen an Rechenressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
       cpu: 300m
       # (string) Anforderungen an RAM Ressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
-      memory: 500Mi
+      memory: 50Mi
 
 
   # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
@@ -2370,7 +2414,7 @@ schadcodescanner:
       # (string) Anforderungen an Rechenressourcen, die auf den ClamAV-Container anzuwenden sind.
       cpu: 300m
       # (string) Anforderungen an RAM Ressourcen, die auf den ClamAV-Container anzuwenden sind.
-      memory: 2Gi
+      memory: 1.5Gi
 
   resourcesCicap:
     limits:
@@ -2483,9 +2527,15 @@ synapse_admin:
 
 adminPortal:
   # (bool) Aktivieren des Admin-Portal-Moduls
+  # Hierfür ist auch der MAS erforderlich (`mas.enabled: true`).
+  # Ref: ./docs/matrix-authentication-service.md
   enabled: false
   # (string) URI für das Admin-Portal, zwingend notwendig
   uri: ""
+  # (string) Client ID im ulid Format
+  # Die Client ID verwendet das Admin Portal zur Authentifizierung am MAS.
+  # Ref: https://github.com/ulid/spec
+  clientID: "01KBJDJMZJ3K1XCHQ81T4Q17QD"
   # (bool) Aktivieren der TLS Zertifikatsüberprüfung
   TLSverify: true
   # (string) LogLevel Core-Komponente
@@ -2494,14 +2544,14 @@ adminPortal:
   coreImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bumap-core
-    tag: 1.1.0-jammy-production
+    tag: 2.1.0-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
   # (map) Konfiguration des Image vom UI-Modul
   uiImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bumap-ui
-    tag: 1.1.0-jammy-production
+    tag: 2.1.0-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 
@@ -2529,9 +2579,9 @@ adminPortal:
   resources:
     limits:
       # (string) Rechenressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind.
-      cpu: 150m
+      cpu: 500m
       # (string) RAM Ressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind.
-      memory: 100Mi
+      memory: 200Mi
     requests:
       # (string) Anforderungen an Rechenressourcen, die auf die Admin-Portal Pods anzuwenden sind.
       cpu: 5m
@@ -2570,7 +2620,7 @@ webclient:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.24.1-jammy-production
+    tag: 2.24.3-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 
@@ -2607,12 +2657,12 @@ webclient:
       # (string) Rechenressourcengrenzen, die auf den webclient-server anzuwenden sind.
       cpu: 150m
       # (string) RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind.
-      memory: 100Mi
+      memory: 50Mi
     requests:
       # (string) Anforderungen an Rechenressourcen, die auf den webclient-server anzuwenden sind.
       cpu: 50m
       # (string) Anforderungen an RAM Ressourcen, die auf den webclient-server anzuwenden sind.
-      memory: 45Mi
+      memory: 15Mi
 
 
 ######################################################################################
@@ -2839,45 +2889,74 @@ additionalConfig:
 
 networkpolicies:
   enabled: false
-  # (list) IP(s) der Proxy(s), die für den Synapse und seine Worker via Env-Variablen
-  # erreichbar sein sollen. Diese werden per Egress-Regeln erlaubt.
-  # Die Einträge müssen in CIDR-Schreibweise vorgenommen werden: Start-IP/Netzmaske:Proxyport
-  # Bsp:
-  # - "192.168.10.0/24:8765"
-  # - "10.10.0.0/16:5000"
+  # (list) Transport-Adressen der Proxies für den Synapse und seine Worker.
+  # Die angegebenen Proxies werden per Egress-Regeln erlaubt. Alle Einträge
+  # müssen in CIDR-Schreibweise angegeben werden: Start-IP/Netzmaske:Proxyport
+  # Beispiel:
+  # - 192.168.10.0/24:8765
+  # - 10.10.0.0/16:5000
   fwProxyList: []
-  # (list) IP-Range(s) der DNS-Resolver bzw. Admin-API; CIDR-Schreibweise!
-  # Angaben mit Port werden als Zielport mit Protokoll TCP übernommen.
-  # Bsp:
-  # - "192.168.2.0/24"
-  # - "10.20.2.0/24:53"
+  # (list) Transport-Adressen der DNS-Resolver und Admin-API.
+  # Angaben mit Port werden als Zielport mit Protokoll TCP übernommen. Alle
+  # Einträge müssen in CIDR-Schreibweise angegeben werden:
+  # Start-IP/Netzmaske:Proxyport
+  # Beispiel:
+  # - 192.168.2.0/24
+  # - 10.20.2.0/24:53
   egressIpBlock: []
-  # (string) Label zur Identifikation der DNS-Pods der Infrastruktur.
-  dnsLabel: "kube-dns"
-  # (string) Hierbei handelt es sich um den Namespace indem ein Ingress Controller gehostet wird.
-  # Aktuell wird nur eine Architektur mit einem L7 Ingress Controller unterstützt.
-  # Absolut notwendig für die Network-Policies
-  ingressNamespace: "default"
+  # (map) Einstellungen zum DNS der Infrastruktur.
+  dns:
+    # (list) Label-Selector zum Adressieren der DNS-Pods
+    labelSelector:
+      - key: k8s-app
+        operator: In
+        values: ["kube-dns"]
+  # (string) Namespace des Ingress-Controllers.
+  # Aktuell wird nur eine Architektur mit einem L7 Ingress-Controller
+  # unterstützt. Absolut notwendig für die Network-Policies.
+  ingressNamespace: default
 
-  # Wird gesetzt wenn sich die Postgres Instanz ausserhalb des Kubernetes Cluster befindet.
-  # Da Network Policies keine Hostnames auflösen können, wird eine IP benötigt.
-  postgres:
-    # bei dem Einsatz einer Postgres Instanz, welche sich außerhalb des Kubernetes Clusters
-    # befindet, muss hier eine einzelne IP Adresse angegeben werden.
-    externalPostgresIP: ""
-    # (map) Labels zum Adressieren der PostgreSQL-Instanz.
+  # (map) Einstellungen zum Haupt-PostgreSQL-Server.
+  postgresql:
+    # (string|null) IP der externen PostgreSQL-Instanz.
+    # Beim Einsatz einer PostgreSQL-Instanz außerhalb des Kubernetes Clusters
+    # muss hier eine einzelne IP Adresse angegeben werden. Falls ungesetzt wird
+    # angenommen, dass die externe PostgreSQL-Instanz Teil des Kubernetes
+    # Clusters ist.
+    # externalPostgresIP: 10.30.3.0
+
+    # (list) Label-Selector zum Adressieren des PostgreSQL-Pods.
     # Sollten die Labels bei einer eigens betriebenen Instanz abweichen, kann
     # dies hier angepasst werden.
-    # Achtung: Auf Grund des Verhaltens von Helm, muss der Stansardwert, wenn er nicht benötigt wird
-    # explizit deaktiviert werden: `app.kubernetes.io/name: null`
-    selectorLabels:
-      app.kubernetes.io/name: postgresql
+    labelSelector:
+      - key: app.kubernetes.io/name
+        operator: In
+        values: ["postgresql"]
+
+  # (map) Einstellungen zum MAS-PostgreSQL-Server.
+  maspostgresql:
+    # (string|null) IP der externen MAS-PostgreSQL-Instanz.
+    # Beim Einsatz einer PostgreSQL-Instanz außerhalb des Kubernetes Clusters
+    # muss hier eine einzelne IP Adresse angegeben werden. Falls ungesetzt wird
+    # angenommen, dass die externe PostgreSQL-Instanz Teil des Kubernetes
+    # Clusters ist.
+    # externalPostgresIP: 10.30.3.0
+
+    # (list) Label-Selector zum Adressieren des PostgreSQL-Pods.
+    # Sollten die Labels bei einer eigens betriebenen Instanz abweichen, kann
+    # dies hier angepasst werden.
+    labelSelector:
+      - key: app.kubernetes.io/name
+        operator: In
+        values: ["maspostgresql"]
 
   # (map) HTTP-Resolver für ACME/Let’s Encrypt.
   # Erlaubt die Kommunikation vom Ingress zum hier angegebenen Endpunkt (Pod + Port).
   acme:
-    selectorLabels:
-      acme.cert-manager.io/http01-solver: "true"
+    labelSelector:
+      - key: acme.cert-manager.io/http01-solver
+        operator: In
+        values: ["true"]
     port: 8089
 
 

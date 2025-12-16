@@ -3,8 +3,6 @@
 suite: Signing Key generation
 templates:
   - signing-key-job.yaml
-set:
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Job if enabled
     set:

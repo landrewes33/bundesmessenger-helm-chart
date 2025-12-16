@@ -4,8 +4,6 @@ suite: Schadcodescanner
 templates:
   - schadcodescanner/schadcodescanner-deployment.yaml
   - schadcodescanner/schadcodescanner-configuration.yaml
-set:
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a StatefulSet if enabled
     template: schadcodescanner/schadcodescanner-deployment.yaml

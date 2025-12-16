@@ -1,6 +1,6 @@
 {{/* SPDX-FileCopyrightText: 2024–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
-{{- if .Values.mas.enabled }}
+{{- if or .Values.mas.enabled .Values.mas.migration.enabled }}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-authentication-service") -}}
 {{- $component := "matrix-authentication-service" -}}
 ---
@@ -50,6 +50,7 @@ data:
       - name: adminapi
         resources:
           - name: adminapi
+          - name: discovery
         binds:
           # First option: listen to the given address
         {{- if not .Values.ipv4Only }}
@@ -90,6 +91,16 @@ data:
         # Whether to enable the PROXY protocol on the listener
         proxy_protocol: false
 
+    matrix:
+      # The homeserver name, as per the `server_name` in the Synapse configuration file.
+      homeserver: {{ .Values.serverName | quote }}
+      # Shared secret used to authenticate the service to the homeserver.
+      # This must be of high entropy, because leaking this secret would allow anyone
+      # to perform admin actions on the homeserver.
+      secret_file: /mas/secret/matrix-shared-secret
+      # URL to which the homeserver is accessible from the service.
+      endpoint: {{ include "matrix-synapse.masEndpoint" . | quote }}
+
     templates:
       # From where to load the templates
       # This is relative to the current working directory, *not* the config file
@@ -117,30 +128,9 @@ data:
 
     secrets:
       encryption_file: /mas/secret/encryption
-      # keys: are collected at startup and written to a separate config.
-    {{- with .Values.mas.passwords }}
+      keys_dir: /mas/secret/signingkey
 
-    passwords:
-      {{- . | toYaml | nindent 6 }}
-    {{- end }}
-
-    {{- with .Values.mas.account }}
-
-    account:
-      {{- . | toYaml | nindent 6 }}
-    {{- end }}
-
-    {{- with .Values.mas.policy }}
-
-    policy:
-      data:
-        {{- . | toYaml | nindent 8 }}
-    {{- end }}
-
-    {{- with .Values.mas.rate_limiting }}
-
-    rate_limiting:
-      {{- . | toYaml | nindent 6 }}
-    {{- end }}
+    # extraConfig
+    {{- include "matrix-synapse.filteredMasConfig" (dict "global" . "secrets" false) | nindent 4 }}
 
 {{- end }}

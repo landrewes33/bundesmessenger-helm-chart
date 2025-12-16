@@ -47,25 +47,29 @@ Gehen Sie sicher, dass {{  include "matrix-synapse.dsgvoExportServiceAccountName
 Die Sygnal-Konfigurationsoptionen `sygnal.fcmkey_filename` und `sygnal.ioskey_filename` sind abgekündigt. Legen Sie stattdessen direkt das Kubernetes Secret `{{ .Values.sygnal.existingSecret }}` an, wie in docs/sygnal_push.md beschrieben.
 {{- end }}
 
+{{- if not .Values.mas.enabled }}
+🖈 Hinweis – Es ist emfohlen, den MAS zu aktivieren; in diesem Deployment ist der MAS allerdings nicht aktiviert. Im nächsten BuM-Release wird der MAS standardmäßig aktiviert sein. Für ein neues Deployment setzten Sie direkt `mas.enabled: true`. Für ein bestehendes Deployment folgen Sie der Migrationsanleitung unter ./docs/matrix-authentication-service-migration.md.
+{{- end }}
+
 
 Sie können einen initialen administrativen und weitere Accounts für den installierten BundesMessenger mit den folgenden Kommandos anlegen:
-{{ if and .Values.mas.enabled .Values.mas.passwords.enabled }}
+{{ if and .Values.mas.enabled .Values.mas.extraConfig.passwords.enabled }}
 (Ersetzen Sie die Platzhalter NUTZER und PASSWORT mit gewünschten Inhalt.
-Der Benutzer muss in Kleinbuchstaben geschrieben sein und das Passwort die notwendige Komplexität erfüllen, 
+Der Benutzer muss in Kleinbuchstaben geschrieben sein und das Passwort die notwendige Komplexität erfüllen,
 eine E-Mailadresse wird zum aktuellen Zeitpunkt auch empfohlen direkt mit anzugeben)
 
     export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=matrix-authentication-service" -o jsonpath="{.items[0].metadata.name}")
-    kubectl exec --namespace {{ .Release.Namespace }} $POD_NAME -- mas-cli manage -c /mas/config/mas-secret.yaml register-user NUTZER --password PASSWORT --admin --yes -e nutzer@example.com
+    kubectl exec --namespace {{ .Release.Namespace }} $POD_NAME -- mas-cli manage -c /mas/config/config.yaml -c /mas/dbpass/mas-secret.yaml register-user NUTZER --password 'PASSWORT' --admin --yes -e nutzer@example.com
 
 Ein Nutzer ohne administrative Rechte kann mit dem Zusatz "--no-admin" angelegt werden.
-{{- else if and .Values.mas.enabled (not .Values.mas.passwords.enabled) }}
-Im MAS des BundesMessenger Deplyoment werden keine Benutzer verwaltet.
+{{- else if and .Values.mas.enabled (not .Values.mas.extraConfig.passwords.enabled) }}
+Im MAS des BundesMessenger Deployment werden keine Benutzer verwaltet.
 Benutzer müssen im delegierten Authentifizierungsprovider angelegt werden.
 {{- else }}
 (Ersetzen Sie die Platzhalter NUTZER und PASSWORT mit gewünschten Inhalt)
 
     export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }},app.kubernetes.io/instance={{ .Release.Name }},app.kubernetes.io/component=synapse" -o jsonpath="{.items[0].metadata.name}")
-    kubectl exec --namespace {{ .Release.Namespace }} $POD_NAME -- register_new_matrix_user -c /synapse/config/homeserver.yaml -c /synapse/config/conf.d/secrets.yaml -u NUTZER -p PASSWORT --admin http://localhost:8008
+    kubectl exec --namespace {{ .Release.Namespace }} $POD_NAME -- register_new_matrix_user -c /synapse/config/homeserver.yaml -u NUTZER -p PASSWORT --admin http://localhost:8008
 
 Ein Nutzer ohne administrative Rechte kann mit dem Zusatz "--no-admin" angelegt werden.
 {{- end }}

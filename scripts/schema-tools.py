@@ -392,7 +392,10 @@ class BundleNode:
             return bundle(schema, frag)
 
         ref_schema = retrieve_schema(abs_url)
-        ref_node = bundle(ref_schema, frag)
+        # Use "/" as pointer instead of the actual fragment. This bundles
+        # additional schemas that are not actually required by us, but are still
+        # accessed by some JSON Schema implementations.
+        ref_node = bundle(ref_schema, "/")
 
         return BundleNode(schema=True, refs={abs_url: ref_schema} | ref_node.refs)
 

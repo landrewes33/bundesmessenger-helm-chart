@@ -1,6 +1,6 @@
 {{/* SPDX-FileCopyrightText: 2024–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
-{{- if .Values.mas.enabled }}
+{{- if and .Values.mas.enabled ( not .Values.mas.migration.enabled ) }}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "matrix-authentication-service") -}}
 {{- $component := "matrix-authentication-service" -}}
 ---
@@ -24,9 +24,15 @@ spec:
       labels:
         {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: {{ $component }}
+        {{- with .Values.mas.labels }}
+        {{- . | toYaml | nindent 8 }}
+        {{- end }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/matrix-authentication-service/matrix-authentication-service-configuration.yaml") . | sha256sum }}
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
+        {{- with .Values.mas.annotations }}
+        {{- . | toYaml | nindent 8 }}
+        {{- end }}
     spec:
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
@@ -34,47 +40,49 @@ spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       automountServiceAccountToken: false
       initContainers:
-        # Workaround for listing signingkeys until the `keys_dir` setting lands:
-        # https://github.com/element-hq/matrix-authentication-service/pull/4877
-        - name: generate-signingkeys-config
-          image: {{ quote (printf "%s/%s:%s"
-            .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag
-          )}}
-          imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
+        - name: generate-dbpass
           securityContext:
             {{- toYaml .Values.mas.securityContext | nindent 12 }}
-          resources:
-            {{- toYaml .Values.mas.resources | nindent 12 }}
+          env:
+            - name: POSTGRES_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "matrix-synapse.maspostgresql.secret-name" . }}
+                  key: {{ include "matrix-synapse.maspostgresql.secret-key" . }}
           command:
             - sh
             - -c
             - |
-              set -euo pipefail
-              INDIR=/mas/secret/signingkey
-              OUTFILE=/mas/config/signingkeys/signingkeys.yaml
-              {
-                echo "secrets:"
-                echo "  keys:"
-                find -L "$INDIR" -maxdepth 1 -type f -print0 | xargs -0 \
-                  printf "    - key_file: \"%s\"\n"
-              } | tee "$OUTFILE"
+              awk -v pass="$POSTGRES_PASS" '
+                { gsub(/POSTGRES_PASS/, pass); print }
+              ' /mas/config/mas-secret.yaml > /mas/dbpass/mas-secret.yaml
+          image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
+          resources:
+            {{- toYaml .Values.mas.resources | nindent 12 }}
           volumeMounts:
-            - name: secret-signingkeys
-              mountPath: /mas/secret/signingkey
-            - name: config-signingkeys
-              mountPath: /mas/config/signingkeys
+            - name: config
+              mountPath: /mas/config
+            - name: secrets
+              mountPath: /mas/secrets
+            - name: dbpass
+              mountPath: /mas/dbpass
       containers:
         - name: {{ $component }}
           command:
             - mas-cli
             - server
             - --config=/mas/config/config.yaml
-            - --config=/mas/config/mas-secret.yaml
-            - --config=/mas/config/signingkeys/signingkeys.yaml
+            - --config=/mas/dbpass/mas-secret.yaml
           image: "{{ printf "%s/%s:%s" .Values.mas.image.registry .Values.mas.image.repository .Values.mas.image.tag }}"
           imagePullPolicy: {{ .Values.mas.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.mas.securityContext | nindent 12 }}
+          env:
+            - name: POSTGRES_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "matrix-synapse.maspostgresql.secret-name" . }}
+                  key: {{ include "matrix-synapse.maspostgresql.secret-key" . }}
           ports:
             - name: web
               containerPort: 8080
@@ -103,18 +111,21 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /mas/config
-            - name: config-signingkeys
-              mountPath: /mas/config/signingkeys
             - name: secrets
               mountPath: /mas/secret
             - name: secret-signingkeys
               mountPath: /mas/secret/signingkey
+            - name: dbpass
+              mountPath: /mas/dbpass
           {{- with .Values.mas.extraVolumeMounts }}
             {{- . | toYaml | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.mas.resources | nindent 12 }}
       volumes:
+        - name: dbpass
+          emptyDir:
+            sizeLimit: 10Mi
         - name: config
           projected:
             sources:
@@ -128,16 +139,24 @@ spec:
                 items:
                   - key: mas-secret.yaml
                     path: mas-secret.yaml
-        - name: config-signingkeys
-          emptyDir:
-            sizeLimit: 10Mi
-            medium: Memory
         - name: secrets
-          secret:
-            secretName: {{ .Values.mas.encryption.existingSecret | quote }}
-            items:
-              - key: {{ .Values.mas.encryption.existingSecretKey | quote }}
-                path: encryption
+          projected:
+            sources:
+              - secret:
+                  name: {{ .Values.mas.encryption.existingSecret | quote }}
+                  items:
+                    - key: {{ .Values.mas.encryption.existingSecretKey | quote }}
+                      path: encryption
+              {{- if and
+                  ($secretName := include "matrix-synapse.mas.matrixSharedSecret.secretName" .)
+                  ($secretKey := include "matrix-synapse.mas.matrixSharedSecret.secretKey" .)
+              }}
+              - secret:
+                  name: {{ quote $secretName }}
+                  items:
+                    - key: {{ quote $secretKey }}
+                      path: matrix-shared-secret
+              {{- end }}
         - name: secret-signingkeys
           secret:
             secretName: {{ .Values.mas.signingkeys.existingSecret | quote }}

@@ -102,7 +102,11 @@ spec:
     {{- end }}
 
     {{- /* Paths to the MAS admin api */}}
-    {{- $mas_adminapi := list "/api/" "/oauth2/" }}
+    {{- $mas_adminapi := list
+        "/api/"
+        "/oauth2/"
+        "/.well-known/openid-configuration"
+    }}
     {{- range $mas_adminapi }}
       {{- if $.Values.ingress.traefikPaths }}
           - path: {{ printf "/{path:%s}" (trimPrefix "/" .) | quote }}

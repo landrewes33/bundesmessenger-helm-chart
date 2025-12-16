@@ -20,7 +20,11 @@ metadata:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: synapse
 spec:
+    {{- if and .Values.mas.enabled .Values.mas.migration.enabled }}
+  replicas: 0
+    {{- else }}
   replicas: 1
+    {{- end }}
   strategy:
     {{- toYaml .Values.synapse.strategy | nindent 4 }}
   selector:
@@ -50,8 +54,11 @@ spec:
       {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
       securityContext:
         {{- toYaml .Values.synapse.podSecurityContext | nindent 8 }}
-    {{- if and $needsVolumePermissions (not (hasKey .Values.synapse.podSecurityContext "fsGroup" )) }}
       initContainers:
+        {{- if and
+            $needsVolumePermissions
+            (not (hasKey .Values.synapse.podSecurityContext "fsGroup"))
+        }}
         - name: volume-permissions
           command:
             - sh
@@ -67,35 +74,57 @@ spec:
           volumeMounts:
             - name: media
               mountPath: /synapse/data
-    {{- end }}
+        {{- end }}
+        - name: generate-pgpass
+          securityContext:
+            {{- toYaml .Values.synapse.securityContext | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - |
+              # Generate pgpass file.
+              # Ref: https://www.postgresql.org/docs/current/libpq-pgpass.html
+              pgpass_escape() {
+                sed 's/\\/\\\\/; s/:/\\:/'
+              }
+              printf '\
+              # hostname:port:database:username:password
+              *:*:*:%s:%s
+              ' \
+                "$(echo "$POSTGRES_USER" | pgpass_escape)" \
+                "$(pgpass_escape < /synapse/secrets/postgresql/password)" \
+              > /synapse/pgpass/pgpass
+              # PostgreSQL requires restrictive permissions on the passfile.
+              chmod 0400 /synapse/pgpass/pgpass
+          env:
+            - name: POSTGRES_USER
+              value: {{ include "matrix-synapse.postgresql.username" . | quote }}
+          image: {{ quote (printf "%s/%s:%s"
+            .Values.image.registry .Values.image.repository .Values.image.tag
+          )}}
+          resources:
+            {{- toYaml .Values.synapse.resources | nindent 12 }}
+          volumeMounts:
+            - name: pgpass
+              mountPath: /synapse/pgpass
+            - name: secrets
+              mountPath: /synapse/secrets
       containers:
         - name: synapse
           command:
             - sh
             - -c
             - |
-              export POSTGRES_PASSWORD=$(echo "${POSTGRES_PASSWORD:-}" | sed 's/\//\\\//g' | sed 's/\&/\\\&/g') && \
-              cat /synapse/secrets/*.yaml | \
-                sed -e "s/@@POSTGRES_PASSWORD@@/${POSTGRES_PASSWORD:-}/" \
-                       > /synapse/config/conf.d/secrets.yaml
-
-              {{- if .Values.synapse.extraCommands }}
-
-              {{ range .Values.synapse.extraCommands }}
-              {{ . }}
-              {{- end }}
+              {{- range .Values.synapse.extraCommands }}
+              {{- . | nindent 14 }}
               {{- end }}
 
               exec python3 -B -m synapse.app.homeserver \
                           -c /synapse/config/homeserver.yaml \
-                          -c /synapse/config/conf.d/
-          env:
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ include "matrix-synapse.postgresql.secret-name" . | quote }}
-                  key: {{ include "matrix-synapse.postgresql.secret-key" . | quote }}
+                          -c /synapse/config/experimental-features.yaml \
+                          -c /synapse/config/secret-config.yaml
           {{- with .Values.synapse.extraEnv }}
+          env:
             {{- . | toYaml | nindent 12 }}
           {{- end }}
           image: {{ quote (printf "%s/%s:%s"
@@ -132,10 +161,11 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /synapse/config
-            - name: tmpconf
-              mountPath: /synapse/config/conf.d
             - name: secrets
               mountPath: /synapse/secrets
+            - name: pgpass
+              mountPath: /synapse/pgpass/pgpass
+              subPath: pgpass
             - name: signingkey
               mountPath: /synapse/keys
             - name: media
@@ -153,53 +183,75 @@ spec:
             {{- toYaml .Values.synapse.resources | nindent 12 }}
       volumes:
         - name: config
-          configMap:
-            name: {{ include "matrix-synapse.fullname" . }}
-            items:
-              - key: log.yaml
-                path: log.yaml
-              - key: homeserver.yaml
-                path: homeserver.yaml
+          projected:
+            sources:
+              - configMap:
+                  name: {{ include "matrix-synapse.fullname" . }}
+                  items:
+                    - key: log.yaml
+                      path: log.yaml
+                    - key: homeserver.yaml
+                      path: homeserver.yaml
+              - secret:
+                  name: {{ include "matrix-synapse.fullname" . }}
+                  items:
+                    - key: config.yaml
+                      path: secret-config.yaml
+                    - key: experimental-features.yaml
+                      path: experimental-features.yaml
         - name: secrets
           projected:
             sources:
               - secret:
-                  name: {{ include "matrix-synapse.fullname" . }}
-              - secret:
-                  name: {{ include "matrix-synapse.redis.secret-name" . }}
+                  name: {{ include "matrix-synapse.postgresql.secret-name" . | quote }}
                   items:
-                    - key: {{ include "matrix-synapse.redis.secret-key" . }}
+                    - key: {{ include "matrix-synapse.postgresql.secret-key" . | quote }}
+                      path: postgresql/password
+              - secret:
+                  name: {{ include "matrix-synapse.redis.secret-name" . | quote }}
+                  items:
+                    - key: {{ include "matrix-synapse.redis.secret-key" . | quote }}
                       path: redis
-              {{ if and
+              {{- if and
                   ($secretName := include "matrix-synapse.registrationSharedSecret.secretName" .)
                   ($secretKey := include "matrix-synapse.registrationSharedSecret.secretKey" .)
               }}
               - secret:
-                  name: {{ $secretName }}
+                  name: {{ quote $secretName }}
                   items:
-                    - key: {{ $secretKey }}
+                    - key: {{ quote $secretKey }}
                       path: registration
               {{- end }}
-              {{ if and
+              {{- if and
                   ($secretName := include "matrix-synapse.macaroonSecretKey.secretName" .)
                   ($secretKey := include "matrix-synapse.macaroonSecretKey.secretKey" .)
               }}
               - secret:
-                  name: {{ $secretName }}
+                  name: {{ quote $secretName }}
                   items:
-                    - key: {{ $secretKey }}
+                    - key: {{ quote $secretKey }}
                       path: macaroon
               {{- end }}
               - secret:
-                  name: {{ .Values.config.formSecret.existingSecret }}
+                  name: {{ quote .Values.config.formSecret.existingSecret }}
                   items:
-                    - key: {{ .Values.config.formSecret.existingSecretKey }}
+                    - key: {{ quote .Values.config.formSecret.existingSecretKey }}
                       path: form-secret
               - secret:
-                  name: {{ .Values.config.workerReplicationSecret.existingSecret }}
+                  name: {{ quote .Values.config.workerReplicationSecret.existingSecret }}
                   items:
-                    - key: {{ .Values.config.workerReplicationSecret.existingSecretKey }}
+                    - key: {{ quote .Values.config.workerReplicationSecret.existingSecretKey }}
                       path: worker-replication-secret
+              {{- if and
+                  ($secretName := include "matrix-synapse.mas.matrixSharedSecret.secretName" .)
+                  ($secretKey := include "matrix-synapse.mas.matrixSharedSecret.secretKey" .)
+              }}
+              - secret:
+                  name: {{ quote $secretName }}
+                  items:
+                    - key: {{ quote $secretKey }}
+                      path: mas-shared-secret
+              {{- end }}
         - name: signingkey
           secret:
             secretName: {{ .Values.signingkey.existingSecret | default (include "matrix-synapse.workername" (dict "global" . "worker" "signingkey")) | quote }}
@@ -211,7 +263,7 @@ spec:
           secret:
             secretName: {{ . }}
           {{- end }}
-        - name: tmpconf
+        - name: pgpass
           emptyDir:
             sizeLimit: 10Mi
         {{- $mediaworker := false }}

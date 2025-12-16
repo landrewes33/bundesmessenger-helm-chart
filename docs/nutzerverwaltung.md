@@ -62,7 +62,7 @@ export POD_NAME=$(kubectl get pods --namespace bundesmessenger -l "app.kubernete
 - PASSWORT muss in `''` Single-Quotes gesetzt werden, sollte es Sonderzeichen enthalten.
 
 ```console
-kubectl exec --namespace bundesmessenger $POD_NAME -- register_new_matrix_user -c /synapse/config/homeserver.yaml -c /synapse/config/conf.d/secrets.yaml -u NUTZER -p 'PASSWORT' --admin http://localhost:8008
+kubectl exec --namespace bundesmessenger $POD_NAME -- register_new_matrix_user -c /synapse/config/homeserver.yaml -u NUTZER -p 'PASSWORT' --admin http://localhost:8008
 ```
 
 ### Anlegen eines Nutzers **ohne** Administratorrechten
@@ -71,7 +71,7 @@ kubectl exec --namespace bundesmessenger $POD_NAME -- register_new_matrix_user -
 - PASSWORT muss in `''` Single-Quotes gesetzt werden, sollte es Sonderzeichen enthalten.
 
 ```console
-kubectl exec --namespace bundesmessenger $POD_NAME -- register_new_matrix_user -c /synapse/config/homeserver.yaml -c /synapse/config/conf.d/secrets.yaml -u NUTZER -p 'PASSWORT' --no-admin http://localhost:8008
+kubectl exec --namespace bundesmessenger $POD_NAME -- register_new_matrix_user -c /synapse/config/homeserver.yaml -u NUTZER -p 'PASSWORT' --no-admin http://localhost:8008
 ```
 
 ## Synapse-Admin-Oberfläche

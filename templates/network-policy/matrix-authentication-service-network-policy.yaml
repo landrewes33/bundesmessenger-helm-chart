@@ -33,33 +33,33 @@ spec:
       - protocol: TCP
         port: 8008
     {{- end }}
-    {{- if .Values.postgresql.enabled }}
-    {{- /* internal postgresql from this chart */}}
+    {{- if .Values.maspostgresql.enabled }}
+    {{- /* internal maspostgresql from this chart */}}
     - to:
       - podSelector:
-          matchLabels:
-            {{- .Values.networkpolicies.postgres.selectorLabels | default (dict "app.kubernetes.io/name" "postgresql") | toYaml | nindent 12 }}
+          matchExpressions:
+            {{- toYaml .Values.networkpolicies.maspostgresql.labelSelector | nindent 12 }}
       ports:
       - protocol: TCP
-        port: {{ .Values.postgresql.containerPorts.postgresql | default 5432 }}
-    {{- else if .Values.networkpolicies.postgres.externalPostgresIP }}
+        port: {{ .Values.maspostgresql.service.targetPort }}
+    {{- else if .Values.networkpolicies.maspostgresql.externalPostgresIP }}
     {{- /* external postgresql outside cluster selected by IP
           set an IP has higher priority than a label */}}
     - to:
       - ipBlock:
-          cidr: "{{ .Values.networkpolicies.postgres.externalPostgresIP }}/32"
+          cidr: "{{ .Values.networkpolicies.maspostgresql.externalPostgresIP }}/32"
       ports:
       - protocol: TCP
-        port: {{ .Values.externalPostgresql.port | default 5432 }}
+        port: {{ .Values.externalmasPostgresql.port }}
     {{- else }}
     {{- /* external postgresql inside cluster selected by label */}}
     - to:
       - podSelector:
-          matchLabels:
-           {{- .Values.networkpolicies.postgres.selectorLabels | toYaml | nindent 12 }}
+          matchExpressions:
+            {{- toYaml .Values.networkpolicies.maspostgresql.labelSelector | nindent 12 }}
       ports:
       - protocol: TCP
-        port: {{ .Values.externalPostgresql.port | default 5432 }}
+        port: {{ .Values.externalmasPostgresql.port }}
     {{- end }}
 
 ---
@@ -125,6 +125,13 @@ spec:
       - namespaceSelector:
           matchLabels:
             kubernetes.io/metadata.name: {{ .Values.networkpolicies.ingressNamespace }}
+      ports:
+      - protocol: TCP
+        port: 8081
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: adminportal-synapse-core
       ports:
       - protocol: TCP
         port: 8081

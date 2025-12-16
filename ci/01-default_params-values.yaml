@@ -5,3 +5,5 @@ dataPrivacyUrl: example.com/privacy
 imprintUrl: example.com/imprint
 externalPostgresql:
   existingSecret: postgresql-secret
+externalmasPostgresql:
+  existingSecret: postgresql-secret

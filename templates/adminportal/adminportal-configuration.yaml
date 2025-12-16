@@ -1,6 +1,6 @@
 {{/* SPDX-FileCopyrightText: 2024–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
-{{- if .Values.adminPortal.enabled }}
+{{- if and .Values.adminPortal.enabled .Values.mas.enabled }}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "adminportal") -}}
 {{- $component := "adminportal" -}}
 {{- $coreName := "synapse-core" -}}
@@ -17,14 +17,18 @@ metadata:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
     app.kubernetes.io/component: {{ $component }}-{{ $coreName }}
 data:
+  BUMAP_HELM_CHART_VERSION: {{ quote .Chart.Version }}
   BUMAP_CORE_APP_CONFIG_API_URL: ""
   BUMAP_CORE_COMMON_BASE_PATH: "{{ $apiPath }}"
+  BUMAP_CORE_AUTHORIZATION_URL: "https://{{ .Values.adminAPIServerName }}"
+  BUMAP_CORE_AUTHORIZATION_VERIFY_TLS_CERT: "{{ .Values.adminPortal.TLSverify }}"
   {{/* URL via Ingress, as the routing to the workers is required */}}
   BUMAP_CORE_SYNAPSE_ADMIN_API_URL: "https://{{ .Values.adminAPIServerName }}"
   BUMAP_CORE_SYNAPSE_VERIFY_TLS_CERT: "{{ .Values.adminPortal.TLSverify }}"
   BUMAP_CORE_LOGGING_CORE: "{{ .Values.adminPortal.logLevel }}"
   BUMAP_CORE_LOGGING_AUDIT: "{{ .Values.adminPortal.auditLog.logLevel }}"
-  AUDIT_LOG_DATABASE_NAME: "/app/log/audit_log_db"
+  AUDIT_LOG_DATABASE_PATH: /app/log
+  AUDIT_LOG_DATABASE_NAME: audit_log_db
   AUDIT_LOG_DATABASE_TYPE: "{{ .Values.adminPortal.auditLog.database }}"
   AUDIT_LOG_DATABASE_AUTO_MIGRATE: "true"
 
@@ -69,5 +73,9 @@ data:
     window.env = {
       BUMAP_CORE_URL: "{{ $apiPath }}",
       BUMAP_FEATURE_SUPPORT_APP_CONFIG: "false",
+      BUMAP_OIDC_AUTHORITY: "https://{{ .Values.mas.uri }}",
+      BUMAP_OIDC_CLIENT_ID: "{{ .Values.adminPortal.clientID }}",
+      BUMAP_OIDC_REDIRECT_URI: "https://{{ .Values.adminPortal.uri }}/callback",
+      BUMAP_OIDC_SCOPE: "openid urn:synapse:admin:* urn:matrix:org.matrix.msc2967.client:api:* urn:mas:admin",
     }
 {{- end }}

@@ -140,10 +140,26 @@ data:
       {{ .Values.config.extraListeners | toYaml | nindent 6 }}
     {{- end }}
 
+    ## Database configuration ##
+
+    database:
+      name: psycopg2
+      args: {{- nindent 8 (toYaml (merge
+        (dict
+          "host" (include "matrix-synapse.postgresql.host" .)
+          "port" (atoi (include "matrix-synapse.postgresql.port" .))
+          "database" (include "matrix-synapse.postgresql.database" .)
+          "user" (include "matrix-synapse.postgresql.username" .)
+          "passfile" "/synapse/pgpass/pgpass"
+          "cp_min" 5
+          "cp_max" 10
+        )
+        (fromYaml (include "matrix-synapse.postgresql.extraArgs" .))
+      ))}}
+
     ## Files ##
 
     media_store_path: "/synapse/data/media"
-    uploads_path: "/synapse/data/uploads"
 
     ## Registration ##
 
@@ -164,6 +180,19 @@ data:
       host: {{ include "matrix-synapse.redis.host" . | quote }}
       port: {{ include "matrix-synapse.redis.port" . }}
       password_path: /synapse/secrets/redis
+
+    {{- if .Values.mas.enabled }}
+
+    ## Matrix-Authentication-Service
+
+    matrix_authentication_service:
+      enabled: true
+      # The base URL where Synapse will contact MAS
+      endpoint: {{ include "matrix-synapse.mas.internalURL" . | quote }}
+      # The shared secret used to authenticate MAS requests.
+      # Must contain the same secret as `matrix.secret_file` in the MAS configuration.
+      secret_path: /synapse/secrets/mas-shared-secret
+    {{- end }}
 
     ## Metrics ###
 

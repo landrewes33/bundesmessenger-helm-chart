@@ -1,6 +1,6 @@
 {{/* SPDX-FileCopyrightText: 2024–2025 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
-{{- if and .Values.ingress.enabled .Values.adminPortal.enabled }}
+{{- if and .Values.ingress.enabled .Values.adminPortal.enabled .Values.mas.enabled }}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "adminportal") -}}
 {{- $uri := .Values.adminPortal.uri | required "adminPortal.uri is required." -}}
 {{- $coreName := "synapse-core" -}}

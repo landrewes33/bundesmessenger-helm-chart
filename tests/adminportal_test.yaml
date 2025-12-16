@@ -5,10 +5,11 @@ templates:
   - adminportal/adminportal-deployment.yaml
   - adminportal/adminportal-configuration.yaml
   - nginx-conf.yaml
+  - secrets.yaml
 set:
+  mas.enabled: true
   adminPortal:
     uri: adminportal.example.com
-  externalPostgresql.existingSecret: postgresql
 tests:
   - it: ensures a Deployment if enabled
     template: adminportal/adminportal-deployment.yaml

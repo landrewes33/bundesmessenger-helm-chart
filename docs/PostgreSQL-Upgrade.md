@@ -11,7 +11,8 @@ neue Hauptversion.
 
 ```log
 FATAL:  database files are incompatible with server
-DETAIL:  The data directory was initialized by PostgreSQL version 14, which is not compatible with this version 16.4.
+DETAIL:  The data directory was initialized by PostgreSQL version 14, which is
+not compatible with this version 16.4.
 ```
 
 Fehlermeldung von PostgreSQL im Fall, dass kein Upgrade durchgeführt wurde.
@@ -31,8 +32,8 @@ angepasst werden. Zusätzlich zu dem client-seitigen Wartungsmodus, setzt
 [`extraConfig.hs_disabled`](https://element-hq.github.io/synapse/develop/usage/configuration/config_documentation.html#hs_disabled-and-hs_disabled_message)
 den Homeserver selbst in einen sicheren Zustand.
 
-> 📌 **Hinweis** – Die Befehle sind angelehnt an die Anweisung zur Installation der
-> [BundesMessenger Testumgebung](installation_testumgebung.md#bundesmessenger).
+> 📌 **Hinweis** – Die Befehle sind angelehnt an die Anweisung zur Installation
+> der [BundesMessenger Testumgebung](installation_testumgebung.md#bundesmessenger).
 > Im Beispiel heißt der Namespace `bum` und das zugrundeliegende Deployment
 > `bundesmessenger`. Um für ein Cluster die korrekten Namen der
 > Kubernetes-Ressourcen zu finden, können Befehle wie der folgende verwendet
@@ -66,7 +67,7 @@ kind: Job
 metadata:
   name: postgresql-major-upgrade
 spec:
-  ttlSecondsAfterFinished: 300 #5 minuten bleibt der Job bestehen, wird dann abgelöscht
+  ttlSecondsAfterFinished: 300 # 5 Minuten bleibt der Job bestehen, wird dann abgelöscht
   template:
     spec:
       securityContext:
@@ -149,10 +150,10 @@ kubectl delete pvc --namespace=bum data-bundesmessenger-postgresql-0
 
 Zum Initialisieren der Datenbank und anschließendem Rückspielen der Daten kann
 nun ein BundesMessenger-Release mit der folgenden Extrakonfiguration
-(`bum-postgres-major-upgrade.yaml`) durchgeführt werden:
+(`import-postgresql-major-upgrade.yaml`) durchgeführt werden:
 
 ```yaml
-# bum-postgres-major-upgrade.yaml
+# import-postgresql-major-upgrade.yaml
 ---
 postgresql:
   primary:
@@ -180,7 +181,7 @@ helm upgrade bundesmessenger \
     --namespace bum \
     -f bum-configuration.yaml \
     -f bum-tls.yaml \
-    -f bum-postgres-major-upgrade.yaml
+    -f import-postgresql-major-upgrade.yaml
 ```
 
 ### Schritt 5: Aufräumen
@@ -197,7 +198,7 @@ helm upgrade bundesmessenger \
     --namespace bum \
     -f bum-configuration.yaml \
     -f bum-tls.yaml
-    # -f bum-postgres-major-upgrade.yaml
+    # -f import-postgresql-major-upgrade.yaml
 ```
 
 Upgrade-Job und temporären Persistent Volume Claim (PVC)

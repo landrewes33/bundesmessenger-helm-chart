@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schema.bundesmessenger.dev/bum/v1.17.1/values.schema.json",
+  "$id": "https://schema.bundesmessenger.dev/bum/v2.0.0/values.schema.json",
   "$comment": "Do not modify by hand. This file is auto-generated from values.schema.yaml",
   "type": "object",
   "title": "BundesMessenger Helm-Konfiguration",
@@ -1481,7 +1481,7 @@
                 },
                 "memory": {
                   "title": "Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.",
-                  "default": "1000Mi"
+                  "default": "500Mi"
                 }
               }
             }
@@ -1541,7 +1541,7 @@
                   "default": "/health"
                 },
                 "port": {
-                  "default": "metrics"
+                  "default": "health"
                 }
               }
             }
@@ -2405,6 +2405,18 @@
           "description": "Auskommentieren oder null für die Benutzung ohne Proxy. Die Angabe des Zielports beim Proxy ist für die Generierung der Network-Policies zwingend erforderlich.",
           "default": null
         },
+        "annotations": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/annotations",
+          "type": "object",
+          "default": {},
+          "unevaluatedProperties": false
+        },
+        "labels": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/labels",
+          "type": "object",
+          "default": {},
+          "unevaluatedProperties": false
+        },
         "podSecurityContext": {
           "$ref": "#/$defs/podSecurityContext",
           "type": "object",
@@ -2446,7 +2458,7 @@
                 },
                 "memory": {
                   "title": "Anforderungen an RAM Ressourcen, die auf den Sygnal-Container anzuwenden sind",
-                  "default": "45Mi"
+                  "default": "50Mi"
                 }
               }
             }
@@ -2696,6 +2708,8 @@
       "required": [
         "enabled",
         "image",
+        "annotations",
+        "labels",
         "podSecurityContext",
         "securityContext",
         "resources",
@@ -3078,368 +3092,85 @@
       "unevaluatedProperties": false
     },
     "postgresql": {
-      "type": "object",
-      "title": "Konfiguration des internen PostgreSQL-Servers",
-      "description": "Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und schnelle Möglichkeit, Demo- und Testsysteme des BundesMessengers aufzusetzen. Nicht empfohlen ist die Aktivierung für Produktivsysteme.\n\nEmpfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den `externalPostgresql`-Block.",
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "title": "Aktivieren des internen PostgreSQL-Servers",
-          "description": "Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den `externalPostgresql`-Block.",
-          "default": false
+      "allOf": [
+        {
+          "$ref": "#/$defs/postgresqlDefaults",
+          "type": "object"
         },
-        "image": {
-          "$ref": "#/$defs/bitnamiImage",
-          "type": "object",
-          "title": "Das zu verwendende PostgreSQL-Container-Abbild",
-          "properties": {
-            "pullSecrets": {
-              "type": "array",
-              "title": "Liste von Kubernetes Pull-Secrets",
-              "items": {
-                "type": "string"
-              },
-              "default": []
-            }
-          },
-          "default": {
-            "registry": "docker.io",
-            "repository": "bitnami/postgresql",
-            "pullSecrets": [],
-            "pullPolicy": "IfNotPresent"
-          },
-          "required": [
-            "registry",
-            "repository",
-            "tag",
-            "pullSecrets",
-            "pullPolicy"
-          ],
-          "unevaluatedProperties": true
-        },
-        "auth": {
-          "type": "object",
-          "title": "Authentifizierung gegenüber dem internen PostgreSQL-Server",
-          "properties": {
-            "database": {
-              "type": "string",
-              "title": "Name der PostgreSQL-Datenbank",
-              "default": "synapse_db"
-            },
-            "username": {
-              "type": "string",
-              "title": "Name des PostgreSQL-Nutzers",
-              "default": "synapse"
-            },
-            "password": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "title": "Password für PostgreSQL Nutzer",
-              "default": "synapse"
-            },
-            "existingSecret": {
-              "type": "string",
-              "minLength": 1,
-              "title": "Name des Secrets, in dem das PostgreSQL-Passwort steht",
-              "description": "Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen Namen, so wird ein neues Secret automatisch erstellt und verwendet.",
-              "default": "postgresql"
-            },
-            "secretKeys": {
-              "type": "object",
-              "title": "Schlüsselinformationen für ein genanntes Secret",
-              "properties": {
-                "userPasswordKey": {
-                  "type": "string",
-                  "title": "Verweis im `existingSecret` auf das Datenbank-Passwort",
-                  "description": "Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.",
-                  "default": "password"
-                },
-                "adminPasswordKey": {
-                  "type": "string",
-                  "title": "Verweis im `existingSecret` auf das Passwort des postgres-Nutzers",
-                  "description": "Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.",
-                  "default": "postgres-password"
-                }
-              },
-              "required": [
-                "userPasswordKey",
-                "adminPasswordKey"
-              ],
-              "unevaluatedProperties": true
-            }
-          },
-          "required": [
-            "database",
-            "username",
-            "existingSecret",
-            "secretKeys"
-          ],
-          "unevaluatedProperties": true
-        },
-        "containerPorts": {
+        {
           "type": "object",
           "properties": {
-            "postgresql": {
-              "type": "integer",
-              "title": "Port des PostgreSQL-Containers",
-              "default": 5342
-            }
-          },
-          "required": [
-            "postgresql"
-          ],
-          "unevaluatedProperties": true
-        },
-        "primary": {
-          "type": "object",
-          "properties": {
-            "service": {
-              "type": "object",
-              "properties": {
-                "ports": {
-                  "type": "object",
-                  "properties": {
-                    "postgresql": {
-                      "type": "integer",
-                      "title": "Port des PostgreSQL-Service",
-                      "default": 5432
-                    }
-                  },
-                  "required": [
-                    "postgresql"
-                  ],
-                  "unevaluatedProperties": true
-                }
-              },
-              "required": [
-                "ports"
-              ],
-              "unevaluatedProperties": true
-            },
             "initdb": {
               "type": "object",
+              "title": "Initialisierung der Datenbank",
               "properties": {
                 "args": {
                   "type": "string",
-                  "description": "Extra Argumente zur Initialisierung der Datenbank",
+                  "title": "Extra Argumente zur Initialisierung der Datenbank",
                   "default": "--lc-collate=C --lc-ctype=C --encoding=UTF8"
-                }
-              },
-              "unevaluatedProperties": true
-            },
-            "extendedConfiguration": {
-              "type": "string",
-              "title": "Extra Konfiguration der Datenbank",
-              "description": "Die Anzahl an max. Verbindungen ist oft eine Limitierung, da jeder Synapseprozess seine Verbindungen zur Datenbank hält",
-              "default": "max_connections = 1024"
-            },
-            "persistence": {
-              "type": "object",
-              "title": "Persistenzkonfiguration für Storage für PostgreSQL",
-              "properties": {
-                "storageClass": {
-                  "type": "string",
-                  "default": ""
                 },
-                "size": {
-                  "type": "string",
-                  "default": "16Gi"
+                "scripts": {
+                  "type": "object",
+                  "description": "Zusätzliche Initialisierungsskripte",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "unevaluatedProperties": false
                 }
               },
               "required": [
-                "storageClass",
-                "size"
-              ],
-              "unevaluatedProperties": true
-            },
-            "resources": {
-              "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json",
-              "type": "object",
-              "properties": {
-                "limits": {
-                  "properties": {
-                    "cpu": {
-                      "title": "Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind",
-                      "default": 1
-                    },
-                    "memory": {
-                      "title": "RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind",
-                      "default": "4096Mi"
-                    }
-                  }
-                },
-                "requests": {
-                  "properties": {
-                    "cpu": {
-                      "title": "Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind",
-                      "default": "250m"
-                    },
-                    "memory": {
-                      "title": "Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind",
-                      "default": "256Mi"
-                    }
-                  }
-                }
-              },
-              "unevaluatedProperties": false
+                "args"
+              ]
             }
           },
           "required": [
-            "service",
-            "initdb",
-            "extendedConfiguration",
-            "persistence",
-            "resources"
-          ],
-          "unevaluatedProperties": true
-        },
-        "extraArgs": {
-          "$comment": "This config option is not part of the `postgresql` chart.",
-          "type": "object",
-          "title": "Zusätzliche Argumente für die Datenbankverbindung",
-          "description": "Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config",
-          "properties": {
-            "sslmode": {
-              "type": "string",
-              "enum": [
-                "disable",
-                "allow",
-                "prefer",
-                "require",
-                "verify-ca",
-                "verify-full"
-              ],
-              "title": "Verwendeter SSL-Modus",
-              "description": "https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS",
-              "default": "prefer"
-            }
-          },
-          "additionalProperties": {
-            "type": [
-              "null",
-              "string",
-              "number",
-              "integer",
-              "boolean"
-            ]
-          },
-          "required": [
-            "sslmode"
-          ],
-          "unevaluatedProperties": false
+            "initdb"
+          ]
         }
-      },
-      "required": [
-        "enabled",
-        "image",
-        "auth",
-        "containerPorts",
-        "primary",
-        "extraArgs"
-      ],
-      "unevaluatedProperties": true
+      ]
     },
     "externalPostgresql": {
-      "type": "object",
-      "title": "Extern konfigurierter PostgreSQL-Server",
-      "description": "Wird für die Datenbank von Synapse verwendet. Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf \"C\" eingestellt sein. Die „interne“ Datenbank muss deaktiviert sein: `postgresql.enabled: false`.",
-      "properties": {
-        "host": {
-          "type": "string",
-          "minLength": 1,
-          "title": "Hostname vom externen PostgreSQL-Server",
-          "description": "Beispieladresse für einen K8s-internen PostgreSQL im Namespace `postgres`:",
-          "default": "postgres-4-matrix-postgresql.postgres.svc.cluster.local"
+      "$ref": "#/$defs/externalPostgresqlDefaults",
+      "type": "object"
+    },
+    "externalmasPostgresql": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/externalPostgresqlDefaults",
+          "type": "object"
         },
-        "port": {
-          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort",
-          "type": "integer",
-          "title": "Port vom externen PostgreSQL-Server",
-          "default": 5342
-        },
-        "database": {
-          "type": "string",
-          "minLength": 1,
-          "title": "Name der zu verwendenden PostgreSQL-Datenbank",
-          "default": "synapse_db"
-        },
-        "username": {
-          "type": "string",
-          "minLength": 1,
-          "title": "Name des PostgreSQL-Nutzers",
-          "default": "synapse"
-        },
-        "password": {
-          "deprecated": true,
-          "type": [
-            "null",
-            "string"
-          ],
-          "minLength": 1,
-          "title": "Passwort vom PostgreSQL-Nutzer",
-          "description": "**ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.",
-          "default": null,
-          "examples": [
-            "53C237P0576235Q1P455W02D"
-          ]
-        },
-        "existingSecret": {
-          "type": "string",
-          "minLength": 1,
-          "title": "Name vom Secret mit dem PostgreSQL-Passwort",
-          "default": "postgresql"
-        },
-        "existingSecretPasswordKey": {
-          "type": "string",
-          "minLength": 1,
-          "title": "Verweis im `existingSecret` auf das PostgreSQL-Passwort",
-          "default": "password"
-        },
-        "extraArgs": {
+        {
           "type": "object",
-          "title": "Zusätzliche Argumente für die Datenbankverbindung",
-          "description": "Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config",
           "properties": {
-            "sslmode": {
-              "type": "string",
-              "enum": [
-                "disable",
-                "allow",
-                "prefer",
-                "require",
-                "verify-ca",
-                "verify-full"
-              ],
-              "title": "Verwendeter SSL-Modus",
-              "description": "https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS",
-              "default": "prefer"
+            "min_connections": {
+              "type": "integer",
+              "default": 0
+            },
+            "max_connections": {
+              "type": "integer",
+              "default": 10
+            },
+            "connect_timeout": {
+              "type": "integer",
+              "default": 30
+            },
+            "idle_timeout": {
+              "type": "integer",
+              "default": 600
+            },
+            "max_lifetime": {
+              "type": "integer",
+              "default": 1800
             }
           },
-          "additionalProperties": {
-            "type": [
-              "null",
-              "string",
-              "number",
-              "integer",
-              "boolean"
-            ]
-          },
           "required": [
-            "sslmode"
-          ],
-          "unevaluatedProperties": false
+            "min_connections",
+            "max_connections",
+            "connect_timeout",
+            "idle_timeout",
+            "max_lifetime"
+          ]
         }
-      },
-      "required": [
-        "host",
-        "port",
-        "database",
-        "username",
-        "existingSecret",
-        "existingSecretPasswordKey",
-        "extraArgs"
       ],
       "unevaluatedProperties": false
     },
@@ -3450,12 +3181,12 @@
       "properties": {
         "enabled": {
           "type": "boolean",
-          "tiitle": "Aktivieren des internen Redis-Servers",
+          "title": "Aktivieren des internen Redis-Servers",
           "description": "Hinweis: Durch Setzten auf `true`, wird der `externalRedis`-Block ignoriert.",
           "default": true
         },
         "image": {
-          "$ref": "#/$defs/bitnamiImage",
+          "$ref": "#/$defs/cloudPiratesImage",
           "type": "object",
           "title": "Das verwendete Redis-Image",
           "properties": {
@@ -3596,7 +3327,7 @@
                 },
                 "memory": {
                   "title": "Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind",
-                  "default": "256Mi"
+                  "default": "128Mi"
                 }
               }
             }
@@ -3776,11 +3507,23 @@
         },
         "tls": {
           "type": "array",
-          "title": "Zusätzliche Pfade, die zu den Client-zu-Server-Eingangsblöcken hinzugefügt werden sollen",
-          "description": "Werden vor den `/_matrix` und `/_synapse` Catch-all-Pfaden eingefügt.\n\nBeispiele:\n  - path: /_matrix/media\n    pathType: Prefix\n    backend:\n      service:\n        name: matrix-media-repo\n        port: 8000",
+          "title": "TLS-Konfiguration für Ingress Konfiguration",
+          "description": "Enthält für alle benötigten Domains die notwendigen Secrets bzw. TLS-Zertifikate. Jede Eintragung beschreibt 1 Zertifikatsquelle: - hosts:\n    - matrix.example.com\n    - api.example.com\n  secretName: matrix-tls\n  certManagerIssuer: letsencrypt-prod\n- hosts:\n    - admin.example.com\n  secretName: internal-tls\n  certManagerIssuer: internal-ca\n- hosts:\n    - dev.example.com\n  secretName: dev-selfsigned\n  # kein certManagerIssuer -> Secret wird manuell verwaltet",
           "items": {
-            "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.IngressTLS.schema.json",
-            "type": "object",
+            "allOf": [
+              {
+                "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.IngressTLS.schema.json"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "certManagerIssuer": {
+                    "type": "string",
+                    "description": "Optionale Cert-Manager Issuer Angabe.\n"
+                  }
+                }
+              }
+            ],
             "unevaluatedProperties": false
           },
           "default": []
@@ -3820,8 +3563,8 @@
           "type": "object",
           "title": "Konfiguration des MAS Image",
           "default": {
-            "registry": "ghcr.io",
-            "repository": "element-hq/matrix-authentication-service",
+            "registry": "registry.opencode.de",
+            "repository": "bwi/bundesmessenger/backend/container-images/matrix-authentication-service",
             "pullSecrets": [],
             "pullPolicy": "IfNotPresent"
           },
@@ -3834,147 +3577,38 @@
           ],
           "unevaluatedProperties": false
         },
+        "migration": {
+          "type": "object",
+          "description": "Migrationskonfiguration für MAS",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "description": "Aktiviert die Migrationsfunktionalität",
+              "default": false
+            },
+            "backup": {
+              "type": "object",
+              "description": "Backup-Konfiguration für die Migration",
+              "properties": {
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Aktiviert das Backup vor der Migration",
+                  "default": true
+                },
+                "storage": {
+                  "type": "string",
+                  "description": "Speichergröße für das Backup (z.B. \"1Gi\", \"2Gi\")",
+                  "default": "16Gi",
+                  "pattern": "^[0-9]+(Gi|Mi)$"
+                }
+              }
+            }
+          }
+        },
         "uri": {
           "type": "string",
           "title": "URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider.",
           "description": "Eine URI ist dringend ratsam, damit der Dienst routing-technisch getrennt ist. Ein stabiles Deployment ohne eigene URI wurde bisher nicht erprobt."
-        },
-        "postgresql": {
-          "type": "object",
-          "properties": {
-            "host": {
-              "type": [
-                "null",
-                "string"
-              ],
-              "title": "Host für PostgreSQL-DB von MAS",
-              "description": "Falls ungesetzt, wird die Haupt-PostgreSQL-Instanz verwendet.",
-              "default": null,
-              "examples": [
-                "masdb.example.org"
-              ]
-            },
-            "port": {
-              "type": "integer",
-              "title": "Port für PostgreSQL-DB von MAS",
-              "default": 5432
-            },
-            "database": {
-              "type": "string",
-              "minLength": 1,
-              "title": "DB-Name für PostgreSQL-DB von MAS",
-              "default": "mas_synapse"
-            },
-            "username": {
-              "type": "string",
-              "minLength": 1,
-              "title": "Nutzername für PostgreSQL-DB von MAS",
-              "default": "massynapse"
-            },
-            "password": {
-              "type": "string",
-              "minLength": 1,
-              "title": "Password für PostgreSQL Nutzer von MAS",
-              "default": "mas-synapse"
-            },
-            "min_connections": {
-              "type": "integer",
-              "default": 0
-            },
-            "max_connections": {
-              "type": "integer",
-              "default": 10
-            },
-            "connect_timeout": {
-              "type": "integer",
-              "default": 30
-            },
-            "idle_timeout": {
-              "type": "integer",
-              "default": 600
-            },
-            "max_lifetime": {
-              "type": "integer",
-              "default": 1800
-            },
-            "extraArgs": {
-              "type": "object",
-              "title": "Zusätzliche Argumente für die MAS Datenbankverbindung",
-              "description": "https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS",
-              "properties": {
-                "sslmode": {
-                  "type": "string",
-                  "enum": [
-                    "disable",
-                    "allow",
-                    "prefer",
-                    "require",
-                    "verify-ca",
-                    "verify-full"
-                  ],
-                  "title": "Verwendeter SSL-Modus",
-                  "description": "https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS",
-                  "default": "prefer"
-                },
-                "sslrootcert": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
-                  "default": null,
-                  "examples": [
-                    "/path/to/ca.pem"
-                  ]
-                },
-                "sslcert": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
-                  "default": null,
-                  "examples": [
-                    "/path/to/cert.pem"
-                  ]
-                },
-                "sslkey": {
-                  "type": [
-                    "null",
-                    "string"
-                  ],
-                  "default": null,
-                  "examples": [
-                    "/path/to/key.pem"
-                  ]
-                }
-              },
-              "additionalProperties": {
-                "type": [
-                  "null",
-                  "string",
-                  "number",
-                  "integer",
-                  "boolean"
-                ]
-              },
-              "required": [
-                "sslmode"
-              ],
-              "unevaluatedProperties": false
-            }
-          },
-          "required": [
-            "port",
-            "database",
-            "username",
-            "password",
-            "min_connections",
-            "max_connections",
-            "connect_timeout",
-            "idle_timeout",
-            "max_lifetime",
-            "extraArgs"
-          ],
-          "unevaluatedProperties": false
         },
         "encryption": {
           "type": "object",
@@ -3990,6 +3624,30 @@
               "type": "string",
               "title": "Verweis im `existingSecret` auf den MAS Datenbankschlüssel",
               "default": "encryption"
+            }
+          },
+          "required": [
+            "existingSecret",
+            "existingSecretKey"
+          ],
+          "unevaluatedProperties": false
+        },
+        "matrixSharedSecret": {
+          "type": "object",
+          "title": "Matrix–MAS Shared-Secret",
+          "description": "Beliebige Zeichenkette, die zur Absicherung der Kommunikation zwischen Synapse und MAS verwendet wird.",
+          "properties": {
+            "existingSecret": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Name des Secrets, in dem das Matrix–MAS Shared-Secret stehen",
+              "default": "mas"
+            },
+            "existingSecretKey": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Verweis im `existingSecret` auf das Matrix–MAS Shared-Secret",
+              "default": "matrix-shared-secret"
             }
           },
           "required": [
@@ -4042,189 +3700,129 @@
             "/"
           ]
         },
-        "upstream_oauth2_provider": {
-          "type": "array",
-          "title": "Konfiguration eines Upstream Authentification Providers zur Delegierung der Authentifizierung",
-          "description": "Die Angaben werden automatisch in die Konfiguration unter `upstream_oauth2.providers` bereit gestellt.\n\nhttps://element-hq.github.io/matrix-authentication-service/setup/sso.html#configure-an-upstream-sso-provider\nhttps://element-hq.github.io/matrix-authentication-service/usage/configuration.html#upstream_oauth2",
-          "items": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string",
-                "pattern": "^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26}$"
-              },
-              "client_id": {
-                "type": "string"
-              },
-              "token_endpoint_auth_method": {
-                "type": "string",
-                "enum": [
-                  "none",
-                  "client_secret_basic",
-                  "client_secret_post",
-                  "client_secret_jwt",
-                  "private_key_jwt"
-                ]
-              },
-              "scope": {
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "client_id",
-              "token_endpoint_auth_method",
-              "scope"
-            ],
-            "unevaluatedProperties": true
-          },
-          "default": []
-        },
-        "clients": {
-          "type": "array",
-          "title": "OIDC Clients",
-          "description": "Werden zusätzlich zum Synypase Client konfiguriert.\n\nhttps://element-hq.github.io/matrix-authentication-service/reference/configuration.html#clients",
-          "items": {
-            "type": "object",
-            "unevaluatedProperties": true
-          }
-        },
-        "passwords": {
+        "extraConfig": {
           "type": "object",
-          "title": "Passwords.",
-          "description": "https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords",
+          "title": "Zusätzliche Konfigurationen für den MAS",
+          "description": "Ref: https://element-hq.github.io/matrix-authentication-service/reference/configuration.html",
           "properties": {
-            "enabled": {
-              "type": "boolean",
-              "title": "Whether to enable the password database",
-              "description": "If disabled, users will only be able to log in using upstream OIDC providers."
-            },
-            "schemes": {
-              "type": "array",
-              "title": "List of password hashing schemes being used.",
-              "description": "⚠ Only change this if you know what you're doing.",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "version": {
-                    "type": "integer"
-                  },
-                  "algorithm": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "version",
-                  "algorithm"
-                ],
-                "unevaluatedProperties": false
-              },
-              "default": [
-                {
-                  "version": 1,
-                  "algorithm": "argon2id"
-                }
-              ]
-            }
-          },
-          "unevaluatedProperties": true
-        },
-        "account": {
-          "type": "object",
-          "title": "Account.",
-          "description": "https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#account",
-          "properties": {
-            "email_change_allowed": {
-              "type": "boolean",
-              "title": "Whether users are allowed to change their email addresses",
-              "default": true
-            },
-            "displayname_change_allowed": {
-              "type": "boolean",
-              "title": "Whether users are allowed to change their display names",
-              "description": "This should be in sync with the policy in the homeserver configuration.",
-              "default": true
-            },
-            "password_registration_enabled": {
-              "type": "boolean",
-              "title": "Whether to enable self-service password registration",
-              "description": "This has no effect if password login is disabled.",
-              "default": true
-            },
-            "password_change_allowed": {
-              "type": "boolean",
-              "title": "Whether users are allowed to change their passwords",
-              "description": "This has no effect if password login is disabled.",
-              "default": true
-            },
-            "password_recovery_enabled": {
-              "type": "boolean",
-              "title": "Whether email-based password recovery is enabled",
-              "description": "This has no effect if password login is disabled.",
-              "default": true
-            }
-          },
-          "unevaluatedProperties": true
-        },
-        "policy": {
-          "type": "object",
-          "title": "Zusätzliche Policy Konfiguration für MAS",
-          "description": "Die Angaben werden automatisch in die Konfiguration unter `policy.data` bereit gestellt.\n\nhttps://element-hq.github.io/matrix-authentication-service/reference/configuration.html#policy",
-          "properties": {
-            "admin_users": {
-              "type": "array",
-              "items": {
-                "properties": {}
-              },
-              "default": []
-            },
             "passwords": {
               "type": "object",
-              "title": "Registration using passwords",
+              "title": "Konfiguration der Passwortdatenbank.",
+              "description": "https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords",
               "properties": {
-                "min_length": {
+                "enabled": {
+                  "type": "boolean",
+                  "title": "Whether to enable the password database",
+                  "description": "If disabled, users will only be able to log in using upstream OIDC providers."
+                },
+                "schemes": {
+                  "type": "array",
+                  "title": "List of password hashing schemes being used.",
+                  "description": "⚠ Only change this if you know what you're doing.",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "version": {
+                        "type": "integer"
+                      },
+                      "algorithm": {
+                        "type": "string"
+                      },
+                      "unicode_normalization": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "version",
+                      "algorithm"
+                    ],
+                    "unevaluatedProperties": false
+                  },
+                  "default": [
+                    {
+                      "version": 1,
+                      "algorithm": "argon2id"
+                    }
+                  ]
+                },
+                "minimum_complexity": {
                   "type": "integer",
-                  "title": "Minimum length of a password.",
-                  "default": 8
-                },
-                "require_lowercase": {
+                  "title": "Minimum complexity required for passwords",
+                  "description": "Minimum complexity required for passwords, estimated by the zxcvbn algorithm Must be between 0 and 4, default is 3 See https://github.com/dropbox/zxcvbn#usage for more information",
+                  "enum": [
+                    0,
+                    1,
+                    2,
+                    3
+                  ]
+                }
+              },
+              "required": [
+                "enabled",
+                "schemes",
+                "minimum_complexity"
+              ],
+              "unevaluatedProperties": true
+            },
+            "account": {
+              "type": "object",
+              "title": "Einstellungen zu MAS Nutzerkonten.",
+              "description": "https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#account",
+              "properties": {
+                "email_change_allowed": {
                   "type": "boolean",
-                  "title": "Require at least one lowercase character in a password",
+                  "title": "Whether users are allowed to change their email addresses",
                   "default": false
                 },
-                "require_uppercase": {
+                "displayname_change_allowed": {
                   "type": "boolean",
-                  "title": "Require at least one uppercase character in a password",
+                  "title": "Whether users are allowed to change their display names",
+                  "description": "This should be in sync with the policy in the homeserver configuration.",
                   "default": false
                 },
-                "require_number": {
+                "password_registration_enabled": {
                   "type": "boolean",
-                  "title": "Require at least one number in a password",
+                  "title": "Whether to enable self-service password registration",
+                  "description": "This has no effect if password login is disabled.",
+                  "default": false
+                },
+                "password_recovery_enabled": {
+                  "type": "boolean",
+                  "title": "Whether email-based password recovery is enabled",
+                  "description": "This has no effect if password login is disabled.",
                   "default": false
                 }
               },
+              "required": [
+                "email_change_allowed",
+                "displayname_change_allowed",
+                "password_registration_enabled",
+                "password_recovery_enabled"
+              ],
+              "unevaluatedProperties": true
+            },
+            "email": {
+              "type": "object",
+              "title": "Zusätzliche E-Mail Konfiguration für MAS",
+              "description": "https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#email",
+              "properties": {
+                "transport": {
+                  "type": "string",
+                  "minLength": 1,
+                  "default": "blackhole"
+                }
+              },
+              "required": [
+                "transport"
+              ],
               "unevaluatedProperties": true
             }
           },
-          "unevaluatedProperties": true
-        },
-        "rate_limiting": {
-          "type": "object",
-          "title": "Rate-limiting.",
-          "description": "https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#rate_limiting",
-          "unevaluatedProperties": true
-        },
-        "email": {
-          "type": "object",
-          "title": "Zusätzliche E-Mail Konfiguration für MAS",
-          "description": "https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#email",
-          "properties": {
-            "transport": {
-              "type": "string",
-              "minLength": 1,
-              "default": "blackhole"
-            }
-          },
+          "required": [
+            "passwords",
+            "account",
+            "email"
+          ],
           "unevaluatedProperties": true
         },
         "extraVolumes": {
@@ -4267,14 +3865,26 @@
             ]
           ]
         },
+        "annotations": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/annotations",
+          "type": "object",
+          "default": {},
+          "unevaluatedProperties": false
+        },
+        "labels": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/labels",
+          "type": "object",
+          "default": {},
+          "unevaluatedProperties": false
+        },
         "podSecurityContext": {
           "$ref": "#/$defs/podSecurityContext",
           "type": "object",
           "title": "Informationen zum Sicherheitskontext, die der Pod übernehmen soll",
           "default": {
-            "runAsUser": 2666,
-            "runAsGroup": 2666,
-            "fsGroup": 2666,
+            "runAsUser": 1007,
+            "runAsGroup": 1007,
+            "fsGroup": 1007,
             "runAsNonRoot": true
           },
           "unevaluatedProperties": false
@@ -4286,7 +3896,7 @@
           "default": {
             "readOnlyRootFilesystem": true,
             "runAsNonRoot": true,
-            "runAsUser": 2666
+            "runAsUser": 1007
           },
           "unevaluatedProperties": false
         },
@@ -4374,7 +3984,7 @@
                   "default": "/health"
                 },
                 "port": {
-                  "default": "metrics"
+                  "default": "health"
                 }
               }
             }
@@ -4386,26 +3996,63 @@
         "enabled",
         "image",
         "uri",
-        "postgresql",
         "encryption",
+        "matrixSharedSecret",
         "signingkeys",
         "paths",
         "masPaths",
-        "upstream_oauth2_provider",
-        "clients",
-        "passwords",
-        "account",
-        "policy",
-        "rate_limiting",
-        "email",
+        "extraConfig",
         "extraVolumes",
         "extraVolumeMounts",
+        "annotations",
+        "labels",
         "podSecurityContext",
         "securityContext",
         "resources",
         "livenessProbe",
         "readinessProbe",
         "startupProbe"
+      ],
+      "unevaluatedProperties": false
+    },
+    "maspostgresql": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/postgresqlDefaults",
+          "type": "object"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "min_connections": {
+              "type": "integer",
+              "default": 0
+            },
+            "max_connections": {
+              "type": "integer",
+              "default": 10
+            },
+            "connect_timeout": {
+              "type": "integer",
+              "default": 30
+            },
+            "idle_timeout": {
+              "type": "integer",
+              "default": 600
+            },
+            "max_lifetime": {
+              "type": "integer",
+              "default": 1800
+            }
+          },
+          "required": [
+            "min_connections",
+            "max_connections",
+            "connect_timeout",
+            "idle_timeout",
+            "max_lifetime"
+          ]
+        }
       ],
       "unevaluatedProperties": false
     },
@@ -4551,7 +4198,7 @@
                 },
                 "memory": {
                   "title": "RAM Ressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind",
-                  "default": "1Gi"
+                  "default": "500Mi"
                 }
               }
             },
@@ -4563,7 +4210,7 @@
                 },
                 "memory": {
                   "title": "Anforderungen an RAM Ressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind",
-                  "default": "500Mi"
+                  "default": "50Mi"
                 }
               }
             }
@@ -4830,7 +4477,7 @@
                 },
                 "memory": {
                   "title": "Anforderungen an RAM Ressourcen, die auf den ClamAV-Container anzuwenden sind",
-                  "default": "2Gi"
+                  "default": "1.5Gi"
                 }
               }
             }
@@ -4992,8 +4639,8 @@
           "type": "object",
           "title": "Informationen zum Sicherheitskontext, die der Pod übernehmen soll",
           "default": {
-            "runAsUser": 1111,
-            "runAsGroup": 1111
+            "runAsUser": 1001,
+            "runAsGroup": 1001
           },
           "unevaluatedProperties": false
         },
@@ -5116,10 +4763,15 @@
           "title": "URI für das Admin-Portal, zwingend notwendig",
           "default": null
         },
+        "clientID": {
+          "type": "string",
+          "title": "Client ID im ulid Format",
+          "default": "01KBJDJMZJ3K1XCHQ81T4Q17QD"
+        },
         "TLSverify": {
           "type": "boolean",
           "title": "Aktivieren der TLS Zertifikatsüberprüfung",
-          "default": false
+          "default": true
         },
         "logLevel": {
           "type": "string",
@@ -5143,7 +4795,7 @@
           "default": {
             "registry": "registry.opencode.de",
             "repository": "bwi/bundesmessenger/backend/container-images/bumap-core",
-            "tag": "1.0.0-jammy",
+            "tag": "1.1.0-jammy-production",
             "pullSecrets": [],
             "pullPolicy": "IfNotPresent"
           },
@@ -5163,7 +4815,7 @@
           "default": {
             "registry": "registry.opencode.de",
             "repository": "bwi/bundesmessenger/backend/container-images/bumap-ui",
-            "tag": "1.0.0-jammy",
+            "tag": "1.1.0-jammy-production",
             "pullSecrets": [],
             "pullPolicy": "IfNotPresent"
           },
@@ -5275,11 +4927,11 @@
               "properties": {
                 "cpu": {
                   "title": "Rechenressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind",
-                  "default": "150m"
+                  "default": "500m"
                 },
                 "memory": {
                   "title": "RAM-Ressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind",
-                  "default": "100Mi"
+                  "default": "200Mi"
                 }
               }
             },
@@ -5352,6 +5004,7 @@
         "extraVolumes",
         "extraVolumeMounts",
         "uri",
+        "clientID",
         "TLSverify",
         "logLevel",
         "coreImage",
@@ -5427,7 +5080,7 @@
                 },
                 "memory": {
                   "title": "RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind",
-                  "default": "100Mi"
+                  "default": "50Mi"
                 }
               }
             },
@@ -5439,7 +5092,7 @@
                 },
                 "memory": {
                   "title": "Anforderungen an RAM Ressourcen, die auf den webclient-server anzuwenden sind",
-                  "default": "45Mi"
+                  "default": "15Mi"
                 }
               }
             }
@@ -5451,8 +5104,8 @@
           "type": "object",
           "title": "Informationen zum Sicherheitskontext, die der Pod übernehmen soll",
           "default": {
-            "runAsUser": 1111,
-            "runAsGroup": 1111
+            "runAsUser": 1001,
+            "runAsGroup": 1001
           },
           "unevaluatedProperties": false
         },
@@ -5864,7 +5517,7 @@
           "properties": {
             "enabled": {
               "type": "boolean",
-              "default": false
+              "default": true
             },
             "map_style_url": {
               "type": [
@@ -6017,6 +5670,7 @@
     },
     "networkpolicies": {
       "type": "object",
+      "title": "Konfiguration der Network Policies",
       "properties": {
         "enabled": {
           "type": "boolean",
@@ -6024,29 +5678,111 @@
         },
         "fwProxyList": {
           "type": "array",
+          "title": "Transport-Adressen der Proxies für den Synapse und seine Worker",
+          "description": "Die angegebenen Proxies werden per Egress-Regeln erlaubt. Alle Einträge müssen in CIDR-Schreibweise angegeben werden: Start-IP/Netzmaske:Proxyport",
           "items": {
             "type": "string"
           },
-          "default": []
+          "default": [],
+          "examples": [
+            [
+              "192.168.10.0/24:8765",
+              "10.10.0.0/16:5000"
+            ]
+          ]
         },
         "egressIpBlock": {
           "type": "array",
+          "title": "Transport-Adressen der DNS-Resolver und Admin-API",
+          "description": "Angaben mit Port werden als Zielport mit Protokoll TCP übernommen. Alle Einträge müssen in CIDR-Schreibweise angegeben werden: Start-IP/Netzmaske:Proxyport",
           "items": {
             "type": "string"
           },
-          "default": []
+          "default": [],
+          "examples": [
+            [
+              "192.168.2.0/24",
+              "10.20.2.0/24:53"
+            ]
+          ]
         },
-        "dnsLabel": {
-          "type": "string",
-          "minLength": 1,
-          "default": "kube-dns"
+        "dns": {
+          "type": "object",
+          "title": "Einstellungen zum DNS der Infrastruktur.",
+          "properties": {
+            "labelSelector": {
+              "type": "array",
+              "minItems": 1,
+              "title": "Label-Selector zum Adressieren der DNS-Pods",
+              "description": "Sollten die Labels bei einer eigens betriebenen Instanz abweichen, kann dies hier angepasst werden.",
+              "items": {
+                "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelectorRequirement.schema.json",
+                "type": "object"
+              },
+              "default": [
+                {
+                  "key": "k8s-app",
+                  "operator": "In",
+                  "values": [
+                    "kube-dns"
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "labelSelector"
+          ]
         },
         "ingressNamespace": {
           "type": "string",
           "minLength": 1,
+          "title": "Namespace des Ingress-Controllers",
+          "description": "Aktuell wird nur eine Architektur mit einem L7 Ingress-Controller unterstützt. Absolut notwendig für die Network-Policies.",
           "default": "default"
         },
-        "postgres": {
+        "postgresql": {
+          "type": "object",
+          "title": "Einstellungen zum Haupt-PostgreSQL-Server",
+          "properties": {
+            "externalPostgresIP": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "title": "IP der externen PostgreSQL-Instanz",
+              "description": "Beim Einsatz einer PostgreSQL-Instanz außerhalb des Kubernetes Clusters muss hier eine einzelne IP Adresse angegeben werden. Falls ungesetzt wird angenommen, dass die externe PostgreSQL-Instanz Teil des Kubernetes Clusters ist.",
+              "default": null,
+              "examples": [
+                "10.30.3.0"
+              ]
+            },
+            "labelSelector": {
+              "type": "array",
+              "minItems": 1,
+              "title": "Label-Selector zum Adressieren des PostgreSQL-Pods",
+              "description": "Sollten die Labels bei einer eigens betriebenen Instanz abweichen, kann dies hier angepasst werden.",
+              "items": {
+                "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelectorRequirement.schema.json",
+                "type": "object"
+              },
+              "default": [
+                {
+                  "key": "app.kubernetes.io/name",
+                  "operator": "In",
+                  "values": [
+                    "postgresql"
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "labelSelector"
+          ],
+          "unevaluatedProperties": false
+        },
+        "maspostgresql": {
           "type": "object",
           "properties": {
             "externalPostgresIP": {
@@ -6056,17 +5792,28 @@
               ],
               "default": null
             },
-            "selectorLabels": {
-              "type": "object",
-              "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta.schema.json#/properties/labels",
-              "default": {
-                "app.kubernetes.io/name": "postgresql"
+            "labelSelector": {
+              "type": "array",
+              "minItems": 1,
+              "title": "Label-Selector zum Adressieren des MAS PostgreSQL-Pods",
+              "description": "Sollten die Labels bei einer eigens betriebenen Instanz abweichen, kann dies hier angepasst werden.",
+              "items": {
+                "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelectorRequirement.schema.json",
+                "type": "object"
               },
-              "unevaluatedProperties": false
+              "default": [
+                {
+                  "key": "app.kubernetes.io/name",
+                  "operator": "In",
+                  "values": [
+                    "maspostgresql"
+                  ]
+                }
+              ]
             }
           },
           "required": [
-            "selectorLabels"
+            "labelSelector"
           ],
           "unevaluatedProperties": false
         },
@@ -6075,15 +5822,22 @@
           "title": "HTTP-Resolver für ACME/Let’s Encrypt",
           "description": "Erlaubt die Kommunikation vom Ingress zum hier angegebenen Endpunkt (Pod + Port).",
           "properties": {
-            "selectorLabels": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
+            "labelSelector": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelectorRequirement.schema.json",
+                "type": "object"
               },
-              "default": {
-                "acme.cert-manager.io/http01-solver": "true"
-              },
-              "unevaluatedProperties": false
+              "default": [
+                {
+                  "key": "acme.cert-manager.io/http01-solver",
+                  "operator": "In",
+                  "values": [
+                    "true"
+                  ]
+                }
+              ]
             },
             "port": {
               "type": "integer",
@@ -6091,7 +5845,7 @@
             }
           },
           "required": [
-            "selectorLabels",
+            "labelSelector",
             "port"
           ],
           "unevaluatedProperties": false
@@ -6101,9 +5855,10 @@
         "enabled",
         "fwProxyList",
         "egressIpBlock",
-        "dnsLabel",
+        "dns",
         "ingressNamespace",
-        "postgres"
+        "postgresql",
+        "acme"
       ],
       "unevaluatedProperties": false
     },
@@ -6250,7 +6005,482 @@
   ],
   "unevaluatedProperties": false,
   "$defs": {
-    "bitnamiImage": {
+    "postgresqlDefaults": {
+      "type": "object",
+      "title": "Konfiguration des internen PostgreSQL-Servers",
+      "description": "Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und schnelle Möglichkeit, Demo- und Testsysteme aufzusetzen. Nicht empfohlen für Produktivsysteme.\nEmpfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den `externalPostgresql`-Block.",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "title": "Aktivieren des internen PostgreSQL-Servers",
+          "description": "Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den `externalPostgresql`-Block.",
+          "default": false
+        },
+        "image": {
+          "$ref": "#/$defs/cloudPiratesImage",
+          "type": "object",
+          "title": "Das zu verwendende PostgreSQL-Container-Abbild",
+          "default": {
+            "registry": "docker.io",
+            "repository": "postgres",
+            "pullSecrets": [],
+            "pullPolicy": "IfNotPresent"
+          },
+          "required": [
+            "registry",
+            "repository",
+            "tag",
+            "pullSecrets",
+            "pullPolicy"
+          ],
+          "unevaluatedProperties": true
+        },
+        "customUser": {
+          "type": "object",
+          "title": "Konfiguration des Synapse Datenbanknutzers",
+          "properties": {
+            "username": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Name des Datenbanknutzers",
+              "description": "Muss mit der Angabe im `existingSecret` übereinstimmen.",
+              "default": "synapse"
+            },
+            "database": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Name der Datenbank",
+              "description": "Muss mit der Angabe im `existingSecret` übereinstimmen.",
+              "default": "synapse_db"
+            },
+            "password": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "enum": [
+                null,
+                ""
+              ],
+              "title": "Passwort für den PostgreSQL-Nutzer",
+              "description": "Muss leer sein. Das Passwort wird im `existingSecret` angegeben. Wenn das `existingSecret` vor der Installation nicht bereit steht, wird es automatisch mit einem zufälligen Passwort erzeugt.",
+              "default": null
+            },
+            "existingSecret": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Name des Secrets mit dem Passwort des Synapse Datenbanknutzers",
+              "description": "Ist `postgresql.enabled` und das angegebene Secret existiert nicht, so wird automatisch ein neues Secret erstellt und verwendet.",
+              "default": "postgresql"
+            },
+            "secretKeys": {
+              "type": "object",
+              "title": "Schlüssel im angegebenen Secret",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "title": "Verweis im `existingSecret` auf den Namen des Datenbanknutzers",
+                  "default": "username"
+                },
+                "database": {
+                  "type": "string",
+                  "title": "Verweis im `existingSecret` auf den Namen der Datenbank",
+                  "default": "database"
+                },
+                "password": {
+                  "type": "string",
+                  "title": "Verweis im `existingSecret` auf das Nutzerpasswort",
+                  "default": "password"
+                }
+              },
+              "required": [
+                "name",
+                "database",
+                "password"
+              ],
+              "unevaluatedProperties": true
+            }
+          },
+          "required": [
+            "username",
+            "database",
+            "existingSecret",
+            "secretKeys"
+          ],
+          "unevaluatedProperties": true
+        },
+        "auth": {
+          "type": "object",
+          "title": "Konfiguration des Adminnutzers",
+          "properties": {
+            "username": {
+              "type": "string",
+              "title": "Name des PostgreSQL Adminnutzers",
+              "default": "postgres"
+            },
+            "password": {
+              "type": [
+                "null",
+                "string"
+              ],
+              "enum": [
+                null,
+                ""
+              ],
+              "title": "Passwort für den PostgreSQL-Adminnutzer",
+              "description": "Muss leer sein. Das Passwort wird im `existingSecret` angegeben. Wenn das `existingSecret` vor der Installation nicht bereit steht, wird es automatisch mit einem zufälligen Passwort erzeugt.",
+              "default": null
+            },
+            "existingSecret": {
+              "type": "string",
+              "minLength": 1,
+              "title": "Name des Kubernetes Secrets mit dem enhaltenen Adminpasswort",
+              "description": "Ist `postgresql.enabled` und das angegebene Secret existiert nicht, so wird automatisch ein neues Secret erstellt und verwendet.",
+              "default": "postgresql"
+            },
+            "secretKeys": {
+              "type": "object",
+              "title": "Schlüssel im angegebenen Secret",
+              "properties": {
+                "adminPasswordKey": {
+                  "type": "string",
+                  "title": "Verweis im `existingSecret` auf das Adminpasswort",
+                  "default": "postgres-password"
+                }
+              },
+              "required": [
+                "adminPasswordKey"
+              ],
+              "unevaluatedProperties": true
+            }
+          },
+          "required": [
+            "username",
+            "existingSecret",
+            "secretKeys"
+          ],
+          "unevaluatedProperties": true
+        },
+        "service": {
+          "type": "object",
+          "title": "Service-Konfiguration",
+          "properties": {
+            "port": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Port des PostgreSQL-Service",
+              "default": 5432
+            },
+            "targetPort": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Interner Container-Port des PostgreSQL-Containers",
+              "default": 5432
+            }
+          },
+          "required": [
+            "port",
+            "targetPort"
+          ],
+          "unevaluatedProperties": true
+        },
+        "extraVolumes": {
+          "type": "array",
+          "title": "Extra Volumes",
+          "description": "Kann zusammen mit `extraVolumeMounts` zum Wiedereinspielen einer Sicherung verwendet werden.",
+          "default": [],
+          "examples": [
+            [
+              {
+                "name": "major-upgrade-dump",
+                "persistentVolumeClaim": {
+                  "claimName": "postgresql-major-upgrade"
+                }
+              }
+            ]
+          ]
+        },
+        "extraVolumeMounts": {
+          "type": "array",
+          "default": [],
+          "examples": [
+            [
+              {
+                "name": "major-upgrade-dump",
+                "mountPath": "/major-upgrade-dump"
+              }
+            ]
+          ]
+        },
+        "config": {
+          "type": "object",
+          "title": "Extra Konfiguration der Datenbank",
+          "properties": {
+            "postgresqlMaxConnections": {
+              "type": "integer",
+              "title": "Maximale Anzahl an Datenbankverbindungen",
+              "description": "Die maximale Anzahl an Verbindungen ist oft eine Limitierung, da jeder Synapse-Prozess seine Verbindungen zur Datenbank hält.",
+              "default": 1024
+            }
+          },
+          "required": [
+            "postgresqlMaxConnections"
+          ],
+          "unevaluatedProperties": true
+        },
+        "containerSecurityContext": {
+          "type": "object",
+          "properties": {
+            "runAsUser": {
+              "type": "integer",
+              "title": "User ID for the PostgreSQL container",
+              "default": 66999
+            },
+            "runAsGroup": {
+              "type": "integer",
+              "title": "Group ID for the PostgreSQL container",
+              "default": 66999
+            },
+            "readOnlyRootFilesystem": {
+              "type": "boolean",
+              "title": "Mount container root filesystem as read-only",
+              "default": true
+            }
+          },
+          "unevaluatedProperties": true,
+          "required": [
+            "runAsUser",
+            "runAsGroup",
+            "readOnlyRootFilesystem"
+          ]
+        },
+        "persistence": {
+          "type": "object",
+          "title": "Persistenzkonfiguration für PostgreSQL",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "storageClass": {
+              "type": "string",
+              "default": ""
+            },
+            "size": {
+              "type": "string",
+              "default": "16Gi"
+            }
+          },
+          "required": [
+            "enabled",
+            "storageClass",
+            "size"
+          ],
+          "unevaluatedProperties": true
+        },
+        "resources": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json",
+          "type": "object",
+          "title": "Ressourcenanforderungen und -grenzen",
+          "properties": {
+            "limits": {
+              "type": "object",
+              "properties": {
+                "cpu": {
+                  "title": "Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind",
+                  "default": 1
+                },
+                "memory": {
+                  "title": "RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind",
+                  "default": "4096Mi"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "unevaluatedProperties": true
+            },
+            "requests": {
+              "type": "object",
+              "properties": {
+                "cpu": {
+                  "title": "Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind",
+                  "default": "250m"
+                },
+                "memory": {
+                  "title": "Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind",
+                  "default": "256Mi"
+                }
+              },
+              "required": [
+                "cpu",
+                "memory"
+              ],
+              "unevaluatedProperties": true
+            }
+          },
+          "required": [
+            "limits",
+            "requests"
+          ],
+          "unevaluatedProperties": true
+        },
+        "extraArgs": {
+          "$comment": "This config option is not part of the `postgresql` chart.",
+          "type": "object",
+          "title": "Zusätzliche Argumente für die Datenbankverbindung",
+          "description": "Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config",
+          "properties": {
+            "sslmode": {
+              "type": "string",
+              "enum": [
+                "disable",
+                "allow",
+                "prefer",
+                "require",
+                "verify-ca",
+                "verify-full"
+              ],
+              "title": "Verwendeter SSL-Modus",
+              "description": "https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS",
+              "default": "prefer"
+            }
+          },
+          "additionalProperties": {
+            "type": [
+              "null",
+              "string",
+              "number",
+              "integer",
+              "boolean"
+            ]
+          },
+          "required": [
+            "sslmode"
+          ],
+          "unevaluatedProperties": true
+        }
+      },
+      "required": [
+        "enabled",
+        "image",
+        "customUser",
+        "auth",
+        "service",
+        "extraVolumes",
+        "extraVolumeMounts",
+        "config",
+        "containerSecurityContext",
+        "persistence",
+        "resources",
+        "extraArgs"
+      ],
+      "unevaluatedProperties": true
+    },
+    "externalPostgresqlDefaults": {
+      "type": "object",
+      "title": "Extern konfigurierter PostgreSQL-Server",
+      "description": "Wird für die Datenbank von Synapse verwendet. Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf \"C\" eingestellt sein. Die „interne“ Datenbank muss deaktiviert sein: `postgresql.enabled: false`.",
+      "properties": {
+        "host": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Hostname vom externen PostgreSQL-Server",
+          "description": "Beispieladresse für einen K8s-internen PostgreSQL im Namespace `postgres`:",
+          "default": "postgres-4-matrix-postgresql.postgresql.svc.cluster.local"
+        },
+        "port": {
+          "$ref": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json#/properties/containerPort",
+          "type": "integer",
+          "title": "Port vom externen PostgreSQL-Server",
+          "default": 5342
+        },
+        "database": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Name der zu verwendenden PostgreSQL-Datenbank",
+          "default": "synapse_db"
+        },
+        "username": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Name des PostgreSQL-Nutzers",
+          "default": "synapse"
+        },
+        "password": {
+          "deprecated": true,
+          "type": [
+            "null",
+            "string"
+          ],
+          "minLength": 1,
+          "title": "Passwort vom PostgreSQL-Nutzer",
+          "description": "**ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.",
+          "default": null,
+          "examples": [
+            "53C237P0576235Q1P455W02D"
+          ]
+        },
+        "existingSecret": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Name vom Secret mit dem PostgreSQL-Passwort",
+          "default": "postgresql"
+        },
+        "existingSecretPasswordKey": {
+          "type": "string",
+          "minLength": 1,
+          "title": "Verweis im `existingSecret` auf das PostgreSQL-Passwort",
+          "default": "password"
+        },
+        "extraArgs": {
+          "type": "object",
+          "title": "Zusätzliche Argumente für die Datenbankverbindung",
+          "description": "Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config",
+          "properties": {
+            "sslmode": {
+              "type": "string",
+              "enum": [
+                "disable",
+                "allow",
+                "prefer",
+                "require",
+                "verify-ca",
+                "verify-full"
+              ],
+              "title": "Verwendeter SSL-Modus",
+              "description": "https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS",
+              "default": "prefer"
+            }
+          },
+          "additionalProperties": {
+            "type": [
+              "null",
+              "string",
+              "number",
+              "integer",
+              "boolean"
+            ]
+          },
+          "required": [
+            "sslmode"
+          ],
+          "unevaluatedProperties": false
+        }
+      },
+      "required": [
+        "host",
+        "port",
+        "database",
+        "username",
+        "existingSecret",
+        "existingSecretPasswordKey",
+        "extraArgs"
+      ],
+      "unevaluatedProperties": true
+    },
+    "cloudPiratesImage": {
       "type": "object",
       "properties": {
         "registry": {
@@ -7034,6 +7264,36 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.AzureDiskVolumeSource.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.AzureFilePersistentVolumeSource.schema.json": {
+      "description": "AzureFile represents an Azure File Service mount on the host and bind mount to the pod.",
+      "properties": {
+        "readOnly": {
+          "description": "readOnly defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts.",
+          "type": "boolean"
+        },
+        "secretName": {
+          "default": "",
+          "description": "secretName is the name of secret that contains Azure Storage Account Name and Key",
+          "type": "string"
+        },
+        "secretNamespace": {
+          "description": "secretNamespace is the namespace of the secret that contains Azure Storage Account Name and Key default is the same as the Pod",
+          "type": "string"
+        },
+        "shareName": {
+          "default": "",
+          "description": "shareName is the azure Share Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "secretName",
+        "shareName"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.AzureFilePersistentVolumeSource.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.AzureFileVolumeSource.schema.json": {
       "description": "AzureFile represents an Azure File Service mount on the host and bind mount to the pod.",
       "properties": {
@@ -7059,6 +7319,84 @@
       "type": "object",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.AzureFileVolumeSource.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.CSIPersistentVolumeSource.schema.json": {
+      "description": "Represents storage that is managed by an external CSI volume driver (Beta feature)",
+      "properties": {
+        "controllerExpandSecretRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecretReference.schema.json"
+            }
+          ],
+          "description": "controllerExpandSecretRef is a reference to the secret object containing sensitive information to pass to the CSI driver to complete the CSI ControllerExpandVolume call. This field is optional, and may be empty if no secret is required. If the secret object contains more than one secret, all secrets are passed."
+        },
+        "controllerPublishSecretRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecretReference.schema.json"
+            }
+          ],
+          "description": "controllerPublishSecretRef is a reference to the secret object containing sensitive information to pass to the CSI driver to complete the CSI ControllerPublishVolume and ControllerUnpublishVolume calls. This field is optional, and may be empty if no secret is required. If the secret object contains more than one secret, all secrets are passed."
+        },
+        "driver": {
+          "default": "",
+          "description": "driver is the name of the driver to use for this volume. Required.",
+          "type": "string"
+        },
+        "fsType": {
+          "description": "fsType to mount. Must be a filesystem type supported by the host operating system. Ex. \"ext4\", \"xfs\", \"ntfs\".",
+          "type": "string"
+        },
+        "nodeExpandSecretRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecretReference.schema.json"
+            }
+          ],
+          "description": "nodeExpandSecretRef is a reference to the secret object containing sensitive information to pass to the CSI driver to complete the CSI NodeExpandVolume call. This field is optional, may be omitted if no secret is required. If the secret object contains more than one secret, all secrets are passed."
+        },
+        "nodePublishSecretRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecretReference.schema.json"
+            }
+          ],
+          "description": "nodePublishSecretRef is a reference to the secret object containing sensitive information to pass to the CSI driver to complete the CSI NodePublishVolume and NodeUnpublishVolume calls. This field is optional, and may be empty if no secret is required. If the secret object contains more than one secret, all secrets are passed."
+        },
+        "nodeStageSecretRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecretReference.schema.json"
+            }
+          ],
+          "description": "nodeStageSecretRef is a reference to the secret object containing sensitive information to pass to the CSI driver to complete the CSI NodeStageVolume and NodeStageVolume and NodeUnstageVolume calls. This field is optional, and may be empty if no secret is required. If the secret object contains more than one secret, all secrets are passed."
+        },
+        "readOnly": {
+          "description": "readOnly value to pass to ControllerPublishVolumeRequest. Defaults to false (read/write).",
+          "type": "boolean"
+        },
+        "volumeAttributes": {
+          "additionalProperties": {
+            "default": "",
+            "type": "string"
+          },
+          "description": "volumeAttributes of the volume to publish.",
+          "type": "object"
+        },
+        "volumeHandle": {
+          "default": "",
+          "description": "volumeHandle is the unique volume name returned by the CSI volume plugin’s CreateVolume to refer to the volume on all subsequent calls. Required.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "driver",
+        "volumeHandle"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.CSIPersistentVolumeSource.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.CSIVolumeSource.schema.json": {
       "description": "Represents a source location of a volume to mount, managed by an external CSI driver",
@@ -7126,6 +7464,50 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Capabilities.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.CephFSPersistentVolumeSource.schema.json": {
+      "description": "Represents a Ceph Filesystem mount that lasts the lifetime of a pod Cephfs volumes do not support ownership management or SELinux relabeling.",
+      "properties": {
+        "monitors": {
+          "description": "monitors is Required: Monitors is a collection of Ceph monitors More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it",
+          "items": {
+            "default": "",
+            "type": "string"
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        },
+        "path": {
+          "description": "path is Optional: Used as the mounted root, rather than the full Ceph tree, default is /",
+          "type": "string"
+        },
+        "readOnly": {
+          "description": "readOnly is Optional: Defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts. More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it",
+          "type": "boolean"
+        },
+        "secretFile": {
+          "description": "secretFile is Optional: SecretFile is the path to key ring for User, default is /etc/ceph/user.secret More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it",
+          "type": "string"
+        },
+        "secretRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecretReference.schema.json"
+            }
+          ],
+          "description": "secretRef is Optional: SecretRef is reference to the authentication secret for User, default is empty. More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it"
+        },
+        "user": {
+          "description": "user is Optional: User is the rados user name, default is admin More info: https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it",
+          "type": "string"
+        }
+      },
+      "required": [
+        "monitors"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.CephFSPersistentVolumeSource.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.CephFSVolumeSource.schema.json": {
       "description": "Represents a Ceph Filesystem mount that lasts the lifetime of a pod Cephfs volumes do not support ownership management or SELinux relabeling.",
       "properties": {
@@ -7169,6 +7551,38 @@
       "type": "object",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.CephFSVolumeSource.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.CinderPersistentVolumeSource.schema.json": {
+      "description": "Represents a cinder volume resource in Openstack. A Cinder volume must exist before mounting to a container. The volume must also be in the same region as the kubelet. Cinder volumes support ownership management and SELinux relabeling.",
+      "properties": {
+        "fsType": {
+          "description": "fsType Filesystem type to mount. Must be a filesystem type supported by the host operating system. Examples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified. More info: https://examples.k8s.io/mysql-cinder-pd/README.md",
+          "type": "string"
+        },
+        "readOnly": {
+          "description": "readOnly is Optional: Defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts. More info: https://examples.k8s.io/mysql-cinder-pd/README.md",
+          "type": "boolean"
+        },
+        "secretRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecretReference.schema.json"
+            }
+          ],
+          "description": "secretRef is Optional: points to a secret object containing parameters used to connect to OpenStack."
+        },
+        "volumeID": {
+          "default": "",
+          "description": "volumeID used to identify the volume in cinder. More info: https://examples.k8s.io/mysql-cinder-pd/README.md",
+          "type": "string"
+        }
+      },
+      "required": [
+        "volumeID"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.CinderPersistentVolumeSource.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.CinderVolumeSource.schema.json": {
       "description": "Represents a cinder volume resource in Openstack. A Cinder volume must exist before mounting to a container. The volume must also be in the same region as the kubelet. Cinder volumes support ownership management and SELinux relabeling.",
@@ -7237,6 +7651,23 @@
       "type": "object",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ClusterTrustBundleProjection.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ConfigMapEnvSource.schema.json": {
+      "description": "ConfigMapEnvSource selects a ConfigMap to populate the environment variables with.\n\nThe contents of the target ConfigMap's Data field will represent the key-value pairs as environment variables.",
+      "properties": {
+        "name": {
+          "default": "",
+          "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+          "type": "string"
+        },
+        "optional": {
+          "description": "Specify whether the ConfigMap must be defined",
+          "type": "boolean"
+        }
+      },
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ConfigMapEnvSource.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ConfigMapKeySelector.schema.json": {
       "description": "Selects a key from a ConfigMap.",
@@ -7582,6 +8013,28 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerPort.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerResizePolicy.schema.json": {
+      "description": "ContainerResizePolicy represents resource resize policy for the container.",
+      "properties": {
+        "resourceName": {
+          "default": "",
+          "description": "Name of the resource to which this resource resize policy applies. Supported values: cpu, memory.",
+          "type": "string"
+        },
+        "restartPolicy": {
+          "default": "",
+          "description": "Restart policy to apply when specified resource is resized. If not specified, it defaults to NotRequired.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "resourceName",
+        "restartPolicy"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ContainerResizePolicy.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.DownwardAPIProjection.schema.json": {
       "description": "Represents downward API info for projecting into a projected volume. Note that this is identical to a downwardAPI volume source without the default mode.",
       "properties": {
@@ -7686,6 +8139,34 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EmptyDirVolumeSource.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EnvFromSource.schema.json": {
+      "description": "EnvFromSource represents the source of a set of ConfigMaps",
+      "properties": {
+        "configMapRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.ConfigMapEnvSource.schema.json"
+            }
+          ],
+          "description": "The ConfigMap to select from"
+        },
+        "prefix": {
+          "description": "An optional identifier to prepend to each key in the ConfigMap. Must be a C_IDENTIFIER.",
+          "type": "string"
+        },
+        "secretRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecretEnvSource.schema.json"
+            }
+          ],
+          "description": "The Secret to select from"
+        }
+      },
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EnvFromSource.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EnvVar.schema.json": {
       "description": "EnvVar represents an environment variable present in a Container.",
       "properties": {
@@ -7754,6 +8235,228 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EnvVarSource.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EphemeralContainer.schema.json": {
+      "description": "An EphemeralContainer is a temporary container that you may add to an existing Pod for user-initiated activities such as debugging. Ephemeral containers have no resource or scheduling guarantees, and they will not be restarted when they exit or when a Pod is removed or restarted. The kubelet may evict a Pod if an ephemeral container causes the Pod to exceed its resource allocation.\n\nTo add an ephemeral container, use the ephemeralcontainers subresource of an existing Pod. Ephemeral containers may not be removed or restarted.",
+      "properties": {
+        "args": {
+          "description": "Arguments to the entrypoint. The image's CMD is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will produce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell",
+          "items": {
+            "default": "",
+            "type": "string"
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        },
+        "command": {
+          "description": "Entrypoint array. Not executed within a shell. The image's ENTRYPOINT is used if this is not provided. Variable references $(VAR_NAME) are expanded using the container's environment. If a variable cannot be resolved, the reference in the input string will be unchanged. Double $$ are reduced to a single $, which allows for escaping the $(VAR_NAME) syntax: i.e. \"$$(VAR_NAME)\" will produce the string literal \"$(VAR_NAME)\". Escaped references will never be expanded, regardless of whether the variable exists or not. Cannot be updated. More info: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/#running-a-command-in-a-shell",
+          "items": {
+            "default": "",
+            "type": "string"
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        },
+        "env": {
+          "description": "List of environment variables to set in the container. Cannot be updated.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "io.k8s.api.core.v1.EnvVar.schema.json"
+              }
+            ],
+            "default": {}
+          },
+          "type": "array",
+          "x-kubernetes-list-map-keys": [
+            "name"
+          ],
+          "x-kubernetes-list-type": "map",
+          "x-kubernetes-patch-merge-key": "name",
+          "x-kubernetes-patch-strategy": "merge"
+        },
+        "envFrom": {
+          "description": "List of sources to populate environment variables in the container. The keys defined within a source must be a C_IDENTIFIER. All invalid keys will be reported as an event when the container is starting. When a key exists in multiple sources, the value associated with the last source will take precedence. Values defined by an Env with a duplicate key will take precedence. Cannot be updated.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "io.k8s.api.core.v1.EnvFromSource.schema.json"
+              }
+            ],
+            "default": {}
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        },
+        "image": {
+          "description": "Container image name. More info: https://kubernetes.io/docs/concepts/containers/images",
+          "type": "string"
+        },
+        "imagePullPolicy": {
+          "description": "Image pull policy. One of Always, Never, IfNotPresent. Defaults to Always if :latest tag is specified, or IfNotPresent otherwise. Cannot be updated. More info: https://kubernetes.io/docs/concepts/containers/images#updating-images",
+          "type": "string"
+        },
+        "lifecycle": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.Lifecycle.schema.json"
+            }
+          ],
+          "description": "Lifecycle is not allowed for ephemeral containers."
+        },
+        "livenessProbe": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.Probe.schema.json"
+            }
+          ],
+          "description": "Probes are not allowed for ephemeral containers."
+        },
+        "name": {
+          "default": "",
+          "description": "Name of the ephemeral container specified as a DNS_LABEL. This name must be unique among all containers, init containers and ephemeral containers.",
+          "type": "string"
+        },
+        "ports": {
+          "description": "Ports are not allowed for ephemeral containers.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "io.k8s.api.core.v1.ContainerPort.schema.json"
+              }
+            ],
+            "default": {}
+          },
+          "type": "array",
+          "x-kubernetes-list-map-keys": [
+            "containerPort",
+            "protocol"
+          ],
+          "x-kubernetes-list-type": "map",
+          "x-kubernetes-patch-merge-key": "containerPort",
+          "x-kubernetes-patch-strategy": "merge"
+        },
+        "readinessProbe": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.Probe.schema.json"
+            }
+          ],
+          "description": "Probes are not allowed for ephemeral containers."
+        },
+        "resizePolicy": {
+          "description": "Resources resize policy for the container.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "io.k8s.api.core.v1.ContainerResizePolicy.schema.json"
+              }
+            ],
+            "default": {}
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        },
+        "resources": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.ResourceRequirements.schema.json"
+            }
+          ],
+          "default": {},
+          "description": "Resources are not allowed for ephemeral containers. Ephemeral containers use spare resources already allocated to the pod."
+        },
+        "restartPolicy": {
+          "description": "Restart policy for the container to manage the restart behavior of each container within a pod. This may only be set for init containers. You cannot set this field on ephemeral containers.",
+          "type": "string"
+        },
+        "securityContext": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecurityContext.schema.json"
+            }
+          ],
+          "description": "Optional: SecurityContext defines the security options the ephemeral container should be run with. If set, the fields of SecurityContext override the equivalent fields of PodSecurityContext."
+        },
+        "startupProbe": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.Probe.schema.json"
+            }
+          ],
+          "description": "Probes are not allowed for ephemeral containers."
+        },
+        "stdin": {
+          "description": "Whether this container should allocate a buffer for stdin in the container runtime. If this is not set, reads from stdin in the container will always result in EOF. Default is false.",
+          "type": "boolean"
+        },
+        "stdinOnce": {
+          "description": "Whether the container runtime should close the stdin channel after it has been opened by a single attach. When stdin is true the stdin stream will remain open across multiple attach sessions. If stdinOnce is set to true, stdin is opened on container start, is empty until the first client attaches to stdin, and then remains open and accepts data until the client disconnects, at which time stdin is closed and remains closed until the container is restarted. If this flag is false, a container processes that reads from stdin will never receive an EOF. Default is false",
+          "type": "boolean"
+        },
+        "targetContainerName": {
+          "description": "If set, the name of the container from PodSpec that this ephemeral container targets. The ephemeral container will be run in the namespaces (IPC, PID, etc) of this container. If not set then the ephemeral container uses the namespaces configured in the Pod spec.\n\nThe container runtime must implement support for this feature. If the runtime does not support namespace targeting then the result of setting this field is undefined.",
+          "type": "string"
+        },
+        "terminationMessagePath": {
+          "description": "Optional: Path at which the file to which the container's termination message will be written is mounted into the container's filesystem. Message written is intended to be brief final status, such as an assertion failure message. Will be truncated by the node if greater than 4096 bytes. The total message length across all containers will be limited to 12kb. Defaults to /dev/termination-log. Cannot be updated.",
+          "type": "string"
+        },
+        "terminationMessagePolicy": {
+          "description": "Indicate how the termination message should be populated. File will use the contents of terminationMessagePath to populate the container status message on both success and failure. FallbackToLogsOnError will use the last chunk of container log output if the termination message file is empty and the container exited with an error. The log output is limited to 2048 bytes or 80 lines, whichever is smaller. Defaults to File. Cannot be updated.",
+          "type": "string"
+        },
+        "tty": {
+          "description": "Whether this container should allocate a TTY for itself, also requires 'stdin' to be true. Default is false.",
+          "type": "boolean"
+        },
+        "volumeDevices": {
+          "description": "volumeDevices is the list of block devices to be used by the container.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "io.k8s.api.core.v1.VolumeDevice.schema.json"
+              }
+            ],
+            "default": {}
+          },
+          "type": "array",
+          "x-kubernetes-list-map-keys": [
+            "devicePath"
+          ],
+          "x-kubernetes-list-type": "map",
+          "x-kubernetes-patch-merge-key": "devicePath",
+          "x-kubernetes-patch-strategy": "merge"
+        },
+        "volumeMounts": {
+          "description": "Pod volumes to mount into the container's filesystem. Subpath mounts are not allowed for ephemeral containers. Cannot be updated.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "io.k8s.api.core.v1.VolumeMount.schema.json"
+              }
+            ],
+            "default": {}
+          },
+          "type": "array",
+          "x-kubernetes-list-map-keys": [
+            "mountPath"
+          ],
+          "x-kubernetes-list-type": "map",
+          "x-kubernetes-patch-merge-key": "mountPath",
+          "x-kubernetes-patch-strategy": "merge"
+        },
+        "workingDir": {
+          "description": "Container's working directory. If not specified, the container runtime's default will be used, which might be configured in the container image. Cannot be updated.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EphemeralContainer.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.EphemeralVolumeSource.schema.json": {
       "description": "Represents an ephemeral volume that is handled by a normal storage driver.",
       "properties": {
@@ -7774,7 +8477,7 @@
       "description": "ExecAction describes a \"run in container\" action.",
       "properties": {
         "command": {
-          "description": "Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.",
+          "description": "execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.",
           "items": {
             "default": "",
             "type": "string"
@@ -7825,6 +8528,46 @@
       "type": "object",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.FCVolumeSource.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.FlexPersistentVolumeSource.schema.json": {
+      "description": "FlexPersistentVolumeSource represents a generic persistent volume resource that is provisioned/attached using an exec based plugin.",
+      "properties": {
+        "driver": {
+          "default": "",
+          "description": "driver is the name of the driver to use for this volume.",
+          "type": "string"
+        },
+        "fsType": {
+          "description": "fsType is the Filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. \"ext4\", \"xfs\", \"ntfs\". The default filesystem depends on FlexVolume script.",
+          "type": "string"
+        },
+        "options": {
+          "additionalProperties": {
+            "default": "",
+            "type": "string"
+          },
+          "description": "options is Optional: this field holds extra command options if any.",
+          "type": "object"
+        },
+        "readOnly": {
+          "description": "readOnly is Optional: defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts.",
+          "type": "boolean"
+        },
+        "secretRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecretReference.schema.json"
+            }
+          ],
+          "description": "secretRef is Optional: SecretRef is reference to the secret object containing sensitive information to pass to the plugin scripts. This may be empty if no secret object is specified. If the secret object contains more than one secret, all secrets are passed to the plugin scripts."
+        }
+      },
+      "required": [
+        "driver"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.FlexPersistentVolumeSource.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.FlexVolumeSource.schema.json": {
       "description": "FlexVolume represents a generic volume resource that is provisioned/attached using an exec based plugin.",
@@ -7956,6 +8699,36 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.GitRepoVolumeSource.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.GlusterfsPersistentVolumeSource.schema.json": {
+      "description": "Represents a Glusterfs mount that lasts the lifetime of a pod. Glusterfs volumes do not support ownership management or SELinux relabeling.",
+      "properties": {
+        "endpoints": {
+          "default": "",
+          "description": "endpoints is the endpoint name that details Glusterfs topology. More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod",
+          "type": "string"
+        },
+        "endpointsNamespace": {
+          "description": "endpointsNamespace is the namespace that contains Glusterfs endpoint. If this field is empty, the EndpointNamespace defaults to the same namespace as the bound PVC. More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod",
+          "type": "string"
+        },
+        "path": {
+          "default": "",
+          "description": "path is the Glusterfs volume path. More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod",
+          "type": "string"
+        },
+        "readOnly": {
+          "description": "readOnly here will force the Glusterfs volume to be mounted with read-only permissions. Defaults to false. More info: https://examples.k8s.io/volumes/glusterfs/README.md#create-a-pod",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "endpoints",
+        "path"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.GlusterfsPersistentVolumeSource.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.GlusterfsVolumeSource.schema.json": {
       "description": "Represents a Glusterfs mount that lasts the lifetime of a pod. Glusterfs volumes do not support ownership management or SELinux relabeling.",
       "properties": {
@@ -8048,6 +8821,31 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.HTTPHeader.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.HostAlias.schema.json": {
+      "description": "HostAlias holds the mapping between IP and hostnames that will be injected as an entry in the pod's hosts file.",
+      "properties": {
+        "hostnames": {
+          "description": "Hostnames for the above IP address.",
+          "items": {
+            "default": "",
+            "type": "string"
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        },
+        "ip": {
+          "default": "",
+          "description": "IP address of the host file entry.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ip"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.HostAlias.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.HostPathVolumeSource.schema.json": {
       "description": "Represents a host path mapped into a pod. Host path volumes do not support ownership management or SELinux relabeling.",
       "properties": {
@@ -8067,6 +8865,77 @@
       "type": "object",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.HostPathVolumeSource.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ISCSIPersistentVolumeSource.schema.json": {
+      "description": "ISCSIPersistentVolumeSource represents an ISCSI disk. ISCSI volumes can only be mounted as read/write once. ISCSI volumes support ownership management and SELinux relabeling.",
+      "properties": {
+        "chapAuthDiscovery": {
+          "description": "chapAuthDiscovery defines whether support iSCSI Discovery CHAP authentication",
+          "type": "boolean"
+        },
+        "chapAuthSession": {
+          "description": "chapAuthSession defines whether support iSCSI Session CHAP authentication",
+          "type": "boolean"
+        },
+        "fsType": {
+          "description": "fsType is the filesystem type of the volume that you want to mount. Tip: Ensure that the filesystem type is supported by the host operating system. Examples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified. More info: https://kubernetes.io/docs/concepts/storage/volumes#iscsi",
+          "type": "string"
+        },
+        "initiatorName": {
+          "description": "initiatorName is the custom iSCSI Initiator Name. If initiatorName is specified with iscsiInterface simultaneously, new iSCSI interface <target portal>:<volume name> will be created for the connection.",
+          "type": "string"
+        },
+        "iqn": {
+          "default": "",
+          "description": "iqn is Target iSCSI Qualified Name.",
+          "type": "string"
+        },
+        "iscsiInterface": {
+          "default": "default",
+          "description": "iscsiInterface is the interface Name that uses an iSCSI transport. Defaults to 'default' (tcp).",
+          "type": "string"
+        },
+        "lun": {
+          "default": 0,
+          "description": "lun is iSCSI Target Lun number.",
+          "format": "int32",
+          "type": "integer"
+        },
+        "portals": {
+          "description": "portals is the iSCSI Target Portal List. The Portal is either an IP or ip_addr:port if the port is other than default (typically TCP ports 860 and 3260).",
+          "items": {
+            "default": "",
+            "type": "string"
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        },
+        "readOnly": {
+          "description": "readOnly here will force the ReadOnly setting in VolumeMounts. Defaults to false.",
+          "type": "boolean"
+        },
+        "secretRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecretReference.schema.json"
+            }
+          ],
+          "description": "secretRef is the CHAP Secret for iSCSI target and initiator authentication"
+        },
+        "targetPortal": {
+          "default": "",
+          "description": "targetPortal is iSCSI Target Portal. The Portal is either an IP or ip_addr:port if the port is other than default (typically TCP ports 860 and 3260).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "targetPortal",
+        "iqn",
+        "lun"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ISCSIPersistentVolumeSource.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ISCSIVolumeSource.schema.json": {
       "description": "Represents an ISCSI disk. ISCSI volumes can only be mounted as read/write once. ISCSI volumes support ownership management and SELinux relabeling.",
@@ -8182,6 +9051,70 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.KeyToPath.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Lifecycle.schema.json": {
+      "description": "Lifecycle describes actions that the management system should take in response to container lifecycle events. For the PostStart and PreStop lifecycle handlers, management of the container blocks until the action is complete, unless the container process fails, in which case the handler is aborted.",
+      "properties": {
+        "postStart": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.LifecycleHandler.schema.json"
+            }
+          ],
+          "description": "PostStart is called immediately after a container is created. If the handler fails, the container is terminated and restarted according to its restart policy. Other management of the container blocks until the hook completes. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks"
+        },
+        "preStop": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.LifecycleHandler.schema.json"
+            }
+          ],
+          "description": "PreStop is called immediately before a container is terminated due to an API request or management event such as liveness/startup probe failure, preemption, resource contention, etc. The handler is not called if the container crashes or exits. The Pod's termination grace period countdown begins before the PreStop hook is executed. Regardless of the outcome of the handler, the container will eventually terminate within the Pod's termination grace period (unless delayed by finalizers). Other management of the container blocks until the hook completes or until the termination grace period is reached. More info: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/#container-hooks"
+        }
+      },
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Lifecycle.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LifecycleHandler.schema.json": {
+      "description": "LifecycleHandler defines a specific action that should be taken in a lifecycle hook. One and only one of the fields, except TCPSocket must be specified.",
+      "properties": {
+        "exec": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.ExecAction.schema.json"
+            }
+          ],
+          "description": "Exec specifies the action to take."
+        },
+        "httpGet": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.HTTPGetAction.schema.json"
+            }
+          ],
+          "description": "HTTPGet specifies the http request to perform."
+        },
+        "sleep": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SleepAction.schema.json"
+            }
+          ],
+          "description": "Sleep represents the duration that the container should sleep before being terminated."
+        },
+        "tcpSocket": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.TCPSocketAction.schema.json"
+            }
+          ],
+          "description": "Deprecated. TCPSocket is NOT supported as a LifecycleHandler and kept for the backward compatibility. There are no validation of this field and lifecycle hooks will fail in runtime when tcp handler is specified."
+        }
+      },
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LifecycleHandler.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalObjectReference.schema.json": {
       "description": "LocalObjectReference contains enough information to let you locate the referenced object inside the same namespace.",
       "properties": {
@@ -8195,6 +9128,26 @@
       "x-kubernetes-map-type": "atomic",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalObjectReference.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalVolumeSource.schema.json": {
+      "description": "Local represents directly-attached storage with node affinity (Beta feature)",
+      "properties": {
+        "fsType": {
+          "description": "fsType is the filesystem type to mount. It applies only when the Path is a block device. Must be a filesystem type supported by the host operating system. Ex. \"ext4\", \"xfs\", \"ntfs\". The default value is to auto-select a filesystem if unspecified.",
+          "type": "string"
+        },
+        "path": {
+          "default": "",
+          "description": "path of the full path to the volume on the node. It can be either a directory or block device (disk, partition, ...).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.LocalVolumeSource.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.NFSVolumeSource.schema.json": {
       "description": "Represents an NFS mount that lasts the lifetime of a pod. NFS volumes do not support ownership management or SELinux relabeling.",
@@ -8362,6 +9315,43 @@
       "x-kubernetes-map-type": "atomic",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ObjectFieldSelector.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ObjectReference.schema.json": {
+      "description": "ObjectReference contains enough information to let you inspect or modify the referred object.",
+      "properties": {
+        "apiVersion": {
+          "description": "API version of the referent.",
+          "type": "string"
+        },
+        "fieldPath": {
+          "description": "If referring to a piece of an object instead of an entire object, this string should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2]. For example, if the object reference is to a container within a pod, this would take on a value like: \"spec.containers{name}\" (where \"name\" refers to the name of the container that triggered the event) or if no container name is specified \"spec.containers[2]\" (container with index 2 in this pod). This syntax is chosen only to have some well-defined way of referencing a part of an object.",
+          "type": "string"
+        },
+        "kind": {
+          "description": "Kind of the referent. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds",
+          "type": "string"
+        },
+        "name": {
+          "description": "Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+          "type": "string"
+        },
+        "namespace": {
+          "description": "Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/",
+          "type": "string"
+        },
+        "resourceVersion": {
+          "description": "Specific resourceVersion to which this reference is made, if any. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency",
+          "type": "string"
+        },
+        "uid": {
+          "description": "UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids",
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "x-kubernetes-map-type": "atomic",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ObjectReference.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PersistentVolumeClaimSpec.schema.json": {
       "description": "PersistentVolumeClaimSpec describes the common attributes of storage devices and allows a Source for provider-specific attributes",
@@ -8866,6 +9856,222 @@
       "type": "object",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodAntiAffinity.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodDNSConfig.schema.json": {
+      "description": "PodDNSConfig defines the DNS parameters of a pod in addition to those generated from DNSPolicy.",
+      "properties": {
+        "nameservers": {
+          "description": "A list of DNS name server IP addresses. This will be appended to the base nameservers generated from DNSPolicy. Duplicated nameservers will be removed.",
+          "items": {
+            "default": "",
+            "type": "string"
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        },
+        "options": {
+          "description": "A list of DNS resolver options. This will be merged with the base options generated from DNSPolicy. Duplicated entries will be removed. Resolution options given in Options will override those that appear in the base DNSPolicy.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "io.k8s.api.core.v1.PodDNSConfigOption.schema.json"
+              }
+            ],
+            "default": {}
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        },
+        "searches": {
+          "description": "A list of DNS search domains for host-name lookup. This will be appended to the base search paths generated from DNSPolicy. Duplicated search paths will be removed.",
+          "items": {
+            "default": "",
+            "type": "string"
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        }
+      },
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodDNSConfig.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodDNSConfigOption.schema.json": {
+      "description": "PodDNSConfigOption defines DNS resolver options of a pod.",
+      "properties": {
+        "name": {
+          "description": "Required.",
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodDNSConfigOption.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodOS.schema.json": {
+      "description": "PodOS defines the OS parameters of a pod.",
+      "properties": {
+        "name": {
+          "default": "",
+          "description": "Name is the name of the operating system. The currently supported values are linux and windows. Additional value may be defined in future and can be one of: https://github.com/opencontainers/runtime-spec/blob/master/config.md#platform-specific-configuration Clients should expect to handle additional values and treat unrecognized values in this field as os: null",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodOS.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodReadinessGate.schema.json": {
+      "description": "PodReadinessGate contains the reference to a pod condition",
+      "properties": {
+        "conditionType": {
+          "default": "",
+          "description": "ConditionType refers to a condition in the pod's condition list with matching type.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "conditionType"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodReadinessGate.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodResourceClaim.schema.json": {
+      "description": "PodResourceClaim references exactly one ResourceClaim, either directly or by naming a ResourceClaimTemplate which is then turned into a ResourceClaim for the pod.\n\nIt adds a name to it that uniquely identifies the ResourceClaim inside the Pod. Containers that need access to the ResourceClaim reference it with this name.",
+      "properties": {
+        "name": {
+          "default": "",
+          "description": "Name uniquely identifies this resource claim inside the pod. This must be a DNS_LABEL.",
+          "type": "string"
+        },
+        "resourceClaimName": {
+          "description": "ResourceClaimName is the name of a ResourceClaim object in the same namespace as this pod.\n\nExactly one of ResourceClaimName and ResourceClaimTemplateName must be set.",
+          "type": "string"
+        },
+        "resourceClaimTemplateName": {
+          "description": "ResourceClaimTemplateName is the name of a ResourceClaimTemplate object in the same namespace as this pod.\n\nThe template will be used to create a new ResourceClaim, which will be bound to this pod. When this pod is deleted, the ResourceClaim will also be deleted. The pod name and resource name, along with a generated component, will be used to form a unique name for the ResourceClaim, which will be recorded in pod.status.resourceClaimStatuses.\n\nThis field is immutable and no changes will be made to the corresponding ResourceClaim by the control plane after creating the ResourceClaim.\n\nExactly one of ResourceClaimName and ResourceClaimTemplateName must be set.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodResourceClaim.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSchedulingGate.schema.json": {
+      "description": "PodSchedulingGate is associated to a Pod to guard its scheduling.",
+      "properties": {
+        "name": {
+          "default": "",
+          "description": "Name of the scheduling gate. Each scheduling gate must have a unique name field.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSchedulingGate.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSecurityContext.schema.json": {
+      "description": "PodSecurityContext holds pod-level security attributes and common container settings. Some fields are also present in container.securityContext.  Field values of container.securityContext take precedence over field values of PodSecurityContext.",
+      "properties": {
+        "appArmorProfile": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.AppArmorProfile.schema.json"
+            }
+          ],
+          "description": "appArmorProfile is the AppArmor options to use by the containers in this pod. Note that this field cannot be set when spec.os.name is windows."
+        },
+        "fsGroup": {
+          "description": "A special supplemental group that applies to all containers in a pod. Some volume types allow the Kubelet to change the ownership of that volume to be owned by the pod:\n\n1. The owning GID will be the FSGroup 2. The setgid bit is set (new files created in the volume will be owned by FSGroup) 3. The permission bits are OR'd with rw-rw----\n\nIf unset, the Kubelet will not modify the ownership and permissions of any volume. Note that this field cannot be set when spec.os.name is windows.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "fsGroupChangePolicy": {
+          "description": "fsGroupChangePolicy defines behavior of changing ownership and permission of the volume before being exposed inside Pod. This field will only apply to volume types which support fsGroup based ownership(and permissions). It will have no effect on ephemeral volume types such as: secret, configmaps and emptydir. Valid values are \"OnRootMismatch\" and \"Always\". If not specified, \"Always\" is used. Note that this field cannot be set when spec.os.name is windows.",
+          "type": "string"
+        },
+        "runAsGroup": {
+          "description": "The GID to run the entrypoint of the container process. Uses runtime default if unset. May also be set in SecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence for that container. Note that this field cannot be set when spec.os.name is windows.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "runAsNonRoot": {
+          "description": "Indicates that the container must run as a non-root user. If true, the Kubelet will validate the image at runtime to ensure that it does not run as UID 0 (root) and fail to start the container if it does. If unset or false, no such validation will be performed. May also be set in SecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence.",
+          "type": "boolean"
+        },
+        "runAsUser": {
+          "description": "The UID to run the entrypoint of the container process. Defaults to user specified in image metadata if unspecified. May also be set in SecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence for that container. Note that this field cannot be set when spec.os.name is windows.",
+          "format": "int64",
+          "type": "integer"
+        },
+        "seLinuxOptions": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SELinuxOptions.schema.json"
+            }
+          ],
+          "description": "The SELinux context to be applied to all containers. If unspecified, the container runtime will allocate a random SELinux context for each container.  May also be set in SecurityContext.  If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence for that container. Note that this field cannot be set when spec.os.name is windows."
+        },
+        "seccompProfile": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SeccompProfile.schema.json"
+            }
+          ],
+          "description": "The seccomp options to use by the containers in this pod. Note that this field cannot be set when spec.os.name is windows."
+        },
+        "supplementalGroups": {
+          "description": "A list of groups applied to the first process run in each container, in addition to the container's primary GID and fsGroup (if specified).  If the SupplementalGroupsPolicy feature is enabled, the supplementalGroupsPolicy field determines whether these are in addition to or instead of any group memberships defined in the container image. If unspecified, no additional groups are added, though group memberships defined in the container image may still be used, depending on the supplementalGroupsPolicy field. Note that this field cannot be set when spec.os.name is windows.",
+          "items": {
+            "default": 0,
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        },
+        "supplementalGroupsPolicy": {
+          "description": "Defines how supplemental groups of the first container processes are calculated. Valid values are \"Merge\" and \"Strict\". If not specified, \"Merge\" is used. (Alpha) Using the field requires the SupplementalGroupsPolicy feature gate to be enabled and the container runtime must implement support for this feature. Note that this field cannot be set when spec.os.name is windows.",
+          "type": "string"
+        },
+        "sysctls": {
+          "description": "Sysctls hold a list of namespaced sysctls used for the pod. Pods with unsupported sysctls (by the container runtime) might fail to launch. Note that this field cannot be set when spec.os.name is windows.",
+          "items": {
+            "allOf": [
+              {
+                "$ref": "io.k8s.api.core.v1.Sysctl.schema.json"
+              }
+            ],
+            "default": {}
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        },
+        "windowsOptions": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.WindowsSecurityContextOptions.schema.json"
+            }
+          ],
+          "description": "The Windows specific settings applied to all containers. If unspecified, the options within a container's SecurityContext will be used. If set in both SecurityContext and PodSecurityContext, the value specified in SecurityContext takes precedence. Note that this field cannot be set when spec.os.name is linux."
+        }
+      },
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSecurityContext.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json": {
       "description": "PodSpec is a description of a pod.",
@@ -9391,6 +10597,63 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.QuobyteVolumeSource.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.RBDPersistentVolumeSource.schema.json": {
+      "description": "Represents a Rados Block Device mount that lasts the lifetime of a pod. RBD volumes support ownership management and SELinux relabeling.",
+      "properties": {
+        "fsType": {
+          "description": "fsType is the filesystem type of the volume that you want to mount. Tip: Ensure that the filesystem type is supported by the host operating system. Examples: \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified. More info: https://kubernetes.io/docs/concepts/storage/volumes#rbd",
+          "type": "string"
+        },
+        "image": {
+          "default": "",
+          "description": "image is the rados image name. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it",
+          "type": "string"
+        },
+        "keyring": {
+          "default": "/etc/ceph/keyring",
+          "description": "keyring is the path to key ring for RBDUser. Default is /etc/ceph/keyring. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it",
+          "type": "string"
+        },
+        "monitors": {
+          "description": "monitors is a collection of Ceph monitors. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it",
+          "items": {
+            "default": "",
+            "type": "string"
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        },
+        "pool": {
+          "default": "rbd",
+          "description": "pool is the rados pool name. Default is rbd. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it",
+          "type": "string"
+        },
+        "readOnly": {
+          "description": "readOnly here will force the ReadOnly setting in VolumeMounts. Defaults to false. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it",
+          "type": "boolean"
+        },
+        "secretRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecretReference.schema.json"
+            }
+          ],
+          "description": "secretRef is name of the authentication secret for RBDUser. If provided overrides keyring. Default is nil. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it"
+        },
+        "user": {
+          "default": "admin",
+          "description": "user is the rados user name. Default is admin. More info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it",
+          "type": "string"
+        }
+      },
+      "required": [
+        "monitors",
+        "image"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.RBDPersistentVolumeSource.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.RBDVolumeSource.schema.json": {
       "description": "Represents a Rados Block Device mount that lasts the lifetime of a pod. RBD volumes support ownership management and SELinux relabeling.",
       "properties": {
@@ -9559,6 +10822,67 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SELinuxOptions.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ScaleIOPersistentVolumeSource.schema.json": {
+      "description": "ScaleIOPersistentVolumeSource represents a persistent ScaleIO volume",
+      "properties": {
+        "fsType": {
+          "default": "xfs",
+          "description": "fsType is the filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. \"ext4\", \"xfs\", \"ntfs\". Default is \"xfs\"",
+          "type": "string"
+        },
+        "gateway": {
+          "default": "",
+          "description": "gateway is the host address of the ScaleIO API Gateway.",
+          "type": "string"
+        },
+        "protectionDomain": {
+          "description": "protectionDomain is the name of the ScaleIO Protection Domain for the configured storage.",
+          "type": "string"
+        },
+        "readOnly": {
+          "description": "readOnly defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts.",
+          "type": "boolean"
+        },
+        "secretRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.SecretReference.schema.json"
+            }
+          ],
+          "description": "secretRef references to the secret for ScaleIO user and other sensitive information. If this is not provided, Login operation will fail."
+        },
+        "sslEnabled": {
+          "description": "sslEnabled is the flag to enable/disable SSL communication with Gateway, default false",
+          "type": "boolean"
+        },
+        "storageMode": {
+          "default": "ThinProvisioned",
+          "description": "storageMode indicates whether the storage for a volume should be ThickProvisioned or ThinProvisioned. Default is ThinProvisioned.",
+          "type": "string"
+        },
+        "storagePool": {
+          "description": "storagePool is the ScaleIO Storage Pool associated with the protection domain.",
+          "type": "string"
+        },
+        "system": {
+          "default": "",
+          "description": "system is the name of the storage system as configured in ScaleIO.",
+          "type": "string"
+        },
+        "volumeName": {
+          "description": "volumeName is the name of a volume already created in the ScaleIO system that is associated with this volume source.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "gateway",
+        "system",
+        "secretRef"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ScaleIOPersistentVolumeSource.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ScaleIOVolumeSource.schema.json": {
       "description": "ScaleIOVolumeSource represents a persistent ScaleIO volume",
       "properties": {
@@ -9648,6 +10972,23 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SeccompProfile.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SecretEnvSource.schema.json": {
+      "description": "SecretEnvSource selects a Secret to populate the environment variables with.\n\nThe contents of the target Secret's Data field will represent the key-value pairs as environment variables.",
+      "properties": {
+        "name": {
+          "default": "",
+          "description": "Name of the referent. This field is effectively required, but due to backwards compatibility is allowed to be empty. Instances of this type with an empty value here are almost certainly wrong. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names",
+          "type": "string"
+        },
+        "optional": {
+          "description": "Specify whether the Secret must be defined",
+          "type": "boolean"
+        }
+      },
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SecretEnvSource.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SecretKeySelector.schema.json": {
       "description": "SecretKeySelector selects a key of a Secret.",
       "properties": {
@@ -9703,6 +11044,23 @@
       "type": "object",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SecretProjection.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SecretReference.schema.json": {
+      "description": "SecretReference represents a Secret Reference. It has enough information to retrieve secret in any namespace",
+      "properties": {
+        "name": {
+          "description": "name is unique within a namespace to reference a secret resource.",
+          "type": "string"
+        },
+        "namespace": {
+          "description": "namespace defines the space within which the secret name must be unique.",
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "x-kubernetes-map-type": "atomic",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SecretReference.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SecretVolumeSource.schema.json": {
       "description": "Adapts a Secret into a volume.\n\nThe contents of the target Secret's Data field will be presented in a volume as files using the keys in the Data field as the file names. Secret volumes support ownership management and SELinux relabeling.",
@@ -9841,6 +11199,55 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ServiceAccountTokenProjection.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SleepAction.schema.json": {
+      "description": "SleepAction describes a \"sleep\" action.",
+      "properties": {
+        "seconds": {
+          "default": 0,
+          "description": "Seconds is the number of seconds to sleep.",
+          "format": "int64",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "seconds"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.SleepAction.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.StorageOSPersistentVolumeSource.schema.json": {
+      "description": "Represents a StorageOS persistent volume resource.",
+      "properties": {
+        "fsType": {
+          "description": "fsType is the filesystem type to mount. Must be a filesystem type supported by the host operating system. Ex. \"ext4\", \"xfs\", \"ntfs\". Implicitly inferred to be \"ext4\" if unspecified.",
+          "type": "string"
+        },
+        "readOnly": {
+          "description": "readOnly defaults to false (read/write). ReadOnly here will force the ReadOnly setting in VolumeMounts.",
+          "type": "boolean"
+        },
+        "secretRef": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.ObjectReference.schema.json"
+            }
+          ],
+          "description": "secretRef specifies the secret to use for obtaining the StorageOS API credentials.  If not specified, default values will be attempted."
+        },
+        "volumeName": {
+          "description": "volumeName is the human-readable name of the StorageOS volume.  Volume names are only unique within a namespace.",
+          "type": "string"
+        },
+        "volumeNamespace": {
+          "description": "volumeNamespace specifies the scope of the volume within StorageOS.  If no namespace is specified then the Pod's namespace will be used.  This allows the Kubernetes name scoping to be mirrored within StorageOS for tighter integration. Set VolumeName to any name to override the default behaviour. Set to \"default\" if you are not using namespaces within StorageOS. Namespaces that do not pre-exist within StorageOS will be created.",
+          "type": "string"
+        }
+      },
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.StorageOSPersistentVolumeSource.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.StorageOSVolumeSource.schema.json": {
       "description": "Represents a StorageOS persistent volume resource.",
       "properties": {
@@ -9946,6 +11353,65 @@
       "type": "object",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Toleration.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.TopologySpreadConstraint.schema.json": {
+      "description": "TopologySpreadConstraint specifies how to spread matching pods among the given topology.",
+      "properties": {
+        "labelSelector": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.apimachinery.pkg.apis.meta.v1.LabelSelector.schema.json"
+            }
+          ],
+          "description": "LabelSelector is used to find matching pods. Pods that match this label selector are counted to determine the number of pods in their corresponding topology domain."
+        },
+        "matchLabelKeys": {
+          "description": "MatchLabelKeys is a set of pod label keys to select the pods over which spreading will be calculated. The keys are used to lookup values from the incoming pod labels, those key-value labels are ANDed with labelSelector to select the group of existing pods over which spreading will be calculated for the incoming pod. The same key is forbidden to exist in both MatchLabelKeys and LabelSelector. MatchLabelKeys cannot be set when LabelSelector isn't set. Keys that don't exist in the incoming pod labels will be ignored. A null or empty list means only match against labelSelector.\n\nThis is a beta field and requires the MatchLabelKeysInPodTopologySpread feature gate to be enabled (enabled by default).",
+          "items": {
+            "default": "",
+            "type": "string"
+          },
+          "type": "array",
+          "x-kubernetes-list-type": "atomic"
+        },
+        "maxSkew": {
+          "default": 0,
+          "description": "MaxSkew describes the degree to which pods may be unevenly distributed. When `whenUnsatisfiable=DoNotSchedule`, it is the maximum permitted difference between the number of matching pods in the target topology and the global minimum. The global minimum is the minimum number of matching pods in an eligible domain or zero if the number of eligible domains is less than MinDomains. For example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same labelSelector spread as 2/2/1: In this case, the global minimum is 1. | zone1 | zone2 | zone3 | |  P P  |  P P  |   P   | - if MaxSkew is 1, incoming pod can only be scheduled to zone3 to become 2/2/2; scheduling it onto zone1(zone2) would make the ActualSkew(3-1) on zone1(zone2) violate MaxSkew(1). - if MaxSkew is 2, incoming pod can be scheduled onto any zone. When `whenUnsatisfiable=ScheduleAnyway`, it is used to give higher precedence to topologies that satisfy it. It's a required field. Default value is 1 and 0 is not allowed.",
+          "format": "int32",
+          "type": "integer"
+        },
+        "minDomains": {
+          "description": "MinDomains indicates a minimum number of eligible domains. When the number of eligible domains with matching topology keys is less than minDomains, Pod Topology Spread treats \"global minimum\" as 0, and then the calculation of Skew is performed. And when the number of eligible domains with matching topology keys equals or greater than minDomains, this value has no effect on scheduling. As a result, when the number of eligible domains is less than minDomains, scheduler won't schedule more than maxSkew Pods to those domains. If value is nil, the constraint behaves as if MinDomains is equal to 1. Valid values are integers greater than 0. When value is not nil, WhenUnsatisfiable must be DoNotSchedule.\n\nFor example, in a 3-zone cluster, MaxSkew is set to 2, MinDomains is set to 5 and pods with the same labelSelector spread as 2/2/2: | zone1 | zone2 | zone3 | |  P P  |  P P  |  P P  | The number of domains is less than 5(MinDomains), so \"global minimum\" is treated as 0. In this situation, new pod with the same labelSelector cannot be scheduled, because computed skew will be 3(3 - 0) if new Pod is scheduled to any of the three zones, it will violate MaxSkew.",
+          "format": "int32",
+          "type": "integer"
+        },
+        "nodeAffinityPolicy": {
+          "description": "NodeAffinityPolicy indicates how we will treat Pod's nodeAffinity/nodeSelector when calculating pod topology spread skew. Options are: - Honor: only nodes matching nodeAffinity/nodeSelector are included in the calculations. - Ignore: nodeAffinity/nodeSelector are ignored. All nodes are included in the calculations.\n\nIf this value is nil, the behavior is equivalent to the Honor policy. This is a beta-level feature default enabled by the NodeInclusionPolicyInPodTopologySpread feature flag.",
+          "type": "string"
+        },
+        "nodeTaintsPolicy": {
+          "description": "NodeTaintsPolicy indicates how we will treat node taints when calculating pod topology spread skew. Options are: - Honor: nodes without taints, along with tainted nodes for which the incoming pod has a toleration, are included. - Ignore: node taints are ignored. All nodes are included.\n\nIf this value is nil, the behavior is equivalent to the Ignore policy. This is a beta-level feature default enabled by the NodeInclusionPolicyInPodTopologySpread feature flag.",
+          "type": "string"
+        },
+        "topologyKey": {
+          "default": "",
+          "description": "TopologyKey is the key of node labels. Nodes that have a label with this key and identical values are considered to be in the same topology. We consider each <key, value> as a \"bucket\", and try to put balanced number of pods into each bucket. We define a domain as a particular instance of a topology. Also, we define an eligible domain as a domain whose nodes meet the requirements of nodeAffinityPolicy and nodeTaintsPolicy. e.g. If TopologyKey is \"kubernetes.io/hostname\", each Node is a domain of that topology. And, if TopologyKey is \"topology.kubernetes.io/zone\", each zone is a domain of that topology. It's a required field.",
+          "type": "string"
+        },
+        "whenUnsatisfiable": {
+          "default": "",
+          "description": "WhenUnsatisfiable indicates how to deal with a pod if it doesn't satisfy the spread constraint. - DoNotSchedule (default) tells the scheduler not to schedule it. - ScheduleAnyway tells the scheduler to schedule the pod in any location,\n  but giving higher precedence to topologies that would help reduce the\n  skew.\nA constraint is considered \"Unsatisfiable\" for an incoming pod if and only if every possible node assignment for that pod would violate \"MaxSkew\" on some topology. For example, in a 3-zone cluster, MaxSkew is set to 1, and pods with the same labelSelector spread as 3/1/1: | zone1 | zone2 | zone3 | | P P P |   P   |   P   | If WhenUnsatisfiable is set to DoNotSchedule, incoming pod can only be scheduled to zone2(zone3) to become 3/2/1(3/1/2) as ActualSkew(2-1) on zone2(zone3) satisfies MaxSkew(1). In other words, the cluster can still be imbalanced, but scheduler won't make it *more* imbalanced. It's a required field.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "maxSkew",
+        "topologyKey",
+        "whenUnsatisfiable"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.TopologySpreadConstraint.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.TypedLocalObjectReference.schema.json": {
       "description": "TypedLocalObjectReference contains enough information to let you locate the typed referenced object inside the same namespace.",
@@ -10259,6 +11725,28 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Volume.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.VolumeDevice.schema.json": {
+      "description": "volumeDevice describes a mapping of a raw block device within a container.",
+      "properties": {
+        "devicePath": {
+          "default": "",
+          "description": "devicePath is the path inside of the container that the device will be mapped to.",
+          "type": "string"
+        },
+        "name": {
+          "default": "",
+          "description": "name must match the name of a persistentVolumeClaim in the pod",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "devicePath"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.VolumeDevice.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.VolumeMount.schema.json": {
       "description": "VolumeMount describes a mounting of a Volume within a container.",
       "properties": {
@@ -10300,6 +11788,22 @@
       "type": "object",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.VolumeMount.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.VolumeNodeAffinity.schema.json": {
+      "description": "VolumeNodeAffinity defines constraints that limit what nodes this volume can be accessed from.",
+      "properties": {
+        "required": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.NodeSelector.schema.json"
+            }
+          ],
+          "description": "required specifies hard node constraints that must be met."
+        }
+      },
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.VolumeNodeAffinity.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.VolumeProjection.schema.json": {
       "description": "Projection that may be projected along with other supported volume types. Exactly one of these fields must be set.",
@@ -10504,6 +12008,55 @@
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.IPBlock.schema.json"
     },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.IngressBackend.schema.json": {
+      "description": "IngressBackend describes all endpoints for a given service and port.",
+      "properties": {
+        "resource": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.core.v1.TypedLocalObjectReference.schema.json"
+            }
+          ],
+          "description": "resource is an ObjectRef to another Kubernetes resource in the namespace of the Ingress object. If resource is specified, a service.Name and service.Port must not be specified. This is a mutually exclusive setting with \"Service\"."
+        },
+        "service": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.networking.v1.IngressServiceBackend.schema.json"
+            }
+          ],
+          "description": "service references a service as a backend. This is a mutually exclusive setting with \"Resource\"."
+        }
+      },
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.IngressBackend.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.IngressServiceBackend.schema.json": {
+      "description": "IngressServiceBackend references a Kubernetes Service as a Backend.",
+      "properties": {
+        "name": {
+          "default": "",
+          "description": "name is the referenced service. The service must exist in the same namespace as the Ingress object.",
+          "type": "string"
+        },
+        "port": {
+          "allOf": [
+            {
+              "$ref": "io.k8s.api.networking.v1.ServiceBackendPort.schema.json"
+            }
+          ],
+          "default": {},
+          "description": "port of the referenced service. A port name or port number is required for a IngressServiceBackend."
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "type": "object",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.IngressServiceBackend.schema.json"
+    },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.IngressTLS.schema.json": {
       "description": "IngressTLS describes the transport layer security associated with an ingress.",
       "properties": {
@@ -10524,6 +12077,24 @@
       "type": "object",
       "$schema": "https://json-schema.org/draft/2020-12/schema",
       "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.IngressTLS.schema.json"
+    },
+    "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.ServiceBackendPort.schema.json": {
+      "description": "ServiceBackendPort is the service port being referenced.",
+      "properties": {
+        "name": {
+          "description": "name is the name of the port on the Service. This is a mutually exclusive setting with \"Number\".",
+          "type": "string"
+        },
+        "number": {
+          "description": "number is the numerical port number (e.g. 80) on the Service. This is a mutually exclusive setting with \"Name\".",
+          "format": "int32",
+          "type": "integer"
+        }
+      },
+      "type": "object",
+      "x-kubernetes-map-type": "atomic",
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.networking.v1.ServiceBackendPort.schema.json"
     },
     "https://schema.bundesmessenger.dev/kubernetes/io.k8s.apimachinery.pkg.api.resource.Quantity.schema.json": {
       "description": "Quantity is a fixed-point representation of a number. It provides convenient marshaling/unmarshaling in JSON and YAML, in addition to String() and AsInt64() accessors.\n\nThe serialization format is:\n\n``` <quantity>        ::= <signedNumber><suffix>\n\n\t(Note that <suffix> may be empty, from the \"\" case in <decimalSI>.)\n\n<digit>           ::= 0 | 1 | ... | 9 <digits>          ::= <digit> | <digit><digits> <number>          ::= <digits> | <digits>.<digits> | <digits>. | .<digits> <sign>            ::= \"+\" | \"-\" <signedNumber>    ::= <number> | <sign><number> <suffix>          ::= <binarySI> | <decimalExponent> | <decimalSI> <binarySI>        ::= Ki | Mi | Gi | Ti | Pi | Ei\n\n\t(International System of units; See: http://physics.nist.gov/cuu/Units/binary.html)\n\n<decimalSI>       ::= m | \"\" | k | M | G | T | P | E\n\n\t(Note that 1024 = 1Ki but 1000 = 1k; I didn't choose the capitalization.)\n\n<decimalExponent> ::= \"e\" <signedNumber> | \"E\" <signedNumber> ```\n\nNo matter which of the three exponent forms is used, no quantity may represent a number greater than 2^63-1 in magnitude, nor may it have more than 3 decimal places. Numbers larger or more precise will be capped or rounded up. (E.g.: 0.1m will rounded up to 1m.) This may be extended in the future if we require larger or smaller quantities.\n\nWhen a Quantity is parsed from a string, it will remember the type of suffix it had, and will use the same type again when it is serialized.\n\nBefore serializing, Quantity will be put in \"canonical form\". This means that Exponent/suffix will be adjusted up or down (with a corresponding increase or decrease in Mantissa) such that:\n\n- No precision is lost - No fractional digits will be emitted - The exponent (or suffix) is as large as possible.\n\nThe sign will be omitted unless the number is negative.\n\nExamples:\n\n- 1.5 will be serialized as \"1500m\" - 1.5Gi will be serialized as \"1536Mi\"\n\nNote that the quantity will NEVER be internally represented by a floating point number. That is the whole point of this exercise.\n\nNon-canonical values will still parse as long as they are well formed, but will be re-emitted in their canonical form. (So always use canonical form, or don't diff.)\n\nThis format is intended to make it difficult to use these numbers without writing some sort of special handling code in the hopes that that will cause implementors to also use a fixed point implementation.",
