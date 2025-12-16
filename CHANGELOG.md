@@ -11,6 +11,8 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 
 ### ⚠️ Versionshinweise
 
+- Ein Upgrade auf BundesMEssenger 2.0 benötigt unter Umständen eine
+  mehrstufige Migration. Siehe [`UPGRADE.md`](./UPGRADE.md).
 - Migration des PostgreSQL-Subcharts von Bitnami auf das Nachfolge-Chart der
 [CloudPirates](https://www.cloudpirates.io/knowledge/blog/unsere-open-source-helm-charts-als-bitnami-alternative).
 
@@ -32,10 +34,9 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 
   - `postgresql` bleibt trotz Helm-Chart-Namen `postgres` durch Alias
   `postgresql` in Chart.yaml.
-  - `postgresql.auth.secretKeys.adminPasswordKey` entfällt, da
-  PoC-Datenbank mit Synapse-Nutzer als privilegierter Nutzer angelegt wird.
   - `postgresql.auth.secretKeys.userPasswordKey` wird zu
-  `postgresql.auth.secretKeys.passwordKey`.
+  `postgresql.customUser.secretKeys.password`. (hinzu kommen
+  `username` und `database`)
   - `primary` entfällt als Object und `containerPorts` wird zu `targetPort`
   unter `service`.
   - `extendedConfiguration: |` wird im neuen `config`-Objekt zu
@@ -75,9 +76,8 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
   genutzt werden (`maspostgresql.enabled: true`).
 
   Die bisherige Datenbank Konfiguration für den MAS wurde von `mas.postgresql`
-  nach
-  `externalmasPostgresql` verschoben. Das Passwort für die bisher genutzte
-  Datenbank
+  nach `maspostgresql` bzw. `externalmasPostgresql` verschoben.
+  Das Passwort für die bisher genutzte Datenbank
   muss in einem Secret abgelegt werden. Im Standard wird das Secret
   `postgresql`
   mit den Key `maspassword` verwendet. (!999)
