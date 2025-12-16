@@ -47,6 +47,10 @@ Gehen Sie sicher, dass {{  include "matrix-synapse.dsgvoExportServiceAccountName
 Die Sygnal-Konfigurationsoptionen `sygnal.fcmkey_filename` und `sygnal.ioskey_filename` sind abgekündigt. Legen Sie stattdessen direkt das Kubernetes Secret `{{ .Values.sygnal.existingSecret }}` an, wie in docs/sygnal_push.md beschrieben.
 {{- end }}
 
+{{- if not .Values.mas.enabled }}
+🖈 Hinweis – Es ist emfohlen, den MAS zu aktivieren; in diesem Deployment ist der MAS allerdings nicht aktiviert. Im nächsten BuM-Release wird der MAS standardmäßig aktiviert sein. Für ein neues Deployment setzten Sie direkt `mas.enabled: true`. Für ein bestehendes Deployment folgen Sie der Migrationsanleitung unter ./docs/matrix-authentication-service-migration.md.
+{{- end }}
+
 
 Sie können einen initialen administrativen und weitere Accounts für den installierten BundesMessenger mit den folgenden Kommandos anlegen:
 {{ if and .Values.mas.enabled .Values.mas.extraConfig.passwords.enabled }}

@@ -1,0 +1,6 @@
+Im nächsten Release des BundesMessengers (v2.1.0) wird der MAS standardmäßig
+aktiviert sein.
+
+Den MAS zu verwenden ist empfohlen. Falls Sie noch nicht bereit sind, die
+Migration vorzunehmen, setzen Sie in Ihrer Konfiguration explizit
+`mas.enabled: false`, um den MAS weiterhin nicht zu verwenden.
