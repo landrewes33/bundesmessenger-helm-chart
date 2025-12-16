@@ -11,7 +11,7 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 
 ### ⚠️ Versionshinweise
 
-- Ein Upgrade auf BundesMEssenger 2.0 benötigt unter Umständen eine
+- Ein Upgrade auf BundesMessenger 2.0 benötigt unter Umständen eine
   mehrstufige Migration. Siehe [`UPGRADE.md`](./UPGRADE.md).
 - Migration des PostgreSQL-Subcharts von Bitnami auf das Nachfolge-Chart der
 [CloudPirates](https://www.cloudpirates.io/knowledge/blog/unsere-open-source-helm-charts-als-bitnami-alternative).
