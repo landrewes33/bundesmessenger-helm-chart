@@ -227,7 +227,7 @@ Wenn im Rahmen eines PoC das PostgreSQL-Subchart verwendet wurde, so kann
 kubectl create job -n <NAMESPACE> --from=cronjob/mas-migration-backup-job <JOBNAME>
 # (optional) Logausgabe verfolgen
 kubectl logs -n <NAMESPACE> -l job-name=<JOBNAME> -f
-```l
+```
 
 Damit wird auf einem Volume ein Datenbank-Dump und das Media-Repository gesichert.
 
