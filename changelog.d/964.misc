@@ -1,1 +1,0 @@
-Entfernt die veraltete Konfiguration `uploads_path` (siehe [Upstream-PR](https://github.com/matrix-org/synapse/pull/9462)).
