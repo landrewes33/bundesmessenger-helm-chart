@@ -87,6 +87,10 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
   Den MAS zu verwenden ist empfohlen. Falls Sie noch nicht bereit sind, die
   Migration vorzunehmen, setzen Sie in Ihrer Konfiguration explizit
   `mas.enabled: false`, um den MAS weiterhin nicht zu verwenden. (!1029)
+- Im Admin Portal ist in der Version 2.1.0. aktuell noch ein Performance
+  Problem bekannt, was zu längeren Abrufzeiten bei Räumen und Benutzern führt.
+  
+  Wir arbeiten bereits an einem Fix und stellen diesen schnellstmöglich bereit.
 
 ### ✨ Features
 
