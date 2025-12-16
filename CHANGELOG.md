@@ -7,6 +7,165 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 2.0.0 (2025-12-16)
+
+### ⚠️ Versionshinweise
+
+- Ein Upgrade auf BundesMessenger 2.0 benötigt unter Umständen eine
+  mehrstufige Migration. Siehe [`UPGRADE.md`](./UPGRADE.md).
+- Migration des PostgreSQL-Subcharts von Bitnami auf das Nachfolge-Chart der
+[CloudPirates](https://www.cloudpirates.io/knowledge/blog/unsere-open-source-helm-charts-als-bitnami-alternative).
+
+  Für Deployments, die die integrierte Postgres Datenbank benutzen
+  (`postgresql.enabled: true`),
+  ist eine Migration notwendig. Deployments, die die Datenbank extern bereit
+  stellen
+  (`externalPostgresql`), sind hiervon nicht betroffen.
+
+  Für ein Upgrade der Datenbank von Version 16 auf 18 im Rahmen des Wechsels,
+  kann die [Dokumentation](./docs/PostgreSQL-Upgrade-Advanced.md) genutzt
+  werden.
+
+  Falls eigene Änderungen an der PostgreSQL-Konfiguration bestehen, sind
+  möglicherweise
+  Konfigurationsänderungen unter `postgresql` notwendig.
+
+  Änderungen in der Struktur sind:
+
+  - `postgresql` bleibt trotz Helm-Chart-Namen `postgres` durch Alias
+  `postgresql` in Chart.yaml.
+  - `postgresql.auth.secretKeys.userPasswordKey` wird zu
+  `postgresql.customUser.secretKeys.password`. (hinzu kommen
+  `username` und `database`)
+  - `primary` entfällt als Object und `containerPorts` wird zu `targetPort`
+  unter `service`.
+  - `extendedConfiguration: |` wird im neuen `config`-Objekt zu
+  `postgresqlMaxConnections` und beinhaltet die Konfiguration der maximalen
+  Verbindungen.
+  - `persistence` wandert eine Ebene nach oben als eigenes Objekt unter
+  `postgresql`.
+
+  Die Dokumentation der neuen Schalter befindet sich unter
+  https://github.com/CloudPirates-io/helm-charts/tree/main/charts/postgres.
+  (!937)
+- Die MAS Konfiguration hat eine neue Struktur erhalten um mehr Flexibilität zu
+  erhalten
+  und wurde an die Art der Synapse Konfiguration angelehnt. Folgende Werte
+  verschieben sich von `mas` zu `mas.extraConfig`: `clients`, `passwords`,
+  `email`, `upstream_oauth2_provider`, `account`, `policy`. (!948)
+- Die Dokumentation zur Migration zur Benutzerverwaltung mit
+  Matrix-Authentication-Service enthält:
+
+  1. Vorbereitungsskripte zur lokalen Prüfung der Konfiguration.
+  2. Schritt-für-Schritt Anleitung zur Migration.
+  3. Beispielkonfigurationen basierend auf der
+  [MAS-Dokumentation](https://element-hq.github.io/matrix-authentication-service/setup/migration.html#map-any-upstream-sso-providers).
+  4. Kubernetes Job Templates für die Migration.
+  5. Klare Anweisungen zur Durchführung und Überwachung der Migration. (!952)
+- Die Konfigurationen zu den Networkpolicies (`networkpolicies`) wurden
+  flexibler gestaltet. Das führt zu folgenden Änderungen:
+
+  - `dnsLabel` -> `dns.labelSelector`
+  - `postgres` -> `postgresql`
+  - `postgresql` und `maspostgresql` Option `selectorLabels` ->
+  `labelSelector`. (!989)
+- Bei Verwendung von ArgoCD muss dies explizit konfiguriert werden (`argoCD:
+  true`). (!993)
+- Der Matrix-Authentication-Service kann jetzt auch als "One-Click-Deployment"
+  mit einer internen Datenbank
+  genutzt werden (`maspostgresql.enabled: true`).
+
+  Die bisherige Datenbank Konfiguration für den MAS wurde von `mas.postgresql`
+  nach `maspostgresql` bzw. `externalmasPostgresql` verschoben.
+  Das Passwort für die bisher genutzte Datenbank
+  muss in einem Secret abgelegt werden. Im Standard wird das Secret
+  `postgresql`
+  mit den Key `maspassword` verwendet. (!999)
+- Im nächsten Release des BundesMessengers (v2.1.0) wird der MAS standardmäßig
+  aktiviert sein.
+
+  Den MAS zu verwenden ist empfohlen. Falls Sie noch nicht bereit sind, die
+  Migration vorzunehmen, setzen Sie in Ihrer Konfiguration explizit
+  `mas.enabled: false`, um den MAS weiterhin nicht zu verwenden. (!1029)
+- Im Admin Portal ist in der Version 2.1.0. aktuell noch ein Performance
+  Problem bekannt, was zu längeren Abrufzeiten bei Räumen und Benutzern führt.
+  
+  Wir arbeiten bereits an einem Fix und stellen diesen schnellstmöglich bereit.
+
+### ✨ Features
+
+- Admin-Portal auf Version v2 aktualisiert. (!897, !1024, !1028)
+- Matrix-Authentication-Service Migrationsanweisungen und Jobs. (!952, !1026)
+- Integriertes Datenbank-SubChart von CloudPirates für
+  Matrix-Authentication-Service hinzugefügt. (!999, !1031)
+- Erlaubt das Setzen von benutzerdefinierten Labels und Annotations für Sygnal
+  und MAS. (!1017)
+- Image `ghcr.io/element-hq/matrix-authentication-service` auf Version `1.7.0`
+  aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web`
+  auf Version `2.24.3` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/synapse`
+  auf Version `1.143.0` aktualisiert.
+- Sub-Chart `postgres` auf Version `0.13.4` aktualisiert.
+- Sub-Chart `redis` auf Version `0.17.3` aktualisiert.
+
+### 🐛 Bugfixes
+
+- Entfernt die automatische Erkennung von ArgoCD, die nur das Vorhandensein im
+  Cluster und nicht die Verwendung von ArgoCD prüft. (!993)
+- Korrigiert Standard-Werte im Schema, die von der `values.yaml` abgewichen
+  sind. (!1008)
+
+### 📚 Dokumentation
+
+- Einbinden eines `client_secret` für den MAS mit Kubernetes Secrets
+  dokumentiert. (!947)
+- Korrekte Angabe der Algorithmen für MAS Signaturschlüssel. (!976)
+- Verbesserungen am `initialize-secrets.sh`-Skript. Dank an Dimitri Schwarz
+  (dimitri.schwarz@muenchen.de). (!982)
+- Anpassung der Nutzerverwaltungsdokumentation (entfernt
+  `secrets.yaml`-Angabe). (!1001)
+- Anwenden der überarbeiteten Markdownlint Regel
+  [MD13](https://github.com/DavidAnson/markdownlint/blob/v0.40.0/doc/md013.md)
+  zur Zeilenlänge. (!1018)
+
+### 📝 Weitere Änderungen
+
+- Integration unseres eigenen Container-Abbilds für den
+  Matrix-Authentication-Service. (!894)
+- Auslesen des Datenbankpassworts von Synapse aus einem PostgreSQL Passfile.
+  (!932)
+- Migration des PostgreSQL Subcharts von Bitnami zu [CloudPirates open-source
+  Helm-Charts](https://github.com/CloudPirates-io/helm-charts/tree/main/charts/postgres).
+  (!937, !1000, !1014, !1030)
+- Strukturiert Anteile der MAS Konfiguration im Helm Chart neu. (!948)
+- Aktualisierung der Schema-Tools. (!963)
+- Entfernt die veraltete Konfiguration `uploads_path` (siehe
+  [Upstream-PR](https://github.com/matrix-org/synapse/pull/9462)). (!964)
+- Verwenden der neuen MAS Konfigurationsoption `secrets.keys_dir`. (!965, !983)
+- OpenID Discovery Endpunkt für MAS zu `adminAPIServerName` hinzugefügt. (!967)
+- Korrektur der CI Merge-Back Anpassungen am Schema. (!969)
+- Markieren der `values.schema.json` und `charts/*` als auto-generiert. (!971)
+- Anpassen der Konfiguration von Renovate. (!972, !973)
+- Umsetzen des Matrix–MAS Share-Secret als Kubernetes Secret. (!977)
+- Konfiguration der CI/CD-Pipelines. (!978, !1027)
+- Aufräumen der Unittests. (!988)
+- Verwenden von Match-Expressions für die Pod-Auswahl der Network-Policies.
+  (!989)
+- Reduzierung der benötigten Ressourcen durch Anpassung der Werte für
+  `resources.requests.memory`. (!1004)
+- Ankündigung der standardmäßigen Aktivierung des MAS. (!1029)
+- `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
+  `v0.87.0` aktualisiert.
+
+### 🦖 Abkündigungen und Bereinigungen
+
+- Erfordern der Angabe von internen PostgreSQL-Passwörtern über ein Secret. Die
+  Änderung hat keine Auswirkung auf Deployments in Standardkonfiguration.
+  (!942)
+
 ## BundesMessenger Helm Chart 1.17.1 (2025-11-21)
 
 ### ⚠️ Versionshinweise

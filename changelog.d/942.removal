@@ -1,1 +1,0 @@
-Erfordern der Angabe von internen PostgreSQL-Passwörtern über ein Secret. Die Änderung hat keine Auswirkung auf Deployments in Standardkonfiguration.
