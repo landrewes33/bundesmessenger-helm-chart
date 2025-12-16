@@ -154,9 +154,14 @@ contentscanner:
 postgresql:
   enabled: true
   image:
-    registry: docker.io
-    repository: bitnamilegacy/postgresql
-    tag: "16"
+    tag: "18"
+
+mas:
+  enabled: true
+  uri: auth.example.com
+
+maspostgresql:
+  enabled: true
 ```
 
 ```yaml
