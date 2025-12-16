@@ -522,10 +522,8 @@ spec:
             fsGroup: 66000
             fsGroupChangePolicy: "OnRootMismatch"
 
-          {{- include "matrix-synapse.imagePullSecrets" $ | nindent 14 }}
-
+          {{- include "matrix-synapse.imagePullSecrets" $ | nindent 10 }}
           serviceAccountName: {{ include "matrix-synapse.migrationServiceAccountName" . }}
-
           initContainers:
             - name: db-dump-container
               image: "{{ printf "%s/%s:%s" .Values.postgresql.image.registry .Values.postgresql.image.repository .Values.postgresql.image.tag }}"
