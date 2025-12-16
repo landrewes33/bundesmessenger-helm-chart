@@ -59,4 +59,4 @@ echo "Generate doc \"$docs_output_file\""
     ) |
     join("\n")
   '
-} > "$docs_output_file"
+} | tee "$docs_output_file" > /dev/null

@@ -30,13 +30,13 @@ if [ -f "$version_file" ]; then
   printf "\033[31mWARNING: Die Version %s (%s) existiert bereits und wird überschrieben.\033[39m\n" "$version" "$version_file" >&2
 fi
 
-version=$version \
-date=$(date -u -I) \
+version="$version" \
+date="$(date -u -I)" \
 yq -n '[{
   "version": strenv(version),
   "tag": "v" + strenv(version),
   "date": strenv(date)
-}]' > "$version_file"
+}]' | tee "$version_file" > /dev/null
 
 # Schleife durch jeden Pfad in der Mapping-Datei, da dieser eindeutig ist.
 loop_var=$(echo "$mapping_content" | yq '.[].path')
@@ -72,13 +72,16 @@ yq -i '.[].images |= unique_by(.name)' "$version_file"
 
 
 # Schleife durch jede Dependency und aus der Chart.yaml übernehmen
-loop_var=$(echo "$chart_content" | yq '.dependencies[].name')
-for dep in $loop_var ; do
+# Benutzt Index anstatt Namen, da dependencies doppelt vorkommen können
+indexes=$(echo "$chart_content" | yq '.dependencies | keys | .[]')
+
+for i in $indexes ; do
+  dep="$(echo "$chart_content" | yq ".dependencies[$i].name")"
   echo "Run dependency \"$dep\""
 
   dep=$dep \
-  version=$(echo "$chart_content" | yq ".dependencies[] | select(.name == \"$dep\") | .version") \
-  repository=$(echo "$chart_content" | yq ".dependencies[] | select(.name == \"$dep\") | .repository") \
+  version=$(echo "$chart_content" | yq ".dependencies[$i].version") \
+  repository=$(echo "$chart_content" | yq ".dependencies[$i].repository") \
   yq -i '.[].helm += [{
     "name": strenv(dep),
     "version": strenv(version),
