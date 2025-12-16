@@ -19,8 +19,8 @@ werden, bevor weitere Upgrade-Schritte durchgeführt werden können.
 ## Upgrade auf MAS-basierte Benutzerverwaltung und Authentifizierung
 
 Der Wechsel auf den Matrix-Authentication-Service (MAS) erfordert einen
-dedizierten Migrationsschritt. Die Migration und Verwendung von MAS ist aktuell noch
-nicht erforderlich. Der MAS ist jedoch für die Benutzung der neuen
+dedizierten Migrationsschritt. Die Migration und Verwendung von MAS ist aktuell
+noch nicht erforderlich. Der MAS ist jedoch für die Benutzung der neuen
 BuMX Apps erforderlich.
 
 - Erforderliche Maßnahme: Durchführung der MAS-Migration
