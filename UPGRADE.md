@@ -3,7 +3,7 @@
 Dieser Abschnitt beschreibt die unterstützten Upgrade-Pfade bei
 einem Upgrade von `v1.x` auf `v2.x` und erforderlichen
 Schritte beim Wechsel zwischen unterschiedlichen Konfigurations- und Funktionsständen.
-Er dient als kurze Erläuterung für die [`CHANGELOG.md`](./UPGRADE.md) und verweist
+Er dient als kurze Erläuterung für die [`CHANGELOG.md`](./CHANGELOG.md) und verweist
 auf die jeweils detaillierte Dokumentation.
 
 ---
