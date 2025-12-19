@@ -89,7 +89,8 @@ networkpolicies:
 maspostgresql:
   enabled: true
   auth:
-    existingSecret: postgresql-secret
+    existingSecret: maspostgresql-secret
+
 mas:
   enabled: true
   # upstream_oauth2_provider:

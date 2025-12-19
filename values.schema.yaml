@@ -2574,59 +2574,85 @@ properties:
       - affinity
     unevaluatedProperties: false
   postgresql:
-    allOf:
-      - $ref: "#/$defs/postgresqlDefaults"
-        type: object
-      - type: object
-        properties:
-          initdb:
-            type: object
-            title: Initialisierung der Datenbank
-            properties:
-              args:
-                type: string
-                title: Extra Argumente zur Initialisierung der Datenbank
-                default: --lc-collate=C --lc-ctype=C --encoding=UTF8
-              scripts:
-                type: object
-                description: Zusätzliche Initialisierungsskripte
-                additionalProperties:
-                  type: string
-                unevaluatedProperties: false
-            required:
-              - args
-        required:
-          - initdb
-  externalPostgresql:
-    $ref: "#/$defs/externalPostgresqlDefaults"
+    $ref: "#/$defs/postgresqlCommon"
     type: object
-  externalmasPostgresql:
-    allOf:
-      - $ref: "#/$defs/externalPostgresqlDefaults"
+    properties:
+      customUser:
         type: object
-      - type: object
         properties:
-          min_connections:
-            type: integer
-            default: 0
-          max_connections:
-            type: integer
-            default: 10
-          connect_timeout:
-            type: integer
-            default: 30
-          idle_timeout:
-            type: integer
-            default: 600
-          max_lifetime:
-            type: integer
-            default: 1800
+          database:
+            type: string
+            default: synapse_db
+          username:
+            type: string
+            default: synapse
+          existingSecret:
+            type: string
+            default: postgresql
         required:
-          - min_connections
-          - max_connections
-          - connect_timeout
-          - idle_timeout
-          - max_lifetime
+          - database
+          - username
+          - existingSecret
+        unevaluatedProperties: true
+      auth:
+        type: object
+        properties:
+          existingSecret:
+            type: string
+            minLength: 1
+            default: postgresql
+        required:
+          - existingSecret
+        unevaluatedProperties: true
+      initdb:
+        type: object
+        title: Initialisierung der Datenbank
+        properties:
+          args:
+            type: string
+            title: Extra Argumente zur Initialisierung der Datenbank
+            default: --lc-collate=C --lc-ctype=C --encoding=UTF8
+        required:
+          - args
+        unevaluatedProperties: true
+    required:
+      - customUser
+      - auth
+      - initdb
+    unevaluatedProperties: true
+  externalPostgresql:
+    $ref: "#/$defs/externalPostgresqlCommon"
+    type: object
+    title: Extern konfigurierter PostgreSQL-Server
+    description: >-
+      Wird für die Datenbank von Synapse verwendet. Die Datenbank muss vorhanden
+      sein und sowohl COLLATE als auch CTYPE auf "C" eingestellt sein. Die
+      „interne“ Datenbank muss deaktiviert sein: `postgresql.enabled: false`.
+    properties:
+      database:
+        type: string
+        default: synapse_db
+      username:
+        type: string
+        default: synapse
+      password:
+        deprecated: true
+        type: ["null", "string"]
+        minLength: 1
+        title: Passwort vom PostgreSQL-Nutzer
+        description: >-
+          **ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.
+        default: null
+        examples:
+          - 53C237P0576235Q1P455W02D
+      existingSecret:
+        type: string
+        minLength: 1
+        default: postgresql
+    required:
+      - database
+      - username
+      - existingSecret
     unevaluatedProperties: false
   redis:
     type: object
@@ -3171,6 +3197,31 @@ properties:
         title: Zusätzliche Konfigurationen für den MAS
         description: "Ref: https://element-hq.github.io/matrix-authentication-service/reference/configuration.html"
         properties:
+          database:
+            type: object
+            properties:
+              min_connections:
+                type: integer
+                default: 0
+              max_connections:
+                type: integer
+                default: 10
+              connect_timeout:
+                type: integer
+                default: 30
+              idle_timeout:
+                type: integer
+                default: 600
+              max_lifetime:
+                type: integer
+                default: 1800
+            required:
+              - min_connections
+              - max_connections
+              - connect_timeout
+              - idle_timeout
+              - max_lifetime
+            unevaluatedProperties: true
           passwords:
             type: object
             title: Konfiguration der Passwortdatenbank.
@@ -3262,6 +3313,7 @@ properties:
               - transport
             unevaluatedProperties: true
         required:
+          - database
           - passwords
           - account
           - email
@@ -3411,32 +3463,59 @@ properties:
       - startupProbe
     unevaluatedProperties: false
   maspostgresql:
-    allOf:
-      - $ref: "#/$defs/postgresqlDefaults"
+    $ref: "#/$defs/postgresqlCommon"
+    type: object
+    properties:
+      customUser:
         type: object
-      - type: object
         properties:
-          min_connections:
-            type: integer
-            default: 0
-          max_connections:
-            type: integer
-            default: 10
-          connect_timeout:
-            type: integer
-            default: 30
-          idle_timeout:
-            type: integer
-            default: 600
-          max_lifetime:
-            type: integer
-            default: 1800
+          username:
+            type: string
+            default: mas
+          database:
+            type: string
+            default: mas
+          existingSecret:
+            type: string
+            minLength: 1
+            default: maspostgresql
         required:
-          - min_connections
-          - max_connections
-          - connect_timeout
-          - idle_timeout
-          - max_lifetime
+          - username
+          - database
+          - existingSecret
+        unevaluatedProperties: true
+      auth:
+        type: object
+        properties:
+          existingSecret:
+            type: string
+            minLength: 1
+            default: maspostgresql
+        required:
+          - existingSecret
+        unevaluatedProperties: true
+    required:
+      - customUser
+      - auth
+    unevaluatedProperties: true
+  externalmasPostgresql:
+    $ref: "#/$defs/externalPostgresqlCommon"
+    type: object
+    properties:
+      database:
+        type: string
+        default: mas
+      username:
+        type: string
+        default: mas
+      existingSecret:
+        type: string
+        minLength: 1
+        default: maspostgresql
+    required:
+      - database
+      - username
+      - existingSecret
     unevaluatedProperties: false
   contentscanner:
     type: object
@@ -4970,6 +5049,8 @@ required:
   - externalRedis
   - ingress
   - mas
+  - maspostgresql
+  - externalmasPostgresql
   - contentscanner
   - schadcodescanner
   - synapse_admin
@@ -4980,7 +5061,7 @@ required:
   - tests
 unevaluatedProperties: false
 $defs:
-  postgresqlDefaults:
+  postgresqlCommon:
     type: object
     title: Konfiguration des internen PostgreSQL-Servers
     description: >-
@@ -5026,13 +5107,11 @@ $defs:
             minLength: 1
             title: Name des Datenbanknutzers
             description: Muss mit der Angabe im `existingSecret` übereinstimmen.
-            default: synapse
           database:
             type: string
             minLength: 1
             title: Name der Datenbank
             description: Muss mit der Angabe im `existingSecret` übereinstimmen.
-            default: synapse_db
           password:
             type: ["null", "string"]
             enum:
@@ -5051,7 +5130,6 @@ $defs:
             description: >-
               Ist `postgresql.enabled` und das angegebene Secret existiert nicht,
               so wird automatisch ein neues Secret erstellt und verwendet.
-            default: postgresql
           secretKeys:
             type: object
             title: Schlüssel im angegebenen Secret
@@ -5106,7 +5184,6 @@ $defs:
             description: >-
               Ist `postgresql.enabled` und das angegebene Secret existiert nicht,
               so wird automatisch ein neues Secret erstellt und verwendet.
-            default: postgresql
           secretKeys:
             type: object
             title: Schlüssel im angegebenen Secret
@@ -5278,7 +5355,7 @@ $defs:
           type: ["null", "string", "number", "integer", "boolean"]
         required:
           - sslmode
-        unevaluatedProperties: true
+        unevaluatedProperties: false
     required:
       - enabled
       - image
@@ -5293,13 +5370,8 @@ $defs:
       - resources
       - extraArgs
     unevaluatedProperties: true
-  externalPostgresqlDefaults:
+  externalPostgresqlCommon:
     type: object
-    title: Extern konfigurierter PostgreSQL-Server
-    description: >-
-      Wird für die Datenbank von Synapse verwendet. Die Datenbank muss vorhanden
-      sein und sowohl COLLATE als auch CTYPE auf "C" eingestellt sein. Die
-      „interne“ Datenbank muss deaktiviert sein: `postgresql.enabled: false`.
     properties:
       host:
         type: string
@@ -5319,27 +5391,14 @@ $defs:
         type: string
         minLength: 1
         title: Name der zu verwendenden PostgreSQL-Datenbank
-        default: synapse_db
       username:
         type: string
         minLength: 1
         title: Name des PostgreSQL-Nutzers
-        default: synapse
-      password:
-        deprecated: true
-        type: ["null", "string"]
-        minLength: 1
-        title: Passwort vom PostgreSQL-Nutzer
-        description: >-
-          **ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.
-        default: null
-        examples:
-          - 53C237P0576235Q1P455W02D
       existingSecret:
         type: string
         minLength: 1
         title: Name vom Secret mit dem PostgreSQL-Passwort
-        default: postgresql
       existingSecretPasswordKey:
         type: string
         minLength: 1
@@ -5377,7 +5436,6 @@ $defs:
       - existingSecret
       - existingSecretPasswordKey
       - extraArgs
-    unevaluatedProperties: true
   cloudPiratesImage:
     type: object
     properties:
