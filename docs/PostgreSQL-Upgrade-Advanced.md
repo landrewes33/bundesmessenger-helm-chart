@@ -124,9 +124,18 @@ spec:
     spec:
       securityContext:
         fsGroup: 1001
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: postgresql-major-upgrade
           image: docker.io/bitnamilegacy/postgresql:16
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
           env:
             - name: PGHOST
               value: <RELEASE>-postgresql
