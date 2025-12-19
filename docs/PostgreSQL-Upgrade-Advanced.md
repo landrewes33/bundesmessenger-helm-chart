@@ -272,7 +272,7 @@ postgresql:
 
 Anschließend kann das neue Release deployed werden.
 
-> :warning: **Achtung** – Überprüfe, dass in den values.yaml unter
+> :warning: **Achtung** – Überprüfe, dass in der values.yaml unter
 > `postgresql.image.tag` die **neue** Version angegeben ist.
 
 ```sh
@@ -306,8 +306,8 @@ rm import-postgresql-major-upgrade.yaml
 > Deployments am aktuell laufenden Pod des PostgreSQL-Servers eingehängt.
 > Solange wird es auch nicht unter `PVC` aufgeräumt und das `PV` auch nicht freigegeben.
 >
-> Sollte die Sicherung mit den `postgresql-major-upgrade` Job länger als 5 Minuten
-> vergangen sein, kann dadurch eine Fehlermeldung auftreten:
+> Sollte die Sicherung mit dem `postgresql-major-upgrade`-Job länger als 5 Minuten
+> andauern, kann dadurch eine Fehlermeldung auftreten:
 
 ```plain
 Error from server (NotFound): error when deleting "`export-postgresql-major-upgrade`.yaml": jobs.batch "postgresql-major-upgrade" not found
@@ -328,7 +328,7 @@ helm upgrade <RELEASE> \
 ```
 
 :pushpin: Hinweis: Das Volume mit dem SQL-Dump bleibt bis zu einem Neustart des
-Deployments am aktuell laufenden Pod des PostgreSQL-Servers eingehängt.
+Deployments an dem aktuell laufenden Pod des PostgreSQL-Servers eingehängt.
 
 ---
 
