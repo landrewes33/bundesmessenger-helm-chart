@@ -79,21 +79,35 @@ spec:
       remoteRef:
         key: secret/postgresql
         property: password
-    - secretKey: masusername
-      remoteRef:
-        key: secret/postgresql
-        property: masusername
-    - secretKey: masdatabase
-      remoteRef:
-        key: secret/postgresql
-        property: masdatabase
-    - secretKey: maspassword
-      remoteRef:
-        key: secret/postgresql
-        property: maspassword
     - secretKey: postgres-password
       remoteRef:
         key: secret/postgresql
+        property: postgres-password
+---
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: maspostgresql
+spec:
+  secretStoreRef:
+    kind: SecretStore
+    name: bum-secret-store
+  data:
+    - secretKey: username
+      remoteRef:
+        key: secret/maspostgresql
+        property: username
+    - secretKey: database
+      remoteRef:
+        key: secret/maspostgresql
+        property: database
+    - secretKey: password
+      remoteRef:
+        key: secret/maspostgresql
+        property: password
+    - secretKey: postgres-password
+      remoteRef:
+        key: secret/maspostgresql
         property: postgres-password
 ---
 apiVersion: external-secrets.io/v1

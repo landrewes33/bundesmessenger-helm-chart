@@ -3,7 +3,3 @@ publicServerName: matrix.example.org
 adminAPIServerName: admin-api.example.org
 dataPrivacyUrl: example.com/privacy
 imprintUrl: example.com/imprint
-externalPostgresql:
-  existingSecret: postgresql-secret
-externalmasPostgresql:
-  existingSecret: postgresql-secret

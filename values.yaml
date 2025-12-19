@@ -1550,19 +1550,6 @@ x-defaultPostgresqlCommon: &postgresDefaults
     pullSecrets: []
     pullPolicy: IfNotPresent
 
-  # (map) Konfiguration des Adminnutzers.
-  auth:
-    # (string) Name des PostgreSQL Adminnutzers.
-    username: postgres
-    # (string) Name des Kubernetes Secrets mit dem Adminpasswort.
-    # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen
-    # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
-    existingSecret: postgresql
-    # (map) Schlüssel im angegebenen Secret.
-    secretKeys:
-      # (string) Verweis im `existingSecret` auf das Adminpasswort.
-      adminPasswordKey: postgres-password
-
   # (map) Service-Konfiguration.
   service:
     # (integer) Port des PostgreSQL-Service.
@@ -1598,6 +1585,9 @@ x-defaultPostgresqlCommon: &postgresDefaults
     runAsGroup: 66999
     # (bool) Mount container root filesystem as read-only.
     readOnlyRootFilesystem: true
+    # (map) BSI SYS.1.6.A21_APP.4.4.A4
+    seccompProfile:
+      type: RuntimeDefault
 
   # (map) Persistenzkonfiguration für Storage für PostgreSQL
   persistence:
@@ -1667,6 +1657,19 @@ postgresql:
       database: database
       # (string) Verweis im `existingSecret` auf das Nutzerpasswort.
       password: password
+
+  # (map) Konfiguration des Adminnutzers.
+  auth:
+    # (string) Name des PostgreSQL Adminnutzers.
+    username: postgres
+    # (string) Name des Kubernetes Secrets mit dem Adminpasswort.
+    # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen
+    # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
+    existingSecret: postgresql
+    # (map) Schlüssel im angegebenen Secret.
+    secretKeys:
+      # (string) Verweis im `existingSecret` auf das Adminpasswort.
+      adminPasswordKey: postgres-password
 
   initdb:
     # (string) Extra Argumente zur Initialisierung der Datenbank
@@ -2009,6 +2012,13 @@ mas:
   # Zusätzliche Konfigurationen für den MAS
   # Ref: https://element-hq.github.io/matrix-authentication-service/reference/configuration.html
   extraConfig:
+    database:
+      min_connections: 0
+      max_connections: 10
+      connect_timeout: 30
+      idle_timeout: 600
+      max_lifetime: 1800
+
     # (map) Konfiguration der Passwortdatenbank.
     # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords
     passwords:
@@ -2151,25 +2161,33 @@ maspostgresql:
     username: mas
     # (string) Name der Datenbank.
     # Muss mit der Angabe im `existingSecret` übereinstimmen.
-    database: mas_synapse
+    database: mas
     # (string) Name vom Secret mit dem Passwort des Synapse Datenbanknutzers.
     # Ist `maspostgresql.enabled` und es existiert kein Secret mit dem angegebenen
     # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
-    existingSecret: postgresql
+    existingSecret: maspostgresql
     # (map) Schlüssel im angegebenen Secret.
     secretKeys:
       # (string) Verweis im `existingSecret` auf den Namen des Datenbanknutzers.
-      name: masusername
+      name: username
       # (string) Verweis im `existingSecret` auf den Namen der Datenbank.
-      database: masdatabase
+      database: database
       # (string) Verweis im `existingSecret` auf das Nutzerpasswort.
-      password: maspassword
+      password: password
 
-  min_connections: 0
-  max_connections: 10
-  connect_timeout: 30
-  idle_timeout: 600
-  max_lifetime: 1800
+  # (map) Konfiguration des Adminnutzers.
+  auth:
+    # (string) Name des PostgreSQL Adminnutzers.
+    username: postgres
+    # (string) Name des Kubernetes Secrets mit dem Adminpasswort.
+    # Ist `maspostgresql.enabled` und es existiert kein Secret mit dem
+    # angegebenen Namen, so wird ein neues Secret automatisch erstellt und
+    # verwendet.
+    existingSecret: maspostgresql
+    # (map) Schlüssel im angegebenen Secret.
+    secretKeys:
+      # (string) Verweis im `existingSecret` auf das Adminpasswort.
+      adminPasswordKey: postgres-password
 
 externalmasPostgresql:
   # (string) Hostname vom externen PostgreSQL-Server.
@@ -2178,16 +2196,16 @@ externalmasPostgresql:
   # (integer) Port vom externen PostgreSQL-Server.
   port: 5432
   # (string) Name der zu verwendenden PostgreSQL-Datenbank.
-  database: mas_synapse
+  database: mas
 
   # (string) Name des PostgreSQL-Nutzers.
   username: mas
 
   # (string) Name vom Secret mit dem PostgreSQL-Passwort.
-  existingSecret: postgresql
+  existingSecret: maspostgresql
 
   # (string) Verweis im `existingSecret` auf das PostgreSQL-Passwort.
-  existingSecretPasswordKey: maspassword
+  existingSecretPasswordKey: password
 
   # (map) Zusätzliche Argumente für die Datenbankverbindung.
   # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
@@ -2196,11 +2214,6 @@ externalmasPostgresql:
     # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
     sslmode: prefer
 
-  min_connections: 0
-  max_connections: 10
-  connect_timeout: 30
-  idle_timeout: 600
-  max_lifetime: 1800
 
 ######################################################################################
 ##          Konfiguration für Matrix-Content-Scanner (MCS)

@@ -78,9 +78,11 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
   Die bisherige Datenbank Konfiguration für den MAS wurde von `mas.postgresql`
   nach `maspostgresql` bzw. `externalmasPostgresql` verschoben.
   Das Passwort für die bisher genutzte Datenbank
-  muss in einem Secret abgelegt werden. Im Standard wird das Secret
+  muss in einem Secret abgelegt werden. ~~Im Standard wird das Secret
   `postgresql`
-  mit den Key `maspassword` verwendet. (!999)
+  mit den Key `maspassword` verwendet.~~ (!999).
+  Update von Version 2.0.1:
+  Im Standard wird das Secret `maspostgresql` mit den Key `password` verwendet.
 - Im nächsten Release des BundesMessengers (v2.1.0) wird der MAS standardmäßig
   aktiviert sein.
 
@@ -89,7 +91,7 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
   `mas.enabled: false`, um den MAS weiterhin nicht zu verwenden. (!1029)
 - Im Admin Portal ist in der Version 2.1.0. aktuell noch ein Performance
   Problem bekannt, was zu längeren Abrufzeiten bei Räumen und Benutzern führt.
-  
+
   Wir arbeiten bereits an einem Fix und stellen diesen schnellstmöglich bereit.
 
 ### ✨ Features

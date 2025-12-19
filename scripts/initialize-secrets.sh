@@ -45,15 +45,19 @@ kubectl create -n "$NAMESPACE" secret generic "synapse" \
     --from-literal="form-secret=$(alphanum_password)" \
     --from-literal="worker-replication-secret=$(alphanum_password)"
 
-# Secret mit den Synapse und MAS PostgreSQL-Passwörtern.
+# Secret mit den Synapse PostgreSQL-Passwörtern.
 kubectl create -n "$NAMESPACE" secret generic "postgresql" \
     --from-literal="database=synapse_db" \
     --from-literal="username=synapse" \
     --from-literal="password=$(alphanum_password)" \
     --from-literal="postgres-password=$(alphanum_password)"
-    --from-literal="masdatabase=mas_synapse" \
-    --from-literal="masusername=mas" \
-    --from-literal="maspassword=$(alphanum_password)"
+
+# Secret mit den MAS PostgreSQL-Passwörtern.
+kubectl create -n "$NAMESPACE" secret generic "maspostgresql" \
+    --from-literal="database=mas" \
+    --from-literal="username=mas" \
+    --from-literal="password=$(alphanum_password)" \
+    --from-literal="postgres-password=$(alphanum_password)"
 
 # Secret mit dem Redis-Passwort.
 kubectl create -n "$NAMESPACE" secret generic "redis" \
