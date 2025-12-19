@@ -7,6 +7,52 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 2.0.2 (2025-12-19)
+
+Nachtrag des zuvor nicht veröffentlichten Changelog-Eintrags.
+Funktional identisch zu Version 2.0.1.
+
+## BundesMessenger Helm Chart 2.0.1 (2025-12-19)
+
+### ⚠️ Versionshinweise
+
+- Die Version 2.0.1 des Helm Charts ersetzt die Version 2.0.0.
+  Die Version 2.0.0 sollte nicht verwendet werden.
+  Die Änderungen betreffen nur den MAS, insbesondere, wenn die neu in Version
+  2.0.0 hinzugekommene
+  interne Datenbank für den MAS (`maspostgresql`) installiert wurde.
+
+  Folgende Änderungen haben sich ergeben:
+
+  - Die Feineinstellungen für die Datenbankverbindung (u.a. `min_connections`)
+    wurden aus `externalmasPostgresql` und `maspostgresql` nach
+    `mas.extraConfig.database` verschoben.
+  - Die Zugangsdaten der Datenbank für den MAS wurden aus dem Secret
+  `postgresql`
+    in ein separates Secret `maspostgresql` verschoben (Konfiguration:
+  `existingSecret`).
+  - In dem Secret `maspostgresql` wurden die Keys (`secretKeys`) standardisiert
+    (`masusername`, `masdatabase`, `maspassword` -> `username`, `database`,
+  `password`).
+  - Der Standardname der Datenbank wurde von `mas_synapse` auf `mas` geändert.
+  (!1041)
+
+### 📚 Dokumentation
+
+- Fehlerkorrektur im `initialize-secrets.sh`-Skript. (!1033)
+- Korrektur eines fehlerhaften Links in UPGRADE.md (CHANGELOG.md statt
+  UPGRADE.md). (!1036)
+- Kleinere Umformulierungen in der PostgreSQL-Upgrade-Advanced-Dokumentation.
+  (!1040)
+- In der Upgrade-Dokumentation das Beispiel zum Backup der Datenbank um den
+  `securityContext` ergänzt. (!1043)
+
+### 📝 Weitere Änderungen
+
+- Anpassung der Standardwerte für die internen Datenbanken. (!1041)
+- Hinzufügen von DVC-notwendigen Konfiguration für `securityContext` in
+  PostgreSQL Subchart. (!1042)
+
 ## BundesMessenger Helm Chart 2.0.0 (2025-12-16)
 
 ### ⚠️ Versionshinweise
