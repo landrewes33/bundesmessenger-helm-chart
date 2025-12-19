@@ -3092,85 +3092,107 @@
       "unevaluatedProperties": false
     },
     "postgresql": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/postgresqlDefaults",
-          "type": "object"
-        },
-        {
+      "$ref": "#/$defs/postgresqlCommon",
+      "type": "object",
+      "properties": {
+        "customUser": {
           "type": "object",
           "properties": {
-            "initdb": {
-              "type": "object",
-              "title": "Initialisierung der Datenbank",
-              "properties": {
-                "args": {
-                  "type": "string",
-                  "title": "Extra Argumente zur Initialisierung der Datenbank",
-                  "default": "--lc-collate=C --lc-ctype=C --encoding=UTF8"
-                },
-                "scripts": {
-                  "type": "object",
-                  "description": "Zusätzliche Initialisierungsskripte",
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "unevaluatedProperties": false
-                }
-              },
-              "required": [
-                "args"
-              ]
+            "database": {
+              "type": "string",
+              "default": "synapse_db"
+            },
+            "username": {
+              "type": "string",
+              "default": "synapse"
+            },
+            "existingSecret": {
+              "type": "string",
+              "default": "postgresql"
             }
           },
           "required": [
-            "initdb"
-          ]
+            "database",
+            "username",
+            "existingSecret"
+          ],
+          "unevaluatedProperties": true
+        },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "existingSecret": {
+              "type": "string",
+              "minLength": 1,
+              "default": "postgresql"
+            }
+          },
+          "required": [
+            "existingSecret"
+          ],
+          "unevaluatedProperties": true
+        },
+        "initdb": {
+          "type": "object",
+          "title": "Initialisierung der Datenbank",
+          "properties": {
+            "args": {
+              "type": "string",
+              "title": "Extra Argumente zur Initialisierung der Datenbank",
+              "default": "--lc-collate=C --lc-ctype=C --encoding=UTF8"
+            }
+          },
+          "required": [
+            "args"
+          ],
+          "unevaluatedProperties": true
         }
-      ]
+      },
+      "required": [
+        "customUser",
+        "auth",
+        "initdb"
+      ],
+      "unevaluatedProperties": true
     },
     "externalPostgresql": {
-      "$ref": "#/$defs/externalPostgresqlDefaults",
-      "type": "object"
-    },
-    "externalmasPostgresql": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/externalPostgresqlDefaults",
-          "type": "object"
+      "$ref": "#/$defs/externalPostgresqlCommon",
+      "type": "object",
+      "title": "Extern konfigurierter PostgreSQL-Server",
+      "description": "Wird für die Datenbank von Synapse verwendet. Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf \"C\" eingestellt sein. Die „interne“ Datenbank muss deaktiviert sein: `postgresql.enabled: false`.",
+      "properties": {
+        "database": {
+          "type": "string",
+          "default": "synapse_db"
         },
-        {
-          "type": "object",
-          "properties": {
-            "min_connections": {
-              "type": "integer",
-              "default": 0
-            },
-            "max_connections": {
-              "type": "integer",
-              "default": 10
-            },
-            "connect_timeout": {
-              "type": "integer",
-              "default": 30
-            },
-            "idle_timeout": {
-              "type": "integer",
-              "default": 600
-            },
-            "max_lifetime": {
-              "type": "integer",
-              "default": 1800
-            }
-          },
-          "required": [
-            "min_connections",
-            "max_connections",
-            "connect_timeout",
-            "idle_timeout",
-            "max_lifetime"
+        "username": {
+          "type": "string",
+          "default": "synapse"
+        },
+        "password": {
+          "deprecated": true,
+          "type": [
+            "null",
+            "string"
+          ],
+          "minLength": 1,
+          "title": "Passwort vom PostgreSQL-Nutzer",
+          "description": "**ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.",
+          "default": null,
+          "examples": [
+            "53C237P0576235Q1P455W02D"
           ]
+        },
+        "existingSecret": {
+          "type": "string",
+          "minLength": 1,
+          "default": "postgresql"
         }
+      },
+      "required": [
+        "database",
+        "username",
+        "existingSecret"
       ],
       "unevaluatedProperties": false
     },
@@ -3705,6 +3727,39 @@
           "title": "Zusätzliche Konfigurationen für den MAS",
           "description": "Ref: https://element-hq.github.io/matrix-authentication-service/reference/configuration.html",
           "properties": {
+            "database": {
+              "type": "object",
+              "properties": {
+                "min_connections": {
+                  "type": "integer",
+                  "default": 0
+                },
+                "max_connections": {
+                  "type": "integer",
+                  "default": 10
+                },
+                "connect_timeout": {
+                  "type": "integer",
+                  "default": 30
+                },
+                "idle_timeout": {
+                  "type": "integer",
+                  "default": 600
+                },
+                "max_lifetime": {
+                  "type": "integer",
+                  "default": 1800
+                }
+              },
+              "required": [
+                "min_connections",
+                "max_connections",
+                "connect_timeout",
+                "idle_timeout",
+                "max_lifetime"
+              ],
+              "unevaluatedProperties": true
+            },
             "passwords": {
               "type": "object",
               "title": "Konfiguration der Passwortdatenbank.",
@@ -3819,6 +3874,7 @@
             }
           },
           "required": [
+            "database",
             "passwords",
             "account",
             "email"
@@ -4016,43 +4072,76 @@
       "unevaluatedProperties": false
     },
     "maspostgresql": {
-      "allOf": [
-        {
-          "$ref": "#/$defs/postgresqlDefaults",
-          "type": "object"
-        },
-        {
+      "$ref": "#/$defs/postgresqlCommon",
+      "type": "object",
+      "properties": {
+        "customUser": {
           "type": "object",
           "properties": {
-            "min_connections": {
-              "type": "integer",
-              "default": 0
+            "username": {
+              "type": "string",
+              "default": "mas"
             },
-            "max_connections": {
-              "type": "integer",
-              "default": 10
+            "database": {
+              "type": "string",
+              "default": "mas"
             },
-            "connect_timeout": {
-              "type": "integer",
-              "default": 30
-            },
-            "idle_timeout": {
-              "type": "integer",
-              "default": 600
-            },
-            "max_lifetime": {
-              "type": "integer",
-              "default": 1800
+            "existingSecret": {
+              "type": "string",
+              "minLength": 1,
+              "default": "maspostgresql"
             }
           },
           "required": [
-            "min_connections",
-            "max_connections",
-            "connect_timeout",
-            "idle_timeout",
-            "max_lifetime"
-          ]
+            "username",
+            "database",
+            "existingSecret"
+          ],
+          "unevaluatedProperties": true
+        },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "existingSecret": {
+              "type": "string",
+              "minLength": 1,
+              "default": "maspostgresql"
+            }
+          },
+          "required": [
+            "existingSecret"
+          ],
+          "unevaluatedProperties": true
         }
+      },
+      "required": [
+        "customUser",
+        "auth"
+      ],
+      "unevaluatedProperties": true
+    },
+    "externalmasPostgresql": {
+      "$ref": "#/$defs/externalPostgresqlCommon",
+      "type": "object",
+      "properties": {
+        "database": {
+          "type": "string",
+          "default": "mas"
+        },
+        "username": {
+          "type": "string",
+          "default": "mas"
+        },
+        "existingSecret": {
+          "type": "string",
+          "minLength": 1,
+          "default": "maspostgresql"
+        }
+      },
+      "required": [
+        "database",
+        "username",
+        "existingSecret"
       ],
       "unevaluatedProperties": false
     },
@@ -5994,6 +6083,8 @@
     "externalRedis",
     "ingress",
     "mas",
+    "maspostgresql",
+    "externalmasPostgresql",
     "contentscanner",
     "schadcodescanner",
     "synapse_admin",
@@ -6005,7 +6096,7 @@
   ],
   "unevaluatedProperties": false,
   "$defs": {
-    "postgresqlDefaults": {
+    "postgresqlCommon": {
       "type": "object",
       "title": "Konfiguration des internen PostgreSQL-Servers",
       "description": "Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und schnelle Möglichkeit, Demo- und Testsysteme aufzusetzen. Nicht empfohlen für Produktivsysteme.\nEmpfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled` auf `false` und konfigurieren Sie den `externalPostgresql`-Block.",
@@ -6043,15 +6134,13 @@
               "type": "string",
               "minLength": 1,
               "title": "Name des Datenbanknutzers",
-              "description": "Muss mit der Angabe im `existingSecret` übereinstimmen.",
-              "default": "synapse"
+              "description": "Muss mit der Angabe im `existingSecret` übereinstimmen."
             },
             "database": {
               "type": "string",
               "minLength": 1,
               "title": "Name der Datenbank",
-              "description": "Muss mit der Angabe im `existingSecret` übereinstimmen.",
-              "default": "synapse_db"
+              "description": "Muss mit der Angabe im `existingSecret` übereinstimmen."
             },
             "password": {
               "type": [
@@ -6070,8 +6159,7 @@
               "type": "string",
               "minLength": 1,
               "title": "Name des Secrets mit dem Passwort des Synapse Datenbanknutzers",
-              "description": "Ist `postgresql.enabled` und das angegebene Secret existiert nicht, so wird automatisch ein neues Secret erstellt und verwendet.",
-              "default": "postgresql"
+              "description": "Ist `postgresql.enabled` und das angegebene Secret existiert nicht, so wird automatisch ein neues Secret erstellt und verwendet."
             },
             "secretKeys": {
               "type": "object",
@@ -6135,8 +6223,7 @@
               "type": "string",
               "minLength": 1,
               "title": "Name des Kubernetes Secrets mit dem enhaltenen Adminpasswort",
-              "description": "Ist `postgresql.enabled` und das angegebene Secret existiert nicht, so wird automatisch ein neues Secret erstellt und verwendet.",
-              "default": "postgresql"
+              "description": "Ist `postgresql.enabled` und das angegebene Secret existiert nicht, so wird automatisch ein neues Secret erstellt und verwendet."
             },
             "secretKeys": {
               "type": "object",
@@ -6359,7 +6446,7 @@
           "required": [
             "sslmode"
           ],
-          "unevaluatedProperties": true
+          "unevaluatedProperties": false
         }
       },
       "required": [
@@ -6378,10 +6465,8 @@
       ],
       "unevaluatedProperties": true
     },
-    "externalPostgresqlDefaults": {
+    "externalPostgresqlCommon": {
       "type": "object",
-      "title": "Extern konfigurierter PostgreSQL-Server",
-      "description": "Wird für die Datenbank von Synapse verwendet. Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf \"C\" eingestellt sein. Die „interne“ Datenbank muss deaktiviert sein: `postgresql.enabled: false`.",
       "properties": {
         "host": {
           "type": "string",
@@ -6399,34 +6484,17 @@
         "database": {
           "type": "string",
           "minLength": 1,
-          "title": "Name der zu verwendenden PostgreSQL-Datenbank",
-          "default": "synapse_db"
+          "title": "Name der zu verwendenden PostgreSQL-Datenbank"
         },
         "username": {
           "type": "string",
           "minLength": 1,
-          "title": "Name des PostgreSQL-Nutzers",
-          "default": "synapse"
-        },
-        "password": {
-          "deprecated": true,
-          "type": [
-            "null",
-            "string"
-          ],
-          "minLength": 1,
-          "title": "Passwort vom PostgreSQL-Nutzer",
-          "description": "**ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.",
-          "default": null,
-          "examples": [
-            "53C237P0576235Q1P455W02D"
-          ]
+          "title": "Name des PostgreSQL-Nutzers"
         },
         "existingSecret": {
           "type": "string",
           "minLength": 1,
-          "title": "Name vom Secret mit dem PostgreSQL-Passwort",
-          "default": "postgresql"
+          "title": "Name vom Secret mit dem PostgreSQL-Passwort"
         },
         "existingSecretPasswordKey": {
           "type": "string",
@@ -6477,8 +6545,7 @@
         "existingSecret",
         "existingSecretPasswordKey",
         "extraArgs"
-      ],
-      "unevaluatedProperties": true
+      ]
     },
     "cloudPiratesImage": {
       "type": "object",
@@ -8477,7 +8544,7 @@
       "description": "ExecAction describes a \"run in container\" action.",
       "properties": {
         "command": {
-          "description": "execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.",
+          "description": "Command is the command line to execute inside the container, the working directory for the command  is root ('/') in the container's filesystem. The command is simply exec'd, it is not run inside a shell, so traditional shell instructions ('|', etc) won't work. To use a shell, you need to explicitly call out to that shell. Exit status of 0 is treated as live/healthy and non-zero is unhealthy.",
           "items": {
             "default": "",
             "type": "string"

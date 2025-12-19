@@ -335,9 +335,9 @@ Bei der Nutzung von Vaults/External-Operatoren muss die Änderung
 darüber stattfinden.
 
 ```bash
-kubectl -n <NAMESPACE> patch secret postgresql -p "{\"data\": {\"masusername\": \"$(echo -n 'mas' | base64)\"}}"
-kubectl -n <NAMESPACE> patch secret postgresql -p "{\"data\": {\"masdatabase\": \"$(echo -n 'mas_synapse' | base64)\"}}"
-kubectl -n <NAMESPACE> patch secret postgresql -p "{\"data\": {\"maspassword\": \"$(echo -n 'CHANGE_ME_STRENG_GEHEIM' | base64)\"}}"
+kubectl -n <NAMESPACE> patch secret maspostgresql -p "{\"data\": {\"username\": \"$(echo -n 'mas' | base64)\"}}"
+kubectl -n <NAMESPACE> patch secret maspostgresql -p "{\"data\": {\"database\": \"$(echo -n 'mas' | base64)\"}}"
+kubectl -n <NAMESPACE> patch secret maspostgresql -p "{\"data\": {\"password\": \"$(echo -n 'CHANGE_ME_STRENG_GEHEIM' | base64)\"}}"
 ```
 
 #### A) Manuelle Erstellung der Datenbank
@@ -403,19 +403,19 @@ maspostgresql:
     username: mas
     # (string) Name der Datenbank.
     # Muss mit der Angabe im `existingSecret` übereinstimmen.
-    database: mas_synapse
+    database: mas
     # (string) Name vom Secret mit dem Passwort des Synapse Datenbanknutzers.
     # Ist `maspostgresql.enabled` und es existiert kein Secret mit dem angegebenen
     # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
-    existingSecret: postgresql
+    existingSecret: maspostgresql
     # (map) Schlüssel im angegebenen Secret.
     secretKeys:
       # (string) Verweis im `existingSecret` auf den Namen des Datenbanknutzers.
-      name: masusername
+      name: username
       # (string) Verweis im `existingSecret` auf den Namen der Datenbank.
-      database: masdatabase
+      database: database
       # (string) Verweis im `existingSecret` auf das Nutzerpasswort.
-      password: maspassword
+      password: password
 ```
 
 Oder wenn das Sub-Chart des BundesMessenger nicht genutzt wird:

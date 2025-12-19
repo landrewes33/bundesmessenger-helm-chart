@@ -513,16 +513,10 @@ https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-CONNSTRING-URIS
 */}}
 {{- define "matrix-synapse.maspostgresql.uri" -}}
 {{- $argsPercentEncoded := list }}
-{{- if .Values.maspostgresql.enabled }}
-  {{- range $k, $v := .Values.maspostgresql.extraArgs }}
-    {{- $arg := printf "%s=%s" (urlquery $k) (urlquery $v) }}
-    {{- $argsPercentEncoded = append $argsPercentEncoded $arg }}
-  {{- end }}
-{{- else }}
-{{- range $k, $v := .Values.externalmasPostgresql.extraArgs }}
-    {{- $arg := printf "%s=%s" (urlquery $k) (urlquery $v) }}
-    {{- $argsPercentEncoded = append $argsPercentEncoded $arg }}
-  {{- end }}
+{{- $extraArgs := fromYaml (include "matrix-synapse.maspostgresql.extraArgs" .) }}
+{{- range $k, $v := $extraArgs }}
+  {{- $arg := printf "%s=%s" (urlquery $k) (urlquery $v) }}
+  {{- $argsPercentEncoded = append $argsPercentEncoded $arg }}
 {{- end }}
 {{- printf "postgresql://%s:POSTGRES_PASS@%s:%s/%s?%s"
   (urlquery (include "matrix-synapse.maspostgresql.username" .))
@@ -674,86 +668,18 @@ Defaults to `matrix-synapse.postgresql.port`.
   {{- end }}
 {{- end -}}
 
-{{/*
-Set MAS PostgreSQL min_connections
-*/}}
-{{- define "matrix-synapse.maspostgresql.min_connections" -}}
-  {{- if .Values.maspostgresql.enabled -}}
-    {{- .Values.maspostgresql.min_connections | default "0" }}
-  {{- else }}
-    {{- required
-        "A valid externalmasPostgresql.min_connections is required"
-        .Values.externalmasPostgresql.min_connections
-    }}
-  {{- end -}}
-{{- end -}}
-
-{{/*
-Set MAS PostgreSQL max_connections
-*/}}
-{{- define "matrix-synapse.maspostgresql.max_connections" -}}
-  {{- if .Values.maspostgresql.enabled -}}
-    {{- .Values.maspostgresql.max_connections | default "10" }}
-  {{- else }}
-    {{- required
-        "A valid externalmasPostgresql.max_connections is required"
-        .Values.externalmasPostgresql.max_connections
-    }}
-  {{- end -}}
-{{- end -}}
-
-{{/*
-Set MAS PostgreSQL connect_timeout
-*/}}
-{{- define "matrix-synapse.maspostgresql.connect_timeout" -}}
-  {{- if .Values.maspostgresql.enabled -}}
-    {{- .Values.maspostgresql.connect_timeout | default "30" }}
-  {{- else }}
-    {{- required
-        "A valid externalmasPostgresql.connect_timeout is required"
-        .Values.externalmasPostgresql.connect_timeout
-    }}
-  {{- end -}}
-{{- end -}}
-
-{{/*
-Set MAS PostgreSQL idle_timeout
-*/}}
-{{- define "matrix-synapse.maspostgresql.idle_timeout" -}}
-  {{- if .Values.maspostgresql.enabled -}}
-    {{- .Values.maspostgresql.idle_timeout | default "600" }}
-  {{- else }}
-    {{- required
-        "A valid externalmasPostgresql.idle_timeout is required"
-        .Values.externalmasPostgresql.idle_timeout
-    }}
-  {{- end -}}
-{{- end -}}
-
-{{/*
-Set MAS PostgreSQL max_lifetime
-*/}}
-{{- define "matrix-synapse.maspostgresql.max_lifetime" -}}
-  {{- if .Values.maspostgresql.enabled -}}
-    {{- .Values.maspostgresql.max_lifetime | default "1800" }}
-  {{- else }}
-    {{- required
-        "A valid externalmasPostgresql.max_lifetime is required"
-        .Values.externalmasPostgresql.max_lifetime
-    }}
-  {{- end -}}
-{{- end -}}
-
 {{- /*
-Wählt automatisch die korrekten extraArgs – abhängig davon,
-ob der interne PostgreSQL genutzt wird oder der externe.
+MAS PostgreSQL extra arguments for establishing a database connection.
+
+Refer to https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+for a list of options that can be passed.
 */ -}}
-{{- define "maspostgresql.extraArgs" -}}
-{{- if .Values.maspostgresql.enabled -}}
-{{- toYaml .Values.maspostgresql.extraArgs | nindent 0 -}}
-{{- else -}}
-{{- toYaml .Values.externalmasPostgresql.extraArgs | nindent 0 -}}
-{{- end -}}
+{{- define "matrix-synapse.maspostgresql.extraArgs" -}}
+{{- if .Values.maspostgresql.enabled }}
+  {{- toYaml .Values.maspostgresql.extraArgs }}
+{{- else }}
+  {{- toYaml .Values.externalmasPostgresql.extraArgs }}
+{{- end }}
 {{- end -}}
 
 {{/*

@@ -93,6 +93,14 @@ tests:
       path: metadata.name
       value: RELEASE-NAME-matrix-authentication-service
     set:
+      mas:
+        extraConfig:
+          database:
+            min_connections: 3
+            max_connections: 20
+            connect_timeout: 60
+            idle_timeout: 1212
+            max_lifetime: 1818
       maspostgresql:
         enabled: false
       externalmasPostgresql:
@@ -102,12 +110,6 @@ tests:
         username: Frank
         existingSecret: postgresql
         existingSecretPasswordKey: password
-        password: ididitmyway
-        min_connections: 3
-        max_connections: 20
-        connect_timeout: 60
-        idle_timeout: 1212
-        max_lifetime: 1818
         extraArgs:
           sslmode: require
           sslrootcert: /path/to/ca.pem
