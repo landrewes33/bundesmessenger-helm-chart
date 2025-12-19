@@ -1598,6 +1598,9 @@ x-defaultPostgresqlCommon: &postgresDefaults
     runAsGroup: 66999
     # (bool) Mount container root filesystem as read-only.
     readOnlyRootFilesystem: true
+    # (map) BSI SYS.1.6.A21_APP.4.4.A4
+    seccompProfile:
+      type: RuntimeDefault
 
   # (map) Persistenzkonfiguration für Storage für PostgreSQL
   persistence:
