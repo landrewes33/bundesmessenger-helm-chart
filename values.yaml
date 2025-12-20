@@ -2713,7 +2713,7 @@ call:
     image:
       registry: ghcr.io
       repository: element-hq/lk-jwt-service
-      tag: 0.3.0
+      tag: 0.4.0
       pullSecrets: []
       pullPolicy: IfNotPresent
 
