@@ -4019,6 +4019,12 @@ properties:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
         unevaluatedProperties: false
+      extraEnv:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
+        type: array
+        title: Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+        default: []
       extraVolumes:
         type: array
         title: Zusätzliche in den Synapse Admin einzuhängende Datenträger (Volumes)
@@ -4074,6 +4080,7 @@ properties:
       - resources
       - podSecurityContext
       - securityContext
+      - extraEnv
       - extraVolumes
       - extraVolumeMounts
     unevaluatedProperties: false

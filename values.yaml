@@ -2504,6 +2504,9 @@ synapse_admin:
   securityContext:
     <<: *defaultSecurityContext
 
+  # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+  extraEnv: []
+
   # (map) Zusätzliche in den Synapse Admin einzuhängende Datenträger (Volumes).
   # Beispiel:
   # extraVolumes:
