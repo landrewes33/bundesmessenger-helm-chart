@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2026 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if .Values.synapse_admin.enabled }}
 {{- $adminName := include "matrix-synapse.externalname" (dict "global" . "external" "synapse-admin") -}}
@@ -36,7 +36,7 @@ spec:
       serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
       automountServiceAccountToken: false
       securityContext:
-        {{- $.Values.synapse_admin.podSecurityContext | toYaml | nindent 8 }}
+        {{- .Values.synapse_admin.podSecurityContext | toYaml | nindent 8 }}
       {{- include "matrix-synapse.imagePullSecrets" $ | nindent 6 }}
       containers:
         - name: {{ $adminName }}
@@ -49,6 +49,10 @@ spec:
               containerPort: 8080
           resources:
             {{- toYaml .Values.synapse_admin.resources | nindent 12 }}
+          {{- with .Values.synapse_admin.extraEnv }}
+          env:
+            {{- . | toYaml | nindent 12 }}
+          {{- end }}
           livenessProbe:
             httpGet:
               path: /status
