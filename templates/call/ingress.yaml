@@ -45,7 +45,15 @@ spec:
     - host: {{ . | quote }}
       http:
         paths:
+          {{/* deprecated */}}
           - path: "/sfu/get"
+            backend:
+              service:
+                name: {{ $jwtServiceName }}
+                port:
+                  number: 8080
+            pathType: Prefix
+          - path: "/get_token"
             backend:
               service:
                 name: {{ $jwtServiceName }}

@@ -35,7 +35,7 @@ auf einer anderen Server.
   Verfügung gestellt werden kann.
   - API [`POST /_matrix/client/v3/user/{userId}/openid/request_token`](https://spec.matrix.org/v1.11/client-server-api/#post_matrixclientv3useruseridopenidrequest_token)
 - Der Benutzer übergibt den Bearer Token an den LiveKit JWT Service
-(`POST /sfu/get`)
+(`POST /sfu/get` (veraltet) bzw. `POST /get_token`)
 - Der LiveKit JWT Service prüft den Bearer Token am Homeserver
 des Benutzers. Das gilt auch für föderierte Benutzer.
   - Der abgefragte Endpunkt ist
@@ -73,7 +73,8 @@ wird um die LiveKit JWT Service URL in der `.well-known/matrix/client` erweitert
 ```
 
 Der Call Client ruft die notwendigen Informationen während der Nutzung von der
-API `POST https://example.com/sfu/get` ab.
+API `POST https://example.com/sfu/get` (veraltet) bzw. `POST https://example.com/get_token`
+ab.
 
 ### LiveKit JWT Service
 
@@ -114,9 +115,10 @@ und wird via Umgebungsvariablen konfiguriert.
 - `LIVEKIT_KEY_FROM_FILE`
 - `LIVEKIT_SECRET_FROM_FILE`
 
-Der LiveKit JWT Service stellt den API Endpunkt `POST /sfu/get` für die Clients
-bereit. Über die API bekommt er einen OpenID-Token des Benutzers und den Synapse-Homeserver
-mitgeteilt. Beides wird überprüft in dem er den Homeserver abfragt.
+Der LiveKit JWT Service stellt den API Endpunkt `POST /sfu/get` (veraltet)
+bzw. `POST /get_token` für die Clients bereit. Über die API bekommt er einen
+OpenID-Token des Benutzers und den Synapse-Homeserver mitgeteilt. Beides wird
+überprüft in dem er den Homeserver abfragt.
 
 ```text
 GET matrix://<serverName>/_matrix/federation/v1/openid/userinfo?access_token=<token>
