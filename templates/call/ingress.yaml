@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2022–2025 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2022–2026 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if and .Values.ingress.enabled .Values.call.enabled }}
 {{- $jwtServiceName := include "matrix-synapse.externalname" (dict "global" . "external" "call-jwt-service") -}}
