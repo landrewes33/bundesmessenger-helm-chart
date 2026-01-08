@@ -2776,6 +2776,61 @@ call:
     # (map) Affinitäts-Konfiguration für den Container.
     affinity: {}
 
+  standalone:
+    # (bool) BundesMessenger-Call standalone im Deployment aktivieren
+    # Der Betrieb von Standalone ist experimentell und dient
+    # der Benutzung von Gast-Zutritten zu Huddles
+    # `call.enabled` muss ebenfalls aktiviert sein
+    enabled: false
+    # (string) URL für den Call Client, zwingend notwendig
+    uri: ""
+
+    image:
+      registry: ghcr.io
+      repository: element-hq/element-call
+      tag: v0.16.3
+      pullSecrets: []
+      pullPolicy: IfNotPresent
+
+    # Zusätzliche Konfigurationen für den Callclient (config.json)
+    # Ref: https://github.com/element-hq/element-call/blob/livekit/config/config.sample.json
+    extraConfig: {}
+
+    # (list) Weitere Umgebungsvariablen für den Call-Container.
+    extraEnv: []
+
+    # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+    podSecurityContext:
+      <<: *defaultPodSecurityContext
+      runAsUser: 1001
+      runAsGroup: 1001
+
+    # (map) Konfiguration für die Container-Sicherheitsrichtlinie
+    securityContext:
+      <<: *defaultSecurityContext
+
+    # (list) Weitere Speicherbereiche für den Call-Pod.
+    extraVolumes: []
+    # (list) Weitere Speicher-Einhängepunkte für den Call-Container.
+    extraVolumeMounts:
+    # []
+      # workaround for Image: element-hq/element-call
+      - name: tmp
+        mountPath: /var/cache/nginx/
+
+    ## Ressource Konfiguration für BundesMessenger-Call.
+    resources:
+      limits:
+        # (string) Rechenressourcengrenzen, die auf den BundesMessenger-Call anzuwenden sind.
+        cpu: 100m
+        # (string) RAM Ressourcengrenzen, die auf den BundesMessenger-Call anzuwenden sind.
+        memory: 90Mi
+      requests:
+        # (string) Anforderungen an Rechenressourcen, die auf den BundesMessenger-Call anzuwenden sind.
+        cpu: 50m
+        # (string) Anforderungen an RAM Ressourcen, die auf den BundesMessenger-Call anzuwenden sind.
+        memory: 45Mi
+
 
 ######################################################################################
 ##          zusätzliche Konfigurationen für den BundesMessenger

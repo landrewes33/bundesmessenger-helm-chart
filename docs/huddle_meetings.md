@@ -76,6 +76,78 @@ Der Call Client ruft die notwendigen Informationen während der Nutzung von der
 API `POST https://example.com/sfu/get` (veraltet) bzw. `POST https://example.com/get_token`
 ab.
 
+### Standalone BundesMessenger Call Client
+
+📌 **Hinweis** –
+BundesMessenger Call im Standalone-Modus dient ausschließlich zur Nutzung von
+Gast-Zugriff. Für die Benutzung mit registrierten Benutzern ist
+[BundesMessenger Call im Integrierten-Modus](#integrierter-bundesmessenger-call-client)
+vorgesehen.
+
+Für den Gast-Zugriff wird einen Homeserver mit aktivierter Registrierung ohne
+3pid- oder Token-Anforderungen benötigt.
+Dieser kann dann von nicht registrierten Benutzern verwendet werden.
+Es wird davon abgeraten für Gast-Benutzer und normale Benutzer den gleichen Homeserver
+zu verwenden.
+
+Wenn Standalone BundesMessenger Call Client benötigt wird, wird empfohlen
+zwei Installationen zu betreiben.
+
+1. BundesMessenger Instanz mit integriertem Call
+2. BundesMessenger Instanz mit standalone Call
+
+Die BundesMessenger Instanz mit standalone Call benötigt keinen BundesMessenger
+Web Client für die Chat Funktion. Dies unterstützt der standalone Call Client nicht.
+
+Um Missbrauch zu verhindern wird empfohlen die Föderation zu deaktivieren oder
+auf den Server zu beschränken mit dem die Gäste kommunizieren sollen.
+
+Beispielkonfiguration für eine Instanz mit standalone Call:
+
+```yaml
+call:
+  enabled: true
+  standalone:
+    enabled: true
+    uri: "call.example.com"
+
+extraConfig:
+  enable_set_displayname: true
+  federation_domain_whitelist:
+    - federated-server.example.org
+
+  enable_registration: true
+  enable_registration_without_verification: true
+  password_config:
+    policy:
+      require_symbol: false
+      require_digit: false
+
+schadcodescanner:
+  enabled: false
+contentscanner:
+  enabled: false
+
+webclient:
+  enabled: false
+
+workers:
+  generic_worker:
+    enabled: false
+```
+
+:pushpin: Die weiteren Konfigurationen werden durch das Helm Chart automatisch
+bereitgestellt.
+
+Die Call Client [Konfiguration](https://github.com/element-hq/element-call?tab=readme-ov-file#backend)
+wird in der `config.json` erweitert.
+Weitere Konfigurationen holt sich der Client aus der Wellknown wie beim
+[BundesMessenger Call im Integrierten-Modus](#integrierter-bundesmessenger-call-client)
+beschrieben ab.
+
+Der Call Client ruft die notwendigen Informationen während der Nutzung von der
+API `POST https://example.com/sfu/get` ab.
+
 ### LiveKit JWT Service
 
 Es sind folgende Parameter im Bereich `call` der Konfiguration anzugeben:

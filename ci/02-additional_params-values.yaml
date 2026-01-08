@@ -49,6 +49,10 @@ webclient:
 call:
   enabled: true
 
+  standalone:
+    enabled: true
+    uri: call.example.org
+
 contentscanner:
   enabled: true
 
