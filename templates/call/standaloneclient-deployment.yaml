@@ -1,0 +1,96 @@
+{{/* SPDX-FileCopyrightText: 2024–2026 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if and .Values.call.enabled .Values.call.standalone.enabled }}
+{{- $callName := include "matrix-synapse.externalname" (dict "global" . "external" "call-standalone") -}}
+{{- $component := "call-standalone" -}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $callName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "matrix-synapse.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: {{ $component }}
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/call/standaloneclient-configuration.yaml") . | sha256sum }}
+      labels:
+        {{- include "matrix-synapse.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: {{ $component }}
+    spec:
+      serviceAccountName: {{ include "matrix-synapse.serviceAccountName" . }}
+      automountServiceAccountToken: false
+      {{- include "matrix-synapse.imagePullSecrets" . | nindent 6 }}
+      securityContext:
+        {{- toYaml .Values.call.standalone.podSecurityContext | nindent 8 }}
+      containers:
+      - name: call
+          {{- with .Values.call.standalone.extraEnv }}
+        env:
+            {{- . | toYaml | nindent 10 }}
+          {{- end }}
+        image: "{{ printf "%s/%s:%s" .Values.call.standalone.image.registry .Values.call.standalone.image.repository .Values.call.standalone.image.tag  }}"
+        imagePullPolicy: {{ .Values.call.standalone.image.pullPolicy }}
+        securityContext:
+          {{- toYaml .Values.call.standalone.securityContext | nindent 10 }}
+        resources:
+          {{- toYaml .Values.call.standalone.resources | nindent 10 }}
+        volumeMounts:
+          - name: files
+            mountPath: /app/config.json
+            subPath: config.json
+          - name: files
+            mountPath: /etc/nginx/sites-enabled/default.conf
+            subPath: default.conf
+            readOnly: true
+          - name: nginx-conf
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+            readOnly: true
+          - name: nginx-conf-d
+            mountPath: /etc/nginx/conf.d
+            readOnly: true
+          - name: tmp
+            mountPath: /tmp
+          {{- with .Values.call.standalone.extraVolumeMounts }}
+            {{- . | toYaml | nindent 10 }}
+          {{- end }}
+        ports:
+          - containerPort: 8080
+            name: http
+            protocol: TCP
+        readinessProbe:
+          tcpSocket:
+            port: http
+          periodSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /status
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+      volumes:
+        - name: tmp
+          emptyDir:
+            sizeLimit: 50M
+            medium: Memory
+        - name: files
+          configMap:
+            name: {{ $callName }}
+        - name: nginx-conf
+          configMap:
+            name: nginx-conf-default
+        - name: nginx-conf-d
+          configMap:
+            name: nginx-conf-d
+        {{- with .Values.call.standalone.extraVolumes }}
+          {{- . | toYaml | nindent 8 }}
+        {{- end }}
+{{- end }}

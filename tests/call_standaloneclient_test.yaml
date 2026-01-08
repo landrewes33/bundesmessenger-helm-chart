@@ -1,0 +1,86 @@
+# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+suite: Call Standalone
+templates:
+  - call/standaloneclient-deployment.yaml
+  - call/standaloneclient-configuration.yaml
+  - call/standalone-ingress.yaml
+set:
+  call:
+    enabled: true
+    standalone:
+      uri: call.example.org
+  externalPostgresql.existingSecret: postgresql
+  serverName: example.org
+tests:
+  - it: ensures a Deployment if enabled
+    template: call/standaloneclient-deployment.yaml
+    set:
+      call.standalone.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Deployment
+          apiVersion: apps/v1
+          name: RELEASE-NAME-call-standalone
+          any: true
+  - it: ensures no Deployment if disabled
+    template: call/standaloneclient-deployment.yaml
+    set:
+      call.standalone.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Deployment
+        not: true
+  - it: ensures a pull secret is passed in
+    template: call/standaloneclient-deployment.yaml
+    documentIndex: 0
+    set:
+      call:
+        standalone:
+          enabled: true
+          image:
+            pullSecrets:
+            - name: a-little-secret
+    asserts:
+      - contains:
+          path: spec.template.spec.imagePullSecrets
+          content:
+            name: a-little-secret
+  - it: ensures an Ingress if (call enabled, ingress enabled)
+    template: call/standalone-ingress.yaml
+    set:
+      call.standalone.enabled: true
+      ingress.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Ingress
+          apiVersion: networking.k8s.io/v1
+          name: RELEASE-NAME-call-standalone
+          any: true
+  - it: ensures no Ingress if (call enabled, ingress disabled)
+    template: call/standalone-ingress.yaml
+    set:
+      call.standalone.enabled: true
+      ingress.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true
+  - it: ensures no Ingress if (call disabled, ingress enabled)
+    template: call/standalone-ingress.yaml
+    set:
+      call.standalone.enabled: false
+      ingress.enabled: true
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true
+  - it: ensures no Ingress if (call disabled, ingress disabled)
+    template: call/standalone-ingress.yaml
+    set:
+      call.standalone.enabled: false
+      ingress.enabled: false
+    asserts:
+      - containsDocument:
+          kind: Ingress
+        not: true
