@@ -31,12 +31,12 @@ dependencies:
     repository: oci://ghcr.io/cloudpirates-io/helm-charts
     condition: redis.enabled
   - name: postgres
-    version: ^0.13.4
+    version: ^0.13.8
     repository: oci://ghcr.io/cloudpirates-io/helm-charts
     condition: postgresql.enabled
     alias: postgresql
   - name: postgres
-    version: ^0.13.4
+    version: ^0.13.8
     repository: oci://ghcr.io/cloudpirates-io/helm-charts
     condition: maspostgresql.enabled
     alias: maspostgresql

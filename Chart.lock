@@ -1,12 +1,12 @@
 dependencies:
 - name: redis
   repository: oci://ghcr.io/cloudpirates-io/helm-charts
-  version: 0.17.3
+  version: 0.17.6
 - name: postgres
   repository: oci://ghcr.io/cloudpirates-io/helm-charts
-  version: 0.13.4
+  version: 0.13.8
 - name: postgres
   repository: oci://ghcr.io/cloudpirates-io/helm-charts
-  version: 0.13.4
-digest: sha256:ba91151c2c70a648ce93dc8d29f1a6442c1774cf7d6f251a2a969a150d9262d9
-generated: "2025-12-12T14:13:05.55371342Z"
+  version: 0.13.8
+digest: sha256:fff11fdfe4f37a9d58c599dbc1d50bf91c10e8cb993c5f1b044c3ed4213e0d63
+generated: "2026-01-09T06:14:27.5147594Z"
