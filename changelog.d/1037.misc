@@ -1,0 +1,1 @@
+Ersetzt das veraltete `chartmuseum/helm-push` Plugin durch `curl`.
