@@ -2567,7 +2567,7 @@ adminPortal:
   uiImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bumap-ui
-    tag: 2.3.0-jammy-production
+    tag: 2.3.1-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 
