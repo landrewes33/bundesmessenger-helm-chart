@@ -2636,7 +2636,7 @@ webclient:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.24.3-jammy-production
+    tag: 2.24.4-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 
