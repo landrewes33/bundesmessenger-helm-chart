@@ -22,6 +22,7 @@ data:
   BUMAP_CORE_COMMON_BASE_PATH: "{{ $apiPath }}"
   BUMAP_CORE_REQUEST_VERIFY_TLS_CERT: {{ quote .Values.adminPortal.TLSverify }}
   BUMAP_CORE_AUTHORIZATION_URL: "https://{{ .Values.adminAPIServerName }}"
+  BUMAP_CORE_AUTHORIZATION_VERIFY_TLS_CERT: {{ quote .Values.adminPortal.TLSverify }}
   {{/* URL via Ingress, as the routing to the workers is required */}}
   BUMAP_CORE_SYNAPSE_ADMIN_API_URL: "https://{{ .Values.adminAPIServerName }}"
   BUMAP_CORE_LOGGING_CORE: "{{ .Values.adminPortal.logLevel }}"
