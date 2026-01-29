@@ -1,1 +1,1 @@
-Sub-Chart `redis` auf Version `0.21.2` aktualisiert.
+Sub-Chart `redis` auf Version `0.21.3` aktualisiert.
