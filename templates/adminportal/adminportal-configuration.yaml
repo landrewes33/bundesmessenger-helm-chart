@@ -1,4 +1,4 @@
-{{/* SPDX-FileCopyrightText: 2024–2025 BWI GmbH */}}
+{{/* SPDX-FileCopyrightText: 2024–2026 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
 {{- if and .Values.adminPortal.enabled .Values.mas.enabled }}
 {{- $name := include "matrix-synapse.externalname" (dict "global" . "external" "adminportal") -}}
@@ -20,11 +20,10 @@ data:
   BUMAP_HELM_CHART_VERSION: {{ quote .Chart.Version }}
   BUMAP_CORE_APP_CONFIG_API_URL: ""
   BUMAP_CORE_COMMON_BASE_PATH: "{{ $apiPath }}"
+  BUMAP_CORE_REQUEST_VERIFY_TLS_CERT: {{ quote .Values.adminPortal.TLSverify }}
   BUMAP_CORE_AUTHORIZATION_URL: "https://{{ .Values.adminAPIServerName }}"
-  BUMAP_CORE_AUTHORIZATION_VERIFY_TLS_CERT: "{{ .Values.adminPortal.TLSverify }}"
   {{/* URL via Ingress, as the routing to the workers is required */}}
   BUMAP_CORE_SYNAPSE_ADMIN_API_URL: "https://{{ .Values.adminAPIServerName }}"
-  BUMAP_CORE_SYNAPSE_VERIFY_TLS_CERT: "{{ .Values.adminPortal.TLSverify }}"
   BUMAP_CORE_LOGGING_CORE: "{{ .Values.adminPortal.logLevel }}"
   BUMAP_CORE_LOGGING_AUDIT: "{{ .Values.adminPortal.auditLog.logLevel }}"
   AUDIT_LOG_DATABASE_PATH: /app/log
