@@ -2103,12 +2103,12 @@ mas:
       # (string) Rechenressourcengrenzen, die auf den MAS anzuwenden sind.
       cpu: 500m
       # (string) RAM Ressourcengrenzen, die auf den MAS anzuwenden sind.
-      memory: 200Mi
+      memory: 400Mi
     requests:
       # (string) Anforderungen an Rechenressourcen, die auf den MAS anzuwenden sind.
       cpu: 300m
       # (string) Anforderungen an RAM Ressourcen, die auf den MAS anzuwenden sind.
-      memory: 50Mi
+      memory: 200Mi
 
   ## Healthcheck
   livenessProbe:

@@ -3968,7 +3968,7 @@
                 },
                 "memory": {
                   "title": "RAM Ressourcengrenzen, die auf den MAS anzuwenden sind",
-                  "default": "200Mi"
+                  "default": "400Mi"
                 }
               }
             },
@@ -3980,7 +3980,7 @@
                 },
                 "memory": {
                   "title": "Anforderungen an RAM Ressourcen, die auf den MAS anzuwenden sind",
-                  "default": "50Mi"
+                  "default": "200Mi"
                 }
               }
             }
