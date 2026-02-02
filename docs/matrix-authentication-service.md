@@ -113,7 +113,7 @@ den benötigten Werten und umfangreiche Beispiele finden sich in der
 ## Einbindung eines OAuth 2.0/OIDC Clients
 
 Der MAS ist ein OIDC Authentifizierungsprovider.
-Er bietet Anwendungen, wie dem [Admin Portal](./admin-portal.md),
+Er bietet Anwendungen, wie dem [Admin-Portal](./admin-portal.md),
 die Möglichkeit Benutzer zu authentifizieren.
 Hierfür werden im MAS
 [OIDC Clients](https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#clients)

@@ -2549,7 +2549,7 @@ adminPortal:
   # (string) URI für das Admin-Portal, zwingend notwendig
   uri: ""
   # (string) Client ID im ulid Format
-  # Die Client ID verwendet das Admin Portal zur Authentifizierung am MAS.
+  # Die Client ID verwendet das Admin-Portal zur Authentifizierung am MAS.
   # Ref: https://github.com/ulid/spec
   clientID: "01KBJDJMZJ3K1XCHQ81T4Q17QD"
   # (bool) Aktivieren der TLS Zertifikatsüberprüfung
