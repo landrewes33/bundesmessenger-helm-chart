@@ -206,6 +206,6 @@ Eine Konfiguration eines HTTP-Proxies ist durch die Umgebungsvariablen
 ### LiveKit Server
 
 Aufbau und Konfiguration vom LiveKit Server wird
-[separat beschrieben](./livekit_server.md).
+[separat beschrieben](./livekit-server.md).
 
 - offizielle [LiveKit Dokumentation](https://docs.livekit.io/realtime/self-hosting/local/)

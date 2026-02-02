@@ -60,7 +60,7 @@ Ein Exponieren der Services via Layer 4 über den Servicetypen LoadBalancer ist
 nicht unterstützt.
 
 Eine Detailbeschreibung der einzelnen Network Policies ist hier zu finden:
-[Network Policies Detailbeschreibungen](network_policies_detailbeschreibung.md)
+[Network Policies Detailbeschreibungen](network-policies-detailbeschreibung.md)
 
 ## CertManager und Network Policies
 

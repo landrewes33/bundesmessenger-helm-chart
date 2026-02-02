@@ -172,12 +172,12 @@ Die ausführliche Dokumentation hierfür erfolgt zu einem späteren Zeitpunkt.
 
 Weiterführende Links:
 
-- [Mindestkonfiguration von Parametern](docs/requirements_poc.md#requirements-für-die-konfiguration)
-- [Kurzanleitung zur Installation einer Testumgebung](docs/installation_testumgebung.md)
-- [Hinweise zur Nutzung mit ArgoCD](docs/ArgoCD.md)
+- [Mindestkonfiguration von Parametern](docs/requirements-poc.md#requirements-für-die-konfiguration)
+- [Kurzanleitung zur Installation einer Testumgebung](docs/installation-testumgebung.md)
+- [Hinweise zur Nutzung mit ArgoCD](docs/argocd.md)
 
 :pushpin: Getestet wird das Helm Chart auf einer Kubernetes-Infrastruktur mit einem
-[4-Node-Cluster](./docs/requirements_poc.md#maschinengröße) auf Basis von vanilla
+[4-Node-Cluster](./docs/requirements-poc.md#maschinengröße) auf Basis von vanilla
 Kubernetes.
 
 Im weiteren Verlauf der Anleitung wird die Installation mit dem Befehl
@@ -244,12 +244,12 @@ Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
 - Anpassung der [`values.yaml`](./values.yaml) zur Nutzung der richtigen Images
   und Registry
   - :pushpin: Informationen zur Bereitstellung der
-  [Container-Basisimages](./docs/requirements_poc.md#container-basisimages)
+  [Container-Basisimages](./docs/requirements-poc.md#container-basisimages)
   und [BundesMessenger Container Registry](https://gitlab.opencode.de/bwi/bundesmessenger/backend/container-images/)
 - Bereitstellen des Helm Charts im eigenen Repository (`helm repo add`). In den
   Beispielen `bundesmessenger`. Alternativ die Installation des Helm Charts aus
   dem Dateisystem (z.B. `./bundesmessenger/`) oder der OpenCoDE OCI-Registry.
-- ([Sub-)Domains mit dazugehörigen TLS-Zertifikaten](./docs/requirements_poc.md#hostnamendns)
+- ([Sub-)Domains mit dazugehörigen TLS-Zertifikaten](./docs/requirements-poc.md#hostnamendns)
   ([Sicherheitshinweis](https://github.com/element-hq/synapse/blob/develop/README.rst#security-note))
   - Eine (Sub-)Domain für den Applikationsserver z.B.: `matrix.example.com`
   (Parameter `serverName` bzw. `publicServerName`)
@@ -271,7 +271,7 @@ Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
   - Datenbank `synapse_db` mit einem Benutzer `synapse`.
   - Server muss aus dem k8s-Namespace erreichbar sein
   - :pushpin: **Hinweis:** Collation und cType müssen auf `C` gesetzt sein. Siehe
-  [Postgresql-Datenbank](./docs/requirements_poc.md#postgresql-datenbank)
+  [Postgresql-Datenbank](./docs/requirements-poc.md#postgresql-datenbank)
 - *Optional: ein `existingClaim` (persistent volume claim) mit dem Namen
   `matrix-synapse` (empfohlen 10 GB) für den Media-Worker als Speicher.*
 
@@ -292,7 +292,7 @@ konfiguriert wurde.
 :pushpin: Matrix benötigt valide TLS-Zertifikate und HTTPS-Verbindungen um voll
 funktionsfähig zu sein. Das Helm Chart stellt die Infrastruktur auf Basis
 eines `http`-Listeners bereit. Details hierzu sind in der
-[Dokumentation zu den TLS-Zertifikaten](docs/requirements_poc.md#ssl-zertifikate)
+[Dokumentation zu den TLS-Zertifikaten](docs/requirements-poc.md#ssl-zertifikate)
 beschrieben.
 
 ## Option 1: Domain entspricht den Benutzernamen (ohne Delegation)
@@ -460,16 +460,16 @@ Upgrade mit Angabe der Parameter in der `values.yaml`:
 Eine Anweisung für die Installation einer Umgebung finden Sie hier, so wie
 auch Hinweise zu den einzelnen zusätzlichen Diensten:
 
-- [PoC Requirements](./docs/requirements_poc.md)
+- [PoC Requirements](./docs/requirements-poc.md)
 - [Benutzerverwaltung](./docs/nutzerverwaltung.md)
 - [BundesMessenger WebClient](./docs/webclient.md)
-- [Synapse Admin](./docs/synapse_admin.md)
-- [Sygnal (Push-Service)](./docs/sygnal_push.md)
-- [Huddle Meetings / Call](./docs/huddle_meetings.md)
-- [LiveKit Server / WebRTC Server](./docs/livekit_server.md)
-- [Synapse Module](./docs/synapse_modules.md)
+- [Synapse Admin](./docs/synapse-admin.md)
+- [Sygnal (Push-Service)](./docs/sygnal-push.md)
+- [Huddle Meetings / Call](./docs/huddle-meetings.md)
+- [LiveKit Server / WebRTC Server](./docs/livekit-server.md)
+- [Synapse Module](./docs/synapse-modules.md)
 - [Matrix-Authentication-Service](./docs/matrix-authentication-service.md)
-- [Monitoring mit Grafana](./docs/Monitoring-mit-Grafana.md)
+- [Monitoring mit Grafana](./docs/monitoring-mit-grafana.md)
 - [Föderation](./docs/federation.md)
 
 # Kontakt und Austausch

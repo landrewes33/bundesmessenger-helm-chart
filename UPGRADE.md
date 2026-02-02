@@ -14,7 +14,7 @@ Wird das interne (Bitnami) PostgreSQL-Subchart verwendet, muss dieses zuerst mig
 werden, bevor weitere Upgrade-Schritte durchgeführt werden können.
 
 - Erforderliche Maßnahme: Migration auf internen Datenbank-Subchart von CloudPirates
-- Dokumentation: [`PostgreSQL-Upgrade-Advanced.md`](./docs/PostgreSQL-Upgrade-Advanced.md)
+- Dokumentation: [`PostgreSQL-Upgrade-Advanced.md`](./docs/postgresql-upgrade-advanced.md)
 
 ## Upgrade auf MAS-basierte Benutzerverwaltung und Authentifizierung
 

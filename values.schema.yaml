@@ -2132,7 +2132,7 @@ properties:
         title: Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält
         description: >-
           Nähere Infos unter
-          ./docs/sygnal_push.md#nutzung-eines-secrets-für-sygnal-push-konfiguration
+          ./docs/sygnal-push.md#nutzung-eines-secrets-für-sygnal-push-konfiguration
         default: sygnal
       ioskey_filename:
         deprecated: true

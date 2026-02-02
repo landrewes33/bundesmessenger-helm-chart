@@ -48,4 +48,4 @@ Die aktuelle Verfassung des Exporters exportiert keine Mediendateien,
 sondern nur deren ID. Dies kann sich zukünftig ändern oder selbst
 vorgenommen erweitert werden.
 
-Siehe [Export von Medien in der Synapse Dokumentation](https://element-hq.github.io/synapse/latest/usage/administration/admin_faq.html#how-can-i-export-user-data)
+Siehe [Export von Medien in der Synapse Dokumentation](https://element-hq.github.io/synapse/latest/usage/administration/admin-faq.html#how-can-i-export-user-data)

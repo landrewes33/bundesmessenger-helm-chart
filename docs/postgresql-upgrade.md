@@ -33,7 +33,7 @@ angepasst werden. Zusätzlich zu dem client-seitigen Wartungsmodus, setzt
 den Homeserver selbst in einen sicheren Zustand.
 
 > 📌 **Hinweis** – Die Befehle sind angelehnt an die Anweisung zur Installation
-> der [BundesMessenger Testumgebung](installation_testumgebung.md#bundesmessenger).
+> der [BundesMessenger Testumgebung](installation-testumgebung.md#bundesmessenger).
 > Im Beispiel heißt der Namespace `bum` und das zugrundeliegende Deployment
 > `bundesmessenger`. Um für ein Cluster die korrekten Namen der
 > Kubernetes-Ressourcen zu finden, können Befehle wie der folgende verwendet

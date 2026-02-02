@@ -162,6 +162,6 @@ spec:
 ```
 
 Für eine Einführung zum Einsatz von Secrets im BundesMessenger siehe
-[Secrets.md](./Secrets.md).
+[Secrets.md](./secrets.md).
 
 [`ExternalSecret`]: <https://external-secrets.io/latest/api/externalsecret/>

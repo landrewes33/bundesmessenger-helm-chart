@@ -69,7 +69,7 @@ Funktional identisch zu Version 2.0.1.
   (`externalPostgresql`), sind hiervon nicht betroffen.
 
   Für ein Upgrade der Datenbank von Version 16 auf 18 im Rahmen des Wechsels,
-  kann die [Dokumentation](./docs/PostgreSQL-Upgrade-Advanced.md) genutzt
+  kann die [Dokumentation](./docs/postgresql-upgrade-advanced.md) genutzt
   werden.
 
   Falls eigene Änderungen an der PostgreSQL-Konfiguration bestehen, sind
@@ -245,7 +245,7 @@ Funktional identisch zu Version 2.0.1.
   müssen über alternative Mittel, z.B.
   [`kubectl`](./scripts/initialize-secrets.sh) oder den [External Secrets
   Operator](https://external-secrets.io/latest/api/externalsecret/) angelegt
-  werden. Details in unserer [ArgoCD-Doku](./docs/ArgoCD.md).
+  werden. Details in unserer [ArgoCD-Doku](./docs/argocd.md).
 
   Für PostgreSQL und Redis bleiben die aktuellen Secrets bestehen. Beim Upgrade
   ist insbesondere das Secret `synapse` zu berücksichtigen. (!928)
@@ -278,7 +278,7 @@ Funktional identisch zu Version 2.0.1.
 ### 🐛 Bugfixes
 
 - Unterbinden der Generierung von Secrets unter ArgoCD. Mehr Infos dazu in
-  unserer [ArgoCD-Doku](./docs/ArgoCD.md). (!928)
+  unserer [ArgoCD-Doku](./docs/argocd.md). (!928)
 - Bedingte Einbindung von Umgebungsvariablen für AdminPortal korrigiert
   (partly contributed by Siegfried Schöfer (Siegfried.schoefer@lsi.bayern.de). (!938)
 - Importiert nur die benötigten Scripte für den Signing-Key-Job in die
@@ -744,7 +744,7 @@ Schließt die Sicherheitslücke
   (!613)
 - Dokumentieren der Möglichkeiten zur
   [Nutzerverwaltung](./docs/nutzerverwaltung.md). (!632)
-- Dokumentation der BundesMessenger [Secrets](./docs/Secrets.md). (!633)
+- Dokumentation der BundesMessenger [Secrets](./docs/secrets.md). (!633)
 
 ### 📝 Weitere Änderungen
 
@@ -868,7 +868,7 @@ Schließt die Sicherheitslücke
   angehoben. Die damit standardmäßig ausgelieferte PostgreSQL-Version ist nun
   Version 16. Um auf eine neue Hauptversion von PostgreSQL zu wechseln, ist ein
   Migrationsschritt erforderlich; ein solcher wird beispielhaft unter
-  [PostgreSQL-Upgrade](./docs/PostgreSQL-Upgrade.md) detailliert.
+  [PostgreSQL-Upgrade](./docs/postgresql-upgrade.md) detailliert.
   Alternativ kann die verwendete PostgreSQL Version manuell mit
   `postgresql.image.tag: 14` auf dem alten Stand fixiert werden. (!496)
 

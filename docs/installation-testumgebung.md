@@ -13,7 +13,7 @@ Einige Teile werden an dieser Stelle nicht beschrieben, u.a.:
 - Konfiguration der DNS-Namen
 
 :pushpin: [Beschreibung der Bereitstellung eines Kubernetes Clusters
-mit Hilfe von Terraform am Beispiel der IONOS Cloud.](./installation_k8s_ionos.md)
+mit Hilfe von Terraform am Beispiel der IONOS Cloud.](./installation-k8s-ionos.md)
 
 ## Inhaltsverzeichnis
 
@@ -214,4 +214,4 @@ Installation des BundesMessenger auf dem Kubernetes Cluster:
 
 Die Echtzeitüberwachung ist kein Bestandteil der BundesMessenger-Testumgebung,
 kann jedoch leicht integriert werden. Informationen zur Einrichtung sind unter
-[Monitoring mit Grafana](./Monitoring-mit-Grafana.md) zu finden.
+[Monitoring mit Grafana](./monitoring-mit-grafana.md) zu finden.
