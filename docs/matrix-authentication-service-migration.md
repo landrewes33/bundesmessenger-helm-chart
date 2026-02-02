@@ -119,7 +119,7 @@ CloudPirates Migration
 2. PostgreSQL-Version 18 (bei Verwendung `postgresql.enabled: true` und zukünftig
 auch für MAS-Datenbank)
 
-Dafür eignet sich die [Dokumentation für das Datenbankupgrade](./PostgreSQL-Upgrade-Advanced.md)
+Dafür eignet sich die [Dokumentation für das Datenbankupgrade](./postgresql-upgrade-advanced.md)
 
 ## 1.1 Voraussetzungen
 
@@ -299,7 +299,7 @@ kubectl cp <NAMESPACE>/$PODNAME:/synapse/data/media /backup/media --no-preserve=
 
 ## 2.1 MAS-Konfiguration vorbereiten
 
-Diese Aufzählung stammt zum großen Teil aus der [MAS-Dokumentation](./docs/matrix-authentication-service.md#vorbereitung).
+Diese Aufzählung stammt zum großen Teil aus der [MAS-Dokumentation](./matrix-authentication-service.md#vorbereitung).
 Folgenden Punkte müssen erfüllt werden und umgesetzt sein:
 
 1. Eigene Subdomain für den MAS
@@ -1079,7 +1079,7 @@ sicherzustellen, dass sowohl MAS als auch Synapse ordnungsgemäß zusammenarbeit
 und alle Authentifizierungs- und Kommunikationswege korrekt funktionieren.
 
 > :pushpin: Hinweis: Die Administration des MAS ist mit Synapse-Admin
-> nicht möglich. Synapse-Admin kann durch das [BundesMessenger Admin-Portal](./admin_portal.md)
+> nicht möglich. Synapse-Admin kann durch das [BundesMessenger Admin-Portal](./admin-portal.md)
 > ersetzt werden (`synapse_admin.enabled: false`, `adminPortal.enabled: true`.
 
 ## Funktionalität prüfen

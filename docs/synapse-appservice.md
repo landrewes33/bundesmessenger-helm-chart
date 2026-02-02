@@ -5,7 +5,7 @@ erweitert werden. Die Application Service können Bots oder ähnliches bereit st
 Application Services sind im [Matrix Protokoll](https://matrix.org/docs/spec/application_service/unstable.html)
 verankert und spezifiziert.
 
-Neben der Erweiterung mit Application Services gibt es auch [Synapse Module](./synapse_modules.md).
+Neben der Erweiterung mit Application Services gibt es auch [Synapse Module](./synapse-modules.md).
 
 ## Einbindung und Konfiguration
 

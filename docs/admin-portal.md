@@ -4,10 +4,10 @@ Zur Administration mit Hilfe einer Weboberfläche kann das
 [BundesMessenger Admin-Portal](https://gitlab.opencode.de/bwi/bundesmessenger/admin-portal)
 mit dem Helm Chart installiert werden.
 
-| :pushpin: BundesMessenger Admin-Portal wird in Zukunft [Synapse-Admin](./synapse_admin.md) ablösen. |
+| :pushpin: BundesMessenger Admin-Portal wird in Zukunft [Synapse-Admin](./synapse-admin.md) ablösen. |
 | --- |
 
-| :pushpin: BundesMessenger Admin-Portal erfordert den [MAS](./matrix-authentication-service.md) und die Migration der Benutzerverwaltung von Synapse zum MAS. |
+| :pushpin: BundesMessenger Admin-Portal erfordert den [MAS](./matrix-authentication-service.md) und die [Migration der Benutzerverwaltung von Synapse zum MAS](./matrix-authentication-service-migration.md). |
 | --- |
 
 In dem folgenden Beispiel wird zusätzlich zur Synapse-Installation BundesMessenger

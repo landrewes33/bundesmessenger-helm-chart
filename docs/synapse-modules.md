@@ -6,7 +6,7 @@ erweitert werden. Die Module können Funktionalitäten ausweiten oder anpassen.
 Module sind Python Code, die in die Umgebung eingebunden und durch
 die Konfiguration im Synapse aktiviert werden.
 
-Neben der Erweiterung mit Modulen gibt es auch [Synapse Application Services](./synapse_appservice.md).
+Neben der Erweiterung mit Modulen gibt es auch [Synapse Application Services](./synapse-appservice.md).
 
 | :warning: Wenn Sie Module von Drittanbietern verwenden, gestatten Sie anderen Personen, benutzerdefinierten Code auf Ihrem Synapse Homeserver auszuführen. Serveradministratoren wird empfohlen, die Herkunft der Module, die sie auf ihrem Homeserver verwenden, zu überprüfen und sicherzustellen, dass die Module keinen bösartigen Code auf ihrer Instanz ausführen oder Schwachstellen öffnen. |
 | --- |

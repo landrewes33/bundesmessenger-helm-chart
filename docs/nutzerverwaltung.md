@@ -34,7 +34,7 @@ lassen sich im Anschluss auch per
 [Admin API](https://element-hq.github.io/synapse/latest/admin_api/user_admin_api.html#create-or-modify-account)
 (z.B. mit `curl`), der Administrationsoberfläche
 [Synapse-Admin](https://github.com/Awesome-Technologies/synapse-admin) oder dem
-[BundesMessenger Admin-Portal](./admin_portal.md) anlegen.
+[BundesMessenger Admin-Portal](./admin-portal.md) anlegen.
 
 Am Ende der Installation werden die notwendigen Kommandozeilen ausgegeben.
 In der Ausgabe sind die Umgebungsvariablen (Deployment und Namespace)
@@ -79,7 +79,7 @@ kubectl exec --namespace bundesmessenger $POD_NAME -- register_new_matrix_user -
 Die Synapse-Admin-Oberfläche kann ganz einfach über die
 BundesMessenger-Konfiguration aktiviert werden und ist dann unter der
 angegebenen Domain erreichbar. Weitere Informationen dazu finden sich unter
-[Synapse-Admin](./synapse_admin.md).
+[Synapse-Admin](./synapse-admin.md).
 
 ```yaml
 adminAPIServerName: admin.example.com
