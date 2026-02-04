@@ -1932,7 +1932,7 @@ ingress:
 
 mas:
   # (bool) Aktivieren des Matrix-Authentication-Service
-  enabled: false
+  enabled: true
   # (map) Konfiguration des Image/Repository
   image:
     registry: registry.opencode.de
@@ -2026,8 +2026,11 @@ mas:
       # If disabled, users will only be able to log in using upstream OIDC providers
       enabled: true
 
-      # List of password hashing schemes being used
-      # /!\ Only change this if you know what you're doing
+      # Liste der verwendeten Passwort-Hash-Verfahren
+      # /!\ Ändern Sie dies nur, wenn Sie wissen, was Sie tun.
+      # Bei einer Migration von Synapse zu MAS ist dies u.U. anzupassen.
+      # Ref: ./docs/matrix-authentication-service-migration.md#31-migration-check-automatisch
+      # https://element-hq.github.io/matrix-authentication-service/setup/migration.html#local-passwords
       schemes:
         - version: 1
           algorithm: argon2id
