@@ -61,7 +61,8 @@ Bestandteil des Helm Charts.
 Die folgenden Punkte sind abhängig zu der Bedingung zu Konfigurieren,
 damit ein Deployment möglich und erfolgreich ist.
 
-Eine Musterkonfiguration ist in der [Installationsanleitung](./installation_testumgebung.md#bundesmessenger)
+Eine Musterkonfiguration ist in der
+[Installationsanleitung](./installation-testumgebung.md#bundesmessenger)
 enthalten.
 
 | Konfigurationsparameter | Bedingung | Bemerkung |
