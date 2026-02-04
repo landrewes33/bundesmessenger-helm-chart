@@ -34,7 +34,7 @@ lassen sich im Anschluss auch per
 [Admin API](https://element-hq.github.io/synapse/latest/admin_api/user_admin_api.html#create-or-modify-account)
 (z.B. mit `curl`), der Administrationsoberfläche
 [Synapse-Admin](https://github.com/Awesome-Technologies/synapse-admin) oder dem
-[BundesMessenger Admin-Portal](./admin_portal.md) anlegen.
+[BundesMessenger Admin-Portal](./admin-portal.md) anlegen.
 
 Am Ende der Installation werden die notwendigen Kommandozeilen ausgegeben.
 In der Ausgabe sind die Umgebungsvariablen (Deployment und Namespace)
@@ -76,14 +76,28 @@ kubectl exec --namespace bundesmessenger $POD_NAME -- register_new_matrix_user -
 
 ## Synapse-Admin-Oberfläche
 
-Die Synapse-Admin-Oberfläche kann ganz einfach über die
+Die Synapse-Admin-Oberfläche (unterstützt kein MAS) kann ganz einfach über die
 BundesMessenger-Konfiguration aktiviert werden und ist dann unter der
 angegebenen Domain erreichbar. Weitere Informationen dazu finden sich unter
-[Synapse-Admin](./synapse_admin.md).
+[Synapse-Admin](./synapse-admin.md).
 
 ```yaml
 adminAPIServerName: admin.example.com
 synapse_admin:
+  enabled: true
+  uri: adminportal.example.com
+```
+
+## Admin Portal-Oberfläche
+
+Das Admin Portal (unterstützt MAS) kann ganz einfach über die
+BundesMessenger-Konfiguration aktiviert werden und ist dann unter der
+angegebenen Domain erreichbar. Weitere Informationen dazu finden sich unter
+[Admin Portal](./admin-portal.md).
+
+```yaml
+adminAPIServerName: admin.example.com
+adminPortal:
   enabled: true
   uri: adminportal.example.com
 ```
@@ -98,7 +112,8 @@ aus einer CSV-Datei anzulegen.
 
 > 📌 **Hinweis** – Empfohlen ist diese Variante nur zum Anlegen von Testnutzern.
 > Für den Produktiveinsatz ist die Verwaltung über eine Adminoberfläche oder ein
-> externes System zur Nutzerverwaltung empfohlen.
+> externes System zur Nutzerverwaltung empfohlen. Dieses Script funktioniert
+> nur in Umgebungen, die keinen MAS benutzen.
 
 ```bash
 #!/usr/bin/env bash

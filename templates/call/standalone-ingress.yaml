@@ -1,14 +1,14 @@
 {{/* SPDX-FileCopyrightText: 2022–2026 BWI GmbH */}}
 {{/* SPDX-License-Identifier: Apache-2.0 */}}
-{{- if and .Values.ingress.enabled .Values.call.enabled }}
-{{- $jwtServiceName := include "matrix-synapse.externalname" (dict "global" . "external" "call-jwt-service") -}}
-{{- $component := "call" -}}
-{{- $matrixHostName := include "matrix-synapse.publicServerName" . }}
+{{- if and .Values.ingress.enabled .Values.call.enabled .Values.call.standalone.enabled }}
+{{- $callUri := .Values.call.standalone.uri | required "call.standalone.uri is required." -}}
+{{- $callName := include "matrix-synapse.externalname" (dict "global" . "external" "call-standalone") -}}
+{{- $component := "call-standalone" -}}
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ $jwtServiceName }}
+  name: {{ $callName }}
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "matrix-synapse.labels" . | nindent 4 }}
@@ -24,7 +24,7 @@ spec:
 {{- if .Values.ingress.tls }}
   tls:
   {{- range .Values.ingress.tls }}
-    {{- if has $matrixHostName .hosts }}
+    {{- if has $callUri .hosts }}
     - hosts:
       {{- range .hosts }}
         - {{ . | quote }}
@@ -36,29 +36,14 @@ spec:
   {{- end }}
 {{- end }}
   rules:
-  {{- $csHosts := .Values.ingress.csHosts }}
-  {{- if $.Values.ingress.includeServerName }}
-    {{- $csHosts = concat (list $matrixHostName) $csHosts }}
-  {{- end }}
-  {{- range $csHosts }}
-    {{- $host := . }}
-    - host: {{ . | quote }}
+    - host: {{ $callUri | quote }}
       http:
         paths:
-          {{/* deprecated */}}
-          - path: "/sfu/get"
+          - path: /
             backend:
               service:
-                name: {{ $jwtServiceName }}
+                name: {{ $callName }}
                 port:
                   number: 8080
             pathType: Prefix
-          - path: "/get_token"
-            backend:
-              service:
-                name: {{ $jwtServiceName }}
-                port:
-                  number: 8080
-            pathType: Prefix
-  {{- end }}
 {{- end }}

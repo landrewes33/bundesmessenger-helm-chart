@@ -65,7 +65,7 @@ adminAPIServerName: ""
 
 ## Monitoring mit Prometheus
 ## Detaillierte Beschreibung mit Grafana-Dashboards in der Dokumentation,
-## siehe [Monitoring mit Grafana](/docs/Monitoring-mit-Grafana.md).
+## siehe [Monitoring mit Grafana](/docs/monitoring-mit-grafana.md).
 monitoring:
   # (bool) Aktivieren des Monitorings für Synapse-Dienste in Prometheus
   # @default -- false
@@ -1305,7 +1305,7 @@ sygnal:
 
   # (string) Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält.
   # Nähere Infos unter
-  # ./docs/sygnal_push.md#nutzung-eines-secrets-für-sygnal-push-konfiguration
+  # ./docs/sygnal-push.md#nutzung-eines-secrets-für-sygnal-push-konfiguration
   existingSecret: "sygnal"
 
   # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
@@ -1325,28 +1325,28 @@ sygnal:
 
   # (string|null) iOS-Key Dateiname
   # Wenn iOS Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
-  # Bei Nutzung von iOS-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
+  # Bei Nutzung von iOS-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal-push.md
   # Durch Filename-Vergabe wird der unten angegebene ioskey geladen.
   # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
-  # (siehe docs/sygnal_push.md).
+  # (siehe docs/sygnal-push.md).
   # ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus der APNS-Sektion
   # der vorhergehenden Apps-Konfiguration übereinstimmen!
   # (string|null) iOS-Key Datei-Inhalt. Die Zeichenkette muss in Base64 kodiert sein.
   # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
-  # (siehe docs/sygnal_push.md).
+  # (siehe docs/sygnal-push.md).
   # ioskey_keyvalue: 'HIER KÖNNTE IHR KEY STEHEN'
 
   # (string|null) FCM-Key Dateiname
-  # bei Nutzung von FCM-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal_push.md
+  # bei Nutzung von FCM-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal-push.md
   # Wenn FCM Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
   # Durch Filename-Vergabe wird der unten angegebene FCM-Service-Account-File geladen.
   # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
-  # (siehe docs/sygnal_push.md).
+  # (siehe docs/sygnal-push.md).
   # fcmkey_filename: de.opencode.dvs.bundesmessenger.json <<-- muss zwingend mit dem service_account_file-Dateinamen
   # aus der gcm-Sektion der vorhergehenden Apps-Konfiguration übereinstimmen!
   # (map|null) FCM-Key Service Account File Inhalt
   # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
-  # (siehe docs/sygnal_push.md).
+  # (siehe docs/sygnal-push.md).
   # fcmkey_keyvalue:
   #   type: "service_account"
   #   project_id: "bundesmessenger"
@@ -1718,7 +1718,7 @@ externalPostgresql:
 ## `redis.enabled: false` und konfigurieren den `externalRedis`-Block.
 ##
 ## Die Konfiguration des Kernelparameters `transparent_hugepage` wird im
-## Dokument docs/redis_sysctl_tuning.md beschrieben.
+## Dokument docs/redis-sysctl-tuning.md beschrieben.
 
 redis:
   # (bool) Aktivieren des internen Redis-Servers.
@@ -1932,7 +1932,7 @@ ingress:
 
 mas:
   # (bool) Aktivieren des Matrix-Authentication-Service
-  enabled: false
+  enabled: true
   # (map) Konfiguration des Image/Repository
   image:
     registry: registry.opencode.de
@@ -2026,8 +2026,11 @@ mas:
       # If disabled, users will only be able to log in using upstream OIDC providers
       enabled: true
 
-      # List of password hashing schemes being used
-      # /!\ Only change this if you know what you're doing
+      # Liste der verwendeten Passwort-Hash-Verfahren
+      # /!\ Ändern Sie dies nur, wenn Sie wissen, was Sie tun.
+      # Bei einer Migration von Synapse zu MAS ist dies u.U. anzupassen.
+      # Ref: ./docs/matrix-authentication-service-migration.md#31-migration-check-automatisch
+      # https://element-hq.github.io/matrix-authentication-service/setup/migration.html#local-passwords
       schemes:
         - version: 1
           algorithm: argon2id
@@ -2103,12 +2106,12 @@ mas:
       # (string) Rechenressourcengrenzen, die auf den MAS anzuwenden sind.
       cpu: 500m
       # (string) RAM Ressourcengrenzen, die auf den MAS anzuwenden sind.
-      memory: 200Mi
+      memory: 400Mi
     requests:
       # (string) Anforderungen an Rechenressourcen, die auf den MAS anzuwenden sind.
       cpu: 300m
       # (string) Anforderungen an RAM Ressourcen, die auf den MAS anzuwenden sind.
-      memory: 50Mi
+      memory: 200Mi
 
   ## Healthcheck
   livenessProbe:
@@ -2504,6 +2507,9 @@ synapse_admin:
   securityContext:
     <<: *defaultSecurityContext
 
+  # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+  extraEnv: []
+
   # (map) Zusätzliche in den Synapse Admin einzuhängende Datenträger (Volumes).
   # Beispiel:
   # extraVolumes:
@@ -2546,7 +2552,7 @@ adminPortal:
   # (string) URI für das Admin-Portal, zwingend notwendig
   uri: ""
   # (string) Client ID im ulid Format
-  # Die Client ID verwendet das Admin Portal zur Authentifizierung am MAS.
+  # Die Client ID verwendet das Admin-Portal zur Authentifizierung am MAS.
   # Ref: https://github.com/ulid/spec
   clientID: "01KBJDJMZJ3K1XCHQ81T4Q17QD"
   # (bool) Aktivieren der TLS Zertifikatsüberprüfung
@@ -2557,14 +2563,14 @@ adminPortal:
   coreImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bumap-core
-    tag: 2.1.0-jammy-production
+    tag: 2.3.0-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
   # (map) Konfiguration des Image vom UI-Modul
   uiImage:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bumap-ui
-    tag: 2.1.0-jammy-production
+    tag: 2.3.1-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 
@@ -2633,7 +2639,7 @@ webclient:
   image:
     registry: registry.opencode.de
     repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
-    tag: 2.24.3-jammy-production
+    tag: 2.24.4-jammy-production
     pullSecrets: []
     pullPolicy: IfNotPresent
 
@@ -2713,7 +2719,7 @@ call:
     image:
       registry: ghcr.io
       repository: element-hq/lk-jwt-service
-      tag: 0.3.0
+      tag: 0.4.1
       pullSecrets: []
       pullPolicy: IfNotPresent
 
@@ -2772,6 +2778,61 @@ call:
 
     # (map) Affinitäts-Konfiguration für den Container.
     affinity: {}
+
+  standalone:
+    # (bool) BundesMessenger-Call standalone im Deployment aktivieren
+    # Der Betrieb von Standalone ist experimentell und dient
+    # der Benutzung von Gast-Zutritten zu Huddles
+    # `call.enabled` muss ebenfalls aktiviert sein
+    enabled: false
+    # (string) URL für den Call Client, zwingend notwendig
+    uri: ""
+
+    image:
+      registry: ghcr.io
+      repository: element-hq/element-call
+      tag: v0.16.3
+      pullSecrets: []
+      pullPolicy: IfNotPresent
+
+    # Zusätzliche Konfigurationen für den Callclient (config.json)
+    # Ref: https://github.com/element-hq/element-call/blob/livekit/config/config.sample.json
+    extraConfig: {}
+
+    # (list) Weitere Umgebungsvariablen für den Call-Container.
+    extraEnv: []
+
+    # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+    podSecurityContext:
+      <<: *defaultPodSecurityContext
+      runAsUser: 1001
+      runAsGroup: 1001
+
+    # (map) Konfiguration für die Container-Sicherheitsrichtlinie
+    securityContext:
+      <<: *defaultSecurityContext
+
+    # (list) Weitere Speicherbereiche für den Call-Pod.
+    extraVolumes: []
+    # (list) Weitere Speicher-Einhängepunkte für den Call-Container.
+    extraVolumeMounts:
+    # []
+      # workaround for Image: element-hq/element-call
+      - name: tmp
+        mountPath: /var/cache/nginx/
+
+    ## Ressource Konfiguration für BundesMessenger-Call.
+    resources:
+      limits:
+        # (string) Rechenressourcengrenzen, die auf den BundesMessenger-Call anzuwenden sind.
+        cpu: 100m
+        # (string) RAM Ressourcengrenzen, die auf den BundesMessenger-Call anzuwenden sind.
+        memory: 90Mi
+      requests:
+        # (string) Anforderungen an Rechenressourcen, die auf den BundesMessenger-Call anzuwenden sind.
+        cpu: 50m
+        # (string) Anforderungen an RAM Ressourcen, die auf den BundesMessenger-Call anzuwenden sind.
+        memory: 45Mi
 
 
 ######################################################################################

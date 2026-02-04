@@ -1,0 +1,92 @@
+{{/* SPDX-FileCopyrightText: 2024–2026 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if and .Values.call.enabled .Values.call.standalone.enabled }}
+{{- $callName := include "matrix-synapse.externalname" (dict "global" . "external" "call-standalone") -}}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $callName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $callName }}
+data:
+  config.json: |
+{{- $defaultConfig := dict
+  "default_server_config" (dict
+    "m.homeserver" (dict
+      "base_url" (include "matrix-synapse.publicServerURL" .)
+      "server_name" .Values.serverName
+    )
+  )
+  "features" (dict
+    "feature_group_calls_without_video_and_audio" true
+    "feature_use_device_session_member_events" true
+  )
+  "media_devices" (dict
+    "enable_audio" false
+    "enable_video" true
+  )
+  "app_prompt" false
+}}
+
+{{- $customConfig := .Values.call.standalone.extraConfig | default dict }}
+{{- $mergedConfig := mergeOverwrite $defaultConfig $customConfig }}
+{{- $mergedConfig | toPrettyJson | nindent 4 }}
+
+
+  default.conf: |
+    # Default server configuration
+    #
+    server {
+      listen 8080 default_server;
+      {{- if not .Values.ipv4Only }}
+      listen [::]:8080 default_server;
+      {{- end }}
+
+      root /app/;
+
+      server_name _;
+
+      # livenessProbe auf /status, logging deaktiviert
+      location /status {
+        return 200;
+        access_log off;
+      }
+
+      location / {
+          # disable cache entriely by default (apart from Etag which is accurate enough)
+          add_header Cache-Control 'private no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0';
+          if_modified_since off;
+          expires off;
+          # also turn off last-modified since they are just the timestamps of the file in the docker image
+          # and may or may not bear any resemblance to when the resource changed
+          add_header Last-Modified "";
+
+          try_files $uri /$uri /index.html;
+
+          # X-Header for CORS-Policy
+          # include /etc/nginx/conf.d/cors_headers.conf;
+          # do not set Content-Security-Policy and X-Frame-Options
+          add_header X-Content-Type-Options nosniff;
+          add_header X-XSS-Protection "1; mode=block";
+      }
+
+      # assets can be cached because they have hashed filenames
+      location /assets {
+          expires 1w;
+          add_header Cache-Control "public, no-transform";
+
+          # include /etc/nginx/conf.d/cors_headers.conf;
+      }
+
+      location /apple-app-site-association {
+          default_type application/json;
+
+          # include /etc/nginx/conf.d/cors_headers.conf;
+      }
+
+    }
+{{- end }}

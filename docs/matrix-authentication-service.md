@@ -1,6 +1,6 @@
 # Matrix-Authentication-Service
 
-| :warning: Wichtig: Der Matrix-Authentication-Service (MAS) ist seit dem 13. August 2025 im Stauts "stable". In diesem Dokument wird nur der Matrix-authentication-Service behandelt. Eine Migration wird separat unter der [Migrations-Nutzerdokumentation](./docs/matrix-authentication-service-migration) aufgeführt. |
+| :warning: Wichtig: Der Matrix-Authentication-Service (MAS) ist seit dem 13. August 2025 im Status "stable". In diesem Dokument wird nur der Matrix-authentication-Service behandelt. Eine Migration wird separat unter der [Migrations-Nutzerdokumentation](./matrix-authentication-service-migration.md) aufgeführt. |
 | --- |
 
 | :pushpin: Wenn der matrix-authentication-service Pod nicht startet, befinden sich die relevanten Fehlermeldungen meist im `initContainer` `initconfig`. |
@@ -113,7 +113,7 @@ den benötigten Werten und umfangreiche Beispiele finden sich in der
 ## Einbindung eines OAuth 2.0/OIDC Clients
 
 Der MAS ist ein OIDC Authentifizierungsprovider.
-Er bietet Anwendungen, wie dem [Admin Portal](./admin_portal.md),
+Er bietet Anwendungen, wie dem [Admin-Portal](./admin-portal.md),
 die Möglichkeit Benutzer zu authentifizieren.
 Hierfür werden im MAS
 [OIDC Clients](https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#clients)
@@ -123,7 +123,7 @@ Für die Konfiguration von Clients ist unter Umständen die Angabe eines
 Client-Secrets notwendig. Es wird empfohlen dieses Client-Secret sicher über ein
 Kubernetes Secret einzubinden. Hierzu kann dass Secret beispielsweise manuell
 mit `kubectl` erstellt werden oder der External Secrets Operator verwendet
-werden (siehe: [Secrets](./Secrets.md))
+werden (siehe: [secrets](./secrets.md))
 
 ```yaml
 # Beispiel für die Einbindung eines Client Secrets

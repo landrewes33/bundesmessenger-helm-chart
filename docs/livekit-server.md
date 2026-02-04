@@ -17,8 +17,8 @@ Je nach Umgebung kann die Bereitstellung auch auf anderem Wege erfolgen.
 
 ## Vorbereitung
 
-- [Installation Nginx Ingress Controller](./installation_testumgebung.md#ingress-controller)
-- [Installation Cert Manager](./installation_testumgebung.md#cert-manager)
+- [Installation Nginx Ingress Controller](./installation-testumgebung.md#ingress-controller)
+- [Installation Cert Manager](./installation-testumgebung.md#cert-manager)
 
 ## Installation
 

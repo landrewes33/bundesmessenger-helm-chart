@@ -1,5 +1,5 @@
 $schema: https://json-schema.org/draft/2020-12/schema
-$id: https://schema.bundesmessenger.dev/bum/v2.0.2/values.schema.json
+$id: https://schema.bundesmessenger.dev/bum/v2.1.0/values.schema.json
 type: object
 title: BundesMessenger Helm-Konfiguration
 properties:
@@ -2132,7 +2132,7 @@ properties:
         title: Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält
         description: >-
           Nähere Infos unter
-          ./docs/sygnal_push.md#nutzung-eines-secrets-für-sygnal-push-konfiguration
+          ./docs/sygnal-push.md#nutzung-eines-secrets-für-sygnal-push-konfiguration
         default: sygnal
       ioskey_filename:
         deprecated: true
@@ -3388,7 +3388,7 @@ properties:
                 default: 500m
               memory:
                 title: RAM Ressourcengrenzen, die auf den MAS anzuwenden sind
-                default: 200Mi
+                default: 400Mi
           requests:
             properties:
               cpu:
@@ -3397,7 +3397,7 @@ properties:
                 default: 300m
               memory:
                 title: Anforderungen an RAM Ressourcen, die auf den MAS anzuwenden sind
-                default: 50Mi
+                default: 200Mi
         unevaluatedProperties: false
       livenessProbe:
         $ref: >-
@@ -4019,6 +4019,12 @@ properties:
           readOnlyRootFilesystem: true
           runAsNonRoot: true
         unevaluatedProperties: false
+      extraEnv:
+        $ref: >-
+          https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
+        type: array
+        title: Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+        default: []
       extraVolumes:
         type: array
         title: Zusätzliche in den Synapse Admin einzuhängende Datenträger (Volumes)
@@ -4074,6 +4080,7 @@ properties:
       - resources
       - podSecurityContext
       - securityContext
+      - extraEnv
       - extraVolumes
       - extraVolumeMounts
     unevaluatedProperties: false
@@ -4624,12 +4631,126 @@ properties:
           - tolerations
           - affinity
         unevaluatedProperties: false
+      standalone:
+        type: object
+        title: Konfiguration für standalone Client vom BundesMessenger-Call
+        properties:
+          enabled:
+            type: boolean
+            title: BundesMessenger-Call standalone im Deployment aktivieren
+            default: false
+          uri:
+            type: ["null", "string"]
+            title: URL für den Call Client, zwingend notwendig
+            default: null
+          image:
+            $ref: "#/$defs/image"
+            type: object
+            title: >-
+              Repository/Image-Konfiguration für den Client vom BundesMessenger-Call
+            default:
+              registry: ghcr.io
+              repository: >-
+                element-hq/element-call
+              pullSecrets: []
+              pullPolicy: IfNotPresent
+            required:
+              - registry
+              - repository
+              - tag
+              - pullSecrets
+              - pullPolicy
+            unevaluatedProperties: false
+          extraConfig:
+            type: object
+            description: Zusätzliche Konfigurationen für den Callclient (config.json)
+            default: {}
+            unevaluatedProperties: true
+          extraEnv:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/env
+            type: array
+            title: Weitere Umgebungsvariablen für den Call-Container
+            default: []
+          podSecurityContext:
+            $ref: "#/$defs/podSecurityContext"
+            type: object
+            default:
+              runAsUser: 1021
+              fsGroup: 2666
+              runAsGroup: 1021
+            unevaluatedProperties: false
+          securityContext:
+            $ref: "#/$defs/securityContext"
+            type: object
+            default:
+              capabilities:
+                drop:
+                  - ALL
+              allowPrivilegeEscalation: false
+              readOnlyRootFilesystem: true
+            unevaluatedProperties: false
+          extraVolumes:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.PodSpec.schema.json#/properties/volumes
+            type: array
+            title: Weitere Speicherbereiche für den Call-Pod
+            default: []
+          extraVolumeMounts:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.Container.schema.json#/properties/volumeMounts
+            type: array
+            title: Weitere Speicher-Einhängepunkte für den Call-Container
+            default: []
+          resources:
+            $ref: >-
+              https://schema.bundesmessenger.dev/kubernetes/io.k8s.api.core.v1.ResourceRequirements.schema.json
+            type: object
+            title: Ressourcen für den Client vom BundesMessenger-Call
+            properties:
+              limits:
+                properties:
+                  cpu:
+                    title: >-
+                      Rechenressourcengrenzen, die auf den BundesMessenger-Call
+                      anzuwenden sind
+                    default: 100m
+                  memory:
+                    title: >-
+                      RAM Ressourcengrenzen, die auf den BundesMessenger-Call
+                      anzuwenden sind
+                    default: 90Mi
+              requests:
+                properties:
+                  cpu:
+                    title: >-
+                      Anforderungen an Rechenressourcen, die auf den
+                      BundesMessenger-Call anzuwenden sind
+                    default: 50m
+                  memory:
+                    title: >-
+                      Anforderungen an RAM Ressourcen, die auf den
+                      BundesMessenger-Call anzuwenden sind
+                    default: 45Mi
+            unevaluatedProperties: false
+        required:
+          - enabled
+          - image
+          - extraConfig
+          - extraEnv
+          - podSecurityContext
+          - securityContext
+          - extraVolumes
+          - extraVolumeMounts
+          - resources
+        unevaluatedProperties: false
     required:
       - enabled
       - livekit
       - existingSecret
       - secretKeys
       - jwtService
+      - standalone
     unevaluatedProperties: false
   additionalConfig:
     type: object

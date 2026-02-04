@@ -33,7 +33,7 @@ da der beschriebene Vorgang bei jedem Upgrade ausgeführt wird.
 Dieses Helm-Chart generiert bei Bedarf Secrets. Dies führt,
 in Zusammenhang wie ArgoCD arbeitet, zu Komplikationen.
 Deshalb ist bei der Verwendung von ArgoCD explizit
-`argoCD: true` zu setzen (siehe [Doks ArgoCD](./ArgoCD.md)).
+`argoCD: true` zu setzen (siehe [Doks ArgoCD](./argocd.md)).
 Somit können notwendige Teile des Charts automatisch angepasst werden,
 wie dies z.B. beim Signaturschlüssel-Job der Fall ist.
 

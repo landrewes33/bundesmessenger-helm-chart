@@ -1,6 +1,6 @@
-# SPDX-FileCopyrightText: 2024–2025 BWI GmbH
+# SPDX-FileCopyrightText: 2024–2026 BWI GmbH
 # SPDX-License-Identifier: Apache-2.0
-suite: Admin Portal Ingress
+suite: Admin-Portal Ingress
 templates:
   - adminportal/adminportal-ingress.yaml
   - secrets.yaml

@@ -1,6 +1,6 @@
 # Synapse-Admin
 
-| :pushpin: Synapse-Admin wird in Zukunft durch das [BundesMessenger Admin-Portal](./admin_portal.md) abgelöst werden. |
+| :pushpin: Synapse-Admin wird in Zukunft durch das [BundesMessenger Admin-Portal](./admin-portal.md) abgelöst werden. |
 | --- |
 
 Zur Administration mit Hilfe einer Weboberfläche kann

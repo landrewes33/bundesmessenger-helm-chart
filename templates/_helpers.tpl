@@ -243,6 +243,7 @@ Pull secrets
     .Values.adminPortal.coreImage.pullSecrets
     .Values.adminPortal.uiImage.pullSecrets
     .Values.webclient.image.pullSecrets
+    .Values.call.standalone.image.pullSecrets
     .Values.call.jwtService.image.pullSecrets
     .Values.tests.image.pullSecrets
 -}}

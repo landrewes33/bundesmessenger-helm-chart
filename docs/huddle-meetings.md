@@ -35,7 +35,7 @@ auf einer anderen Server.
   Verfügung gestellt werden kann.
   - API [`POST /_matrix/client/v3/user/{userId}/openid/request_token`](https://spec.matrix.org/v1.11/client-server-api/#post_matrixclientv3useruseridopenidrequest_token)
 - Der Benutzer übergibt den Bearer Token an den LiveKit JWT Service
-(`POST /sfu/get`)
+(`POST /sfu/get` (veraltet) bzw. `POST /get_token`)
 - Der LiveKit JWT Service prüft den Bearer Token am Homeserver
 des Benutzers. Das gilt auch für föderierte Benutzer.
   - Der abgefragte Endpunkt ist
@@ -71,6 +71,79 @@ wird um die LiveKit JWT Service URL in der `.well-known/matrix/client` erweitert
     },
 ]
 ```
+
+Der Call Client ruft die notwendigen Informationen während der Nutzung von der
+API `POST https://example.com/sfu/get` (veraltet) bzw. `POST https://example.com/get_token`
+ab.
+
+### Standalone BundesMessenger Call Client
+
+📌 **Hinweis** –
+BundesMessenger Call im Standalone-Modus dient ausschließlich zur Nutzung von
+Gast-Zugriff. Für die Benutzung mit registrierten Benutzern ist
+[BundesMessenger Call im Integrierten-Modus](#integrierter-bundesmessenger-call-client)
+vorgesehen.
+
+Für den Gast-Zugriff wird einen Homeserver mit aktivierter Registrierung ohne
+3pid- oder Token-Anforderungen benötigt.
+Dieser kann dann von nicht registrierten Benutzern verwendet werden.
+Es wird davon abgeraten für Gast-Benutzer und normale Benutzer den gleichen Homeserver
+zu verwenden.
+
+Wenn Standalone BundesMessenger Call Client benötigt wird, wird empfohlen
+zwei Installationen zu betreiben.
+
+1. BundesMessenger Instanz mit integriertem Call
+2. BundesMessenger Instanz mit standalone Call
+
+Die BundesMessenger Instanz mit standalone Call benötigt keinen BundesMessenger
+Web Client für die Chat Funktion. Dies unterstützt der standalone Call Client nicht.
+
+Um Missbrauch zu verhindern wird empfohlen die Föderation zu deaktivieren oder
+auf den Server zu beschränken mit dem die Gäste kommunizieren sollen.
+
+Beispielkonfiguration für eine Instanz mit standalone Call:
+
+```yaml
+call:
+  enabled: true
+  standalone:
+    enabled: true
+    uri: "call.example.com"
+
+extraConfig:
+  enable_set_displayname: true
+  federation_domain_whitelist:
+    - federated-server.example.org
+
+  enable_registration: true
+  enable_registration_without_verification: true
+  password_config:
+    policy:
+      require_symbol: false
+      require_digit: false
+
+schadcodescanner:
+  enabled: false
+contentscanner:
+  enabled: false
+
+webclient:
+  enabled: false
+
+workers:
+  generic_worker:
+    enabled: false
+```
+
+:pushpin: Die weiteren Konfigurationen werden durch das Helm Chart automatisch
+bereitgestellt.
+
+Die Call Client [Konfiguration](https://github.com/element-hq/element-call?tab=readme-ov-file#backend)
+wird in der `config.json` erweitert.
+Weitere Konfigurationen holt sich der Client aus der Wellknown wie beim
+[BundesMessenger Call im Integrierten-Modus](#integrierter-bundesmessenger-call-client)
+beschrieben ab.
 
 Der Call Client ruft die notwendigen Informationen während der Nutzung von der
 API `POST https://example.com/sfu/get` ab.
@@ -114,9 +187,10 @@ und wird via Umgebungsvariablen konfiguriert.
 - `LIVEKIT_KEY_FROM_FILE`
 - `LIVEKIT_SECRET_FROM_FILE`
 
-Der LiveKit JWT Service stellt den API Endpunkt `POST /sfu/get` für die Clients
-bereit. Über die API bekommt er einen OpenID-Token des Benutzers und den Synapse-Homeserver
-mitgeteilt. Beides wird überprüft in dem er den Homeserver abfragt.
+Der LiveKit JWT Service stellt den API Endpunkt `POST /sfu/get` (veraltet)
+bzw. `POST /get_token` für die Clients bereit. Über die API bekommt er einen
+OpenID-Token des Benutzers und den Synapse-Homeserver mitgeteilt. Beides wird
+überprüft in dem er den Homeserver abfragt.
 
 ```text
 GET matrix://<serverName>/_matrix/federation/v1/openid/userinfo?access_token=<token>
@@ -132,6 +206,6 @@ Eine Konfiguration eines HTTP-Proxies ist durch die Umgebungsvariablen
 ### LiveKit Server
 
 Aufbau und Konfiguration vom LiveKit Server wird
-[separat beschrieben](./livekit_server.md).
+[separat beschrieben](./livekit-server.md).
 
 - offizielle [LiveKit Dokumentation](https://docs.livekit.io/realtime/self-hosting/local/)

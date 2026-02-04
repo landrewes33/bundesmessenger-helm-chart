@@ -1,0 +1,25 @@
+{{/* SPDX-FileCopyrightText: 2022–2026 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if and .Values.call.enabled .Values.call.standalone.enabled }}
+{{- $callName := include "matrix-synapse.externalname" (dict "global" . "external" "call-standalone") -}}
+{{- $component := "call-standalone" -}}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $callName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "matrix-synapse.labels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+spec:
+  selector:
+    {{- include "matrix-synapse.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: {{ $component }}
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: http
+{{- end }}

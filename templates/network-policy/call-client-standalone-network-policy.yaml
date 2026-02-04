@@ -1,0 +1,27 @@
+{{/* SPDX-FileCopyrightText: 2023–2026 BWI GmbH */}}
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{- if .Values.networkpolicies.enabled }}
+{{- if and .Values.call.enabled .Values.call.standalone.enabled }}
+{{- $component := "call-standalone" -}}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ .Release.Name }}-{{ $component }}-allow-ingress-controller
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: {{ $component }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: {{ .Values.networkpolicies.ingressNamespace }}
+      ports:
+      - protocol: TCP
+        port: 8080
+{{- end }}
+{{- end }}

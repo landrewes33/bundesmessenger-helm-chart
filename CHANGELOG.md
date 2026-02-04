@@ -7,6 +7,52 @@ Git History neu geschrieben wird, sind die Merge Requests aktuell nicht verlinkt
 <!-- markdownlint-disable MD024 MD012 -->
 
 <!-- towncrier release notes start -->
+## BundesMessenger Helm Chart 2.1.0 (2026-02-04)
+
+### ⚠️ Versionshinweise
+
+- Der Matrix-Authentication-Service (MAS) wird in der Standardkonfiguration
+  (`values.yaml`)
+  aktiviert (`mas.enabled: true`). Neue Installationen nutzen somit automatisch
+  den MAS und müssen nicht später migrieren.
+
+  Alle Installationen, die noch nicht auf den MAS migriert haben, müssen in
+  ihrer
+  Konfiguration den MAS ausschalten (`mas.enabled: false`). (!1012)
+
+### ✨ Features
+
+- Fügt einen [standalone Call
+  Client](https://github.com/element-hq/element-call/blob/livekit/docs/embedded-standalone.md)
+  hinzu. (!891)
+- Aktiviert den Matrix-Authentication-Service in der Standardkonfiguration.
+  (!1012)
+- Admin-Portal auf aktuelle Version aktualisiert. (!1077, !1079)
+- Image `ghcr.io/element-hq/lk-jwt-service` auf Version `0.4.1` aktualisiert.
+- Image
+  `registry.opencode.de/bwi/bundesmessenger/backend/container-images/bundesmessenger-web`
+  auf Version `2.24.4` aktualisiert.
+- Sub-Chart `postgres` auf Version `0.13.8` aktualisiert.
+- Sub-Chart `redis` auf Version `0.21.5` aktualisiert.
+
+### 📚 Dokumentation
+
+- Neustrukturierung der Dokumentation und [README.md](./README.md). (!1050)
+- Vereinheitlichung der Dateinamen in der Dokumentation. (!1084)
+- Einheitliche Schreibweise für das Admin-Portal. (!1085)
+
+### 📝 Weitere Änderungen
+
+- Fügt die Route `POST /get_token` für [lk-jwt-service
+  v0.4.0](https://github.com/element-hq/lk-jwt-service/releases/tag/v0.4.0)
+  ([MSC4195](https://github.com/matrix-org/matrix-spec-proposals/pull/4195))
+  hinzu. (!1005)
+- Ersetzt das veraltete `chartmuseum/helm-push` Plugin durch `curl`. (!1037)
+- Hinzufügen des Schalters `extraEnv` zum Synapse Admin. (!1046)
+- Erhöhen der Ressourcen-Grenzen für den MAS. (!1074)
+- `prometheus-operator/prometheus-operator` in der CI-Pipeline auf Version
+  `v0.88.1` aktualisiert.
+
 ## BundesMessenger Helm Chart 2.0.2 (2025-12-19)
 
 Nachtrag des zuvor nicht veröffentlichten Changelog-Eintrags.
@@ -69,7 +115,7 @@ Funktional identisch zu Version 2.0.1.
   (`externalPostgresql`), sind hiervon nicht betroffen.
 
   Für ein Upgrade der Datenbank von Version 16 auf 18 im Rahmen des Wechsels,
-  kann die [Dokumentation](./docs/PostgreSQL-Upgrade-Advanced.md) genutzt
+  kann die [Dokumentation](./docs/postgresql-upgrade-advanced.md) genutzt
   werden.
 
   Falls eigene Änderungen an der PostgreSQL-Konfiguration bestehen, sind
@@ -245,7 +291,7 @@ Funktional identisch zu Version 2.0.1.
   müssen über alternative Mittel, z.B.
   [`kubectl`](./scripts/initialize-secrets.sh) oder den [External Secrets
   Operator](https://external-secrets.io/latest/api/externalsecret/) angelegt
-  werden. Details in unserer [ArgoCD-Doku](./docs/ArgoCD.md).
+  werden. Details in unserer [ArgoCD-Doku](./docs/argocd.md).
 
   Für PostgreSQL und Redis bleiben die aktuellen Secrets bestehen. Beim Upgrade
   ist insbesondere das Secret `synapse` zu berücksichtigen. (!928)
@@ -278,7 +324,7 @@ Funktional identisch zu Version 2.0.1.
 ### 🐛 Bugfixes
 
 - Unterbinden der Generierung von Secrets unter ArgoCD. Mehr Infos dazu in
-  unserer [ArgoCD-Doku](./docs/ArgoCD.md). (!928)
+  unserer [ArgoCD-Doku](./docs/argocd.md). (!928)
 - Bedingte Einbindung von Umgebungsvariablen für AdminPortal korrigiert
   (partly contributed by Siegfried Schöfer (Siegfried.schoefer@lsi.bayern.de). (!938)
 - Importiert nur die benötigten Scripte für den Signing-Key-Job in die
@@ -744,7 +790,7 @@ Schließt die Sicherheitslücke
   (!613)
 - Dokumentieren der Möglichkeiten zur
   [Nutzerverwaltung](./docs/nutzerverwaltung.md). (!632)
-- Dokumentation der BundesMessenger [Secrets](./docs/Secrets.md). (!633)
+- Dokumentation der BundesMessenger [Secrets](./docs/secrets.md). (!633)
 
 ### 📝 Weitere Änderungen
 
@@ -868,7 +914,7 @@ Schließt die Sicherheitslücke
   angehoben. Die damit standardmäßig ausgelieferte PostgreSQL-Version ist nun
   Version 16. Um auf eine neue Hauptversion von PostgreSQL zu wechseln, ist ein
   Migrationsschritt erforderlich; ein solcher wird beispielhaft unter
-  [PostgreSQL-Upgrade](./docs/PostgreSQL-Upgrade.md) detailliert.
+  [PostgreSQL-Upgrade](./docs/postgresql-upgrade.md) detailliert.
   Alternativ kann die verwendete PostgreSQL Version manuell mit
   `postgresql.image.tag: 14` auf dem alten Stand fixiert werden. (!496)
 

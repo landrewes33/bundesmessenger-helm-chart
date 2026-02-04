@@ -61,6 +61,10 @@ Bestandteil des Helm Charts.
 Die folgenden Punkte sind abhängig zu der Bedingung zu Konfigurieren,
 damit ein Deployment möglich und erfolgreich ist.
 
+Eine Musterkonfiguration ist in der
+[Installationsanleitung](./installation-testumgebung.md#bundesmessenger)
+enthalten.
+
 | Konfigurationsparameter | Bedingung | Bemerkung |
 | ------ | ------ | ------ |
 | `dataPrivacyUrl` | `wellknown.enabled: true` | DSGVO verpflichtende URL für die per Internet abrufbare Datenschutzbestimmungen. |
@@ -68,13 +72,15 @@ damit ein Deployment möglich und erfolgreich ist.
 | `serverName` bzw. `publicServerName` | Eine ist verpflichtend | Öffentlich (oder teilöffentlich bzw. Nutzerkreis bekannter) präsentierter Endpunkt bzw. MXID der Nutzer. |
 | `adminAPIServerName` | verpflichtend | Zur Trennung des Admin-API Interfaces des Synapse vom öffentlichen präsentierten Kontaktpunkt. |
 | `sygnal.apns` | `sygnal.enabled: true` | Werden von der BWI GmbH für die mobilen Clients zur Verfügung gestellt und beim Deployment zusätzlich eingebunden. |
-| `externalPostgresql.host` | `postgresql.enabled: false` | Wenn kein PostgreSQL-Server im Zuge des Deployments erstellt werden soll, muss zwingend eine URL zum erreichen eines externen PostgreSQL-Servers konfiguriert werden. (inklusive Zugangsdaten!) |
+| `externalPostgresql.host` | `postgresql.enabled: false` | Wenn kein PostgreSQL-Server (für Synapse) im Zuge des Deployments erstellt werden soll, muss zwingend eine URL zum erreichen eines externen PostgreSQL-Servers konfiguriert werden. (inklusive Zugangsdaten!) |
+| `externalmasPostgresql.host` | `maspostgresql.enabled: false` | Wenn kein PostgreSQL-Server (für MAS) im Zuge des Deployments erstellt werden soll, muss zwingend eine URL zum Erreichen eines externen PostgreSQL-Servers konfiguriert werden. (inklusive Zugangsdaten!) |
 | `externalRedis.host` | `redis.enabled: false` | Wenn kein eigener Redis-Server installiert werden soll, muss zwingend die URL eines externen Redis-Server konfiguriert werden. (inklusive Zugangsdaten!) |
 | Alle Ingress-Routen und Network policies | `ingress.enabled.false` | Alle Routen und Network-Policies müssen manuell konfiguriert werden, wenn kein DVS-Standard Ingress-Controller nicht vorhanden ist und in der Konfiguration deaktiviert wurde. |
 | `schadcodescanner.freshclam.mirrors` | eigener lokaler privater Mirror, da Zugriff auf Internet nicht möglich | Hier kann und muss eine Liste von privaten Mirrors für den eingesetzten ClamAV Updater freshclam hinterlegt werden, wenn ein Zugriff auf den offiziellen Server unter database.clamav.net nicht möglich ist. |
-| `synapse_admin.uri` | `synapse_admin.enabled: true` | Wenn der Synapse-Admin genutzt werden soll, kann eine sich von `adminAPIServerName` unterscheidende URL konfiguriert werden (empfohlen). |
-| `adminPortal.uri` | `adminPortal.enabled: true` | Wenn das BundesMessenger Admin-Portal genutzt werden soll, kann eine sich von `adminAPIServerName` unterscheidende URL konfiguriert werden (empfohlen). |
+| `synapse_admin.uri` | `synapse_admin.enabled: true` | Wenn der Synapse-Admin (kein MAS Support) genutzt werden soll, kann eine sich von `adminAPIServerName` unterscheidende URL konfiguriert werden (empfohlen). |
+| `adminPortal.uri` | `adminPortal.enabled: true` | Wenn das BundesMessenger Admin-Portal (mit MAS Support) genutzt werden soll, kann eine sich von `adminAPIServerName` unterscheidende URL konfiguriert werden (empfohlen). |
 | `webclient.uri` | `webclient.enabled: true` | Wenn der Webclient genutzt werden will, muss eine entsprechende URL für die WebGUI konfiguriert werden. |
+| `call.standalone.uri` | `call.standalone.enabled: true` | Wenn der [standalone Call Client](./huddle-meetings.md#standalone-bundesmessenger-call-client) genutzt werden will, muss eine entsprechende URL für die WebGUI konfiguriert werden. |
 | `displayName` | `webclient.enabled: true` | Der Anzeigename des Messengers im Webclient. Default: `Messenger deiner Organisation`. |
 
 ## Hostnamen/DNS
@@ -86,7 +92,8 @@ Sie benötigen Hostnamen inkl. DNS-Auflösung für die folgenden Infrastrukturko
 | Synapse | erforderlich | `serverName` bzw. `publicServerName` | |
 | Synapse | erforderlich | `adminAPIServerName` | Für die Trennung der Admin-API von Synapse und dem öffentlich zugänglichen Endpunkt des Synapse. |
 | [WebClient](webclient.md) | optional, aber empfohlen | `webclient.uri` | Kann aktiviert werden mit `webclient.enabled=true`. <br /> Der inkludierte gehärtete WebClient des BundesMessenger wird hauptsächlich für den "internen" Gebrauch ausgelegt und per Browser aufgerufen. <br /> Für die externe Nutzung von Clients über mobile Endgeräte stehen die Apps des BundesMessengers zur Verfügung. |
-| [Synapse-Admin](synapse_admin.md) | optional, aber empfohlen | `synapse_admin.uri` | Empfohlen für eine Erreichbarkeit nur von intern, `.local`-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :smiley:<br />Kann aktiviert werden mit `synapse_admin.enabled=true`. |
+| Call Standalone | optional bei Nutzung von Call | `call.standalone.uri` | Kann aktiviert werden mit `call.standalone.enabled=true`. <br /> Der [standalone Call Client](./huddle-meetings.md#standalone-bundesmessenger-call-client) des BundesMessenger kann ohne den WebClient genutzt über diese URL aufgerufen werden. |
+| [Synapse-Admin](synapse-admin.md) | optional, aber empfohlen | `synapse_admin.uri` | Empfohlen für eine Erreichbarkeit nur von intern, `.local`-Domain, ansonsten muss eine zusätzliche Sicherheitsbarriere hier berücksichtigt werden :smiley:<br />Kann aktiviert werden mit `synapse_admin.enabled=true`. |
 | Monitoring | empfohlen | tbd | ToDo |
 
 ## Container-Basisimages
@@ -145,10 +152,13 @@ Die Installation erfordert, dass Sie eine PostgreSQL-Datenbank mit einem
 Siehe [Synapse Dokumentation](https://element-hq.github.io/synapse/latest/postgres.html#set-up-database)
 für weitere Details.
 
+Zusätzlich benötigen Sie auch eine Datenbank für den MAS.
+Siehe [MAS Dokumentation](https://element-hq.github.io/matrix-authentication-service/setup/database.html)
+
 Wenn Sie diese bereitgestellt haben, notieren Sie sich bitte den
 Datenbanknamen, den Benutzer und das Passwort, da Sie diese benötigen, um mit
-der Installation zu beginnen. (per Parameter zu übergeben oder in der
-`values.yaml` anzupassen)
+der Installation zu beginnen. (per Parameter zu übergeben, in der
+`values.yaml` anzupassen bzw. als k8s-Secret konfigurieren.)
 
 Wenn Sie noch keine Datenbank haben, richten Sie sich eine Datenbank nach den
 Vorgaben im Kubernetes ein. Die Nutzung eines SubChart für die Einrichtung des
@@ -231,4 +241,4 @@ extraConfig:
 
 ### [Kyverno](https://kyverno.io/)
 
-Siehe Dokumentation der einzelnen Rulesets im Dokument [DVS Policies retentions](./DVS-Policies-restrictions.md)
+Siehe Dokumentation der einzelnen Rulesets im Dokument [DVS Policies retentions](./dvs-policies-restrictions.md)
