@@ -1,5 +1,0 @@
-Der Matrix-Authentication-Service (MAS) wird in der Standardkonfiguration (`values.yaml`)
-aktiviert (`mas.enabled: true`). Neue Installationen nutzen somit automatisch den MAS und müssen nicht später migrieren.
-
-Alle Installationen, die noch nicht auf den MAS migriert haben, müssen in ihrer
-Konfiguration den MAS ausschalten (`mas.enabled: false`).

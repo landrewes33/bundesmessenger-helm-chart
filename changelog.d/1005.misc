@@ -1,1 +1,0 @@
-Fügt die Route `POST /get_token` für [lk-jwt-service v0.4.0](https://github.com/element-hq/lk-jwt-service/releases/tag/v0.4.0) ([MSC4195](https://github.com/matrix-org/matrix-spec-proposals/pull/4195)) hinzu.

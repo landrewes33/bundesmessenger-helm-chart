@@ -1,1 +1,0 @@
-Fügt einen [standalone Call Client](https://github.com/element-hq/element-call/blob/livekit/docs/embedded-standalone.md) hinzu.
