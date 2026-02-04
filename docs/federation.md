@@ -94,5 +94,5 @@ obliegen dem verantwortlichen Administrator.
 
 ## Weiterführende Themen
 
-- [Aufbau von Benutzernamen](../README.md#benutzernamen)
-- [Delegation](../README.md#delegation)
+- [Aufbau von Benutzernamen](matrix-basics.md#benutzernamen)
+- [Delegation](delegation.md)
