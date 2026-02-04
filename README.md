@@ -268,10 +268,11 @@ Das Helm Chart rollt die im Bild blau dargestellten Komponenten aus.
   haben (von Vorteil für die Datenbank und Media)*
 - Zugriff auf vorhandenen [PostgreSQL](https://www.postgresql.org/)
   Server (konform zur DVS)
-  - Datenbank `synapse_db` mit einem Benutzer `synapse`.
+  - Datenbank für Synapse (z. Bsp. `synapse_db`) mit einem Benutzer (z. Bsp.`synapse`).
+  - Datenbank für MAS (z. Bsp.`mas_synapse`) mit einem Benutzer (z. Bsp.`mas`).
   - Server muss aus dem k8s-Namespace erreichbar sein
-  - :pushpin: **Hinweis:** Collation und cType müssen auf `C` gesetzt sein. Siehe
-  [Postgresql-Datenbank](./docs/requirements-poc.md#postgresql-datenbank)
+  - :pushpin: **Hinweis:** Collation und cType müssen auf `C` (für die Synapse Datenbank)
+  gesetzt sein. Siehe [Postgresql-Datenbank](./docs/requirements-poc.md#postgresql-datenbank)
 - *Optional: ein `existingClaim` (persistent volume claim) mit dem Namen
   `matrix-synapse` (empfohlen 10 GB) für den Media-Worker als Speicher.*
 

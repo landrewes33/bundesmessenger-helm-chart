@@ -1,6 +1,6 @@
 # Matrix-Authentication-Service
 
-| :warning: Wichtig: Der Matrix-Authentication-Service (MAS) ist seit dem 13. August 2025 im Status "stable". In diesem Dokument wird nur der Matrix-authentication-Service behandelt. Eine Migration wird separat unter der [Migrations-Nutzerdokumentation](./docs/matrix-authentication-service-migration.md) aufgeführt. |
+| :warning: Wichtig: Der Matrix-Authentication-Service (MAS) ist seit dem 13. August 2025 im Status "stable". In diesem Dokument wird nur der Matrix-authentication-Service behandelt. Eine Migration wird separat unter der [Migrations-Nutzerdokumentation](./matrix-authentication-service-migration.md) aufgeführt. |
 | --- |
 
 | :pushpin: Wenn der matrix-authentication-service Pod nicht startet, befinden sich die relevanten Fehlermeldungen meist im `initContainer` `initconfig`. |

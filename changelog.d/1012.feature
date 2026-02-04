@@ -1,0 +1,1 @@
+Aktiviert den Matrix-Authentication-Service in der Standardkonfiguration.
