@@ -1,0 +1,3077 @@
+# SPDX-FileCopyrightText: 2022–2024 BWI GmbH
+# SPDX-License-Identifier: Apache-2.0
+---
+######################################################################################
+##          Konfiguration für Synapse
+######################################################################################
+image:
+  registry: registry.opencode.de
+  # (string) Repository/Image Konfiguration, für Synapse und Workernodes.
+  # ursprünglich: "repository: matrixdotorg/synapse"
+  repository: bwi/bundesmessenger/backend/container-images/synapse
+
+  # (string) Verwendete Version des Synapse-Abbilds.
+  tag: 1.143.0-jammy-production
+
+  # (list) Optional kann ein Array von imagePullSecrets angegeben werden.
+  # Secrets müssen manuell im Namensraum angelegt werden.
+  # ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  # Beispiel:
+  # pullSecrets:
+  #   - name: myRegistryKeySecretName
+  pullSecrets: []
+
+  # (string) Pullpolicy für das konfigurierte Image
+  # imagePullPolicy „Always“, wenn tag ist „latest“ (imagepullpolicy-always.yaml)
+  pullPolicy: IfNotPresent
+
+# (string) Überschreibt einen Teil des installierten Namens, behält aber den Releasenamen bei.
+nameOverride: ""
+
+# (string) Überschreiben Sie den vollständigen Namen des installierten Charts.
+fullnameOverride: ""
+
+
+# (string) Der Matrix-Domänenname, der für den Domänenteil in Ihren MXIDs verwendet wird.
+# @default -- Nicht gesetzt, aber Voraussetzung!
+serverName: ""
+
+# (string) Der öffentliche Matrix-Servername, der für alle öffentlichen URLs
+# in der Konfiguration sowie für Client-API-Links im Ingress verwendet wird.
+# @default -- Nicht gesetzt
+publicServerName: ""
+
+# (string) Eine URL (ohne "https://") unter der der Nutzer sich Datenschutzbestimmungen einsehen kann.
+# Diese Datenschutzbestimmungen muss jeder Anbieter selbst dem Nutzer zur Verfügung stellen.
+# Die Mobil-Apps nutzen dies, um die Datenschutzbestimmungen per Webaufruf
+# dem Nutzer anzeigen zu lassen.
+# @default -- Nicht gesetzt, aber Voraussetzung!
+dataPrivacyUrl: ""
+
+# (string) Eine URL (ohne "https://") unter der der Nutzer das Impressum einsehen kann.
+# Dieses Impressum muss jeder Anbieter selbst dem Nutzer zur Verfügung stellen.
+# Die Mobil-Apps nutzen dies, um das Impressum dem Nutzer anzeigen zu lassen.
+# @default -- Nicht gesetzt, aber Voraussetzung!
+imprintUrl: ""
+
+# (string) Der Server-Name für Admin-APIs.
+# Unter diesem Namen werden die Admin-APIs von Synapse (`/_synapse/admin`),
+# MAS (`/api/admin`) und weiteren Komponenten zur Verfügung gestellt.
+#
+# Schnittstellen zum Konfigurieren werden nur über `adminAPIServerName`
+# zur Verfügung gestellt.
+# @default -- Nicht gesetzt, aber Voraussetzung!
+adminAPIServerName: ""
+
+## Monitoring mit Prometheus
+## Detaillierte Beschreibung mit Grafana-Dashboards in der Dokumentation,
+## siehe [Monitoring mit Grafana](/docs/monitoring-mit-grafana.md).
+monitoring:
+  # (bool) Aktivieren des Monitorings für Synapse-Dienste in Prometheus
+  # @default -- false
+  enabled: false
+  # (map) Labels, die Prometheus Operator als matchLabels benutzt (podMonitorSelector, ruleSelector)
+  # um den PodMonitor und die PrometheusRule zu aktivieren.
+  # `kubectl get Prometheus --all-namespaces -o jsonpath='{.items[*].spec.podMonitorSelector.matchLabels}'`
+  labels: {}
+
+# (map) Erstellen eines ServiceAccounts, samt gewünschter Annotations.
+# Beinhaltet gewünschte Annotations oder Nutzung eines vorhandenen
+# ServiceAccounts. Es werden darüber hinaus noch weitere ServiceAccounts
+# angelegt, z.B. für den Signing-Key Job.
+serviceAccount:
+  # (bool) Aktivierung der Erstellung eines ServiceAccounts.
+  create: true
+  # (map) Setzen von Annotations für den ServiceAccount
+  # Beispiel: eks.amazonaws.com/role-arn: arn:aws:iam::000000000000:role/matrix-synapse
+  annotations: {}
+  # (string|null) Name des ServiceAccounts für das Deployment.
+  # Falls null, wird der Release-Name benutzt.
+  # name: non-default-service-name
+
+# (bool) Manuelle Aktivierung bei Nutzung von ArgoCD.
+# Sollte durch `.Capabilities.APIVersions.Has "argoproj.io/v1alpha1"` erkannt
+# werden, kann hier aber erzwungen werden.
+argoCD: false
+
+# -- (map) Abbild vom im Chart verwendeten `kubectl`-Container.
+kubectlImage:
+  registry: registry.opencode.de
+  repository: bwi/bundesmessenger/backend/container-images/kubectl
+  tag: 1.34.1-jammy-production
+  pullSecrets: []
+  pullPolicy: IfNotPresent
+
+# Standardwerte für alle Pods.
+# Alle `podSecurityContext`-Schlüssel in dieser Datei verwenden die Werte aus
+# dem hier definierten YAML-Anchor.
+x-defaultPodSecurityContext: &defaultPodSecurityContext
+  runAsNonRoot: true
+  seccompProfile:
+    type: RuntimeDefault
+
+# Standardwerte für alle Container.
+# Alle `securityContext`-Schlüssel in dieser Datei verwenden die Werte aus dem
+# hier definierten YAML-Anchor.
+x-defaultSecurityContext: &defaultSecurityContext
+  capabilities:
+    drop:
+      - ALL
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+
+## Die Quelle des von Synapse im Verbund verwendeten Signierschlüssels.
+##
+signingkey:
+  ## Aktivieren Sie einen Kubernetes-Job, um einen Signierschlüssel zu erzeugen und zu speichern,
+  ## wenn noch keiner vorhanden ist.
+  ## Wenn Sie bereits einen Matrix-Server in Ihrer Domäne betrieben haben, dann
+  ## wollen Sie den alten Signierschlüssel beibehalten, entweder durch Verwendung der `existingSecret`
+  ## Konfiguration, oder indem Sie den alten Schlüssel unter `extraConfig.old_signing_keys` einbinden.
+  ##
+  ## Wenn Sie Ihren Signierschlüssel verlieren, kann es sein, dass der Föderationsverkehr von Ihrer Instanz
+  ## möglicherweise nicht mehr vom weiteren Netzwerk als vertrauenswürdig eingestuft wird.
+  ##
+  ## Sollte nach dem initialen Durchlauf deaktiviert werden, um Upgrades zu beschleunigen.
+
+  # (map) ServiceAccounts für den signingkey-Job.
+  serviceAccount:
+    # (bool) Aktivierung der Erstellung eines ServiceAccounts.
+    create: true
+    # (string|null) Name des ServiceAccounts für den signingkey-Job.
+    # Null für die Verwendung eines Standardnamens für den ServiceAccount.
+    # name: signingkey-serviceaccount
+
+  # (bool) Mit dem Job wird zur Installation ein Signierschlüssel erzeugt.
+  # Nach der Erstellung des Keys oder bei manueller Einbindung eines Keys (`extraConfig.old_signing_keys`)
+  # sollte der Job deaktiviert werden.
+  job:
+    enabled: true
+
+    ## (list) Annotations to apply to the signing-key-job.
+    # Bsp:
+    # argocd.argoproj.io/hook: PostSync
+    # argocd.argoproj.io/hook-delete-policy: HookSucceeded
+    annotations: {}
+
+    generateImage:
+      registry: registry.opencode.de
+      # (string) Repository/Image Konfiguration für Synapse-signing-key-job. Es wird dringend
+      # empfohlen, dass die gleiche Konfiguration wie vom Synapse bzw. den Workernodes genutzt wird.
+      # ursprünglich: "repository: matrixdotorg/synapse"
+      # bei Nichtsetzen vom Tag, wird das Tag aus dem Chart.yaml übernommen (empfohlen)
+      repository: bwi/bundesmessenger/backend/container-images/synapse
+      # (string) Verwendete Version des Synapse-Abbilds.
+      tag: 1.143.0-jammy-production
+      pullSecrets: []
+      # (string) PullPolicy für das Image vom Signing-Key-Job
+      pullPolicy: IfNotPresent
+
+  ## Geben Sie ein bestehendes Signierschlüssel-Secret an, das im Voraus erstellt werden muss.
+  # existingSecret: signingkey
+  # existingSecretKey: signing.key
+
+  # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    runAsUser: 2666
+    fsGroup: 2666
+
+  # (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  securityContext:
+    <<: *defaultSecurityContext
+    runAsUser: 2666
+
+  ## Bereitschaftscheck
+  readinessProbe:
+    exec:
+      command:
+      - /bin/sh
+      - -c
+      - /scripts/signing-key-check.sh -o ready
+    initialDelaySeconds: 5
+    periodSeconds: 10
+
+  ## Ressourcen für das Image der Erzeugung vom Signierschlüssel
+  resources:
+    limits:
+      cpu: 100m
+      memory: 250Mi
+    requests:
+      cpu: 100m
+      memory: 250Mi
+
+  ## Healthcheck
+  livenessProbe:
+    exec:
+      command:
+      - /bin/sh
+      - -c
+      - /scripts/signing-key-check.sh -o health
+    initialDelaySeconds: 10
+    periodSeconds: 15
+
+
+# (bool) Schaltet alle internen IP-Adressevergaben auf IPv4-only
+# Wenn `true` sind alle Listener und Anbindungspunkte `0.0.0.0`,
+# wenn `false` sind einige Listener bzw. Anbindungspunkte `::` (IPv6)
+# Derzeit wird nur reine IPv4 (https://github.com/element-hq/synapse/issues/13107)
+# oder Dual-Stack Umgebungen unterstützt, keine reine IPv6 Umgebung.
+# @default -- false
+ipv4Only: true
+
+## Matrix-Konfigurationswerte, die sich auf andere Teile des Charts auswirken.
+## Jeden Wert, der nicht von diesem Block behandelt wird, sollten Sie stattdessen in
+## im Abschnitt `extraConfig` unten einstellen.
+## Ref: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
+##
+config:
+  # (string|null) Die öffentlich zugängliche URL für die Synapse-Instanz.
+  # Lautet standardmäßig `https://<publicServerName>`.
+  # Beispiel:
+  # publicBaseurl: "https://matrix.example.com"
+
+  # (string) Das Loglevel für Synapse.
+  # Wenn das komplette Logging z.B. für Debugging verändert werden soll,
+  # muss useRecommendedLogging auf false gesetzt werden.
+  # Achtung: Es wird empfohlen, wenn das logLevel auf DEBUG erhöht wird,
+  # das Logging für `synapse.storage.SQL` via extraLoggers zu reduzieren, da sonst
+  # alle SQL-Abfragen protokolliert werden. Diese enthalten sensible Informationen wie z.B. Zugriffstoken.
+  # Dokumentation: https://element-hq.github.io/synapse/latest/structured_logging.html
+  logLevel: INFO
+
+
+  # (bool) Aktiviert eine Standardkonfiguration für das Logging um unnötige Details nicht zu erfassen.
+  # Die Deaktivierung ist nötig, wenn z.B. das logLevel für alles auf DEBUG erhöht werden soll.
+  # Die Einstellungen befinden sich in der Datei /files/default_logging.yaml
+  useRecommendedLogging: true
+
+  ## Logging
+  # use TerseJsonFormatter structured logging
+  # Dokumentation: https://element-hq.github.io/synapse/latest/structured_logging.html
+  useStructuredLogging: false
+
+  # (map) Geben Sie hier zusätzliche Logger-Konfigurationen an.
+  # Ref: https://element-hq.github.io/synapse/latest/structured_logging.html
+  # Diese Konfiguration wird mit dem useRecommendedLogging zusammengeführt, wobei
+  # extraLoggers die höhere Priorität hat und bei Bedarf die Standardkonfiguration überschreibt.
+  # Beispiel:
+  # synapse.storage.SQL:
+  #   level: WARNING
+  extraLoggers: {}
+
+  # (bool) Erfassung Nutzungsstatistiken (Hostname, Synapse-Version und -Uptime, total_users usw.) an die Entwickler melden
+  reportStats: false
+
+  # (bool) Metriken erfassen, eingeschaltet
+  enable_metrics: true
+
+  # -- (map|string|null) Geheimnis zum Registrieren neuer Nutzer.
+  # Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge gesetzt, wenn
+  # er nicht angegeben ist.
+  registrationSharedSecret:
+    existingSecret: synapse
+    existingSecretKey: registration-shared-secret
+
+  # -- (map|string|null) Macaroon-Schlüssel für diverse Signaturen.
+  # Verwendet wird der Macaroon-Schlüssel zum Generieren und Überprüfen von
+  # - Access-Tokens von Gastnutzern,
+  # - Login-Tokens während SSO-Logins und
+  # - Abmeldelinks in Emails.
+  #
+  # Dieser Wert wird standardmäßig auf eine zufällige Zeichenfolge gesetzt, wenn
+  # er nicht angegeben ist.
+  macaroonSecretKey:
+    existingSecret: synapse
+    existingSecretKey: macaroon-secret-key
+
+  # -- (map) Geheimnis zum Generieren und Überprüfen von AGB-Bestätigungslinks.
+  # Existiert das Secret mit dem angegebenen Namen noch nicht, so wird es
+  # automatisch generiert.
+  formSecret:
+    existingSecret: synapse
+    existingSecretKey: form-secret
+
+  # -- (map) Geheimnis zur Kommunikation zwischen Workern.
+  # Existiert das Secret mit dem angegebenen Namen noch nicht, so wird es
+  # automatisch generiert.
+  workerReplicationSecret:
+    existingSecret: synapse
+    existingSecretKey: worker-replication-secret
+
+  # (list) Extra listener
+  extraListeners: []
+  #  - port: 9000
+  #    bind_addresses: ['::']
+  #    type: manhole
+
+  ## Extra listener, die zum Listener des Hauptprozesses hinzugefügt werden können
+  ##
+  extraMainListenerTypes: []
+  #  - consent
+
+########################################
+## Konfigurationen für Föderation
+########################################
+  # (map) Eine Gruppe von vertrauenswürdigen Servern, die zu kontaktieren sind,
+  # wenn ein anderer Server nicht auf eine Signierschlüssel-Anfrage antwortet.
+  # @default -- empty Array, da so nur bekannte Server direkt angefragt werden,
+  # oder das Event verfällt; Beispiel:
+  # - server_name: matrix.org
+  #   verify_keys:
+  #     "ed25519:auto": "Noi6WqcDj0QmPxCNQqgezwTlBKrfqehY1u2FyWP9uYw"
+  trustedKeyServers: []
+
+
+# (map) Beliebige weitere Synapse-Konfiguration
+# Vorkonfiguriert nach Best Practise BWI GmbH:
+# Ref: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
+extraConfig:
+  # (map) Durch das automatische Annehmen von Einladungen wird gesteuert, ob Benutzern eine Einladungsanfrage
+  # angezeigt wird oder ob sie stattdessen automatisch einem Raum beitreten, wenn sie eine Einladung erhalten.
+  # Es muss sicher gestellt werden, dass der Worker existent ist.
+  auto_accept_invites:
+    enabled: true
+    only_for_direct_messages: true
+    only_from_local_users: true
+
+  # (object) Vorherige Signing-Keys.
+  # old_signing_keys:
+  #   "ed25519:id": { key: "base64string", expired_ts: 123456789123 }
+  # (string) Maximale Dateigröße für Uploads von Medien.
+  # Zu beachten ist, dass dies auch vom Reverse Proxy erlaubt werden muss, siehe:
+  # "ingress.annotations: nginx.ingress.kubernetes.io/proxy-body-size"
+  max_upload_size: 50M
+  # (string) Die maximale zulässige Dateigröße für ein Benutzer-Profilbild.
+  max_avatar_size: 5M
+  # (map) Angabe wann Medien von Repository gelöscht werden. Für die Zeitdauer gilt
+  # das Datum des letzten Zugriffs / Downloads.
+  media_retention:
+    # (string) Zeitdauer wie lange eigene Medien vorgehalten werden.
+    # Wenn sie gelöscht werden, sind sie für den Benutzer nicht mehr abrufbar.
+    # local_media_lifetime: 180d
+    # (string) Zeitdauer wie lange Medien von fremden Servern im Cache vorgehalten werden.
+    # Bei Bedarf werden diese vom remote Server erneut heruntergeladen.
+    remote_media_lifetime: 90d
+
+  # (bool) Authentifizierung notwendig für User-Suche
+  require_auth_for_profile_requests: true
+  # (bool) Limitiere Requests für Nutzer mit shared rooms, abgeschaltet
+  limit_profile_requests_to_users_who_share_rooms: false
+  # (bool) Übersenden von Profildaten, wenn Chat gestartet wird
+  include_profile_data_on_invite: true
+  # (bool) Öffentliche Räume ohne Login/Authentifizierung, abgeschaltet!
+  allow_public_rooms_without_auth: false
+  # (bool) Einladung die von unpriviligierten Nutzern stammen blocken, abgeschaltet
+  block_non_admin_invites: false
+  # (list) IP-Whitelist für Föderation und Push-Services zwingend benötigt
+  ip_range_whitelist: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
+  presence:
+    # (bool) Anwesenheitsstatus anzeigen, abgeschaltet (Load)
+    enabled: false
+  # (bool) Nutzersuche zulassen, eingeschaltet
+  enable_search: true
+  user_directory:
+    # (bool) Nutzerverzeichnis erstellen, eingeschaltet (Voraussetzung für Nutzersuche)
+    enabled: true
+    # (bool) Suche alle Nutzer, eingeschaltet
+    search_all_users: true
+    # (bool) Lokale Benutzer in Suchergebnissen bevorzugen
+    prefer_local_users: true
+  # (bool) Nutzer können Anzeigenamen ändern, abgeschaltet
+  enable_set_displayname: false
+  # (bool) Nur Raummitglieder können einen Alias für einen Raum konfigurieren.
+  require_membership_for_aliases: true
+  # (string) Meldet und löscht alle Geräte, auf die länger als die angegebene Zeitspanne
+  # nicht zugegriffen wurde.
+  delete_stale_devices_after: 90d
+  # (string) Maximale Speicherzeit für IPs von Nutzern
+  user_ips_max_age: 28d
+  # (bool) Benutzer vergessen Räume beim Verlassen automatisch.
+  # Nur wenn alle Nutzer einen Raum verlassen und vergessen haben,
+  # wird er automatisch vom Server gelöscht.
+  forget_rooms_on_leave: true
+  # (string) Zeitraum nachdem lokal vergessene Räume aus der Datenbank
+  # gelöscht werden. Wenn der Wert undefiniert oder null ist, wird nichts gelöscht.
+  forgotten_room_retention_period: 28d
+  retention:
+    # (bool) Nachrichtenaufbewahrungsrichtlinien einschalten (auf Raumebene)
+    enabled: false
+  # (bool) URL-Vorschau, abgeschaltet
+  url_preview_enabled: false
+  oembed:
+    # (bool) eingebettete URL-Darstellung von Drittanbietern
+    disable_default_providers: true
+  # (bool) thirdParty Identifier lookup (3pid), abgeschaltet
+  enable_3pid_lookup: false
+  # (bool) Gastzugang, abgeschaltet
+  allow_guest_access: false
+  # (map) Konfiguration für Login mit Passwort
+  password_config:
+    # (bool) Login mit Passwort erlauben, eingeschaltet
+    # Wird automatisch ausgeschaltet, falls `mas.enabled`.
+    enabled: true
+    # (bool) lokale Nutzerdatenbank, eingeschaltet
+    # Wenn dies deaktiviert wird, müssen andere `password_providers` definiert werden.
+    localdb_enabled: true
+    policy:
+      # (bool) Passwortpolicy nutzen, eingeschaltet
+      enabled: true
+      # (integer) Passwortmindestlänge in Zeichen
+      minimum_length: 8
+      # (bool) Zahl muss mit genutzt werden
+      require_digit: true
+      # (bool) Sonderzeichen muss genutzt werden
+      require_symbol: true
+      # (bool) Kleinbuchstaben muss genutzt werden
+      require_lowercase: true
+      # (bool) Großbuchstaben muss genutzt werden
+      require_uppercase: true
+  ui_auth:
+    # (string) User-Interactive Authentication API timeout
+    session_timeout: "15s"
+  push:
+    # (bool) Push Modul verschickt Inhalt der Nachricht über Google-/Apple-Push-Services, abgeschaltet
+    include_content: false
+  # (string) Verschlüsselung für neue Räume; default für alle Räume aktiviert
+  encryption_enabled_by_default_for_room_type: all
+  stats:
+    # (bool) Schalte Nutzer- und Raumstatistiken ein, eingeschaltet
+    # Beachten Sie, dass das Deaktivieren dazu führen kann, dass bestimmte Funktionen
+    # (z. B. das Raumverzeichnis) nicht korrekt funktionieren.
+    # Details: https://element-hq.github.io/synapse/latest/room_and_user_statistics.html
+    enabled: true
+  # (bool) Raumsuche, eingeschaltet
+  enable_room_list_search: true
+  # (list) Veröffentlichungsrechte für die Raumübersicht.
+  room_list_publication_rules:
+    - action: allow
+      alias: '*'
+      room_id: '*'
+      user_id: '*'
+
+  opentracing:
+    # (bool) OpenTracing ist ein Werkzeug, das einen Einblick
+    # in den kausalen Zusammenhang der Arbeit in und zwischen Servern gibt.
+    # Die einzelnen Server verfolgen Ereignisse und melden
+    # sie an einen zentralen Server - im Fall von Synapse: Jaeger.
+    enabled: false
+  # (bool) dynamisches Vorschaubild, eingeschaltet
+  dynamic_thumbnails: true
+  # (map) Experimentelle Features.
+  experimental_features: {}
+########################################
+## Konfigurationen für Föderation
+########################################
+  # (bool) öffentliche Räume über Föderation erlauben, abgeschaltet
+  allow_public_rooms_over_federation: false
+  # (list) Allowlist (Matrix-Server-Namen) für Föderation
+  federation_domain_whitelist: []
+  #  - poc1.dvs.example.com
+  #  - poc2.dvs.example.com
+  #  - poc3.dvs.example.com
+  # (list) Eine Liste von Matrix-Servern, von denen die eigenen Benutzer
+  # keine Medien herunterladen dürfen.
+  prevent_media_downloads_from: []
+  #  - poc1.dvs.example.com
+  #  - poc2.dvs.example.com
+  #  - poc3.dvs.example.com
+  # (list) Liste der CA-Files im PEM-Format für die föderierten Instanzen.
+  # Diese müssen als Secret im Namespace des Deployments vorliegen,
+  # da sie im Synapse-Container gemountet werden.
+  # Hinweis: Stellen Sie sicher, dass Sie eine PEM-Datei verwenden, die die
+  # vollständige Zertifikatskette einschließlich aller Zwischenzertifikate
+  # enthält (wenn Sie beispielsweise certbot verwenden, verwenden Sie
+  # fullchain.pem als Ihr Zertifikat, nicht cert.pem).
+  # Der Pfad wird durch Secretname und Zertifikatsname(inklusive ".pem"-Endung)
+  # angegeben
+  # Aus dem Pfad wird der Name des Secrets abgeleitet. Bei dem angegebenen Zertifikat
+  # "/SECRETNAME1/myCA1.pem" muss sich im Secret "SECRETNAME1" die Datei "myCA1.pem"
+  # befinden. Sie müssen das Secret manuell selbst vorab anlegen.
+  federation_custom_ca_list: []
+  # - /SECRETNAME1/myCA1.pem
+  # - /SECRETNAME1/myCA2.pem
+  # - /SECRETNAME2/myCA3.pem
+  # Definiert einige Unteroptionen im Zusammenhang mit der Föderation
+  federation:
+    # Die folgenden Optionen beziehen sich auf die Konfiguration der Timeout- und
+    # Wiederholungslogik für eine Föderations-Anfrage, unabhängig von den anderen Anfragen.
+    # Der Algorithmus mit kurzer Wiederholung (short-retry) wird verwendet,
+    # wenn etwas oder jemand auf eine Antwort auf die Anfrage wartet,
+    # während der Algorithmus mit langer Wiederholung (long-retry) für Anfragen
+    # verwendet wird, die im Hintergrund ausgeführt werden,
+    # wie z. B. das Senden einer Föderationstransaktion.
+    # (string) Timeout für die Föderation-Anfragen
+    # @default -- 60s
+    client_timeout: 60s
+    # (string) maximale Verzögerung, die für den short-retry verwendet werden soll
+    # @default -- 2s
+    max_short_retry_delay: 2s
+    # (string) maximale Verzögerung, die für den long-retry verwendet werden soll
+    # @default -- 60s
+    max_long_retry_delay: 60s
+    # (integer) maximale Anzahl von Wiederholungsversuchen für den short-retry
+    # @default -- 3
+    max_short_retries: 3
+    # (integer) maximale Anzahl von Wiederholungsversuchen für den long-retry
+    # @default -- 10
+    max_long_retries: 10
+    # Die folgenden Optionen steuern die Wiederholungslogik bei der
+    # Kommunikation mit einem bestimmten Homeserver.
+    # Im Gegensatz zu den vorherigen Konfigurationsoptionen gelten diese
+    # Werte für alle Anforderungen für ein bestimmtes Ziel und der Status des
+    # Backoffs wird in der Datenbank gespeichert.
+    # (string) Der anfängliche Backoff (Interval), nach erstem Fehlschlag
+    # @default -- 10m
+    destination_min_retry_interval: 10m
+    # (string) Multiplier für wiederholende Fehler zum anfängliche Backoff (Interval)
+    # @default -- 2
+    destination_retry_multiplier: 2
+    # (string) Eine Kappungsgrenze (Limit) des Backoff (Interval)
+    # @default -- 1w
+    destination_max_retry_interval: 1w
+
+# (map) Geben Sie hier eine beliebige - geheime - Synapse-Konfiguration an;
+# Diese Werte werden in Secrets anstelle von Configmaps gespeichert
+# Ref: https://element-hq.github.io/synapse/latest/usage/configuration/config_documentation.html
+# Beispiel:
+#  password_config:
+#    pepper: ""
+extraSecrets: {}
+
+# (map) Konfiguration, die auf den Haupt-Synapse-Container anzuwenden ist.
+# @default -- wird nachfolgend einzeln aufgeschlüsselt
+synapse:
+  strategy:
+    # (string) Nur wirklich anwendbar, wenn das Deployment ein RWO PV angehängt hat (z.B. wenn Media Repository
+    # für den Haupt-Synapse-Container aktiviert ist)
+    # Da Replikate = 1 sind, kann eine Aktualisierung "hängen bleiben", da der vorherige Container mit dem
+    # PV verbunden bleibt und der "neu-aufgebaute" Container nie starten kann. Das Ändern der Strategie auf "Recreate" wird
+    # den einzelnen vorherigen Container beenden, so dass der neue, ankommende Container sich mit dem PV verbinden kann
+    type: RollingUpdate
+
+  # (map) Annotations, die auf den Haupt-Synapse-Container anzuwenden sind.
+  annotations: {}
+
+  # (map) Labels, die auf den Haupt-Synapse-Container anzuwenden sind.
+  labels: {}
+
+  # (list) Zusätzliche Umgebungsvariablen, die auf den Haupt-Synapse-pod anzuwenden sind.
+  # Dies ist unter anderem für die Nutzung eines ausgehenden Proxies
+  # (https://element-hq.github.io/synapse/latest/setup/forward_proxy.html) notwendig.
+  # Achtung: U.U. sind die gleichen Einstellungen zusätzlich unter "workers.default"
+  # bzw. für den Sygnal selbst zu konfigurieren.
+  # Der Sygnal muss in der "no_proxy" Ausnahme enthalten sein, da Synapse
+  # ihn sonst versucht via Proxy zu erreichen. Für die BuM Apps ist dies "push-local".
+  # Beispiel:
+  #  - name: LD_PRELOAD
+  #    value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+  #  - name: SYNAPSE_CACHE_FACTOR
+  #    value: "2"
+  #  - name: http_proxy
+  #    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"
+  #  - name: https_proxy
+  #    value: "http://USERNAME:PASSWORD@proxy.example.com:8080/"
+  #  - name: no_proxy
+  #    value: "*.cluster.local,push-local"
+  extraEnv: []
+
+  # (list) Zusätzliche in Synapse zu mountende Datenträger (Volumes)
+  # Beispiel:
+  #  - name: spamcheck
+  #    configMap:
+  #      name: spamcheck
+  extraVolumes: []
+
+  # (list) Zusätzliche in Synapse zu mountende Datenträgerpfade (Volumes)
+  # Beispiel:
+  #  - name: spamcheck
+  #    mountPath: /usr/local/lib/python3.10/site-packages/company
+  #    readOnly: true
+  extraVolumeMounts: []
+
+  # (list) Zusätzliche Befehle, die beim Starten von Synapse ausgeführt werden
+  # Beispiele:
+  # - 'apt-get update -yqq && apt-get install patch -yqq'
+  # - 'patch -d/usr/local/lib/python3.10/site-packages/synapse -p2 < /synapse/patches/something.patch'
+  extraCommands: []
+
+  # (map) Konfiguration für die Pod-Sicherheitsrichtlinie, Synapse wird immer als
+  # sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist.
+  # Beachten Sie, dass eine Änderung dieser Einstellung auch die Verwendung der volumePermission
+  # Hilfsprogramm verwenden müssen, abhängig von Ihrem Speicher.
+  # weitere Beispiele:
+  #  fsGroupChangePolicy: Always
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    fsGroup: 2666
+    runAsGroup: 2666
+    runAsUser: 2666
+
+  # (map) Konfiguration für die Container-Sicherheitsrichtlinie, siehe oben
+  # podSecurityContext für weitere relevante Informationen.
+  securityContext:
+    <<: *defaultSecurityContext
+    runAsUser: 2666
+
+  # Begrenzungen und Anforderungen für CPU-Ressourcen werden in CPU-Einheiten gemessen.
+  # In Kubernetes entspricht eine CPU-Einheit einem physischen CPU-Kern oder einem virtuellen Kern,
+  # je nachdem, ob es sich bei dem Knoten um einen physischen Host oder eine virtuelle Maschine handelt,
+  # die innerhalb einer physischen Maschine ausgeführt wird.
+  #
+  # Anteilige Anforderungen sind zulässig.
+  # Wenn Sie einen Container definieren und spec.containers[].resources.requests.cpu auf 0,5 setzen,
+  # fordern Sie nur halb so viel CPU-Zeit an, als wenn Sie 1,0 CPU anfordern würden.
+  # Für CPU-Ressourceneinheiten entspricht der Mengenausdruck 0,1 dem Ausdruck 100m,
+  # was als "einhundert Millicpu" gelesen werden kann.
+  # Manche Leute sagen "einhundert Millicores", und das bedeutet dasselbe.
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
+      cpu: 1500m
+      # (string) RAM Ressourcengrenzen, die auf den Haupt-Synapse-Container anzuwenden sind.
+      memory: 2000Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
+      cpu: 500m
+      # (string) Anforderungen an RAM Ressourcen, die auf den Haupt-Synapse-Container anzuwenden sind.
+      memory: 500Mi
+
+  ## Healthcheck
+  livenessProbe:
+    periodSeconds: 10
+    httpGet:
+      # (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
+      path: /health
+      # (string) Zu verwendende Konfiguration für den Port des Healthchecks
+      port: health
+
+  ## Bereitschaftscheck
+  readinessProbe:
+    periodSeconds: 3
+    httpGet:
+      # (string) Konfiguration des Pfads vom Bereitschaftscheck
+      path: /health
+      # (string) Konfiguration des Ports vom Bereitschaftscheck
+      port: health
+
+  # Startup-Check
+  startupProbe:
+    # (integer) Anzahl der Fehlversuche, damit Startzeit für Worker bei 60 Sekunden landet; Timeout default bei 10 Sekunden
+    failureThreshold: 6
+    httpGet:
+      # (string) Konfiguration des Pfads vom Startup-Check
+      # DEFAULT gilt für alle Synapse-Worker-Container.
+      path: /health
+      # (string) Konfiguration des Ports vom Startup-Check
+      # DEFAULT gilt für alle Synapse-Worker-Container.
+      port: health
+
+
+  # (map) Node Selektoren, die für den Haupt-Synapse-Container festgelegt werden.
+  nodeSelector: {}
+
+  # Die folgenden Taints sind eingebaut:
+  #  node.kubernetes.io/not-ready
+  #     Der Knoten ist nicht bereit. Dies entspricht dem Attribut NodeCondition Ready auf "False" gesetzt.
+  #  node.kubernetes.io/unreachable
+  #     Der Knoten ist vom Node Controller nicht erreichbar.
+  #     Dies entspricht dem Attribut NodeCondition Ready auf "Unknown" gesetzt.
+  #  node.kubernetes.io/memory-pressure
+  #     Der Knoten hat Speicherbesonderheiten mit hohen Lasten auf den RAM
+  #  node.kubernetes.io/disk-pressure
+  #     Der Knoten hat IO-Last auf die Festplatte.
+  #     Im Falle einer hohen Festplattenauslastung auf den Knoten kann dies zu einer
+  #     Verlangsamung der Anwendung führen, so dass es besser ist, die Container zu verlagern.
+  #  node.kubernetes.io/pid-pressure
+  #     Ein Knoten hat Prozess-Last(PID-Druck).
+  #     Die Prozess-ID ist eine begrenzte Ressource und ihre Sättigung
+  #     kann zu einer Verlangsamung der Anwendungen führen, so dass es besser ist,
+  #     Container an einen anderen Ort zu verlagern.
+  #  node.kubernetes.io/network-unavailable
+  #     Das Netzwerk des Knotens ist nicht verfügbar. Wie oben erklärt.
+  #  node.kubernetes.io/unschedulable
+  #     Der Knoten ist nicht planbar.
+  #     Jeder andere Grund, der dazu führt, dass der Knoten für das Hosting von Container ungeeignet ist,
+  #     z. B. wenn der Cluster verkleinert und der Knoten entfernt wird.
+
+  # (list) Tolerations bzw. Taints die für den Haupt-Synapse-Container genutzt werden sollen.
+  tolerations: []
+
+  # -- Affinität zur Wahl von Nodes für die für den Haupt-Synapse-Container genutzt werden sollen.
+  affinity: {}
+
+## Konfiguration für die Handhabung von Synapse-Workern (im Folgenden weiter Worker),
+## die nützlich sind für die Handhabung von Hochlast-Einsätzen bzw. Hochverfügbarkeitseinsätzen.
+##
+## Weitere Informationen finden Sie unter
+## https://element-hq.github.io/synapse/latest/workers.html
+##
+workers:
+
+  # (map) Standardkonfiguration für Worker.
+  # Wird an alle Worker vererbt und kann für jeden Workertyp überschrieben werden.
+  default: &workerDefault
+    # (bool) DEFAULT Worker aktivieren.
+    enabled: false
+
+    # (integer) DEFAULT Die Anzahl der Worker-Replikate.
+    # Beachten Sie, dass einige Worker eine besondere Behandlung erfordern.
+    # Siehe dazu die Dokumentation: https://element-hq.github.io/synapse/latest/workers.html
+    replicaCount: 1
+
+    strategy:
+      # (string) DEFAULT gilt für alle Synapse-Worker-Container
+      # Nur wirklich anwendbar, wenn das Deployment ein RWO PV angehängt hat (z.B. Media Repository)
+      # Da Replikate = 1 sind, kann eine Aktualisierung "hängen bleiben", da der vorherige Container mit dem
+      # PV verbunden bleibt und der "neu-aufgebaute" Container nie starten kann. Das Ändern der Strategie auf "Recreate" wird
+      # den einzelnen vorherigen Container beenden, so dass der neue, ankommende Container sich mit dem PV verbinden kann
+      type: RollingUpdate
+
+    # (map) Zusätzliche Konfiguration für die Worker.
+    extraConfig: {}
+
+    # (map) DEFAULT Annotations, die auf alle Synapse-Worker-Container anzuwenden sind.
+    annotations: {}
+
+    # (list) DEFAULT Zusätzliche Umgebungsvariablen, die auf alle Synapse-Worker-Container anzuwenden sind
+    # Beispiel:
+    #  - name: LD_PRELOAD
+    #    value: /usr/lib/x86_64-linux-gnu/libjemalloc.so.2
+    #  - name: SYNAPSE_CACHE_FACTOR
+    #    value: "1.0"
+    extraEnv: []
+
+    # (list) Zusätzliche Volumes, die dem Worker hinzugefügt werden sollen.
+    # DEFAULT gilt für alle Synapse-Worker-Container. Nützlich für das
+    # Media-Repo oder zum Hinzufügen von Python-Modulen. Daher besser im
+    # entsprechenden Konfigurationsteil der spez. Worker.
+    volumes: []
+
+    # (list) Zusätzliche zu mountende Datenträgerpfade (siehe volumes)
+    # DEFAULT gilt für alle Synapse-Worker-Container.
+    volumeMounts: []
+
+    # (list) Zusätzliche Befehle, die beim Starten von Synapse ausgeführt werden
+    # DEFAULT gilt für alle Synapse-Worker-Container.
+    # Beispiele:
+    # - 'apt-get update -yqq && apt-get install patch -yqq'
+    # - 'patch -d/usr/local/lib/python3.10/site-packages/synapse -p2 < /synapse/patches/something.patch'
+    extraCommands: []
+
+    # (map) Informationen zum Pod-Sicherheitskontext, die den Worker-Pods mitgeteilt werden sollen.
+    # DEFAULT gilt für alle Synapse-Worker-Container.
+    podSecurityContext:
+      <<: *defaultPodSecurityContext
+      fsGroup: 2666
+      runAsGroup: 2666
+      runAsUser: 2666
+
+    # (map) Konfiguration für die Container-Sicherheitsrichtlinie
+    # DEFAULT gilt für alle Synapse-Worker-Container.
+    securityContext:
+      <<: *defaultSecurityContext
+      runAsUser: 2666
+
+    resources:
+      limits:
+        # (string) Rechenressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind.
+        # DEFAULT gilt für alle Synapse-Worker-Container.
+        # Empfohlen gesondert zu verwalten
+        cpu: 600m
+        # (string) RAM Ressourcengrenzen, die auf alle Synapse-Worker-Container anzuwenden sind.
+        # DEFAULT gilt für alle Synapse-Worker-Container.
+        # Empfohlen gesondert zu verwalten
+        memory: 768Mi
+      requests:
+        # (string) Anforderungen an Rechenressourcen, die auf alle Synapse-Worker-Container anzuwenden sind.
+        # DEFAULT gilt für alle Synapse-Worker-Container.
+        # Empfohlen gesondert zu verwalten
+        cpu: 100m
+        # (string) Anforderungen an RAM Ressourcen, die auf alle Synapse-Worker-Container anzuwenden sind.
+        # DEFAULT gilt für alle Synapse-Worker-Container.
+        # Empfohlen gesondert zu verwalten
+        memory: 150Mi
+
+    ## Healthcheck
+    livenessProbe:
+      periodSeconds: 10
+      httpGet:
+        # (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
+        # DEFAULT gilt für alle Synapse-Worker-Container.
+        path: /health
+        # (string) Zu verwendende Konfiguration für den Port des Healthchecks
+        # DEFAULT gilt für alle Synapse-Worker-Container.
+        port: health
+
+    ## Bereitschaftscheck
+    readinessProbe:
+      periodSeconds: 3
+      httpGet:
+        # (string) Konfiguration des Pfads vom Bereitschaftscheck
+        # DEFAULT gilt für alle Synapse-Worker-Container.
+        path: /health
+        # (string) Konfiguration des Ports vom Bereitschaftscheck
+        # DEFAULT gilt für alle Synapse-Worker-Container.
+        port: health
+
+    # Startup-Check
+    startupProbe:
+      # (integer) Anzahl der Fehlversuche, damit Startzeit für Worker bei 60 Sekunden landet; Timeout default bei 10 Sekunden
+      failureThreshold: 6
+      httpGet:
+        # (string) Konfiguration des Pfads vom Startup-Check
+        # DEFAULT gilt für alle Synapse-Worker-Container.
+        path: /health
+        # (string) Konfiguration des Ports vom Startup-Check
+        # DEFAULT gilt für alle Synapse-Worker-Container.
+        port: health
+
+    # (map) Node Selektor Konfiguration, die auf alle Synapse-Worker-Container anzuwenden sind.
+    # DEFAULT gilt für alle Synapse-Worker-Container.
+    nodeSelector: {}
+
+    # (list) Tolerations/Tains Konfiguration, die auf alle Synapse-Worker-Container anzuwenden sind.
+    # DEFAULT gilt für alle Synapse-Worker-Container.
+    tolerations: []
+
+    # (map) Affinitäts-Konfiguration, die auf alle Synapse-Worker-Container anzuwenden sind.
+    # DEFAULT gilt für alle Synapse-Worker-Container.
+    affinity: {}
+
+    # (list) Entsprechende Endpunkte für den Worker.
+    listeners: []
+    # (list) Pfade für die Ingress-Konfiguration des Workers, Client-Server-Kommunikation.
+    csPaths: []
+    # (list) Pfade für die Ingress-Konfiguration des Workers, Server-Server-Kommunikation.
+    paths: []
+
+    # (map) Konfiguration für das Auto-Scaling der Applikation.
+    autoscaling:
+      # (bool) schalte das HPA für die Container ein.
+      # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden.
+      # Hinweis: Kann für alle spezifischen Worker benutzt werden.
+      # Eine Ausnahme besteht für Stream Writer Worker mit "listeners: [replication]".
+      # https://element-hq.github.io/synapse/latest/workers.html#stream-writers
+      # Auf Grund der Synapse und HPA Architektur ist dies nicht möglich. Wenn diese Worker genutzt werden,
+      # wird empfohlen die Anzahl der worker manuell via "replicaCount" zu konfigurieren.
+      enabled: false
+      # (integer) minimale Anzahl der Worker-Container
+      minReplicas: 2
+      # (integer) maximale Anzahl der Worker-Container
+      maxReplicas: 10
+      # (integer) Prozentsatz für CPU-Auslastung um Scaling zu triggern
+      targetCPUUtilizationPercentage: 80
+      # (integer) Prozentsatz für RAM-Auslastung um Scaling zu triggern
+      targetMemoryUtilizationPercentage: 80
+
+  ## Der generische Worker kann für die meisten Endpunkte verwendet werden.
+  ## Seien Sie vorsichtig, wenn Sie die Sync-Endpunkte aktivieren, da sie große Mengen an
+  ## Ressourcen verbrauchen können. Weitere Informationen finden Sie unter der obigen Informations-URL.
+  ## Ein angemessener Lastausgleich mit der K8s-Ingress-Ressource ist möglicherweise nicht möglich.
+  ##
+  generic_worker:
+    <<: *workerDefault
+    # (bool) Aktivieren von Workern
+    enabled: true
+    # (list) entsprechende Endpunkte für den generischen Worker
+    listeners: [client, federation]
+    # (list) Pfade für die Ingress-Konfiguration des Workers, mit 'publicServerName' Domain gesetzt
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
+    csPaths:
+      ## Sync requests
+      - "/_matrix/client/(r0|v3)/sync$"
+      - "/_matrix/client/(api/v1|r0|v3)/events$"
+      - "/_matrix/client/(api/v1|r0|v3)/initialSync$"
+      - "/_matrix/client/(api/v1|r0|v3)/rooms/[^/]+/initialSync$"
+
+      ## Client API requests
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/createRoom$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/publicRooms$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/joined_members$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/context/.*"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/members$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/state$"
+      - "/_matrix/client/v1/rooms/.*/hierarchy$"
+      - "/_matrix/client/(v1|unstable)/rooms/.*/relations/"
+      - "/_matrix/client/v1/rooms/.*/threads$"
+      - "/_matrix/client/unstable/im.nheko.summary/rooms/.*/summary$"
+      - "/_matrix/client/(r0|v3|unstable)/account/3pid$"
+      - "/_matrix/client/(r0|v3|unstable)/account/whoami$"
+      - "/_matrix/client/(r0|v3|unstable)/devices$"
+      - "/_matrix/client/versions$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/voip/turnServer$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/event/"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/joined_rooms$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable/.*)/rooms/.*/aliases"
+      - "/_matrix/client/v1/rooms/.*/timestamp_to_event$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/search$"
+      - "/_matrix/client/(r0|v3|unstable)/user/.*/filter(/|$)"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/directory/room/.*$"
+      - "/_matrix/client/(r0|v3|unstable)/capabilities$"
+      - "/_matrix/client/(r0|v3|unstable)/notifications$"
+
+      ## Encryption requests
+      - "/_matrix/client/(r0|v3|unstable)/keys/query$"
+      - "/_matrix/client/(r0|v3|unstable)/keys/changes$"
+      - "/_matrix/client/(r0|v3|unstable)/keys/claim$"
+      - "/_matrix/client/(r0|v3|unstable)/room_keys(/.*)?(/.*)?$"
+      - "/_matrix/client/(r0|v3|unstable)/keys/upload(/.*)?$"
+
+      ## Registration/login requests
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/login$"
+      - "/_matrix/client/(r0|v3|unstable)/register$"
+      - "/_matrix/client/(r0|v3|unstable)/register/available$"
+      - "/_matrix/client/v1/register/m.login.registration_token/validity$"
+
+      ## Event sending requests
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/redact"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/send"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/(join|invite|leave|ban|unban|kick)$"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/join/"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/knock/"
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/profile/"
+      - "/_matrix/client/(v1|unstable/org.matrix.msc2716)/rooms/.*/batch_send"
+
+      ## User directory search requests
+      - "/_matrix/client/(r0|v3|unstable)/user_directory/search$"
+
+      ## Worker event streams, deaktiviert!
+      ## See https://element-hq.github.io/synapse/latest/workers.html#stream-writers
+      ## auskommentiert, da nicht auf generic worker sondern zum master
+
+      ## The typing event stream
+      # - "/_matrix/client/(api/v1|r0|v3|unstable)/rooms/.*/typing"
+
+      ## The to_device event stream
+      # - "/_matrix/client/(r0|v3|unstable)/sendToDevice/"
+
+      ## The account_data event stream
+      # - "/_matrix/client/(r0|v3|unstable)/.*/tags"
+      # - "/_matrix/client/(r0|v3|unstable)/.*/account_data"
+
+      ## The receipts event stream
+      # - "/_matrix/client/(r0|v3|unstable)/rooms/.*/receipt"
+      # - "/_matrix/client/(r0|v3|unstable)/rooms/.*/read_markers"
+
+      ## The presence event stream
+      - "/_matrix/client/(api/v1|r0|v3|unstable)/presence/"
+
+    # (list) Pfade für die Ingress-Konfiguration des Workers, mit 'serverName' Domain gesetzt
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
+    paths:
+      ## Federation requests
+      - "/_matrix/federation/v1/version$"
+      - "/_matrix/federation/(v1|v2)/event/"
+      - "/_matrix/federation/(v1|v2)/state/"
+      - "/_matrix/federation/(v1|v2)/state_ids/"
+      - "/_matrix/federation/(v1|v2)/backfill/"
+      - "/_matrix/federation/(v1|v2)/get_missing_events/"
+      - "/_matrix/federation/(v1|v2)/publicRooms"
+      - "/_matrix/federation/(v1|v2)/query/"
+      - "/_matrix/federation/(v1|v2)/make_join/"
+      - "/_matrix/federation/(v1|v2)/make_leave/"
+      - "/_matrix/federation/(v1|v2)/send_join/"
+      - "/_matrix/federation/(v1|v2)/send_leave/"
+      - "/_matrix/federation/(v1|v2)/invite/"
+      - "/_matrix/federation/(v1|v2)/query_auth/"
+      - "/_matrix/federation/(v1|v2)/event_auth/"
+      - "/_matrix/federation/v1/timestamp_to_event/"
+      - "/_matrix/federation/(v1|v2)/exchange_third_party_invite/"
+      - "/_matrix/federation/(v1|v2)/user/devices/"
+      - "/_matrix/federation/(v1|v2)/get_groups_publicised$"
+      - "/_matrix/key/v2/query"
+      - "/_matrix/federation/v1/hierarchy/"
+
+      ## Inbound federation transaction request
+      - "/_matrix/federation/(v1|v2)/send/"
+
+    # (integer) Anzahl der Worker-Container
+    # Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas
+    # oder wenn nicht gesetzt, dann wird autoscaling.minReplicas übernommen
+    replicaCount: 2
+
+    ## Konfiguration für das auto-scaling der Applikation.
+    autoscaling:
+      # (bool) schalte das HPA für die Container ein.
+      # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden.
+      # Hinweis: Kann für alle spezifischen Worker benutzt werden.
+      # Eine Ausnahme besteht für Stream Writer Worker mit "listeners: [replication]".
+      # https://element-hq.github.io/synapse/latest/workers.html#stream-writers
+      # Auf Grund der Synapse und HPA Architektur ist dies nicht möglich. Wenn diese Worker genutzt werden,
+      # wird empfohlen die Anzahl der worker manuell via "replicaCount" zu konfigurieren.
+      enabled: false
+      # (integer) minimale Anzahl der Worker-Container
+      minReplicas: 2
+      # (integer) maximale Anzahl der Worker-Container
+      maxReplicas: 10
+      # (integer) Prozentsatz für CPU-Auslastung um Scaling zu triggern
+      targetCPUUtilizationPercentage: 80
+      # (integer) Prozentsatz für RAM-Auslastung um Scaling zu triggern
+      targetMemoryUtilizationPercentage: 80
+
+  ## Um den allgemeinen Worker in spezifische Belange aufzuteilen - zum Beispiel den Empfang von Föderationstransaktionen;
+  ## Hinweis: Diese Worker sollten eingehenden Datenverkehr basierend auf der Quell-IP routen lassen, was
+  ## noch als TODO offen ist.
+  ## https://element-hq.github.io/synapse/latest/workers.html#load-balancing
+
+  federation_reader:
+    <<: *workerDefault
+    # (bool) Aktiviere spez. Worker für Föderationsanfragen
+    # Wenn dieser Worker genutzt wird, können die URLs aus dem
+    # generic_worker entfernt werden.
+    enabled: false
+    # (list) Zusätzliche Listener für Föderationsworker
+    listeners: [federation]
+    # (string) Server-Side Pfade für die Ingress-Konfiguration des Föderations-Workers
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
+    paths:
+      - "/_matrix/federation/v1/version$"
+      - "/_matrix/federation/(v1|v2)/event/"
+      - "/_matrix/federation/(v1|v2)/state/"
+      - "/_matrix/federation/(v1|v2)/state_ids/"
+      - "/_matrix/federation/(v1|v2)/backfill/"
+      - "/_matrix/federation/(v1|v2)/get_missing_events/"
+      - "/_matrix/federation/(v1|v2)/publicRooms"
+      - "/_matrix/federation/(v1|v2)/query/"
+      - "/_matrix/federation/(v1|v2)/make_join/"
+      - "/_matrix/federation/(v1|v2)/make_leave/"
+      - "/_matrix/federation/(v1|v2)/send_join/"
+      - "/_matrix/federation/(v1|v2)/send_leave/"
+      - "/_matrix/federation/(v1|v2)/invite/"
+      - "/_matrix/federation/(v1|v2)/query_auth/"
+      - "/_matrix/federation/(v1|v2)/event_auth/"
+      - "/_matrix/federation/v1/timestamp_to_event/"
+      - "/_matrix/federation/(v1|v2)/exchange_third_party_invite/"
+      - "/_matrix/federation/(v1|v2)/user/devices/"
+      - "/_matrix/federation/(v1|v2)/get_groups_publicised$"
+      - "/_matrix/key/v2/query"
+      - "/_matrix/federation/v1/hierarchy/"
+
+      ## Inbound federation transaction request
+      - "/_matrix/federation/(v1|v2)/send/"
+
+  # (map) Dieser Worker übernimmt die Übermittlung von Push-Benachrichtigungen.
+  # (pusher-worker -> Sygnal -> Push-Provider (Apple od. Google))
+  # Ein lokaler Sygnal-Service und -Container ist Bestandteil des Helm-Charts.
+  # Die Pusher-Worker werden als `pusher_instances` in die Synapse-Konfiguration
+  # übernommen.
+  pusher:
+    <<: *workerDefault
+    enabled: false
+
+  # (map) Worker für das Senden von Daten an registrierte Anwendungsdienste.
+  # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden. Diese
+  # wird als `notify_appservices_from_worker` in die Synapse-Konfiguration
+  # übernommen.
+  appservice:
+    <<: *workerDefault
+    enabled: false
+
+  # (map) Sender von Verbundverkehr (federation traffic) an andere Matrix-Server.
+  # Die Föderationssender-Worker werden als `federation_sender_instances` in die
+  # Synapse-Konfiguration übernommen.
+  federation_sender:
+    <<: *workerDefault
+    # (bool) Aktivieren der Föderationssender-Worker.
+    enabled: false
+
+  # (map) Worker zur Bereitstellung und Speicherung von Medien.
+  # Einer der Worker wird als `media_instance_running_background_jobs` in die
+  # Synapse-Konfiguration übernommen.
+  #
+  # Hinweis: Die Ausführung mehrerer Instanzen führt zu Konflikten mit
+  # Hintergrundaufgaben.
+  media_repository:
+    <<: *workerDefault
+    # (bool) Aktivieren des Media-Worker
+    enabled: true
+    # (list) Zusätzliche Listener für Media-Worker
+    listeners: [media]
+    # (list) Pfade für die Ingress-Konfiguration des Media-Workers, mit 'publicServerName' Domain gesetzt
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
+    csPaths:
+      - "/_matrix/media/"
+      - "/_matrix/client/v1/media/"
+      - "/_synapse/admin/v1/purge_media_cache$"
+      - "/_synapse/admin/v1/room/.*/media"
+      - "/_synapse/admin/v1/user/.*/media"
+      - "/_synapse/admin/v1/media/"
+      - "/_synapse/admin/v1/quarantine_media/"
+      - "/_synapse/admin/v1/users/.*/media$"
+    # (list) Pfade für die Ingress-Konfiguration des Media-Workers, mit 'serverName' Domain gesetzt
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
+    paths:
+      - "/_matrix/media/"
+      - "/_matrix/federation/v1/media/"
+    resources:
+      limits:
+        # (string) Rechenressourcengrenzen, die auf den media_repository-Container anzuwenden sind.
+        cpu: 2000m
+        # (string) RAM Ressourcengrenzen, die auf den media_repository-Container anzuwenden sind.
+        memory: 2500Mi
+      requests:
+        # (string) Anforderungen an Rechenressourcen, die auf den media_repository-Container anzuwenden sind.
+        cpu: 500m
+        # (string) Anforderungen an RAM Ressourcen, die auf den media_repository-Container anzuwenden sind.
+        memory: 1500Mi
+
+    # (map) Zusätzliche Konfiguration für die Worker
+    extraConfig:
+      enable_media_repo: true
+
+  # (map) Dieser Worker aktualisiert das Benutzerverzeichnis und kann darin suchen.
+  # Jeder generic_worker kann im Benutzerverzeichnis suchen, daher ist der
+  # Worker optional.
+  #
+  # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden. Diese
+  # wird als `update_user_directory_from_worker` in die Synapse-Konfiguration
+  # übernommen.
+  user_dir:
+    <<: *workerDefault
+    # (bool) Aktivieren des Nutzersuch-Workers.
+    enabled: false
+    # (list) Zusätzliche Listener für NutzerSuch-Worker
+    listeners: [client]
+    # (list) Pfade für die Ingress-Konfiguration des Nutzersuch-Workers, mit 'publicServerName' Domain gesetzt
+    # @default -- werden in der values.yaml gesetzt und können dort eingesehen werden
+    csPaths:
+      - "/_matrix/client/(r0|v3|unstable)/user_directory/search$"
+
+  # (object) Konfiguration des Background-Workers.
+  # Hinweis: Es kann nur eine Instanz dieses Workers ausgeführt werden. Diese
+  # wird als `run_background_tasks_on` in die Synapse-Konfiguration übernommen.
+  background_worker:
+    <<: *workerDefault
+    # (bool) Aktivieren des Background-Workers.
+    enabled: false
+
+persistence:
+  # (bool) Aktivieren der Persistenz-Konfiguration für die Media-Repository-Funktion.
+  # Diese PVC wird entweder in Synapse oder einem media_repo-Worker eingehängt.
+  # Hinweis: Wenn Sie in der Lage sein wollen, dies zu skalieren, müssen Sie den
+  # accessMode auf RWX/ReadWriteMany setzen.
+  enabled: true
+  # (string) Name des VolumeClaims
+  # @default -- leerer Wert lässt dynamisches Provisionieren zu
+  existingClaim: ""
+  # (string) Name der entsprechenden Storage-Klasse
+  storageClass: ""
+  # (string) Zugriffsmodus
+  accessMode: ReadWriteOnce
+  # (string) Größe des zu nutzenden Volumes
+  size: 10Gi
+
+volumePermissions:
+  # (bool) Aktivieren des Init-Containers zur Rechtekorrektur,
+  # um die Rechte auf dem Volume für Media anzupassen
+  enabled: false
+  # (integer) Nutzer-ID
+  uid: 2666
+  # (integer) Gruppen-ID
+  gid: 2666
+  # (map) SecurityContext für den Init-Container
+  securityContext:
+    runAsNonRoot: false
+    runAsUser: 0
+
+  image:
+    registry: registry.opencode.de
+    # (string) das Repository für das zu nutzende Image zur Rechtebereinigung
+    repository: bwi/bundesmessenger/backend/container-images/ubuntu
+    # (string) das Tag für das zu nutzende Image zur Rechtebereinigung
+    # Hinweis: noch kein finaler Tag, build version 10 als Alternative zu latest
+    tag: latest-jammy-production
+    # (string) da latest-Tag, PullPolicy immer für das zu nutzende Image zur Rechtebereinigung
+    pullPolicy: IfNotPresent
+    # (list) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
+    # pullSecrets:
+    #   - name: myRegistryKeySecretName
+    pullSecrets: []
+
+  # (map) Ressourcengrenzen des Init-Containers zur Rechtekorrektur.
+  resources:
+    limits:
+      memory: 128Mi
+      cpu: 500m
+    requests:
+      memory: 64Mi
+      cpu: 100m
+
+## Konfiguration für den Hauptdienst von Synapse.
+## Um TLS in Synapse selbst zu verwenden, fügen Sie einen TLS-Listener hinzu und ändern Sie die Ports
+## die hier konfiguriert sind.
+##
+service:
+  # (string) Typ des Auszuliefernden Endpunktes für den Hauptdienst von Synapse
+  type: ClusterIP
+  # (integer) interner Port des Auszuliefernden Endpunktes für den Hauptdienst von Synapse
+  port: 8008
+  # (integer) externer Port des Auszuliefernden Endpunktes für den Hauptdienst von Synapse
+  targetPort: http
+
+
+######################################################################################
+##          Konfiguration für Sygnal
+######################################################################################
+## Reference: https://github.com/element-hq/sygnal
+
+sygnal:
+  # (bool) Aktivieren des Sygnal-Container
+  enabled: false
+  # (maps) Image/Repo-Konfiguration von Sygnal
+  image:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/sygnal
+    tag: 0.17.0-jammy-production
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+
+  # (string|null) Proxy, falls benötigt um die Push-Services zu erreichen.
+  # Auskommentieren oder null für die Benutzung ohne Proxy. Die Angabe des
+  # Zielports beim Proxy ist für die Generierung der Network-Policies zwingend
+  # erforderlich.
+  proxy: null
+
+  # (map) Annotations, die auf den Pod anzuwenden sind.
+  annotations: {}
+
+  # (map) Labels, die auf den Pod anzuwenden sind.
+  labels: {}
+
+  # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    runAsGroup: 1222
+    runAsUser: 1222
+
+  # (map) Konfiguration für die Container-Sicherheitsrichtlinie des generischen Workers
+  # weitere Beispiele:
+  #  runAsUser: 2111
+  securityContext:
+    <<: *defaultSecurityContext
+
+  ## Ressource Konfiguration für Sygnal Server.
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.
+      cpu: 300m
+      # (string) RAM Ressourcengrenzen, die auf den Sygnal-Container anzuwenden sind.
+      memory: 100Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den Sygnal-Container anzuwenden sind.
+      cpu: 150m
+      # (string) Anforderungen an RAM Ressourcen, die auf den Sygnal-Container anzuwenden sind.
+      memory: 50Mi
+
+  ## Healthcheck
+  livenessProbe:
+    periodSeconds: 10
+    tcpSocket:
+      # (string) Zu verwendende Konfiguration für den Port des Healthchecks
+      port: sygnal-port
+
+  ## Bereitschaftscheck
+  readinessProbe:
+    periodSeconds: 10
+    tcpSocket:
+      # (string) Zu verwendende Konfiguration für den Port des Bereitschaftscheck
+      port: sygnal-port
+
+  # (map|null) Startup-Check.
+  # startupProbe:
+  #   failureThreshold: 6
+  #   httpGet:
+  #     path: /health
+  #     port: metrics
+
+  # (map) Node Selektor Konfiguration für Sygnal-Container.
+  nodeSelector: {}
+
+  # (list) Tolerations/Tains Konfiguration für Sygnal-Container.
+  tolerations: []
+
+  # (map) Affinitäts-Konfiguration für Sygnal-Container.
+  affinity: {}
+
+  # (map) Konfiguration für Push-Dienste (APNS und FCM)
+  # Beispiel:
+  # apps:
+  #   de.opencode.dvs.ios:
+  #     type: apns
+  #     keyfile: /secrets/de.opencode.dvs.ios.p8
+  apps: {}
+
+  # (string) Name des Secrets, welches Schlüsseldateien für FCM und iOS Push enthält.
+  # Nähere Infos unter
+  # ./docs/sygnal-push.md#nutzung-eines-secrets-für-sygnal-push-konfiguration
+  existingSecret: "sygnal"
+
+  # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+  # Beispiel:
+  # - name: NO_PROXY
+  #   value: "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"
+  # - name: HTTPS_PROXY
+  #   value: "https://proxyuser@proxyserver:proxyport"
+  # - name: HTTP_PROXY
+  #   value: "http://proxyuser@proxyserver:proxyport"
+  extraEnv: []
+
+  # (list) Weitere Speicherbereiche für das Admin-Portal Deployment.
+  extraVolumes: []
+  # (list) Weitere Speicher-Einhängepunkte für das Admin-Portal Deployment.
+  extraVolumeMounts: []
+
+  # (string|null) iOS-Key Dateiname
+  # Wenn iOS Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
+  # Bei Nutzung von iOS-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal-push.md
+  # Durch Filename-Vergabe wird der unten angegebene ioskey geladen.
+  # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
+  # (siehe docs/sygnal-push.md).
+  # ioskey_filename: de.opencode.dvs.ios.p8 <<-- muss zwingend mit dem Keyfile-Dateinamen aus der APNS-Sektion
+  # der vorhergehenden Apps-Konfiguration übereinstimmen!
+  # (string|null) iOS-Key Datei-Inhalt. Die Zeichenkette muss in Base64 kodiert sein.
+  # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
+  # (siehe docs/sygnal-push.md).
+  # ioskey_keyvalue: 'HIER KÖNNTE IHR KEY STEHEN'
+
+  # (string|null) FCM-Key Dateiname
+  # bei Nutzung von FCM-Pushservice, muss Key mit angegeben werden. Weiteres siehe ./docs/sygnal-push.md
+  # Wenn FCM Push mit genutzt wird, muss ein gültiger und valider Dateiname angegeben werden.
+  # Durch Filename-Vergabe wird der unten angegebene FCM-Service-Account-File geladen.
+  # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
+  # (siehe docs/sygnal-push.md).
+  # fcmkey_filename: de.opencode.dvs.bundesmessenger.json <<-- muss zwingend mit dem service_account_file-Dateinamen
+  # aus der gcm-Sektion der vorhergehenden Apps-Konfiguration übereinstimmen!
+  # (map|null) FCM-Key Service Account File Inhalt
+  # **ABGEKÜNDIGT**: Erstellen Sie selbst ein Secret mit den gewünschten Dateien
+  # (siehe docs/sygnal-push.md).
+  # fcmkey_keyvalue:
+  #   type: "service_account"
+  #   project_id: "bundesmessenger"
+  #   ...
+
+
+######################################################################################
+##          Konfiguration für Well-Known-Server
+######################################################################################
+## Dies wird einen NginX-Server einrichten, der auf alle
+## /.well-known/matrix/server Anfragen antwortet, um den Verbund zu ermöglichen, ohne
+## Hinzufügen von SRV-Einträgen zu DNS.
+
+wellknown:
+  # (bool) Aktivierung des Wellknown-Container
+  enabled: true
+
+  # (string|null) DNS-Name des Wellknown-Servers.
+  # Falls nicht gesetzt, wird der öffentliche Servername verwendet.
+  # host: wellknown.example.org
+
+  # (integer) Port des Wellknown-Servers.
+  port: 443
+
+  # (map|null) Die Host- und Port-Kombination, die auf .well-known/matrix/server zu bedienen ist.
+  # Falls null, wird für `m.server` der Homeserver-Name (`publicServerName`,
+  # sonst `serverName`) mit Port 443 verwendet.
+  # server:
+  #   m.server: matrix.example.com:443
+
+  # (map) Daten, die auf .well-known/matrix/client bereitgestellt werden sollen
+  # Die Angabe des Objektes "de.bwi": {"data_privacy_url": "https://example.com/privacy",
+  # "imprintUrl": "https://example.com/imprint"} ist verpflichtend,
+  # wenn keine .Values.dataPrivacyUrl und .Values.imprintUrl angegeben wurde
+  # und auf den WellKnown-Server verzichtet wird.
+  # Alle Angaben, welche die selben Schlüssel wie in der Standardkonfiguration
+  # setzen, überschreiben unsere generierte client.json. Zusätzliche Angaben
+  # werden hinzugefügt.
+  # Beispiel des Standards:
+  #  io.element.e2ee:
+  #    secure_backup_required: true
+  #    secure_backup_setup_methods: ["passphrase"]
+  #    outbound_keys_pre_sharing_mode: "on_room_opening"
+  #  m.homeserver:
+  #    base_url: https://matrix.example.com
+  #  de.bwi:
+  #    data_privacy_url: https://example.com/privacy
+  #    imprintUrl: https://example.com/imprint
+  client: {}
+
+  # (integer) Replica-Count.
+  replicaCount: 1
+
+  # (map) Zusätzliche Daten, die unter .well-known/matrix/<data> bereitgestellt werden
+  # Dictionaries werden in JSON umgewandelt, einfache Strings werden direkt ausgeliefert
+  # MSC1929 Beispiel:
+  # support:
+  #   admins:
+  #     - matrix_id: '@admin:example.com'
+  #       email_address: 'admin@example.com'
+  #       role: 'admin'
+  #   support_page: 'https://example.com/support'
+  extraData: {}
+
+  # (string) Ein benutzerdefinierter htdocs-Pfad, der nützlich ist, wenn ein anderes Image ausgeführt wird.
+  # @default -- /usr/share/nginx/html (nginx)
+  htdocsPath: /usr/share/nginx/html
+
+  # (map) Das Webserver Image
+  image:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/nginx
+    tag: 1.18.0-6ubuntu14.7-jammy-production
+    pullPolicy: IfNotPresent
+    # (list) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
+    # pullSecrets:
+    #   - name: myRegistryKeySecretName
+    pullSecrets: []
+
+  # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  # weitere Möglichkeiten:
+  #  fsGroup: 1001
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    runAsGroup: 1001
+    runAsUser: 1001
+
+  # (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  securityContext:
+    <<: *defaultSecurityContext
+
+  ## Ressource Konfiguration für well-known server.
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den well-known server anzuwenden sind.
+      cpu: 50m
+      # (string) RAM Ressourcengrenzen, die auf den well-known server anzuwenden sind.
+      memory: 50Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den well-known server anzuwenden sind.
+      cpu: 5m
+      # (string) Anforderungen an RAM Ressourcen, die auf den well-known server anzuwenden sind.
+      memory: 15Mi
+
+  # (map) Node Selektor Konfiguration für well-known server.
+  nodeSelector: {}
+
+  # (list) Tolerations/Tains Konfiguration für well-known server.
+  tolerations: []
+
+  # (map) Affinitäts-Konfiguration für well-known server.
+  affinity: {}
+
+
+######################################################################################
+##          Konfiguration für ConfigurationHub-Server
+######################################################################################
+## Dies wird einen NginX-Server einrichten, der notwendige
+## Dateien zur Konfiguration und Information der Clients ausliefert
+## und die nicht zum Matrix / Synapse-Server gehören
+
+confighub:
+  # (bool) Aktivierung des ConfigHub-Container
+  enabled: true
+
+  # (integer) Replica-Count.
+  replicaCount: 1
+
+  # (map) Zusätzliche Daten, die unter /_matrix/cconfig/<data> bereitgestellt werden
+  # Dictionaries werden in JSON umgewandelt, einfache Strings werden direkt ausgeliefert
+  # Beispiel siehe wellknown-Konfiguration
+  extraData: {}
+
+  # (string) Ein benutzerdefinierter htdocs-Pfad, der nützlich ist, wenn ein anderes Image ausgeführt wird.
+  # @default -- /usr/share/nginx/html (nginx)
+  htdocsPath: /usr/share/nginx/html
+
+  # (map) Das Webserver Image
+  image:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/nginx
+    tag: 1.18.0-6ubuntu14.7-jammy-production
+    pullPolicy: IfNotPresent
+    # (list) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
+    # pullSecrets:
+    #   - name: myRegistryKeySecretName
+    pullSecrets: []
+
+  # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  # weitere Möglichkeiten:
+  #  fsGroup: 1001
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    runAsGroup: 1001
+    runAsUser: 1001
+
+  # (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  securityContext:
+    <<: *defaultSecurityContext
+
+  ## Ressource Konfiguration für confighub.
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den confighub anzuwenden sind.
+      cpu: 50m
+      # (string) RAM Ressourcengrenzen, die auf den confighub anzuwenden sind.
+      memory: 50Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den confighub anzuwenden sind.
+      cpu: 5m
+      # (string) Anforderungen an RAM Ressourcen, die auf den confighub anzuwenden sind.
+      memory: 15Mi
+
+  # (map) Node Selektor Konfiguration für confighub.
+  nodeSelector: {}
+
+  # (list) Tolerations/Tains Konfiguration für confighub.
+  tolerations: []
+
+  # (map) Affinitäts-Konfiguration für confighub.
+  affinity: {}
+
+######################################################################################
+##          Konfiguration des PostgreSQL-Defaults zur Wiederverwendung
+######################################################################################
+## Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und
+## schnelle Möglichkeit, Demo- und Testsysteme des BundesMessengers aufzusetzen.
+
+x-defaultPostgresqlCommon: &postgresDefaults
+# (map) Das zu verwendende PostgreSQL-Container-Abbild.
+  image:
+    registry: docker.io
+    repository: postgres
+    tag: "18"
+
+    # (list) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
+    # pullSecrets: ["myRegistryKeySecretName"]
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+
+  # (map) Service-Konfiguration.
+  service:
+    # (integer) Port des PostgreSQL-Service.
+    port: 5432
+    # (integer) Interner Port des PostgreSQL-Containers.
+    targetPort: 5432
+
+  # (list) Extra Volumes.
+  # Kann zusammen mit `extraVolumeMounts` zum Wiedereinspielen einer Sicherung
+  # verwendet werden.
+  # Beispiel:
+  #   - name: major-upgrade-dump
+  #     persistentVolumeClaim:
+  #       claimName: postgresql-major-upgrade
+  extraVolumes: []
+  # (list) Extra Volume-Mounts.
+  # Beispiel:
+  #   - name: major-upgrade-dump
+  #     mountPath: /major-upgrade-dump
+  extraVolumeMounts: []
+
+  # (map) Extra Konfiguration der Datenbank.
+  config:
+    # (int) Maximale Anzahl an Datenbankverbindungen.
+    # Die maximale Anzahl an Verbindungen ist oft eine Limitierung, da jeder
+    # Synapse-Prozess seine Verbindungen zur Datenbank hält.
+    postgresqlMaxConnections: 1024
+
+  containerSecurityContext:
+    # (integer) User ID for the PostgreSQL container.
+    runAsUser: 66999
+    # (integer) Group ID for the PostgreSQL container.
+    runAsGroup: 66999
+    # (bool) Mount container root filesystem as read-only.
+    readOnlyRootFilesystem: true
+    # (map) BSI SYS.1.6.A21_APP.4.4.A4
+    seccompProfile:
+      type: RuntimeDefault
+
+  # (map) Persistenzkonfiguration für Storage für PostgreSQL
+  persistence:
+    enabled: true
+    storageClass: ""
+    size: 16Gi
+
+  # (map) Ressourcenanforderungen und -grenzen.
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
+      cpu: 1
+      # (string) RAM Ressourcengrenzen, die auf den PostgreSQL-Container anzuwenden sind.
+      memory: 4096Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den PostgreSQL-Container anzuwenden sind.
+      cpu: 250m
+      # (string) Anforderungen an RAM Ressourcen, die auf den PostgreSQL-Container anzuwenden sind.
+      memory: 256Mi
+
+  # (map) Zusätzliche Argumente für die Datenbankverbindung.
+  # https://www.postgresql.org/docs/current/libpq-connect.html#LIBPQ-PARAMKEYWORDS
+  extraArgs:
+    # -- (string) Verwendeter SSL-Modus.
+    # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+    sslmode: prefer
+    # sslrootcert: /path/to/ca.pem
+    # sslcert: /path/to/cert.pem
+    # sslkey: /path/to/key.pem
+
+######################################################################################
+##          Konfiguration der internen PostgreSQL-Server
+######################################################################################
+## Der mitgelieferte PostgreSQL-Datenbankserver bietet eine einfache und
+## schnelle Möglichkeit, Demo- und Testsysteme des BundesMessengers aufzusetzen.
+## Nicht empfohlen ist die Aktivierung für Produktivsysteme.
+##
+## Empfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen
+## Sie `postgresql.enabled` auf `false` und konfigurieren Sie den
+## `externalPostgresql`-Block.
+
+postgresql:
+  <<: *postgresDefaults
+  # (bool) Aktivieren des internen PostgreSQL-Servers.
+  # Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern
+  # vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `postgresql.enabled`
+  # auf `false` und konfigurieren Sie den `externalPostgresql`-Block.
+  enabled: false
+
+  # (map) Konfiguration des Synapse Datenbanknutzers.
+  customUser:
+    # (string) Name vom Datenbanknutzer.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
+    username: synapse
+    # (string) Name der Datenbank.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
+    database: synapse_db
+    # (string) Name vom Secret mit dem Passwort des Synapse Datenbanknutzers.
+    # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen
+    # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
+    existingSecret: postgresql
+    # (map) Schlüssel im angegebenen Secret.
+    secretKeys:
+      # (string) Verweis im `existingSecret` auf den Namen des Datenbanknutzers.
+      name: username
+      # (string) Verweis im `existingSecret` auf den Namen der Datenbank.
+      database: database
+      # (string) Verweis im `existingSecret` auf das Nutzerpasswort.
+      password: password
+
+  # (map) Konfiguration des Adminnutzers.
+  auth:
+    # (string) Name des PostgreSQL Adminnutzers.
+    username: postgres
+    # (string) Name des Kubernetes Secrets mit dem Adminpasswort.
+    # Ist `postgresql.enabled` und es existiert kein Secret mit dem angegebenen
+    # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
+    existingSecret: postgresql
+    # (map) Schlüssel im angegebenen Secret.
+    secretKeys:
+      # (string) Verweis im `existingSecret` auf das Adminpasswort.
+      adminPasswordKey: postgres-password
+
+  initdb:
+    # (string) Extra Argumente zur Initialisierung der Datenbank
+    args: "--lc-collate=C --lc-ctype=C --encoding=UTF8"
+
+# (map) Extern konfigurierter PostgreSQL-Server.
+# Wird für die Datenbank von Synapse verwendet.
+# Die Datenbank muss vorhanden sein und sowohl COLLATE als auch CTYPE auf "C"
+# eingestellt sein.
+# Die „interne“ Datenbank muss deaktiviert sein: `postgresql.enabled: false`.
+externalPostgresql:
+  # (string) Hostname vom externen PostgreSQL-Server.
+  # Beispieladresse für einen K8s-internen PostgreSQL im Namespace `postgres`:
+  host: postgres-4-matrix-postgresql.postgres.svc.cluster.local
+  # (integer) Port vom externen PostgreSQL-Server.
+  port: 5432
+  # (string) Name der zu verwendenden PostgreSQL-Datenbank.
+  database: synapse_db
+
+  # (string) Name des PostgreSQL-Nutzers.
+  username: synapse
+
+  # (string|null) Passwort vom PostgreSQL-Nutzer.
+  # **ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.
+  # password: 53C237P0576235Q1P455W02D
+
+  # (string) Name vom Secret mit dem PostgreSQL-Passwort.
+  existingSecret: postgresql
+
+  # (string) Verweis im `existingSecret` auf das PostgreSQL-Passwort.
+  existingSecretPasswordKey: password
+
+  # (map) Zusätzliche Argumente für die Datenbankverbindung.
+  # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+  extraArgs:
+    # -- (string) Verwendeter SSL-Modus.
+    # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+    sslmode: prefer
+
+
+######################################################################################
+##          Konfiguration des Redis-Servers
+######################################################################################
+## Diese Konfiguration ist für den internen Redis, der für die Verwendung mit
+## Worker/Sharding eingesetzt wird. Für einen externen Redis-Server setzen Sie
+## `redis.enabled: false` und konfigurieren den `externalRedis`-Block.
+##
+## Die Konfiguration des Kernelparameters `transparent_hugepage` wird im
+## Dokument docs/redis-sysctl-tuning.md beschrieben.
+
+redis:
+  # (bool) Aktivieren des internen Redis-Servers.
+  # Hinweis: Durch Setzten auf `true`, wird der `externalRedis`-Block ignoriert.
+  enabled: true
+
+  # (map) Das verwendete Redis-Image.
+  image:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/redis
+    tag: 5_6.0.16-1ubuntu1.1-jammy-production
+    # (list) Liste von Kubernetes Pull-Secrets.
+    # Beispiel:
+    # pullSecrets: ["myRegistryKeySecretName"]
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+
+  # (map) Authentifikation gegenüber Redis.
+  # Verwenden Sie ein bestehendes Secret mit `redis-password`-Eintrag anstelle
+  # eines statischen Passworts.
+  auth:
+    # (bool) Aktivieren der Authentifikation.
+    enabled: true
+    # (string|null) Password für Redis.
+    # Ist der Wert null, wird stattdessen `existingSecret` verwendet.
+    password: null
+    # (string) Name des Secrets mit dem Redis-Passwort.
+    # Existiert noch kein Kubernetes Secret mit dem angegebenen Namen, wird es
+    # mit einem zufälligen Passwort automatisch generiert.
+    existingSecret: redis
+    # (string) Verweis im `existingSecret` auf das Redis-Passwort.
+    # Wird nur berücksichtigt, wenn `existingSecret` gesetzt ist.
+    existingSecretPasswordKey: redis-password
+
+  # (string) Form der Architektur des Deployments
+  architecture: standalone
+
+  config:
+    # (string) Redis Konfiguration.
+    content: |
+      # Don’t enforce IPv6 binding and make compatible for ubuntu redis 5.6
+      # bind * -::*
+      port 6379
+
+  # (map) Persistenzkonfiguration des Redis.
+  # Beachten Sie, dass Synapse Redis nur als Synchronisierungsdienstprogramm
+  # verwendet, so dass keine Daten jemals persistiert werden müssen.
+  persistence:
+    enabled: false
+  service:
+    type: ClusterIP
+    port: 6379
+
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den Redis-Container anzuwenden sind.
+      cpu: 500m
+      # (string) RAM Ressourcengrenzen, die auf den Redis-Container anzuwenden sind.
+      memory: 768Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den Redis-Container anzuwenden sind.
+      cpu: 300m
+      # (string) Anforderungen an RAM Ressourcen, die auf den Redis-Container anzuwenden sind.
+      memory: 128Mi
+
+# (map) Extern konfigurierter Redis-Server.
+# Wird nur verwendet, wenn `redis.enabled: false` ist.
+externalRedis:
+  # (string) Hostname vom externen Redis-Server.
+  host: redis
+  # (integer) Port vom externen Redis-Server.
+  port: 6379
+  # (string|null) Password für Redis.
+  # **ABGEKÜNDIGT**: Geben Sie das Passwort stattdessen per existingSecret an.
+  # password: 53C237R3D!5P455W02D
+
+  # (string) Name des Secrets mit dem Redis-Passwort.
+  existingSecret: redis
+  # (string) Verweis im `existingSecret` auf das Redis-Passwort.
+  existingSecretPasswordKey: redis-password
+
+
+######################################################################################
+##          Konfiguration für Ingress
+######################################################################################
+## Die K8s Ingress-Konfiguration wird sehr häufig verwendet, um
+## das gesamte Routing einzurichten, das für die Verwendung mit einer gesplitteten Synapse-Instanz erforderlich ist.
+## Wenn Sie keinen Ingress-kompatiblen K8s-Ingress verwenden, müssen Sie
+## stattdessen Ihr eigenes Routing einrichten.
+
+ingress:
+  # (bool) Aktiviert Ingress-Konfiguration
+  enabled: true
+
+  # (bool) Generierung von Traefik-kompatiblen Regex-Pfaden anstelle von Nginx-kompatiblen Pfaden.
+  # UNGETESTET!
+  traefikPaths: false
+
+  # (map) Annotations zur Konfiguration des Ingress.
+  annotations:
+    ## Annotiation um Regex-Regeln nutzen zu können
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    ## Annotiation, um Body-size zu vergößern (Default Limit 1 oder 10MB)
+    nginx.ingress.kubernetes.io/proxy-body-size: 50m
+    nginx.ingress.kubernetes.io/enable-owasp-core-rules: "true"
+    ## Folgende Einträge sind für Cross-origin resource sharing wichtig
+    ## Da mehrere FQDN genutzt werden, ist die Nutzung "best practise"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE"
+    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    ## Folgende Einträge sind bei der Nutzung des Cert-Managers mit lets-encrypt notwendig:
+  #  kubernetes.io/ingress.class: nginx
+  #  kubernetes.io/tls-acme: "true"
+
+  # (map) Annotations zur Konfiguration des Ingress für die Admin-API.
+  # Dies ermöglicht z.B. das Konfigurieren eines IP-Filters für den administrativen Zugriff.
+  # Bsp: nginx.ingress.kubernetes.io/whitelist-source-range: "192.168.10.0/24, 10.10.12.0/24, 10.0.0.1"
+  annotationsAdminAPI: {}
+
+  # (map) Annotations zur Konfiguration des Ingress für das Admin-Portal.
+  # Dies ermöglicht z.B. das Konfigurieren eines IP-Filters für den administrativen Zugriff.
+  # Bsp: nginx.ingress.kubernetes.io/whitelist-source-range: "192.168.10.0/24, 10.10.12.0/24, 10.0.0.1"
+  annotationsAdminPortal: {}
+
+  # (list) Hosts, die der Ingress-Konfiguration für die Verarbeitung von
+  # Client-to-Server-API-Anfragepfade hinzugefügt werden sollen.
+  # Hinweis: serverName bzw. publicServerName wird einbezogen, wenn includeServerName gesetzt ist. (default)
+  # Beispiel:
+  #  - matrix.example.com
+  csHosts: []
+
+  # (list) Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung von
+  # Server-zu-Server-API-Anfragen hinzugefügt werden sollen.
+  # Hinweis: serverName bzw. publicServerName wird einbezogen, wenn includeServerName gesetzt ist. (default)
+  # Beispiel:
+  #  - example.com
+  hosts: []
+
+  # (list) Zusätzliche Hosts, die der Ingress-Konfiguration für die Bearbeitung von
+  # wellknown-Anfragen hinzugefügt werden sollen.
+  # Hinweis: serverName wird einbezogen, wenn includeServerName gesetzt ist. (default)
+  # Beispiel:
+  #  - example.com
+  wkHosts: []
+
+  # (list) Zusätzliche Pfade, die zu den Server-zu-Server-Eingangsblöcken hinzugefügt werden sollen
+  # Werden vor dem `/_matrix` Catch-all-Pfad eingefügt.
+  # Beispiele:
+  #  # K8s 1.19+
+  #  - path: /_matrix/media
+  #    pathType: Prefix
+  #    backend:
+  #      service:
+  #        name: matrix-media-repo
+  #        port: 8000
+  #  # K8s <1.19
+  #  - path: /_matrix/media
+  #    backend:
+  #      serviceName: matrix-media-repo
+  #      servicePort: 8000
+  paths: []
+
+  # (list) Zusätzliche Pfade, die zu den Client-zu-Server Blöcken hinzugefügt werden sollen
+  # Werden vor den `/_matrix` und `/_synapse` Catch-all-Pfaden eingefügt.
+  # Beispiele:
+  #  # K8s 1.19+
+  #  - path: /_matrix/media
+  #    pathType: Prefix
+  #    backend:
+  #      service:
+  #        name: matrix-media-repo
+  #        port: 8000
+  #  # K8s <1.19
+  #  - path: /_matrix/media
+  #    backend:
+  #      serviceName: matrix-media-repo
+  #      servicePort: 8000
+  csPaths: []
+
+  # (bool) Soll der `/_synapse`-Pfad im Ingress enthalten sein, werden die Client-APIs unter diesem Pfad bereitgestellt.
+  includeUnderscoreSynapse: true
+
+  # (bool) Nimmt `serverName` bzw. `publicServerName` in die Liste der Domains
+  # für den Ingress mit auf.
+  # Kann auf `false` gesetzt werden, wenn die Hauptdomäne auf irgendeine externe Weise verwaltet wird.
+  includeServerName: true
+
+  # (list) TLS-Konfiguration für Ingress Konfiguration
+  # Enthält für alle benötigten Domains die notwendigen Secrets bzw. TLS-Zertifikate
+  # Beispiel:
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - example.com
+  #      - matrix.example.com
+  #  - secretName: admin-example-tls
+  #    hosts:
+  #      - admin.example.com
+  tls: []
+
+  # (string) Legen Sie den Namen der IngressClass-Cluster-Ressource fest (optional)
+  # https://kubernetes.io/docs/reference/kubernetes-api/service-resources/ingress-v1/#IngressSpec
+  # HINWEIS: Wir setzen dem Nginx voraus, da wir auch die entsprechenden Annotiations setzen
+  className: nginx
+
+
+######################################################################################
+##          Konfiguration für Matrix-Authentication-Service
+######################################################################################
+## Dokumentation zum MAS, siehe: docs/matrix-authentication-service.md
+
+mas:
+  # (bool) Aktivieren des Matrix-Authentication-Service
+  enabled: true
+  # (map) Konfiguration des Image/Repository
+  image:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/matrix-authentication-service
+    tag: 1.7.0-jammy-production
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+
+  # Migrationskonfiguration für MAS
+  migration:
+    # (bool) Aktiviert die Migrationsfunktionalität
+    enabled: false  # Auf true setzen, um Migration auszuführen
+    # Backup-Konfiguration für die Migration
+    backup:
+      # (bool) Aktiviert das Backup vor der Migration
+      enabled: true  # Backup-Option aktivieren
+      # (string) Speichergröße für das Backup (z.B. "1Gi", "2Gi")
+      storage: 16Gi   # Speicherplatz für Backup
+
+  # (string) URI für den Matrix-Authentication-Service bzw. OpenID-Connect Provider
+  # Eine URI ist dringend ratsam, damit der Dienst routing-technisch getrennt ist.
+  # Ein stabiles Deployment ohne eigene URI wurde bisher nicht erprobt.
+  uri: ""
+
+  # (map) MAS Cookie- und Datenbankschlüssel.
+  # Der Schlüssel wird als hexadezimale Zeichenkette eingelesen und besteht aus
+  # genau 32 Bytes. Beispiel:
+  #
+  #   c7e42fb8baba8f228b2e169fdf4c8216dffd5d33ad18bafd8b928c09ca46c718
+  #
+  # Warnung: Verwenden Sie ausschließlich den initialen Schlüssel vom ersten
+  # Start des MAS! Ändern des Schlüssels führt zu Datenverlust.
+  encryption:
+    # (string) Name des Secrets, in dem der MAS Datenbankschlüssel stehen.
+    existingSecret: mas
+    # (string) Verweis im `existingSecret` auf den MAS Datenbankschlüssel.
+    existingSecretKey: encryption
+
+  # (map) Matrix–MAS Shared-Secret.
+  # Beliebige Zeichenkette, die zur Absicherung der Kommunikation zwischen
+  # Synapse und MAS verwendet wird.
+  matrixSharedSecret:
+    # (string) Name des Secrets, in dem das Matrix–MAS Shared-Secret stehen.
+    existingSecret: mas
+    # (string) Verweis im `existingSecret` auf das Matrix–MAS Shared-Secret.
+    existingSecretKey: matrix-shared-secret
+
+  # (map) MAS Signaturschlüssel.
+  # Im Secret liegt eine beliebige Anzahl an Signaturschlüsseln im PEM-Format.
+  # Unter den Schlüsseln muss mindestens ein RSA-Schlüssel vorhanden sein.
+  #
+  # Referenz:
+  # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#secretskeys
+  signingkeys:
+    # (string) Name des Secrets, in dem die MAS Signaturschlüssel stehen.
+    existingSecret: mas-signingkeys
+
+  # (list) Diese URLs ersetzen bzw. überlagern die URLs vom Synapse.
+  # D.h., dass diese URLs vom MAS anstatt von Synapse beantwortet werden müssen.
+  # Die hier definierten URLs werden von dem Ingress des Synapse entfernt und
+  # dem MAS zugeordnet, wenn vorhanden.
+  paths:
+    - "/_matrix/client/(api/v1|r0|v3|unstable)/login"
+    - "/_matrix/client/(api/v1|r0|v3|unstable)/logout"
+    - "/_matrix/client/(api/v1|r0|v3|unstable)/refresh"
+
+  # (list) Liste der URL-Einstiegspunkte, die der MAS benötigt bzw.
+  # der `mas.uri` zugeordnet werden.
+  masPaths:
+    - "/authorize"
+    - "/oauth2"
+    - "/account"
+    - "/graphql"
+    - "/.well-known/openid-configuration"
+    - "/"
+
+  # Zusätzliche Konfigurationen für den MAS
+  # Ref: https://element-hq.github.io/matrix-authentication-service/reference/configuration.html
+  extraConfig:
+    database:
+      min_connections: 0
+      max_connections: 10
+      connect_timeout: 30
+      idle_timeout: 600
+      max_lifetime: 1800
+
+    # (map) Konfiguration der Passwortdatenbank.
+    # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#passwords
+    passwords:
+      # Whether to enable the password database.
+      # If disabled, users will only be able to log in using upstream OIDC providers
+      enabled: true
+
+      # Liste der verwendeten Passwort-Hash-Verfahren
+      # /!\ Ändern Sie dies nur, wenn Sie wissen, was Sie tun.
+      # Bei einer Migration von Synapse zu MAS ist dies u.U. anzupassen.
+      # Ref: ./docs/matrix-authentication-service-migration.md#31-migration-check-automatisch
+      # https://element-hq.github.io/matrix-authentication-service/setup/migration.html#local-passwords
+      schemes:
+        - version: 1
+          algorithm: argon2id
+
+      # Minimum complexity required for passwords, estimated by the zxcvbn algorithm
+      # Must be between 0 and 4, default is 3
+      # See https://github.com/dropbox/zxcvbn#usage for more information
+      minimum_complexity: 3
+
+    # (map) Einstellungen zu MAS Nutzerkonten.
+    # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#account
+    account:
+      # (bool) Whether users are allowed to change their email addresses. default: true
+      email_change_allowed: false
+
+      # (bool) Whether users are allowed to change their display names. default: true
+      # This should be in sync with the policy in the homeserver configuration.
+      displayname_change_allowed: false
+
+      # (bool) Whether to enable self-service password registration. default: false
+      # This has no effect if password login is disabled.
+      password_registration_enabled: false
+
+      # (bool) Whether email-based password recovery is enabled. default: false
+      # This has no effect if password login is disabled.
+      password_recovery_enabled: false
+
+    # (map) Zusätzliche E-Mail Konfiguration für MAS.
+    # https://element-hq.github.io/matrix-authentication-service/reference/configuration.html#email
+    email:
+      # Default transport: don't send any emails
+      transport: blackhole
+
+  # (list) Zusätzliche in den MAS zu mountende Datenträger (Volumes)
+  # Beispiel:
+  #  - name: oauth2
+  #    configMap:
+  #      name: oauth
+  extraVolumes: []
+
+  # (list) Zusätzliche in den MAS zu mountende Datenträgerpfade (Volumes)
+  # Beispiel:
+  #  - name: oauth2
+  #    mountPath: /etc/ssl/certs/
+  #    subMountPath: oauthprovider.crt
+  #    readOnly: true
+  extraVolumeMounts: []
+
+  # (map) Annotations, die auf den Pod anzuwenden sind.
+  annotations: {}
+
+  # (map) Labels, die auf den Pod anzuwenden sind.
+  labels: {}
+
+  # (map) Konfiguration für die Container-Sicherheitsrichtlinie, Synapse wird immer als
+  # sein eigener Benutzer ausgeführt, auch wenn dies nicht eingestellt ist.
+  # Beachten Sie, dass eine Änderung dieser Einstellung auch die Verwendung der volumePermission
+  # Hilfsprogramm verwenden müssen, abhängig von Ihrem Speicher.
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    fsGroup: 1007
+    runAsGroup: 1007
+    runAsUser: 1007
+
+  # (map) Konfiguration für die Container-Sicherheitsrichtlinie, siehe oben
+  # podSecurityContext für weitere relevante Informationen.
+  securityContext:
+    <<: *defaultSecurityContext
+    runAsUser: 1007
+
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den MAS anzuwenden sind.
+      cpu: 500m
+      # (string) RAM Ressourcengrenzen, die auf den MAS anzuwenden sind.
+      memory: 400Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den MAS anzuwenden sind.
+      cpu: 300m
+      # (string) Anforderungen an RAM Ressourcen, die auf den MAS anzuwenden sind.
+      memory: 200Mi
+
+  ## Healthcheck
+  livenessProbe:
+    periodSeconds: 10
+    httpGet:
+      # (string) Zu verwendende Konfiguration für den Pfad des Healthchecks
+      path: /health
+      # (string) Zu verwendende Konfiguration für den Port des Healthchecks
+      port: health
+
+  ## Bereitschaftscheck
+  readinessProbe:
+    periodSeconds: 3
+    httpGet:
+      # (string) Konfiguration des Pfads vom Bereitschaftscheck
+      path: /health
+      # (string) Konfiguration des Ports vom Bereitschaftscheck
+      port: health
+
+  # Startup-Check
+  startupProbe:
+    # (integer) Anzahl der Fehlversuche, damit Startzeit für Worker bei 60 Sekunden landet; Timeout default bei 10 Sekunden
+    failureThreshold: 6
+    httpGet:
+      # (string) Konfiguration des Pfads vom Startup-Check
+      path: /health
+      # (string) Konfiguration des Ports vom Startup-Check
+      # DEFAULT gilt für alle Synapse-Worker-Container.
+      port: health
+
+######################################################################################
+##          Datenbank Konfiguration für Matrix-Authentication-Service
+######################################################################################
+## Empfohlen: Um einen extern vorhandenen PostgreSQL-Server zu verwenden, setzen
+## Sie `externalmasPostgresql.enabled` auf `false` und konfigurieren Sie den
+## `externalPostgresql`-Block.
+  # https://element-hq.github.io/matrix-authentication-service/setup/database.html#set-up-a-database
+maspostgresql:
+  <<: *postgresDefaults
+  # (bool) Aktivieren des internen PostgreSQL-Servers für MAS.
+  # Hinweis: Nur für Demo- und Testsysteme empfohlen. Um einen extern
+  # vorhandenen PostgreSQL-Server zu verwenden, setzen Sie `maspostgresql.enabled`
+  # auf `false` und konfigurieren Sie den `externalmasPostgresql`-Block.
+  enabled: false
+
+  # (map) Konfiguration des Synapse Datenbanknutzers.
+  customUser:
+    # (string) Name vom Datenbanknutzer.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
+    username: mas
+    # (string) Name der Datenbank.
+    # Muss mit der Angabe im `existingSecret` übereinstimmen.
+    database: mas
+    # (string) Name vom Secret mit dem Passwort des Synapse Datenbanknutzers.
+    # Ist `maspostgresql.enabled` und es existiert kein Secret mit dem angegebenen
+    # Namen, so wird ein neues Secret automatisch erstellt und verwendet.
+    existingSecret: maspostgresql
+    # (map) Schlüssel im angegebenen Secret.
+    secretKeys:
+      # (string) Verweis im `existingSecret` auf den Namen des Datenbanknutzers.
+      name: username
+      # (string) Verweis im `existingSecret` auf den Namen der Datenbank.
+      database: database
+      # (string) Verweis im `existingSecret` auf das Nutzerpasswort.
+      password: password
+
+  # (map) Konfiguration des Adminnutzers.
+  auth:
+    # (string) Name des PostgreSQL Adminnutzers.
+    username: postgres
+    # (string) Name des Kubernetes Secrets mit dem Adminpasswort.
+    # Ist `maspostgresql.enabled` und es existiert kein Secret mit dem
+    # angegebenen Namen, so wird ein neues Secret automatisch erstellt und
+    # verwendet.
+    existingSecret: maspostgresql
+    # (map) Schlüssel im angegebenen Secret.
+    secretKeys:
+      # (string) Verweis im `existingSecret` auf das Adminpasswort.
+      adminPasswordKey: postgres-password
+
+externalmasPostgresql:
+  # (string) Hostname vom externen PostgreSQL-Server.
+  # Beispieladresse für einen K8s-internen PostgreSQL im Namespace `postgres`:
+  host: postgres-4-matrix-postgresql.postgres.svc.cluster.local
+  # (integer) Port vom externen PostgreSQL-Server.
+  port: 5432
+  # (string) Name der zu verwendenden PostgreSQL-Datenbank.
+  database: mas
+
+  # (string) Name des PostgreSQL-Nutzers.
+  username: mas
+
+  # (string) Name vom Secret mit dem PostgreSQL-Passwort.
+  existingSecret: maspostgresql
+
+  # (string) Verweis im `existingSecret` auf das PostgreSQL-Passwort.
+  existingSecretPasswordKey: password
+
+  # (map) Zusätzliche Argumente für die Datenbankverbindung.
+  # Ref: https://element-hq.github.io/synapse/latest/postgres.html#synapse-config
+  extraArgs:
+    # -- (string) Verwendeter SSL-Modus.
+    # https://www.postgresql.org/docs/current/libpq-ssl.html#LIBPQ-SSL-SSLMODE-STATEMENTS
+    sslmode: prefer
+
+
+######################################################################################
+##          Konfiguration für Matrix-Content-Scanner (MCS)
+######################################################################################
+
+contentscanner:
+  # (bool) Aktivieren des Matrix-Content-Scanner
+  # Mittelsmann zwischen AV und Matrix-Synapse
+  enabled: false
+
+  # (list|null) Liste der zulässigen MIME-Typen.
+  # Falls angegeben, darf `blocked_mimetypes` nicht ebenfalls angegeben werden.
+  # Wenn eine Datei einen MIME-Typ hat, der nicht in dieser Liste enthalten ist,
+  # wird ihr Scan als fehlgeschlagen betrachtet. Eine Liste aller MIME-Typen
+  # findet man unter
+  # https://www.iana.org/assignments/media-types/media-types.xhtml
+  #
+  # Nicht erkannte Binärdateien werden als „application/octet-stream“ betrachtet.
+  # Nicht erkannte Textdateien werden als „text/plain“ betrachtet.
+  # Falls beide (`allowd_mimetypes` und `blocked_mimetypes`) nicht angegeben,
+  # werden alle MIME-Typen zugelassen.
+  # allowed_mimetypes:
+  #   - text/plain
+
+  # (list|null) Liste der blockierten MIME-Typen.
+  # Falls angegeben, darf `allowed_mimetypes` nicht ebenfalls angegeben werden.
+  # Falls angegeben, führt eine Datei, deren MIME-Typ auf dieser Liste steht, zu einem Scan, der
+  # als fehlgeschlagen gilt.
+  # Nicht erkannte Binärdateien werden als `application/octet-stream` betrachtet.
+  # Nicht erkannte Textdateien werden als `text/plain` betrachtet.Bin
+  # blocked_mimetypes:
+  #   - text/plain
+
+  # (string) Die maximale zwischenspeicherbare Dateigröße.
+  # Wenn eine Datei größer als diese Größe ist, wird eine Kopie davon
+  # nicht zwischengespeichert, selbst wenn der Scan erfolgreich ist.
+  # Wenn die Datei erneut angefordert wird, wird sie erneut vom Homeserver
+  # heruntergeladen, aber nicht auf die Festplatte geschrieben oder gescannt.
+  max_file_size: "100MB"
+
+  # (integer) Maximale Anzahl von Ergebnissen, die im Cache gespeichert werden können.
+  # Wenn mehr Dateien gescannt werden, bevor vorhandene Elemente ihre TTL erreichen,
+  # werden die zuletzt aufgerufenen entfernt.
+  max_cache_size: 2048
+
+  # (string) Die maximale Zeit, die ein Eintrag im Cache verbleibt, bevor er entfernt wird.
+  ttl: 1d
+
+  # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+  extraEnv: []
+
+  # (list) Zusätzliche in den Matrix-Content-Scanner zu mountende Datenträger (Volumes)
+  # Beispiel:
+  #  - name: custom-scanscript
+  #    configMap:
+  #      name: custom-scanscript
+  #      defaultMode: 0755
+  #      items:
+  #      - key: script.sh
+  #        path: script.sh
+  extraVolumes: []
+
+  # (list) Zusätzliche in den Matrix-Content-Scanner zu mountende Datenträgerpfade (Volumes)
+  # Beispiel:
+  #  - name: custom-scanscript
+  #    mountPath: /opt/custom/
+  #    subMountPath: script.sh
+  #    readOnly: true
+  extraVolumeMounts: []
+
+  # (string) Names und Pfad des Scriptes welches zum Scannen ausgeführt wird.
+  # Das Script muss in der ConfigMap `contentscanner.existingConfigmap` enthalten sein.
+  # Wenn kein Schadcode gefunden wurde, muss das Script den Exit-Code 0 zurück geben.
+  # siehe: https://github.com/element-hq/matrix-content-scanner-python/blob/da1783c6bce638c3f616fb061425520fc19863a6/config.sample.yaml#L22-L26
+  scanScript: "/opt/scanner.sh"
+
+  # (map) Konfiguration des Image/Repository
+  image:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/matrix-content-scanner
+    tag: 1.2.1-jammy-production
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+
+  replicaCount: 1
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
+      cpu: 500m
+      # (string) RAM Ressourcengrenzen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
+      memory: 500Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
+      cpu: 300m
+      # (string) Anforderungen an RAM Ressourcen, die auf den Matrix-Content-Scanner-Container anzuwenden sind.
+      memory: 50Mi
+
+
+  # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  # weitere Möglichkeiten:
+  #  fsGroup: 1001
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    runAsGroup: 1334
+    runAsUser: 1334
+    fsGroup: 1334
+
+  # (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  securityContext:
+    <<: *defaultSecurityContext
+
+
+######################################################################################
+##          Konfiguration für ClamAV
+######################################################################################
+
+schadcodescanner:
+  # (bool) Aktivieren des ClamAV-Container
+  enabled: false
+  # (map) Konfiguration des ClamAV-Image/Repository
+  clamavImage:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/clamav
+    tag: 1.4.3_dfsg-0ubuntu0.22.04.1-jammy-production
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+  # (map) Konfiguration des C-ICAP-Server-Image/Repository
+  icapImage:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/icap
+    tag: 1_0.5.6-2build1-jammy-production
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+    # (map) Konfiguration des persistenten Speichers für ClamAV
+    # empfohlen: ExistingClaim mit ReadWriteMany-Volume anzugeben, so dass mehrere Pods die ClamAV-DB nutzen können. (TBD: freshclam darf dann nur einmal laufen: Abfrage PID)
+  persistence:
+    enabled: true
+    # (string) Name des VolumeClaims
+    # @default -- leer, damit dynamische Volumes genutzt werden können (dennoch persistent)
+    existingClaim: ""
+    # (string) Name der entsprechenden Storage-Klasse, - (damit wird default genutzt, ansonsten storageClass direkt benennen)
+    storageClass: ""
+    # (string) Zugriffsmodus, ReadWriteOnce (wird für jedes HPA-skalierte neu angelegt)
+    accessMode: ReadWriteOnce
+    # (string) Größe des zu nutzenden Volumes
+    size: 10Gi
+
+  # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+  # Beispiel:
+  #   - name: NO_PROXY
+  #     value: "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"
+  #   - name: HTTPS_PROXY
+  #     value: "https://proxyuser@proxyserver:proxyport"
+  #   - name: HTTP_PROXY
+  #     value: "http://proxyuser@proxyserver:proxyport"
+  extraEnv: []
+
+  service:
+    # (integer) der Port des ClamAV Pods (c-icap-Server), wird im Service übertragen
+    port: 1344
+
+  freshclam:
+    # (list) Eine Liste von clamav-Spiegeln, die vom freshclam-Dienst verwendet werden sollen.
+    # Erzeugt eine Liste von "PrivateMirror" in der freshclam.conf
+    # https://docs.clamav.net/appendix/CvdPrivateMirror.html#use-freshclam-to-serve-only-whole-database-files-from-a-private-mirror
+    # Der Standard-Updateserver ("DatabaseMirror") ist "database.clamav.net" und wird
+    # durch das Konfigurieren eines privaten Mirrors automatisch überschrieben.
+    # Die Angabe des Zielports beim Mirror ist für die Generierung der
+    # Network Policies zwingend erforderlich
+    mirrors: []
+    # - clamav-private-mirror:8000
+  # (integer) Anzahl der ClamAV-Pods
+  # Hinweis: Wenn autoscaling.enabled=true und replicaCount geringer als autoscaling.minReplicas
+  # oder wenn nicht gesetzt, dann wird autoscaling.minReplicas übernommen
+  replicaCount: 1
+
+  ## Konfiguration für das auto-scaling der Applikation.
+  autoscaling:
+    # (bool) schalte das HPA für die Container ein
+    # Hinweis: Kann für alle spezifischen Worker benutzt werden
+    # Dazu muss entsprechende Konfiguration in die separaten Sektionen eingefügt werden
+    enabled: false
+    # (integer) minimale Anzahl der Worker-Container
+    minReplicas: 1
+    # (integer) maximale Anzahl der Worker-Container
+    maxReplicas: 4
+    # (integer) Prozentsatz für CPU-Auslastung um Scaling zu triggern
+    targetCPUUtilizationPercentage: 90
+    # (integer) Prozentsatz für RAM-Auslastung um Scaling zu triggern
+    targetMemoryUtilizationPercentage: 80
+
+  limits:
+    # clamav.limits.fileSize -- The largest file size scanable by clamav, in MB
+    fileSize: 50
+    # clamav.limits.scanSize -- The largest scan size permitted in clamav, in MB
+    scanSize: 100
+    # clamav.limits.connectionQueueLength -- Maximum length the queue of pending connections may grow to
+    connectionQueueLength: 100
+    # clamav.limits.maxThreads --Maximum number of threads running at the same time.
+    maxThreads: 4
+    # clamav.sendBufTimeout -- This option specifies how long to wait (in milliseconds) if the send buffer is full, keep low to avoid clamd hanging
+    sendBufTimeout: 500
+
+  resourcesClamav:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.
+      cpu: 1500m
+      # (string) RAM Ressourcengrenzen, die auf den ClamAV-Container anzuwenden sind.
+      memory: 4Gi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den ClamAV-Container anzuwenden sind.
+      cpu: 300m
+      # (string) Anforderungen an RAM Ressourcen, die auf den ClamAV-Container anzuwenden sind.
+      memory: 1.5Gi
+
+  resourcesCicap:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den C-Icap-Container anzuwenden sind.
+      cpu: 500m
+      # (string) RAM Ressourcengrenzen, die auf den C-Icap-Container anzuwenden sind.
+      memory: 100Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den C-Icap-Container anzuwenden sind.
+      cpu: 300m
+      # (string) Anforderungen an RAM Ressourcen, die auf den C-Icap-Container anzuwenden sind.
+      memory: 50Mi
+
+  # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    fsGroup: 1111
+
+  # (map) Konfiguration für die ClamAV-Container-Sicherheitsrichtlinie
+  clamavSecurityContext:
+    <<: *defaultSecurityContext
+    runAsUser: 1111
+    runAsGroup: 1111
+
+  # (map) Konfiguration für die C-ICAP-Container-Sicherheitsrichtlinie
+  # weitere Möglichkeiten:
+  #  capabilities:
+  #    drop:
+  #    - ALL
+  icapSecurityContext:
+    <<: *defaultSecurityContext
+    runAsUser: 1112
+    runAsGroup: 1112
+
+
+######################################################################################
+##          Konfiguration für Synapse Admin
+######################################################################################
+
+synapse_admin:
+  # (bool) Aktivieren des Synapse-Admin-Moduls
+  enabled: false
+  # (string|null) URI für die Admin GUI, zwingend notwendig
+  uri: null
+  # (map) Konfiguration des Image vom Modul
+  image:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/synapse-admin
+    tag: 0.11.1-jammy-production
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+
+  ## Ressourcen Konfiguration für Synapse-Admin Server.
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.
+      cpu: 50m
+      # (string) RAM Ressourcengrenzen, die auf den Synapse-Admin Server anzuwenden sind.
+      memory: 50Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den Synapse-Admin Server anzuwenden sind.
+      cpu: 5m
+      # (string) Anforderungen an RAM Ressourcen, die auf den Synapse-Admin Server anzuwenden sind.
+      memory: 15Mi
+
+  # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  # Hinweis: hier muss der Sycall für unpriviligierter User auf priviligierter Port gesetzt sein
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    runAsGroup: 1001
+    runAsUser: 1001
+
+  # (map) Konfiguration für die Container-Sicherheitsrichtlinie des Containers
+  securityContext:
+    <<: *defaultSecurityContext
+
+  # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+  extraEnv: []
+
+  # (map) Zusätzliche in den Synapse Admin einzuhängende Datenträger (Volumes).
+  # Beispiel:
+  # extraVolumes:
+  #   - name: confnginx
+  #     emptyDir: {}
+  #   - name: lognginx
+  #     emptyDir: {}
+  #   - name: runnginx
+  #     emptyDir: {}
+  #   - name: tmpnginx
+  #     emptyDir: {}
+  #   - name: backgrounds
+  #     persistentVolumeClaim:
+  #       claimName: element-backgrounds
+  extraVolumes: []
+
+  # (map) Zusätzliche in den Synapse Admin einzuhängende Datenträgerpfade (Volume-Mounts).
+  # Beispiel:
+  # extraVolumeMounts:
+  #   - name: confnginx
+  #     mountPath: /etc/nginx/conf.d/
+  #   - name: lognginx
+  #     mountPath: /var/log/nginx/
+  #   - name: runnginx
+  #     mountPath: /var/run/
+  #   - name: tmpnginx
+  #     mountPath: /var/cache/nginx/
+  extraVolumeMounts: []
+
+
+######################################################################################
+##          Konfiguration für Admin-Portal
+######################################################################################
+
+adminPortal:
+  # (bool) Aktivieren des Admin-Portal-Moduls
+  # Hierfür ist auch der MAS erforderlich (`mas.enabled: true`).
+  # Ref: ./docs/matrix-authentication-service.md
+  enabled: false
+  # (string) URI für das Admin-Portal, zwingend notwendig
+  uri: ""
+  # (string) Client ID im ulid Format
+  # Die Client ID verwendet das Admin-Portal zur Authentifizierung am MAS.
+  # Ref: https://github.com/ulid/spec
+  clientID: "01KBJDJMZJ3K1XCHQ81T4Q17QD"
+  # (bool) Aktivieren der TLS Zertifikatsüberprüfung
+  TLSverify: true
+  # (string) LogLevel Core-Komponente
+  logLevel: "INFO"
+  # (map) Konfiguration des Image vom Core- bzw. Backend-Modul
+  coreImage:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/bumap-core
+    tag: 2.3.0-jammy-production
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+  # (map) Konfiguration des Image vom UI-Modul
+  uiImage:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/bumap-ui
+    tag: 2.3.1-jammy-production
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+
+  auditLog:
+    # (string) Log-Level der Audit-Komponente vom Admin-Portal.
+    # Mögliche Werte sind "OFF" und "INFO".
+    logLevel: "OFF"
+    # (string) Datenbank für die Audit-Komponente.
+    database: sqlite
+    sqlite:
+      persistence:
+        enabled: false
+        # (string|null) Name des PersistentVolumeClaims.
+        # Falls nicht gesetzt, wird dynamisch ein neuer PVC erstellt.
+        # existingClaim: admin-portal
+        # (string) Name der PVC Storage-Class.
+        # Falls "-", wird die standard Storage-Class des Clusters verwendet.
+        storageClass: ""
+        # (string) PVC Zugriffsmodus.
+        accessMode: ReadWriteOnce
+        # (string) Größe des zu nutzenden Volumes.
+        size: 1Gi
+
+  ## Ressourcen Konfiguration für alle Admin-Portal Module.
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind.
+      cpu: 500m
+      # (string) RAM Ressourcengrenzen, die auf die Admin-Portal Pods anzuwenden sind.
+      memory: 200Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf die Admin-Portal Pods anzuwenden sind.
+      cpu: 5m
+      # (string) Anforderungen an RAM Ressourcen, die auf den Admin-Portal Pods anzuwenden sind.
+      memory: 15Mi
+
+  # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    runAsGroup: 1001
+    runAsUser: 1001
+
+  # (map) Konfiguration für die Container-Sicherheitsrichtlinie des Containers
+  securityContext:
+    <<: *defaultSecurityContext
+
+  # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+  extraEnv: []
+
+  # (list) Weitere Speicherbereiche für das Admin-Portal Deployment.
+  extraVolumes: []
+  # (list) Weitere Speicher-Einhängepunkte für das Admin-Portal Deployment.
+  extraVolumeMounts: []
+
+
+######################################################################################
+##          Konfiguration für BundesMessenger-WebClient
+######################################################################################
+
+webclient:
+  # (bool) BundesMessenger-WebClient im Deployment aktivieren
+  enabled: false
+  # (string|null) URL für den Webclient, zwingend notwendig
+  uri: null
+  # (map) Konfiguration für das Image vom BundesMessenger-WebClient
+  image:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/bundesmessenger-web
+    tag: 2.24.4-jammy-production
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+
+  # (string) Anzeigename des Servers in Webclients.
+  displayName: Messenger deiner Organisation
+
+  # Zusätzliche Konfigurationen für den Webclient (config.json)
+  # Ref: https://gitlab.opencode.de/bwi/bundesmessenger/clients/bundesmessenger-web/-/blob/master/config.sample.json
+  extraConfig: {}
+
+  # (list) Weitere Umgebungsvariablen für den Webclient-Container.
+  extraEnv: []
+
+  # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  # weitere Möglichkeiten:
+  #  fsGroup: 1001
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    runAsGroup: 1001
+    runAsUser: 1001
+
+  # (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  securityContext:
+    <<: *defaultSecurityContext
+
+  # (list) Weitere Speicherbereiche für den Webclient-Pod.
+  extraVolumes: []
+  # (list) Weitere Speicher-Einhängepunkte für den Webclient-Container.
+  extraVolumeMounts: []
+
+  ## Ressource Konfiguration für webclient-server.
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die auf den webclient-server anzuwenden sind.
+      cpu: 150m
+      # (string) RAM Ressourcengrenzen, die auf den webclient-server anzuwenden sind.
+      memory: 50Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die auf den webclient-server anzuwenden sind.
+      cpu: 50m
+      # (string) Anforderungen an RAM Ressourcen, die auf den webclient-server anzuwenden sind.
+      memory: 15Mi
+
+
+######################################################################################
+##          Konfiguration für BundesMessenger-Call
+######################################################################################
+## Der BundesMessenger-Call Client ist derzeit im Beta-Status. Er ermöglicht Video-Chats.
+## Die Video-Chats funktionieren via WebRTC und LiveKit SFU.
+## Die SFU muss sperat bereit gestellt werden.
+## Der Client für Call ist Bestandteil vom Webclient. Es wird jedoch der
+## JWT Service benötigt.
+
+call:
+  # (bool) BundesMessenger-Call im Deployment aktivieren
+  enabled: false
+
+  # (map) Konfiguration mit denen der LiveKit Server erreicht werden kann.
+  # Key und Secret müssen mit den Angabe im LiveKit Server überein stimmen.
+  livekit:
+    # (string) URL des LiveKit Servers.
+    url: "wss://livekit.example.com"
+    # key: "devkey"
+    # secret: "secret"
+
+  # (string) Name vom Livekit-Secret.
+  existingSecret: call
+  # (map) Verweise auf Livekit-Schlüssel und -Geheimnis.
+  secretKeys:
+    # (string) Verweis im `existingSecret` auf den Livekit-Schlüssel.
+    livekitKey: livekit-key
+    # (string) Verweis im `existingSecret` auf das Livekit-Geheimnis.
+    livekitSecret: livekit-secret
+
+  # (map) Konfiguration für das Image vom LiveKit JWT Service
+  jwtService:
+    image:
+      registry: ghcr.io
+      repository: element-hq/lk-jwt-service
+      tag: 0.4.1
+      pullSecrets: []
+      pullPolicy: IfNotPresent
+
+    # (integer) Replica-Count.
+    replicaCount: 1
+
+    # (list) Zusätzliche Umgebungsvariablen, die auf den Pod anzuwenden sind
+    # Beispiel:
+    # https://github.com/element-hq/lk-jwt-service/tree/main?tab=readme-ov-file#%EF%B8%8F-configuration
+    # - name: LIVEKIT_FULL_ACCESS_HOMESERVERS
+    #   value: *
+    # https://github.com/element-hq/lk-jwt-service/tree/main?tab=readme-ov-file#-development--testing
+    # - name: LIVEKIT_INSECURE_SKIP_VERIFY_TLS
+    #   value: YES_I_KNOW_WHAT_I_AM_DOING
+    # - name: NO_PROXY
+    #   value: "127.0.0.1,localhost,*.mylocaldomain.local,10.0.0.0/8"
+    # - name: HTTPS_PROXY
+    #   value: "https://proxyuser@proxyserver:proxyport"
+    # - name: HTTP_PROXY
+    #   value: "http://proxyuser@proxyserver:proxyport"
+    extraEnv: []
+
+    # (list) Weitere Speicherbereiche für den LiveKit JWT Service-Pod.
+    extraVolumes: []
+    # (list) Weitere Speicher-Einhängepunkte für den LiveKit JWT Service-Container.
+    extraVolumeMounts: []
+
+    # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+    podSecurityContext:
+      <<: *defaultPodSecurityContext
+      runAsGroup: 1021
+      runAsUser: 1021
+
+    # (map) Konfiguration für die Container-Sicherheitsrichtlinie
+    securityContext:
+      <<: *defaultSecurityContext
+
+    ## Ressource Konfiguration für LiveKit-JWT-Server.
+    resources:
+      limits:
+        # (string) Rechenressourcengrenzen, die auf den LiveKit-JWT-Server anzuwenden sind.
+        cpu: 100m
+        # (string) RAM Ressourcengrenzen, die auf den LiveKit-JWT-Server anzuwenden sind.
+        memory: 50Mi
+      requests:
+        # (string) Anforderungen an Rechenressourcen, die auf den LiveKit-JWT-Server anzuwenden sind.
+        cpu: 50m
+        # (string) Anforderungen an RAM Ressourcen, die auf den LiveKit-JWT-Server anzuwenden sind.
+        memory: 25Mi
+
+    # (map) Node Selektor Konfiguration für den Container.
+    nodeSelector: {}
+
+    # (list) Tolerations/Tains Konfiguration für den Container.
+    tolerations: []
+
+    # (map) Affinitäts-Konfiguration für den Container.
+    affinity: {}
+
+  standalone:
+    # (bool) BundesMessenger-Call standalone im Deployment aktivieren
+    # Der Betrieb von Standalone ist experimentell und dient
+    # der Benutzung von Gast-Zutritten zu Huddles
+    # `call.enabled` muss ebenfalls aktiviert sein
+    enabled: false
+    # (string) URL für den Call Client, zwingend notwendig
+    uri: ""
+
+    image:
+      registry: ghcr.io
+      repository: element-hq/element-call
+      tag: v0.16.3
+      pullSecrets: []
+      pullPolicy: IfNotPresent
+
+    # Zusätzliche Konfigurationen für den Callclient (config.json)
+    # Ref: https://github.com/element-hq/element-call/blob/livekit/config/config.sample.json
+    extraConfig: {}
+
+    # (list) Weitere Umgebungsvariablen für den Call-Container.
+    extraEnv: []
+
+    # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+    podSecurityContext:
+      <<: *defaultPodSecurityContext
+      runAsUser: 1001
+      runAsGroup: 1001
+
+    # (map) Konfiguration für die Container-Sicherheitsrichtlinie
+    securityContext:
+      <<: *defaultSecurityContext
+
+    # (list) Weitere Speicherbereiche für den Call-Pod.
+    extraVolumes: []
+    # (list) Weitere Speicher-Einhängepunkte für den Call-Container.
+    extraVolumeMounts:
+    # []
+      # workaround for Image: element-hq/element-call
+      - name: tmp
+        mountPath: /var/cache/nginx/
+
+    ## Ressource Konfiguration für BundesMessenger-Call.
+    resources:
+      limits:
+        # (string) Rechenressourcengrenzen, die auf den BundesMessenger-Call anzuwenden sind.
+        cpu: 100m
+        # (string) RAM Ressourcengrenzen, die auf den BundesMessenger-Call anzuwenden sind.
+        memory: 90Mi
+      requests:
+        # (string) Anforderungen an Rechenressourcen, die auf den BundesMessenger-Call anzuwenden sind.
+        cpu: 50m
+        # (string) Anforderungen an RAM Ressourcen, die auf den BundesMessenger-Call anzuwenden sind.
+        memory: 45Mi
+
+
+######################################################################################
+##          zusätzliche Konfigurationen für den BundesMessenger
+######################################################################################
+## Konfigurationen, die übergreifend sind und nicht nur eine einzelne Komponenten betreffen.
+## Die Abschnitte `config` und `extraConfig` betreffen Einstellungen, die direkt in die
+## Konfiguration von Synapse eingehen. Die Abschnitte `wellknown` oder `webclient` betreffen
+## bevorzugt diese Komponenten direkt. Die Einstellungen, die hier statt finden,
+## greifen komponentenübergreifend, z.B. alle Clients (auch die mobilen Apps)
+## und nicht nur den Webclient.
+
+additionalConfig:
+
+  # (list) Liste an JWT, die dem Client bereit gestellt werden, um die Infrastruktur
+  # als legitim auszuweisen. Diese werden via `<public_baseurl>/_bum/client/v1/verify`
+  verifyJWT: []
+
+  federation:
+    # (bool) Um die Darstellung der Föderation in den Clients zu aktivieren oder deaktivieren.
+    enabled: true
+    # (bool) Um die Einführungsdialoge anzeigen zu können.
+    showIntroduction: false
+    # (bool) Um die Vorankündigung zur Einführung der Föderation anzeigen zu können.
+    # Hinweis: Der Einführungsdialog wird nur einmalig angezeigt.
+    showAnnouncement: false
+
+  # (integer) Migrationshinweis für BundesMessengerX.
+  # Ermöglicht dem Benutzer in den BuM Legacy-Apps in verschiedenen Stufen auf
+  # die Migration zu BuMX hinzuweisen.
+  #  0: Keine Information
+  #  1: Freundlicher Hinweis
+  #  2: Aufforderung zum Wechsel
+  #  3: Zwangsdialog, Anmeldung an der BuM Legacy App nicht mehr möglich
+  migrationBuMX: 0
+
+  dsgvoExport:
+    # (bool) Fügt Volume und suspended Cronjob hinzu um Benutzer zu exportieren.
+    # Weiteres siehe ./docs/DSGVO-Exporter.md
+    enabled: false
+
+    serviceAccount:
+      create: true
+      # (string|null) Name des ServiceAccounts für den dsgo-exporter-job.
+      # name: non-default-dsgvo-exporter-name
+
+  locationSharing:
+    # (bool) Aktivierung und Konfiguration von Standort teilen (location sharing) in den Clients
+    # Führt zur Konfiguration der /.well-known/client und /_matrix/cconfig/style.json
+    # Wenn wellknown.enable oder confighub.enable deaktiviert sind, ist die
+    # notwendige Konfiguration selbst vorzunehmen.
+    enabled: true
+
+    # (string) Link zur Style Map für den Tiles Server (https://docs.mapbox.com/style-spec/guides/)
+    # Diese URL wird via /.well-known/matrix/client an die Clients übergeben um die Informationen
+    # über den Karten-Server zu erhalten. Wenn der Wert nicht gesetzt ist, wird dem Client die
+    # Konfiguration aus `map_style_config` übergeben.
+    map_style_url: ""
+
+    # (map) Konfiguration für den Client mit den Informationen über den Tiles Server.
+    # Wenn `map_style_url` konfiguriert ist, wird diese Angabe ignoriert.
+    # Die Konfiguration wird mit der Funktion "toRawJson" gerendert.
+    # Anführungszeichen (") werden automatisch von Helm escaped (zu \").
+    map_style_config:
+      version: 8
+      name: wms
+      sources:
+        wms_topplus:
+          type: raster
+          tiles:
+            - https://sgx.geodatenzentrum.de/wms_topplus_open?bbox={bbox-epsg-3857}&format=image/png&service=WMS&version=1.1.1&request=GetMap&srs=EPSG:3857&width=256&height=256&layers=web_scale&styles=
+          tileSize: 256
+          attribution: <a href="https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/Datenquellen_TopPlusOpen.html" target="_blank">&copy; Bundesamt f&uuml;r Kartographie und Geod&auml;sie (2023)</a>
+      layers:
+        - id: web_layer
+          source: wms_topplus
+          source-layer: web
+          type: raster
+
+  # (map) Die Nutzer werden mit diesen Informationen auf die bevorstehende geplante Downtime,
+  # bzw. auf die aktive Downtime, hingewiesen.
+  # Weiterhin besteht die Möglichkeit, die Nutzer zum Update des Clients zu motivieren bzw. zu zwingen.
+  # Die Konfiguration wird vom confighub ausgeliefert, daher ist es notwendig, dass
+  # `confighub.enabled: true` gesetzt ist.
+  #
+  # downtime[]
+  #   warning_start_time: Startzeit der Warnmeldung (ISO 8601)
+  #                       Beispiele: 2023-08-06T14:00:00Z (UTC)
+  #                                  2009-01-01T12:00:00+01:00 (MEZ)
+  #                                  2009-06-30T18:30:00+02:00 (MESZ - Sommerzeit)
+  #   start_time:         Startzeit der Downtime (ISO 8601)
+  #   end_time:           Ende der Downtime (ISO 8601)
+  #   type:
+  #     MAINTENANCE:  Default Text in Anwendung für Wartungsfenster.
+  #                   Feld `description` wird zusätzlich darunter mit 1 Zeile Abstand angezeigt,
+  #                   wenn vorhanden
+  #     ADHOC_MESSAGE: Nur der Text aus dem Feld `description` wird angezeigt.
+  #   description:  optionaler Text zusätzlich zum Standard-Wartungstext
+  #   blocking:     Bei true werden Login und Requests vom Client blockiert (auch im eingeloggten Zustand)
+  #                 Requests auf die Maintenance-Schnittstelle werden nicht blockiert.
+  #
+  # versions: ios oder android (web unterstützt die Funktion aktuell nicht)
+  #   Für die Versionsangabe sind vollständige Versionsnummern (Major.Minor.Patch) anzugeben.
+  # update_before: die letzte Version, die gedulded wird, ältere müssen updaten
+  # warn_before: die letzte Version ohne Update-Hinweis, ältere sollten updaten
+  #
+  # maintenance:
+  #   downtime:
+  #     - warning_start_time: "2022-12-14T11:00:00Z"
+  #       start_time: "2022-12-23T11:00:00Z"
+  #       end_time: "2022-12-24T20:00:00Z"
+  #       type: "MAINTENANCE"
+  #       description: "Weihnachtswartung 2022"
+  #       blocking: true
+  #   versions:
+  #     ios:
+  #       update_before: "1.17.0"
+  #       warn_before: "1.19.0"
+  #     android:
+  #       update_before: "1.17.0"
+  #       warn_before: "1.19.0"
+  maintenance: {}
+
+
+######################################################################################
+##          Konfiguration der Network Policies
+######################################################################################
+
+networkpolicies:
+  enabled: false
+  # (list) Transport-Adressen der Proxies für den Synapse und seine Worker.
+  # Die angegebenen Proxies werden per Egress-Regeln erlaubt. Alle Einträge
+  # müssen in CIDR-Schreibweise angegeben werden: Start-IP/Netzmaske:Proxyport
+  # Beispiel:
+  # - 192.168.10.0/24:8765
+  # - 10.10.0.0/16:5000
+  fwProxyList: []
+  # (list) Transport-Adressen der DNS-Resolver und Admin-API.
+  # Angaben mit Port werden als Zielport mit Protokoll TCP übernommen. Alle
+  # Einträge müssen in CIDR-Schreibweise angegeben werden:
+  # Start-IP/Netzmaske:Proxyport
+  # Beispiel:
+  # - 192.168.2.0/24
+  # - 10.20.2.0/24:53
+  egressIpBlock: []
+  # (map) Einstellungen zum DNS der Infrastruktur.
+  dns:
+    # (list) Label-Selector zum Adressieren der DNS-Pods
+    labelSelector:
+      - key: k8s-app
+        operator: In
+        values: ["kube-dns"]
+  # (string) Namespace des Ingress-Controllers.
+  # Aktuell wird nur eine Architektur mit einem L7 Ingress-Controller
+  # unterstützt. Absolut notwendig für die Network-Policies.
+  ingressNamespace: default
+
+  # (map) Einstellungen zum Haupt-PostgreSQL-Server.
+  postgresql:
+    # (string|null) IP der externen PostgreSQL-Instanz.
+    # Beim Einsatz einer PostgreSQL-Instanz außerhalb des Kubernetes Clusters
+    # muss hier eine einzelne IP Adresse angegeben werden. Falls ungesetzt wird
+    # angenommen, dass die externe PostgreSQL-Instanz Teil des Kubernetes
+    # Clusters ist.
+    # externalPostgresIP: 10.30.3.0
+
+    # (list) Label-Selector zum Adressieren des PostgreSQL-Pods.
+    # Sollten die Labels bei einer eigens betriebenen Instanz abweichen, kann
+    # dies hier angepasst werden.
+    labelSelector:
+      - key: app.kubernetes.io/name
+        operator: In
+        values: ["postgresql"]
+
+  # (map) Einstellungen zum MAS-PostgreSQL-Server.
+  maspostgresql:
+    # (string|null) IP der externen MAS-PostgreSQL-Instanz.
+    # Beim Einsatz einer PostgreSQL-Instanz außerhalb des Kubernetes Clusters
+    # muss hier eine einzelne IP Adresse angegeben werden. Falls ungesetzt wird
+    # angenommen, dass die externe PostgreSQL-Instanz Teil des Kubernetes
+    # Clusters ist.
+    # externalPostgresIP: 10.30.3.0
+
+    # (list) Label-Selector zum Adressieren des PostgreSQL-Pods.
+    # Sollten die Labels bei einer eigens betriebenen Instanz abweichen, kann
+    # dies hier angepasst werden.
+    labelSelector:
+      - key: app.kubernetes.io/name
+        operator: In
+        values: ["maspostgresql"]
+
+  # (map) HTTP-Resolver für ACME/Let’s Encrypt.
+  # Erlaubt die Kommunikation vom Ingress zum hier angegebenen Endpunkt (Pod + Port).
+  acme:
+    labelSelector:
+      - key: acme.cert-manager.io/http01-solver
+        operator: In
+        values: ["true"]
+    port: 8089
+
+
+######################################################################################
+##          Konfiguration für Helm-Tests
+######################################################################################
+
+tests:
+  # (map) Konfiguration für das Image der Tests
+  image:
+    registry: registry.opencode.de
+    repository: bwi/bundesmessenger/backend/container-images/wget
+    tag: 1.21.2-jammy-production
+    pullSecrets: []
+    pullPolicy: IfNotPresent
+
+  # (map) Annotations, die zusätzlich auf die Tests anzuwenden sind.
+  annotations:
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+
+  # (map) Informationen zum Sicherheitskontext, die der Pod übernehmen soll.
+  podSecurityContext:
+    <<: *defaultPodSecurityContext
+    runAsUser: 1001
+    runAsGroup: 1001
+
+  # (map) Konfiguration für die Container-Sicherheitsrichtlinie
+  securityContext:
+    <<: *defaultSecurityContext
+    runAsUser: 1001
+    runAsGroup: 1001
+
+  ## Ressource Konfiguration für Tests.
+  resources:
+    limits:
+      # (string) Rechenressourcengrenzen, die für Tests anzuwenden sind.
+      cpu: 100m
+      # (string) RAM Ressourcengrenzen, die für Tests anzuwenden sind.
+      memory: 32Mi
+    requests:
+      # (string) Anforderungen an Rechenressourcen, die für Tests anzuwenden sind.
+      cpu: 50m
+      # (string) Anforderungen an RAM Ressourcen, die für Tests anzuwenden sind.
+      memory: 16Mi
